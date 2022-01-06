@@ -1,0 +1,12 @@
+version: "2"
+services: 
+
+  practicepractice:
+    build: .
+    container_name: container_pp2
+    ports:
+      - '8005:80'
+      - '3501:3500'
+      - '4701:81'
+    volumes: 
+      - $PWD/APP:/var/www/html/
