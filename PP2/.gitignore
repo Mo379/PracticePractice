@@ -2,6 +2,7 @@
 
 ###User added###
 venv
+
 ### OSX ###
 .DS_Store
 .AppleDouble
@@ -89,3 +90,4 @@ local_settings.py
 
 .env
 db.sqlite3g
+db.sqlite3
