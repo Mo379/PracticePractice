@@ -2,7 +2,7 @@
 
 ###User added###
 venv
-
+logs/**
 ### OSX ###
 .DS_Store
 .AppleDouble

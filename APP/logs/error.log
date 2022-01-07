@@ -1,0 +1,13 @@
+[Fri Jan 07 09:19:43.583828 2022] [wsgi:error] [pid 10:tid 140716449707776] [client 172.18.0.1:60816] Invalid HTTP_HOST header: '0.0.0.0:8005'. You may need to add '0.0.0.0' to ALLOWED_HOSTS.
+[Fri Jan 07 09:19:43.681826 2022] [wsgi:error] [pid 10:tid 140716449707776] [client 172.18.0.1:60816] Bad Request: /
+[Fri Jan 07 09:19:44.129216 2022] [wsgi:error] [pid 10:tid 140716441315072] [client 172.18.0.1:60820] Invalid HTTP_HOST header: '0.0.0.0:8005'. You may need to add '0.0.0.0' to ALLOWED_HOSTS., referer: http://0.0.0.0:8005/
+[Fri Jan 07 09:19:44.196796 2022] [wsgi:error] [pid 10:tid 140716441315072] [client 172.18.0.1:60820] Bad Request: /favicon.ico, referer: http://0.0.0.0:8005/
+[Fri Jan 07 09:20:20.778371 2022] [wsgi:error] [pid 9:tid 140716483278592] [client 172.18.0.1:60826] Not Found: /favicon.ico, referer: http://localhost:8005/
+[Fri Jan 07 09:24:06.748539 2022] [wsgi:error] [pid 10:tid 140226118809344] [client 172.18.0.1:60834] Invalid HTTP_HOST header: '0.0.0.0:8005'. You may need to add '0.0.0.0' to ALLOWED_HOSTS.
+[Fri Jan 07 09:24:06.818948 2022] [wsgi:error] [pid 10:tid 140226118809344] [client 172.18.0.1:60834] Bad Request: /
+[Fri Jan 07 09:24:07.241881 2022] [wsgi:error] [pid 10:tid 140225967806208] [client 172.18.0.1:60836] Invalid HTTP_HOST header: '0.0.0.0:8005'. You may need to add '0.0.0.0' to ALLOWED_HOSTS., referer: http://0.0.0.0:8005/
+[Fri Jan 07 09:24:07.302538 2022] [wsgi:error] [pid 10:tid 140225967806208] [client 172.18.0.1:60836] Bad Request: /favicon.ico, referer: http://0.0.0.0:8005/
+[Fri Jan 07 09:25:50.226310 2022] [wsgi:error] [pid 10:tid 140225909057280] [client 172.18.0.1:60852] Invalid HTTP_HOST header: '0.0.0.0:8005'. You may need to add '0.0.0.0' to ALLOWED_HOSTS.
+[Fri Jan 07 09:25:50.358482 2022] [wsgi:error] [pid 10:tid 140225909057280] [client 172.18.0.1:60852] Bad Request: /
+[Fri Jan 07 09:25:50.768595 2022] [wsgi:error] [pid 11:tid 140226102023936] [client 172.18.0.1:60850] Invalid HTTP_HOST header: '0.0.0.0:8005'. You may need to add '0.0.0.0' to ALLOWED_HOSTS., referer: http://0.0.0.0:8005/
+[Fri Jan 07 09:25:50.891644 2022] [wsgi:error] [pid 11:tid 140226102023936] [client 172.18.0.1:60850] Bad Request: /favicon.ico, referer: http://0.0.0.0:8005/
