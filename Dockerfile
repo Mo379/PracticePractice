@@ -16,12 +16,12 @@ ADD ./requirements.txt /var/www/html
 RUN pip install -r /var/www/html/requirements.txt 
 #Groups, Permissions and Ownership
 WORKDIR /var/www/html 
-#RUN chmod 664 /var/www/html/APP/db.sqlite3 
-#RUN chmod 775 /var/www/html/APP/PP2 
-#RUN chmod 775 /var/www/html/APP/logs 
-#RUN chown :www-data /var/www/html/APP/db.sqlite3 
-#RUN chown :www-data /var/www/html/APP/PP2
-#RUN chown :www-data /var/www/html/APP/logs
+RUN chmod 664 /var/www/html/db.sqlite3 
+RUN chmod 775 /var/www/html/PP2 
+RUN chmod 775 /var/www/html/logs 
+RUN chown :www-data /var/www/html/db.sqlite3 
+RUN chown :www-data /var/www/html/PP2
+RUN chown :www-data /var/www/html/logs
 #expose and run
 EXPOSE 80 3500
 CMD ["apache2ctl", "-D", "FOREGROUND"]
