@@ -119,3 +119,4 @@
 [Mon Jan 10 21:15:18.501671 2022] [wsgi:error] [pid 9:tid 140401541379840] [client 172.18.0.1:61266]     raise TemplateDoesNotExist(template_name, chain=chain)
 [Mon Jan 10 21:15:18.504247 2022] [wsgi:error] [pid 9:tid 140401541379840] [client 172.18.0.1:61266] django.template.exceptions.TemplateDoesNotExist: index.html
 [Mon Jan 17 06:29:10.182305 2022] [wsgi:error] [pid 11:tid 140232989058816] [client 172.18.0.1:65422] Not Found: /favicon.ico, referer: http://0.0.0.0:8005/
+[Mon Jan 17 18:22:59.234714 2022] [wsgi:error] [pid 11:tid 140232888346368] [client 172.18.0.1:65466] Not Found: /favicon.ico, referer: http://localhost:8005/

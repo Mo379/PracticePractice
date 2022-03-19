@@ -1,4 +1,5 @@
 /APP/README.md
 /APP/.env
 /APP/.gitignore
-
+/extras/data
+/venv/
