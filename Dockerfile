@@ -10,8 +10,8 @@ RUN ln /usr/bin/python3 /usr/bin/python
 #RUN ln /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 #app periferals
-ADD ./extras/includes/APP_apache.conf /etc/apache2/sites-available/000-default.conf 
 ADD ./APP/ /var/www/html
+ADD ./extras/includes/APP_apache.conf /etc/apache2/sites-available/000-default.conf 
 ADD ./extras/includes/requirements.txt /var/www/html 
 RUN pip install -r /var/www/html/requirements.txt 
 #Groups, Permissions and Ownership

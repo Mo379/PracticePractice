@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config as decouple_config
+from decouple import Csv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-a58$dv*1(-^4g*ofrah!(_7872502a%71jsi2kx6^)%j4^#l(x'
-
+SECRET_KEY = decouple_config('django_secret')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = decouple_config('django_debug_state', cast=bool)
 
-ALLOWED_HOSTS = ['0.0.0.0','localhost', 'practicepractice.net']
+ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
 
 
 # Application definition
@@ -37,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #user added
+    'content.apps.ContentConfig',
+    'django_mathjax'
 ]
 
 MIDDLEWARE = [
@@ -75,8 +80,12 @@ WSGI_APPLICATION = 'PP2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': decouple_config('DB_ENGINE'),
+        'NAME': decouple_config('DB_NAME'),
+        'USER': decouple_config('DB_USER'),
+        'PASSWORD': decouple_config('DB_PASSWORD'),
+        'HOST': decouple_config('DB_HOST'),
+        'PORT': decouple_config('DB_PORT', cast=int),
     }
 }
 
@@ -122,3 +131,30 @@ STATIC_ROOT = 'staticfiles/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# SMTP settings
+
+EMAIL_HOST = decouple_config('SES_endpoint')
+EMAIL_PORT = decouple_config('SES_TLS_PORT', cast=int)
+EMAIL_HOST_USER = decouple_config('SES_SMTP_USER')
+EMAIL_HOST_PASSWORD = decouple_config('SES_PASSWORD')
+EMAIL_USE_TLS = decouple_config('SES_USE_TLS', cast=bool)
+
+
+# Mathjax settings
+MATHJAX_ENABLED=True
+MATHJAX_CONFIG_DATA = {
+  "tex2jax": {
+    "inlineMath":
+      [
+          ['$','$'],
+          ['\\(','\\)']
+      ]
+  }
+}
+
+
+
+
+
