@@ -4,6 +4,9 @@ A website for delivering A-level content directly to student, with great feature
 
 - [ ] General APP models
 	- [ ] Users
+	- Affiliates APP models
+		- [ ] Affiliate balance
+		- [ ] Affiliate history
 - [ ] Content APP models and util
 	- [ ] Specifications
 	- [x] Question 
@@ -33,9 +36,6 @@ A website for delivering A-level content directly to student, with great feature
 - Payment APP models
 	- [ ] Transactions stripe
 	- [ ] Transactions Paypal
-- Affiliates APP models
-	- [ ] Affiliate balance
-	- [ ] Affiliate history
 
 - [ ] Create the website structure
 	- [ ] About page
