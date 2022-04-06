@@ -17,10 +17,8 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Affiliate balance
 	- [ ] Affiliate history
 - [ ] Make a synchroniser for the data with smart logic
-	- [ ] Load all questions
+	- [X] Load all questions
 	- [ ] Load all points
-	- [ ] Load questions in dir
-	- [ ] Load points in dir
 - [ ] Make a content creator
 	- [ ] CRUD subject
 	- [ ] CRUD moduel
