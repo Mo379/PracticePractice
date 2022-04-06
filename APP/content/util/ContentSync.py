@@ -3,7 +3,7 @@ import sys
 import glob
 import json
 from decouple import config as decouple_config
-from ..models import Question,Point
+from ..models import Question,Point,Video
 
 #left to figure out how to insert the extracted information into the models with smart features
 class QuestionSync():
@@ -42,7 +42,6 @@ class QuestionSync():
             #extracting info from json file data
             q_content = data
             q_difficulty = data['details']['head']['0']['q_difficulty']
-            q_level = data['details']['head']['0']['q_level']
             q_board = data['details']['head']['0']['q_board']
             q_board_moduel = data['details']['head']['0']['q_moduel']
             q_exam_month = data['details']['head']['0']['q_month']
@@ -54,7 +53,6 @@ class QuestionSync():
                 my_question = Question.objects.get(q_unique_id=q_unique_id)
             else:
                 my_question = Question()
-            my_question.q_level = q_level
             my_question.q_board = q_board
             my_question.q_board_moduel= q_board_moduel
             my_question.q_exam_month= q_exam_month if q_exam_month != '' else 0
@@ -75,12 +73,92 @@ class QuestionSync():
             my_question.save()
         return 'full sync'
 
-left to figure out how to read the points information form the files into the database
 class PointSync():
     def __init__(self, content_dir=decouple_config('content_dir')):
         self.content_dir = content_dir
-    def sync(slef):
+    def sync(self, subdir=''):
         """
         Synchronises all of the points in the files data into the database
         """
+        #getting all the question files
+        structure= {}
+        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+            for file in files:
+                if('type_point' in file):
+                    files = [s for s in files if "type_point" in s]
+                    structure[root] = files
+                    continue
+        #getting all the question information
+        for ddir,point in structure.items():
+            #getting source information from name
+            p_subject = ddir.split('/A_')[1].split('/')[0]
+            p_moduel= ddir.split('/B_')[1].split('/')[0]
+            p_chapter= ddir.split('/C_')[1].split('/')[0]
+            p_topic= ddir.split('/D_')[1].split('/')[0] 
+            #
+            p_dir= ddir
+            p_files_dir = ddir+'/files'
+            p_unique_id = point[0].split('tag_')[1].split('.')[0]
+            #getting json file data
+            p_link = ddir +'/'+point[0]
+            with open(p_link, 'r') as file:
+                content= file.read()
+            data = json.loads(content)
+            #extracting info from json file data
+            p_content = data
+            #Load question information to model
+            if Point.objects.filter(p_unique_id=p_unique_id):
+                my_point= Point.objects.get(p_unique_id=p_unique_id)
+            else:
+                my_point= Point()
+            my_point.p_subject= p_subject
+            my_point.p_moduel= p_moduel
+            my_point.p_chapter= p_chapter
+            my_point.p_topic= p_topic
+            my_point.p_content= p_content
+            my_point.p_directory= p_dir
+            my_point.p_link= p_link
+            my_point.p_unique_id= p_unique_id
+            my_point.save()
+        return 'full sync'
+class VideoSync():
+    def __init__(self, content_dir=decouple_config('content_dir')):
+        self.content_dir = content_dir
+    def sync(self, subdir=''):
+        """
+        Synchronises all of the points in the files data into the database
+        """
+        #getting all the question files
+        structure= {}
+        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+            for file in files:
+                if('type_point' in file):
+                    files = [s for s in files if "type_point" in s]
+                    structure[root] = files
+                    continue
+        #getting all the question information
+        for ddir,point in structure.items():
+            p_unique_id = point[0].split('tag_')[1].split('.')[0]
+            p_link = ddir +'/'+point[0]
+            with open(p_link, 'r') as file:
+                content= file.read()
+            data = json.loads(content)
+            point_content = data['details']['hidden']['0']['content']
+            for pos, item in point_content.items():
+                pos = int(pos)
+                if item['vid']:
+                    video = item['vid']
+                    v_pos = pos
+                    v_title = video['vid_title']
+                    v_link = video['vid_link']
+                    if v_link:
+                        if Video.objects.filter(p_unique_id=p_unique_id,v_pos=v_pos):
+                            my_vid= Video.objects.get(p_unique_id=p_unique_id,v_pos=v_pos)
+                        else:
+                            my_vid= Video()
+                        my_vid.p_unique_id= p_unique_id
+                        my_vid.v_title= v_title
+                        my_vid.v_link= v_link
+                        my_vid.v_pos= v_pos
+                        my_vid.save()
         return 'full sync'

@@ -6,8 +6,8 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Users
 	- [ ] Specifications
 	- [x] Question 
-	- [ ] Point 
-	- [ ] Video 
+	- [x] Point 
+	- [x] Video 
 	- [ ] User Papers 
 	- [ ] Question track 
 	- [ ] Keywords
@@ -16,9 +16,9 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Transactions Paypal
 	- [ ] Affiliate balance
 	- [ ] Affiliate history
-- [ ] Make a synchroniser for the data with smart logic
-	- [X] Load all questions
-	- [ ] Load all points
+- [x] Make a synchroniser for the data with smart logic
+	- [x] Load all questions
+	- [x] Load all points
 - [ ] Make a content creator
 	- [ ] CRUD subject
 	- [ ] CRUD moduel

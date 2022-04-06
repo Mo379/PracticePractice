@@ -1,9 +1,11 @@
+from django.utils import timezone
 from django.db import models
+from django.contrib.auth.models import User
+
 
 # Create your models here.
 class Question(models.Model):
     #
-    q_level = models.CharField(max_length=10, default='',null=True) 
     q_board = models.CharField(max_length=10, default='',null=True)  
     q_board_moduel = models.CharField(max_length=10, default='',null=True) 
     q_exam_month = models.IntegerField(default=0,null=True) 
@@ -25,11 +27,36 @@ class Question(models.Model):
     q_unique_id= models.CharField(max_length=11, db_index=True,default='',null=True,unique=True)
     def __str__(self):
         return self.q_unique_id
-class Point(models.Model):
-    p_subject = models.CharField(max_length=50)
+class QuestionTrack(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,db_index=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, 
+            db_column='q_unique_id', db_index=True)
+    track_mark = models.IntegerField(default=0,null=True) 
+    track_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
     def __str__(self):
-        return self.p_subject
+        return self.user
+class Point(models.Model):
+    p_subject = models.CharField(max_length=255,default='',null=True)
+    p_moduel= models.CharField(max_length=255,default='',null=True)
+    p_chapter= models.CharField(max_length=255,default='',null=True)
+    p_topic= models.CharField(max_length=255,default='',null=True)
+    p_content = models.JSONField(default=dict,null=True)  
+    p_directory= models.CharField(max_length=255,default='',null=True)
+    p_link= models.CharField(max_length=256,default='',null=True)
+    p_unique_id= models.CharField(max_length=11, db_index=True,default='',null=True,unique=True)
+    def __str__(self):
+        return self.p_unique_id
 class Video(models.Model):
-    v_title = models.CharField(max_length=50)
+    p_unique_id = models.CharField(max_length=11, db_index=True,default='',null=True)
+    v_title = models.CharField(max_length=255, default='')
+    v_link= models.CharField(max_length=255, default='')
+    v_pos = models.IntegerField(default=0,null=True) 
     def __str__(self):
         return self.v_title
+class UserPaper(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    pap_subject= models.CharField(max_length=50, default='')
+    pap_info = models.JSONField(default=dict,null=True)
+    pap_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
+    def __str__(self):
+        return self.pap_subject
