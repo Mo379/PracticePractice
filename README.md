@@ -5,10 +5,10 @@ A website for delivering A-level content directly to student, with great feature
 - [ ] General APP models
 	- [ ] Users
 	- Affiliates APP models
-		- [ ] Affiliate balance
-		- [ ] Affiliate history
+		- [x] Affiliate balance
+		- [x] Affiliate history
 - [ ] Content APP models and util
-	- [ ] Specifications
+	- [x] Specifications
 	- [x] Question 
 	- [x] Point 
 	- [x] Video 
@@ -20,6 +20,7 @@ A website for delivering A-level content directly to student, with great feature
 		- [x] Load all questions
 		- [x] Load all points
 	- [ ] Make a content creator
+		- [ ] CRUD specification
 		- [ ] CRUD subject
 		- [ ] CRUD moduel
 		- [ ] CRUD chapter

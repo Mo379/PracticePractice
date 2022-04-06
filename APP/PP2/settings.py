@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #user added
     'content.apps.ContentConfig',
+    'affiliates.apps.AffiliatesConfig',
     'django_mathjax'
 ]
 

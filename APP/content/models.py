@@ -88,3 +88,19 @@ class EditingTask(models.Model):
     def __str__(self):
         return self.task_subject +'-' + self.task_resolution
 
+
+
+
+
+
+class Specification(models.Model):
+    spec_board= models.CharField(max_length=50,default='',null=True)
+    spec_subject= models.CharField(max_length=50,default='',null=True)
+    spec_name= models.CharField(max_length=50,default='',null=True)
+    spec_first_assessment= models.DateTimeField('First assessment', blank=True)
+    spec_last_assessment= models.DateTimeField('Last assessment', blank=True)
+    spec_content= models.JSONField(default=dict,null=True) 
+    def __str__(self):
+        return self.spec_board+'-' + self.spec_subject + '-' + self.spec_name
+
+
