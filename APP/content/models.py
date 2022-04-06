@@ -35,6 +35,23 @@ class QuestionTrack(models.Model):
     track_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
     def __str__(self):
         return self.user
+class UserPaper(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    pap_subject= models.CharField(max_length=50, default='')
+    pap_info = models.JSONField(default=dict,null=True)
+    pap_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
+    def __str__(self):
+        return self.pap_subject
+
+
+
+
+
+
+
+
+
+
 class Point(models.Model):
     p_subject = models.CharField(max_length=255,default='',null=True)
     p_moduel= models.CharField(max_length=255,default='',null=True)
@@ -53,10 +70,21 @@ class Video(models.Model):
     v_pos = models.IntegerField(default=0,null=True) 
     def __str__(self):
         return self.v_title
-class UserPaper(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
-    pap_subject= models.CharField(max_length=50, default='')
-    pap_info = models.JSONField(default=dict,null=True)
-    pap_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
+class Keyword(models.Model):
+    kw_subject= models.CharField(max_length=50, db_index=True,default='',null=True)
+    kw_word = models.CharField(max_length=50,default='',null=True) 
+    kw_multiple_context = models.JSONField(default=dict,null=True) 
     def __str__(self):
-        return self.pap_subject
+        return self.kw_subject + '-' + self.kw_word
+class EditingTask(models.Model):
+    task_subject= models.CharField(max_length=255,default='',null=True)
+    task_moduel= models.CharField(max_length=255,default='',null=True)
+    task_chapter= models.CharField(max_length=255,default='',null=True)
+    task_topic= models.CharField(max_length=255,default='',null=True)
+    task_editor = models.ForeignKey(User, on_delete=models.CASCADE,db_index=True)
+    task_payment_amount = models.DecimalField(max_digits=6, decimal_places=2)
+    task_completion_status= models.BooleanField(default=False,null=True)
+    task_approval_status= models.BooleanField(default=False,null=True)
+    def __str__(self):
+        return self.task_subject +'-' + self.task_resolution
+

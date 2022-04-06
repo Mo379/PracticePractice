@@ -14,7 +14,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
+            model_name='userpaper',
+            name='pap_creation_time',
+        ),
+        migrations.AddField(
             model_name='userpaper',
             name='pap_creation_time',
             field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='date created'),

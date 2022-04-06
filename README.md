@@ -2,37 +2,41 @@
 A website for delivering A-level content directly to student, with great features for practicing questions.
 # To Do
 
-- [ ] Make the models
+- [ ] General APP models
 	- [ ] Users
+- [ ] Content APP models and util
 	- [ ] Specifications
 	- [x] Question 
 	- [x] Point 
 	- [x] Video 
-	- [ ] User Papers 
-	- [ ] Question track 
-	- [ ] Keywords
-	- [ ] Editing tasks
+	- [x] User Papers 
+	- [x] Question track 
+	- [x] Keywords
+	- [x] Editing tasks
+	- [x] Make a synchroniser for the data with smart logic
+		- [x] Load all questions
+		- [x] Load all points
+	- [ ] Make a content creator
+		- [ ] CRUD subject
+		- [ ] CRUD moduel
+		- [ ] CRUD chapter
+		- [ ] CRUD topic
+		- [ ] CRUD point
+		- [ ] CRUD question
+	- [ ] Make an editor workflow
+		- [ ] Admin to list tasks with payment amounts
+		- [ ] Editor to make temporary changes
+		- [ ] Editor to submit changes
+		- [ ] Admin to be able to check changes
+		- [ ] Admin to accept changes
+		- [ ] Admin to send payment
+- Payment APP models
 	- [ ] Transactions stripe
 	- [ ] Transactions Paypal
+- Affiliates APP models
 	- [ ] Affiliate balance
 	- [ ] Affiliate history
-- [x] Make a synchroniser for the data with smart logic
-	- [x] Load all questions
-	- [x] Load all points
-- [ ] Make a content creator
-	- [ ] CRUD subject
-	- [ ] CRUD moduel
-	- [ ] CRUD chapter
-	- [ ] CRUD topic
-	- [ ] CRUD point
-	- [ ] CRUD question
-- [ ] Make an editor workflow
-	- [ ] Admin to list tasks with payment amounts
-	- [ ] Editor to make temporary changes
-	- [ ] Editor to submit changes
-	- [ ] Admin to be able to check changes
-	- [ ] Admin to accept changes
-	- [ ] Admin to send payment
+
 - [ ] Create the website structure
 	- [ ] About page
 	- [ ] Contact page
