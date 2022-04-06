@@ -1,11 +1,11 @@
 # PracticePractice
+A website for delivering A-level content directly to student, with great features for practicing questions.
+# To Do
 
-#To Do
-
-- [ ] Make the different models
+- [ ] Make the models
 	- [ ] Users
 	- [ ] Specifications
-	- [ ] Question 
+	- [x] Question 
 	- [ ] Point 
 	- [ ] Video 
 	- [ ] User Papers 
@@ -28,10 +28,20 @@
 	- [ ] CRUD topic
 	- [ ] CRUD point
 	- [ ] CRUD question
+- [ ] Make an editor workflow
+	- [ ] Admin to list tasks with payment amounts
+	- [ ] Editor to make temporary changes
+	- [ ] Editor to submit changes
+	- [ ] Admin to be able to check changes
+	- [ ] Admin to accept changes
+	- [ ] Admin to send payment
 - [ ] Create the website structure
+	- [ ] About page
+	- [ ] Contact page
 	- [ ] index page
 	- [ ] Subject's page
 	- [ ] Questions page
+	- [ ] Notes page
 	- [ ] Hub page
 	- [ ] Paper view page
 	- [ ] user paper view page
@@ -47,5 +57,20 @@
 		- [ ] Question marking
 		- [ ] Elo performance tracking
 	- [ ] Video lazy loader
+	- [ ] Reporting feature for content improvement
+- [ ] Create user settings
+	- [ ] Payment details
+	- [ ] Regular user details
+	- [ ] Choice of level
+	- [ ] Choice of subject
+	- [ ] Choice of specifications
+	- [ ] user groups and group permissions
+- [ ] Style the site
+- [ ] Use a django javascript workflow
+- [ ] Mount SMTP
+- [ ] Create Email templates
+- [ ] Sitemap for User nav
+- [ ] Sitemap for SEO
+- [ ] Terms and conditions page
 
 
