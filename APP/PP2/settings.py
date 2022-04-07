@@ -33,16 +33,20 @@ ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
+    #native
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #Third party 
+    'djstripe',
+    'django_mathjax',
     #user added
     'content.apps.ContentConfig',
     'affiliates.apps.AffiliatesConfig',
-    'django_mathjax'
+    'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [
@@ -141,6 +145,25 @@ EMAIL_PORT = decouple_config('SES_TLS_PORT', cast=int)
 EMAIL_HOST_USER = decouple_config('SES_SMTP_USER')
 EMAIL_HOST_PASSWORD = decouple_config('SES_PASSWORD')
 EMAIL_USE_TLS = decouple_config('SES_USE_TLS', cast=bool)
+
+
+# Stripe settings
+STRIPE_LIVE_SECRET_KEY = decouple_config('Stripe_live_secret')
+STRIPE_TEST_SECRET_KEY = decouple_config('Stripe_test_secret')
+# Change to True in production
+STRIPE_LIVE_MODE = decouple_config('Stripe_live_mode', cast=bool)
+# Get it from the section in the Stripe dashboard where you added the webhook endpoint
+DJSTRIPE_WEBHOOK_SECRET = decouple_config('Stripe_hook_secret')
+# We recommend setting to True for new installations
+DJSTRIPE_USE_NATIVE_JSONFIELD = True  
+DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
+
+
+# Paypal settings 
+PAYPAL_MODE= decouple_config('PAYPAL_MODE')
+PAYPAL_CLIENT_ID= decouple_config('Paypal_test_client_id')
+PAYPAL_CLIENT_SECRET= decouple_config('Paypal_test_client_secret')
+PAYPAL_WEBHOOK_ID= decouple_config('Paypal_test_webhook_id')
 
 
 # Mathjax settings

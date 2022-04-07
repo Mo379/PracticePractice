@@ -21,4 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path('', include('content.urls')),
     path('admin/', admin.site.urls),
+    path('stripe/', include("djstripe.urls", namespace="djstripe")),
+
 ]
