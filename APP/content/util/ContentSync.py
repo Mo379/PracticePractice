@@ -24,6 +24,7 @@ class QuestionSync():
         #getting all the question information
         for ddir,question in structure.items():
             #getting source information from name
+            q_level= ddir.split('/Z_')[1].split('/')[0]
             q_subject = ddir.split('/A_')[1].split('/')[0]
             q_moduel= ddir.split('/B_')[1].split('/')[0]
             q_chapter= ddir.split('/C_')[1].split('/')[0]
@@ -53,6 +54,7 @@ class QuestionSync():
                 my_question = Question.objects.get(q_unique_id=q_unique_id)
             else:
                 my_question = Question()
+            my_question.q_level = q_level
             my_question.q_board = q_board
             my_question.q_board_moduel= q_board_moduel
             my_question.q_exam_month= q_exam_month if q_exam_month != '' else 0
@@ -91,6 +93,7 @@ class PointSync():
         #getting all the question information
         for ddir,point in structure.items():
             #getting source information from name
+            p_level = ddir.split('/Z_')[1].split('/')[0]
             p_subject = ddir.split('/A_')[1].split('/')[0]
             p_moduel= ddir.split('/B_')[1].split('/')[0]
             p_chapter= ddir.split('/C_')[1].split('/')[0]
@@ -111,6 +114,7 @@ class PointSync():
                 my_point= Point.objects.get(p_unique_id=p_unique_id)
             else:
                 my_point= Point()
+            my_point.p_level = p_level
             my_point.p_subject= p_subject
             my_point.p_moduel= p_moduel
             my_point.p_chapter= p_chapter

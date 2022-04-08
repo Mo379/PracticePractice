@@ -19,7 +19,7 @@ A website for delivering A-level content directly to student, with great feature
 	- [x] Make a synchroniser for the data with smart logic
 		- [x] Load all questions
 		- [x] Load all points
-	- [ ] Make a content creator
+	- [ ] Make a CRUD creator bridge| an unordered file creator
 		- [ ] CRUD specification
 		- [ ] CRUD subject
 		- [ ] CRUD moduel
@@ -34,8 +34,13 @@ A website for delivering A-level content directly to student, with great feature
 		- [ ] Admin to be able to check changes
 		- [ ] Admin to accept changes
 		- [ ] Admin to send payment
+	- [ ] Make a student workflow
+		- [ ] Can view content
+		- [ ] Can mark questions
+		- [ ] Can watch video
+		- [ ] Can see statistics
 - [ ] Payment APP models
-	- [x] Transactions stripe
+	- [ ] Transactions stripe
 	- [ ] Transactions Paypal
 
 - [ ] Create the website structure
@@ -68,8 +73,8 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Choice of subject
 	- [ ] Choice of specifications
 	- [ ] user groups and group permissions
-- [ ] Style the site
-- [ ] Use a django javascript workflow
+- [ ] Style the site bootstrap
+- [ ] Use a django-javascript workflow
 - [ ] Mount SMTP
 - [ ] Create Email templates
 - [ ] Sitemap for User nav

@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 class Question(models.Model):
     #
+    q_level = models.CharField(max_length=30, default='',null=True)  
     q_board = models.CharField(max_length=10, default='',null=True)  
     q_board_moduel = models.CharField(max_length=10, default='',null=True) 
     q_exam_month = models.IntegerField(default=0,null=True) 
@@ -53,6 +54,7 @@ class UserPaper(models.Model):
 
 
 class Point(models.Model):
+    p_level = models.CharField(max_length=50,default='',null=True)
     p_subject = models.CharField(max_length=255,default='',null=True)
     p_moduel= models.CharField(max_length=255,default='',null=True)
     p_chapter= models.CharField(max_length=255,default='',null=True)
