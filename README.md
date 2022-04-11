@@ -19,14 +19,18 @@ A website for delivering A-level content directly to student, with great feature
 	- [x] Make a synchroniser for the data with smart logic
 		- [x] Load all questions
 		- [x] Load all points
-	- [ ] Make a CRUD creator bridge| an unordered file creator
-		- [ ] CRUD specification
-		- [ ] CRUD subject
-		- [ ] CRUD moduel
-		- [ ] CRUD chapter
-		- [ ] CRUD topic
-		- [ ] CRUD point
-		- [ ] CRUD question
+	- [x] Make a CRUD creator bridge| an unordered file creator
+		- [x] CRUD specification
+		- [x] CRUD subject
+		- [x] CRUD moduel
+		- [x] CRUD chapter
+		- [x] CRUD topic
+		- [x] CRUD point
+		- [x] CRUD question
+	- [ ] Be able to dit json file content directly from the site
+		- [ ] Editing Questions
+		- [ ] Editing Points
+		- [ ] Editing Specs
 	- [ ] Make an editor workflow
 		- [ ] Admin to list tasks with payment amounts
 		- [ ] Editor to make temporary changes
@@ -44,9 +48,9 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Transactions Paypal
 
 - [ ] Create the website structure
+	- [ ] index page
 	- [ ] About page
 	- [ ] Contact page
-	- [ ] index page
 	- [ ] Subject's page
 	- [ ] Questions page
 	- [ ] Notes page

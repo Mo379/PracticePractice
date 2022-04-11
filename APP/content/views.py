@@ -2,7 +2,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
-from .util.ContentSync import QuestionSync,PointSync,VideoSync 
+from .util.ContentSync import QuestionSync,PointSync,VideoSync,SpecificationSync
+from .util.ContentCRUD import QuestionCRUD,PointCRUD,SpecificationCRUD
 
 
 from .models import *
@@ -29,12 +30,13 @@ class HubView(generic.ListView):
     context_object_name = 'context'
     def get_queryset(self):
         """Return all of the required hub information"""
-        Psync = PointSync()
-        Qsync = QuestionSync()
-        Vsync = VideoSync()
-        q_full_syn= Vsync.sync()
+        crud = QuestionCRUD()
+
+        #q_full_syn= crud.Create('Z_test/A_test/B_test/C_test/questions', 'content')
+        #q_full_syn= crud.Create('Z_test/A_test/B_test/C_test/D_test', 'content')
+        q_full_syn= crud.Delete('38ff4a1d90')
         context = {
-            'p_full_sync': q_full_syn,
+            'Q_crud': q_full_syn,
         }
 
         return context

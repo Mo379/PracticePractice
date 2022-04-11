@@ -3,7 +3,7 @@ import sys
 import glob
 import json
 from decouple import config as decouple_config
-from ..models import Question,Point,Video
+from ..models import Question,Point,Video, Specification
 
 #left to figure out how to insert the extracted information into the models with smart features
 class QuestionSync():
@@ -165,4 +165,58 @@ class VideoSync():
                         my_vid.v_link= v_link
                         my_vid.v_pos= v_pos
                         my_vid.save()
+        return 'full sync'
+
+
+
+
+
+
+class SpecificationSync():
+    def __init__(self, content_dir=decouple_config('specifications_dir')):
+        self.content_dir = content_dir
+    def sync(self, subdir=''):
+        """
+        Synchronises all of the specs in the files data into the database
+        """
+        #getting all the question files
+        structure= {}
+        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+            for file in files:
+                if('.json' in file):
+                    files = [s for s in files if ".json" in s]
+                    structure[root] = files
+        #getting all the question information
+        for ddir,specs in structure.items():
+            for spec in specs:
+                #getting source information from name
+                spec_level = ddir.split('/Z_')[1].split('/')[0]
+                spec_subject = ddir.split('/A_')[1].split('/')[0]
+                spec_board= ddir.split('/B_')[1].split('/')[0]
+                #
+                spec_dir= ddir
+                spec_name= spec.split('.')[0]
+                #getting json file data
+                spec_link = ddir +'/'+spec
+                with open(spec_link, 'r') as file:
+                    content= file.read()
+                try:
+                    data = json.loads(content) 
+                except:
+                    data = {}
+                #extracting info from json file data
+                spec_content = data
+                #Load question information to model
+                if Specification.objects.filter(spec_name=spec_name):
+                    my_spec= Specification.objects.get(spec_name=spec_name)
+                else:
+                    my_spec= Specification()
+                my_spec.spec_level= spec_level
+                my_spec.spec_subject= spec_subject
+                my_spec.spec_board= spec_board
+                my_spec.spec_name= spec_name
+                my_spec.spec_content= spec_content
+                my_spec.spec_dir= spec_dir
+                my_spec.spec_link= spec_link
+                my_spec.save()
         return 'full sync'
