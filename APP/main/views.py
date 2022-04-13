@@ -24,3 +24,28 @@ class ContactView(generic.ListView):
     context_object_name = 'context'
     def get_queryset(self):
         return "base_contact"
+class JobsView(generic.ListView):
+    template_name = "main/jobs.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "base_jobs"
+class FAQView(generic.ListView):
+    template_name = "main/faq.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "base_faq"
+class TermsAndConditionsView(generic.ListView):
+    template_name = "main/tandc.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "base_terms_and_conditions"
+class SiteMapView(generic.ListView):
+    template_name = "main/sitemap.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "base_sitemap"
+class SiteMapSEOView(generic.ListView):
+    template_name = "main/sitemapseo.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "base_sitemap_seo"

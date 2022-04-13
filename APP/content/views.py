@@ -38,6 +38,42 @@ class StatisticsView(generic.ListView):
         return 'content_statistics'
 
 
+class QuestionsView(generic.ListView):
+    template_name = 'content/questions.html'
+    context_object_name = 'context'
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        return 'content_questions'
+class QuestionView(generic.ListView):
+    template_name = 'content/question.html'
+    context_object_name = 'context'
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        return 'content_questions'
+class NotesView(generic.ListView):
+    template_name = 'content/notes.html'
+    context_object_name = 'context'
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        return 'content_notes'
+class PaperView(generic.ListView):
+    template_name = 'content/paper.html'
+    context_object_name = 'context'
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        return 'content_paper'
+class UserPaperView(generic.ListView):
+    template_name = 'content/user-paper.html'
+    context_object_name = 'context'
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        return 'content_user_paper'
+class UserPaperPrintView(generic.ListView):
+    template_name = 'content/user-paper-print.html'
+    context_object_name = 'context'
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        return 'content_user_paper-print'
 
 
 

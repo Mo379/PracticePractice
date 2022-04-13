@@ -12,6 +12,8 @@ urlpatterns = [
     path('settings/', views.SettingsView.as_view(), name='settings'),
     path('passreset/', views.PassResetView.as_view(), name='passreset'),
     path('join/', views.JoinView.as_view(), name='join'),
+    path('join/checkout/stripe', views.CheckoutStripeView.as_view(), name='checkout-stripe'),
+    path('join/checkout/paypal', views.CheckoutPaypalView.as_view(), name='checkout-paypal'),
      path('stripe/', include("djstripe.urls", namespace="djstripe"), name='stripe'),
     path('appearance/', views.AppearanceView.as_view(), name='appearance'),
 ]

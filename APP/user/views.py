@@ -39,6 +39,16 @@ class JoinView(generic.ListView):
     context_object_name = 'context'
     def get_queryset(self):
         return "user_join"
+class CheckoutStripeView(generic.ListView):
+    template_name = "user/checkout-stripe.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "user_checkout-strip"
+class CheckoutPaypalView(generic.ListView):
+    template_name = "user/checkout-paypal.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "user_checkout-stripe"
 class AppearanceView(generic.ListView):
     template_name = "user/action.html"
     context_object_name = 'context'

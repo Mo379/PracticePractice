@@ -50,21 +50,21 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Transactions Paypal
 
 - [ ] Create the website structure
-	- [ ] index page
-	- [ ] About page
-	- [ ] Contact page
-	- [ ] Subject's page
-	- [ ] Questions page
-	- [ ] Notes page
-	- [ ] Hub page
-	- [ ] Paper view page
-	- [ ] user paper view page
-	- [ ] user paper print page
-	- [ ] login page
-	- [ ] Subscriptions page
-	- [ ] checkout pages
-		- [ ] Paypal checkout
-		- [ ] Stripe checkout
+	- [x] index page
+	- [x] About page
+	- [x] Contact page
+	- [x] Subject's page
+	- [x] Questions page
+	- [x] Notes page
+	- [x] Hub page
+	- [x] Paper view page
+	- [x] user paper view page
+	- [x] user paper print page
+	- [x] login page
+	- [x] Subscriptions page
+	- [x] checkout pages
+		- [x] Paypal checkout
+		- [x] Stripe checkout
 - [ ] Create website features
 	- [ ] Paper maker
 	- [ ] Question tracking features

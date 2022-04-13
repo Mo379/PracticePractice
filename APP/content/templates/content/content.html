@@ -10,4 +10,10 @@
 
 {%block content%}
 	{{context}}
+	<br><a href = '{% url 'content:questions'%}' class = 'text-primary'> Questions</a>
+	<br><a href = '{% url 'content:question'%}' class = 'text-primary'> Question</a>
+	<br><a href = '{% url 'content:notes'%}' class = 'text-primary'> Notes</a>
+	<br><a href = '{% url 'content:paper'%}' class = 'text-primary'> Paper </a>
+	<br><a href = '{% url 'content:user-paper'%}' class = 'text-primary'> User paper</a>
+	<br><a href = '{% url 'content:user-paper-print'%}' class = 'text-primary'> User paper print</a>
 {%endblock%}
