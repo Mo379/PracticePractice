@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 from decouple import config as decouple_config
 from decouple import Csv
@@ -44,9 +44,11 @@ INSTALLED_APPS = [
     'djstripe',
     'django_mathjax',
     #user added
+    'main.apps.MainConfig',
+    'user.apps.UserConfig',
     'content.apps.ContentConfig',
     'affiliates.apps.AffiliatesConfig',
-    'payments.apps.PaymentsConfig',
+    'payment.apps.PaymentConfig',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +66,9 @@ ROOT_URLCONF = 'PP2.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates/'),
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

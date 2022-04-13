@@ -27,16 +27,18 @@ A website for delivering A-level content directly to student, with great feature
 		- [x] CRUD topic
 		- [x] CRUD point
 		- [x] CRUD question
-	- [ ] Be able to dit json file content directly from the site
+	- [ ] Be able to edit json file content directly from the site
 		- [ ] Editing Questions
 		- [ ] Editing Points
 		- [ ] Editing Specs
+		- [ ] From json to text and back
 	- [ ] Make an editor workflow
 		- [ ] Admin to list tasks with payment amounts
 		- [ ] Editor to make temporary changes
 		- [ ] Editor to submit changes
 		- [ ] Admin to be able to check changes
 		- [ ] Admin to accept changes
+		- [ ] Changes to be applied to content files
 		- [ ] Admin to send payment
 	- [ ] Make a student workflow
 		- [ ] Can view content

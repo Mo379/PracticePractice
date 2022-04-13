@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+	<link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/footers/">
+	<style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+	<!-- Custom styles for this footer-->
+    <link href="footers.css" rel="stylesheet">
+    <title>
+	{% block title %}
+    {% endblock %}
+	</title>
+  </head>
+  <body>
+	  <div>
+		<nav class="navbar navbar-expand-lg navbar-light bg-white" style='border-bottom:2px solid black;border-top:3px solid silver;'>
+			<a class="navbar-brand" href="{%url 'main:index'%}">PracticePractice</a>
+		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		  </button>
+
+		  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+			  <li class="nav-item">
+				  <a class="nav-link" href="{%url 'content:content'%}"><i class="bi bi-book text-black"></i>  Content</a>
+			  </li>
+
+			  <li>
+				  <a class="nav-link" href="{%url 'content:hub'%}"><i class="bi bi-person-workspace text-primary"></i>  Hub</a>
+			  </li>
+
+			  <li>
+				  <a class="nav-link" href="{%url 'content:statistics'%}"><i class="bi bi-graph-up-arrow text-success"></i>  Statistics</a>
+			  </li>
+
+			</ul>
+			<ul class = 'navbar-nav'>
+
+
+			  <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				  <i class="bi bi-person-circle text-primary"></i> Profile
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+					<a class="dropdown-item" href="{%url 'user:index'%}"><i class="bi bi-credit-card-2-front"></i>  Information</a>
+					<a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-gear"></i>  Settings</a>
+				  <div class="dropdown-divider"></div>
+				  <a class="dropdown-item" href="{%url 'user:logout'%}"> <i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
+				</div>
+			  </li>
+
+			  <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				  <i class="bi bi-box-arrow-in-right text-primary"></i> Login</a>
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdown"style='min-width: 20rem;'>
+					<form class="px-3 py-3" action="{%url 'user:login'%}" method="POST" role="form">
+						{% csrf_token %}
+						<div class="mb-2">
+						  <label for="exampleDropdownFormEmail1" class="form-label">Username</label>
+						  <input type="email" class="form-control" id="exampleDropdownFormEmail1" placeholder="Username/Email">
+						</div>
+						<div class="mb-2">
+						  <label for="exampleDropdownFormPassword1" class="form-label">Password</label>
+						  <input type="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password">
+						</div>
+						<button type="submit" class="btn btn-primary">Sign in</button>
+					  </form>
+					  <div class="dropdown-divider"></div>
+					  <a class="dropdown-item" href="{%url 'user:passreset' %}">Forgot password?</a>
+				</div>
+			  </li>
+
+			  <a class="nav-link" href="{%url 'user:register'%}"><i class="bi bi-plus-circle text-success"></i> Register</a>
+			  <a class="nav-link" href="{%url 'user:join'%}"><i class="bi bi-person-plus text-success"></i> Join</a>
+
+
+			  <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				  <i class="bi bi-moon-fill"></i> Appearance
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+					<a class="dropdown-item" href="{%url 'user:appearance'%}"><i class="bi bi-moon"></i> Light</a>
+					<a class="dropdown-item" href="{%url 'user:appearance'%}"><i class="bi bi-moon-fill"></i> Dark</a>
+					<a class="dropdown-item" href="{%url 'user:appearance'%}"><i class="bi bi-moon-fill text-warning" style="color:yellow-500;"></i> Library</a>
+				</div>
+			  </li>
+
+			</ul>
+		  </div>
+		</nav>
+	</div>
+
+
+
+
+	<div id='content' name = 'content', class='main', style='min-height:80vh;'>
+		<div class='col-11 mx-auto'>
+		<h2 class='mt-2'> 
+			{%block page_name%}
+			{%endblock%}
+		</h2>
+		<hr class= 'mt-0 mb-4'> 
+		{% block content %}
+		{% endblock %}
+		</div>
+	</div>
+
+
+
+		<div class="container">
+		  <footer class="row row-cols-5 py-5 my-5 border-top">
+			<div class="col">
+			  <a href="/" class="d-flex align-items-center mb-3 link-dark text-decoration-none">
+				<svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+			  </a>
+			  <p class="text-muted">&copy; {% now "Y" %} PracticePractice, LTD. All rights reserved.</p>
+			</div>
+
+			<div class="col">
+
+			</div>
+
+			<div class="col">
+			  <h5>Section</h5>
+			  <ul class="nav flex-column">
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Home</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Features</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Pricing</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">FAQs</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">About</a></li>
+			  </ul>
+			</div>
+
+			<div class="col">
+			  <h5>Section</h5>
+			  <ul class="nav flex-column">
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Home</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Features</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Pricing</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">FAQs</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">About</a></li>
+			  </ul>
+			</div>
+
+			<div class="col">
+			  <h5>Section</h5>
+			  <ul class="nav flex-column">
+				  <li class="nav-item mb-2"><a href="{%url 'main:about'%}" class="nav-link p-0 text-primary">About</a></li>
+				<li class="nav-item mb-2"><a href="{% url 'main:review'%}" class="nav-link p-0 text-primary">Reviews</a></li>
+				<li class="nav-item mb-2"><a href="{% url 'main:contact'%}" class="nav-link p-0 text-primary">Contact</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">FAQs</a></li>
+				<li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">About</a></li>
+			  </ul>
+			</div>
+		  </footer>
+		</div>
+
+
+
+
+
+
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
+  </body>
+</html>
