@@ -47,8 +47,6 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'user.apps.UserConfig',
     'content.apps.ContentConfig',
-    'affiliates.apps.AffiliatesConfig',
-    'payment.apps.PaymentConfig',
 ]
 
 MIDDLEWARE = [
