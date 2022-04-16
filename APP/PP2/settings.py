@@ -33,13 +33,6 @@ ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
-    #native
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
     #Third party 
     'djstripe',
     'django_mathjax',
@@ -47,6 +40,13 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'user.apps.UserConfig',
     'content.apps.ContentConfig',
+    #native
+    'django.contrib.auth',
+    'django.contrib.admin',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [

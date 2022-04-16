@@ -60,6 +60,10 @@ A website for delivering A-level content directly to student, with great feature
 			- [ ] Choice of subject
 			- [ ] Choice of specifications
 			- [ ] user groups and group permissions
+	- [ ] Features
+		- [ ] Login
+		- [ ] Register
+		- [ ] change/Reset password
 
 
 
