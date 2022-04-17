@@ -7,7 +7,8 @@ app_name = 'user'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     # Login system
-    path('login', views.login, name='login'),
+    path('login', views.LoginUser, name='login'),
+    path('logout', views.LogoutUser, name='logout'),
     #
     path('settings/', views.SettingsView.as_view(), name='settings'),
     path('join/', views.JoinView.as_view(), name='join'),

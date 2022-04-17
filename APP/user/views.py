@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
@@ -55,8 +55,17 @@ class AppearanceView(generic.ListView):
 
 
 # Authentication system
-def login_user(request):
-    pass
-
-
-
+def LoginUser(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        # Redirect to a success page.
+        return redirect('user:index')
+    else:
+        # Return an 'invalid login' error message.
+        return redirect('user:settings')
+def LogoutUser(request):
+    logout(request)
+    return redirect('main:index')
