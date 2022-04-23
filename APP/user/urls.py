@@ -9,6 +9,7 @@ urlpatterns = [
     # Login system
     path('login', views.LoginUser, name='login'),
     path('logout', views.LogoutUser, name='logout'),
+    path('register', views.RegisterUser.as_view(), name='register'),
     #
     path('settings/', views.SettingsView.as_view(), name='settings'),
     path('join/', views.JoinView.as_view(), name='join'),

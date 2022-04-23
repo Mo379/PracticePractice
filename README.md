@@ -128,6 +128,58 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] other
 
 
+- [ ] Group Action map
+	- [ ] Everyone
+		- [ ] Register
+		- [ ] Login
+		- [ ] Logout
+		- [ ] RecoverPass
+		- [ ] ResetPass
+	- [ ] Admins 
+		- [ ] Manage editors
+	- [ ] Free user
+		- [ ] View Notes
+		- [ ] View Pastpaper questions
+		- [ ] View pastpapers
+		- [ ] Mark questions
+		- [ ] View 
+	- [ ] Members
+	- [ ] Small Organisations (Tuition centers)
+	- [ ] Teachers
+		- [ ] Create class
+		- [ ] Create homework for class
+		- [ ] Release homework solutions
+		- [ ] Create seating plan for class
+		- [ ] Write content
+	- [ ] Editors
+		- [ ] Pickup task
+		- [ ] Write content for given task
+		- [ ] Submit task
+		- [ ] Receive payment
+	- [ ] Student
+		- [ ] Make payment
+		- [ ] Select specifications
+		- [ ] Change site appearance
+		- [ ] View Notes
+		- [ ] Mark Question
+		- [ ] Make question paper
+		- [ ] View question paper
+		- [ ] View Dashboard
+		- [ ] View Statistics
+	- [ ] Schools
+		- [ ] Make payment
+		- [ ] Add teachers
+		- [ ] Add students
+	- [ ] School-students
+		- [ ] View Classes
+		- [ ] join classes
+		- [ ] View homework
+		- [ ] submit homework
+	- [ ] Affiliates
+		- [ ] View history
+		- [ ] View balance
+		- [ ] Recieve payment
+
 
 
 

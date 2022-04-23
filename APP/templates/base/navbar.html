@@ -27,10 +27,10 @@
 		  {%if user.is_authenticated%}
 		  <li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			  <i class="bi bi-person-circle text-primary"></i> Profile
+			  <i class="bi bi-person-circle text-primary"></i> Account 
 			</a>
 			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-				<a class="dropdown-item" href="{%url 'user:index'%}"><i class="bi bi-credit-card-2-front"></i>  Information</a>
+				<a class="dropdown-item" href="{%url 'user:index'%}"><i class="bi bi-credit-card-2-front"></i>  Profile</a>
 				<a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-gear"></i>  Settings</a>
 			  <div class="dropdown-divider"></div>
 			  <a class="dropdown-item" href="{%url 'user:logout'%}"> <i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
@@ -61,7 +61,7 @@
 				  <a class="dropdown-item" href="#placeholder">Forgot password?</a>
 			</div>
 		  </li>
-		  <a class="nav-link" href="#Placeholder"><i class="bi bi-plus-circle text-success"></i> Register</a>
+		  <a class="nav-link" href="{%url 'user:register'%}"><i class="bi bi-plus-circle text-success"></i> Register</a>
 		  {%endif%}
 
 

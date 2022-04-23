@@ -37,6 +37,11 @@ class AppearanceView(generic.ListView):
     def get_queryset(self):
         return "user_appearance_action"
 
+class RegisterUser(generic.ListView):
+    template_name = "registration/register.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "user_register"
 
 
 
