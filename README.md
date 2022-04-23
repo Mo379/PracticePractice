@@ -2,21 +2,26 @@
 A website for delivering A-level content directly to student, with great features for practicing questions.
 # To Do
 
+## General Development process
+- Development
+	- [ ] Allow all kinds of accounts to be created
+	- [ ] Develop the appropriate viewing for every user
+	- [ ] Develop the content editing process
+	- [ ] Develop the Statistics
+	- [ ] Develop the school-teacher-student process
+	- [ ] Develop the independent-student process
+	- [ ] Develop the payment process
+	- [ ] Develop Email templates
+	- [ ] 
 
 
 
 
-
+## Secondary considerations
 - [ ] project root
 	- [ ] other
 	- [x] add .env file
 	- [ ] Mount SMTP
-
-
-
-
-
-
 - [ ] Base
 	- [ ] other
 		- [ ] Use a django-javascript workflow
@@ -27,9 +32,8 @@ A website for delivering A-level content directly to student, with great feature
 
 
 
-
-
-- [ ] Main APP models
+## APPS
+- [ ] Main APP 
 	- [ ] templates 
 		- [x] index page
 		- [x] About page
@@ -37,10 +41,6 @@ A website for delivering A-level content directly to student, with great feature
 		- [x] Sitemap for User page
 		- [x] Sitemap for SEO page
 		- [x] Terms and conditions page
-
-
-
-
 
 
 - [ ] User APP
@@ -64,10 +64,6 @@ A website for delivering A-level content directly to student, with great feature
 		- [x] Login
 		- [ ] Register
 		- [ ] change/Reset password
-
-
-
-
 
 
 - [ ] Content APP
@@ -128,6 +124,8 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] other
 
 
+
+## Allowable user actions
 - [ ] Group Action map
 	- [ ] Everyone
 		- [ ] Register
@@ -135,8 +133,10 @@ A website for delivering A-level content directly to student, with great feature
 		- [ ] Logout
 		- [ ] RecoverPass
 		- [ ] ResetPass
+		- [ ] Give an experince review
 	- [ ] Admins 
 		- [ ] Manage editors
+		- [ ] Write content
 	- [ ] Free user
 		- [ ] View Notes
 		- [ ] View Pastpaper questions
@@ -144,13 +144,26 @@ A website for delivering A-level content directly to student, with great feature
 		- [ ] Mark questions
 		- [ ] View 
 	- [ ] Members
+		- [ ] View statistics
+		- [ ] View model answers
+		- [ ] Make UserPaper
+		- [ ] View questions by difficulty
+		- [ ] View PracticePractice Questions
+		- [ ] View Popular specifications
+		- [ ] View Chapter progress tracker
+		- [ ] View performance tracker
 	- [ ] Small Organisations (Tuition centers)
+		- [ ] Create class
+		- [ ] Create seating plat
+		- [ ] Create homework
+		- [ ] Release homework answers
 	- [ ] Teachers
 		- [ ] Create class
 		- [ ] Create homework for class
 		- [ ] Release homework solutions
 		- [ ] Create seating plan for class
 		- [ ] Write content
+		- [ ] Limited Managing of Editors
 	- [ ] Editors
 		- [ ] Pickup task
 		- [ ] Write content for given task
