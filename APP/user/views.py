@@ -11,6 +11,21 @@ class IndexView(generic.ListView):
     context_object_name = 'context'
     def get_queryset(self):
         return "user_index"
+class LoginView(generic.ListView):
+    template_name = "registration/login.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "user_settings"
+class RegisterView(generic.ListView):
+    template_name = "registration/register.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "user_settings"
+class ForgotPasswordView(generic.ListView):
+    template_name = "registration/forgot-password.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        return "user_settings"
 class SettingsView(generic.ListView):
     template_name = "user/settings.html"
     context_object_name = 'context'
@@ -37,12 +52,6 @@ class AppearanceView(generic.ListView):
     def get_queryset(self):
         return "user_appearance_action"
 
-class RegisterUser(generic.ListView):
-    template_name = "registration/register.html"
-    context_object_name = 'context'
-    def get_queryset(self):
-        return "user_register"
-
 
 
 
@@ -60,7 +69,7 @@ class RegisterUser(generic.ListView):
 
 
 # Authentication system
-def LoginUser(request):
+def _loginUser(request):
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(request, username=username, password=password)
@@ -71,6 +80,6 @@ def LoginUser(request):
     else:
         # Return an 'invalid login' error message.
         return redirect('user:settings')
-def LogoutUser(request):
+def _logoutUser(request):
     logout(request)
     return redirect('main:index')

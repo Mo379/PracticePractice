@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'user.apps.UserConfig',
     'content.apps.ContentConfig',
+    'studentdashboard.apps.StudentdashboardConfig',
     #native
     'django.contrib.auth',
     'django.contrib.admin',
@@ -130,7 +131,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
+STATICFILES_DIRS = (
+  os.path.join(BASE_DIR, 'static/'),
+)
 STATIC_URL = 'static/'
 STATIC_ROOT = 'staticfiles/'
 

@@ -1,5 +1,5 @@
 <div>
-	<nav class="navbar navbar-expand-lg navbar-light bg-white" style='border-bottom:2px solid black;border-top:3px solid silver;'>
+	<nav class="navbar navbar-expand-lg navbar-light bg-white" style='border-bottom:1px solid black;border-top:3px solid silver;'>
 		<a class="navbar-brand" href="{%url 'main:index'%}">PracticePractice</a>
 	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" 
 		  aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -8,16 +8,12 @@
 
 	  <div class="collapse navbar-collapse" id="navbarSupportedContent">
 		<ul class="navbar-nav mr-auto">
+		  <li>
+			  <a class="nav-link" href="{%url 'studentdashboard:index'%}"><i class="bi bi-speedometer2 text-primary"></i>  Dashboard</a>
+		  </li>
+
 		  <li class="nav-item">
-			  <a class="nav-link" href="{%url 'content:content'%}"><i class="bi bi-book text-black"></i>  Content</a>
-		  </li>
-
-		  <li>
-			  <a class="nav-link" href="{%url 'content:hub'%}"><i class="bi bi-person-workspace text-primary"></i>  Hub</a>
-		  </li>
-
-		  <li>
-			  <a class="nav-link" href="{%url 'content:statistics'%}"><i class="bi bi-graph-up-arrow text-success"></i>  Statistics</a>
+			  <a class="nav-link" href="{%url 'content:content'%}"><i class="bi bi-book text-success"></i>  Content</a>
 		  </li>
 
 		</ul>
@@ -33,7 +29,7 @@
 				<a class="dropdown-item" href="{%url 'user:index'%}"><i class="bi bi-credit-card-2-front"></i>  Profile</a>
 				<a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-gear"></i>  Settings</a>
 			  <div class="dropdown-divider"></div>
-			  <a class="dropdown-item" href="{%url 'user:logout'%}"> <i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
+			  <a class="dropdown-item" href="{%url 'user:_logout'%}"> <i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
 			</div>
 		  </li>
 		  <a class="nav-link" href="{%url 'user:join'%}"><i class="bi bi-person-plus text-success"></i> Join</a>
@@ -45,7 +41,7 @@
 			  <i class="bi bi-box-arrow-in-right text-primary"></i> Login</a>
 			</a>
 			<div class="dropdown-menu" aria-labelledby="navbarDropdown"style='min-width: 20rem;'>
-				<form class="px-3 py-3" action="{%url 'user:login'%}" method="POST" role="form">
+				<form class="px-3 py-3" action="{%url 'user:_login'%}" method="POST" role="form">
 					{% csrf_token %}
 					<div class="mb-2">
 					  <label for="exampleDropdownFormEmail1" class="form-label">Username</label>
@@ -78,5 +74,12 @@
 
 		</ul>
 	  </div>
+	</nav>
+	<nav aria-label="breadcrumb">
+	  <ol class="breadcrumb">
+		<li class="breadcrumb-item"><a href="#">Home</a></li>
+		<li class="breadcrumb-item"><a href="#">Library</a></li>
+		<li class="breadcrumb-item active" aria-current="page">Data</li>
+	  </ol>
 	</nav>
 </div>

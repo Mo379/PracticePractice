@@ -5,6 +5,7 @@ A website for delivering A-level content directly to student, with great feature
 ## General Development process
 - Development
 	- [ ] Allow all kinds of accounts to be created
+	- [ ] Develop the outline of different dashboards
 	- [ ] Develop the appropriate viewing for every user
 	- [ ] Develop the content editing process
 	- [ ] Develop the Statistics

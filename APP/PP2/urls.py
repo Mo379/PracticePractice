@@ -20,6 +20,7 @@ urlpatterns = [
     path('', include('main.urls')),
     path('my/', include('content.urls')),
     path('user/', include('user.urls')),
+    path('s-dash/', include('studentdashboard.urls')),
     path('admin/', admin.site.urls),
     #path('checkout/', include('checkout.urls')),
 ]
