@@ -32,6 +32,9 @@
 	<!-- Custom styles for this footer-->
     <link href="footers.css" rel="stylesheet">
 	<link rel="stylesheet" href="{%static 'base/css/main.css'%}">
+	<link rel="stylesheet" href="{%static 'base/js/main.js'%}">
+	{% block pagestatic%}
+    {% endblock %}
     <title>
 	{% block title %}
     {% endblock %}
@@ -45,6 +48,13 @@
 			{%endblock%}
 		</h1>
   	</div>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="#">Home</a></li>
+			<li class="breadcrumb-item"><a href="#">Library</a></li>
+			<li class="breadcrumb-item active" aria-current="page">Data</li>
+	  	</ol>
+	</nav>
 	<div id='content' name = 'content', class='main', style='min-height:80vh;'>
 		<div class='col-11 mx-auto'>
 		<h2 class='mt-2'> 

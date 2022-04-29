@@ -38,7 +38,25 @@ class TermsAndConditionsView(generic.ListView):
     template_name = "main/tandc.html"
     context_object_name = 'context'
     def get_queryset(self):
-        return "base_terms_and_conditions"
+        context = {
+                "CompanyName":"PracticePractice",
+                "SiteURL":"practicepractice.net",
+                "CompanyNumber":"12679239",
+                "InfoContact":"Info@practicepractice.com",
+                "TeamContact":"Contact@practicepractice.com",
+                }
+        return context
+class PrivacyView(generic.ListView):
+    template_name = "main/privacy.html"
+    context_object_name = 'context'
+    def get_queryset(self):
+        context = {
+                "CompanyName":"PracticePractice",
+                "CompanyNumber":"12679239",
+                "InfoContact":"Info@practicepractice.com",
+                "TeamContact":"Contact@practicepractice.com",
+                }
+        return context
 class SiteMapView(generic.ListView):
     template_name = "main/sitemap.html"
     context_object_name = 'context'

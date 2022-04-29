@@ -1,4 +1,10 @@
 {% extends 'base/base.html'%}
+{%load static %}
+
+{%block pagestatic%}
+<link rel="stylesheet" href="{%static 'user/css/main.css'%}">
+<script src="{%static 'user/js/main.js'%}"></script>
+{%endblock%}
 
 {%block page_name%}
 	Profile	
@@ -8,5 +14,6 @@
 {%endblock%}
 
 {%block content%}
+	{%include 'user/index_profile.html'%}
 	{{context}}
 {%endblock%}

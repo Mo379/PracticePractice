@@ -11,6 +11,7 @@ urlpatterns = [
         path('jobs/', views.JobsView.as_view(), name='jobs'),
         path('faq/', views.FAQView.as_view(), name='faq'),
         path('tandc/', views.TermsAndConditionsView.as_view(), name='tandc'),
+        path('privacy/', views.PrivacyView.as_view(), name='privacy'),
         path('sitemap/', views.SiteMapView.as_view(), name='sitemap'),
         path('sitemapseo/', views.SiteMapSEOView.as_view(), name='sitemapseo'),
 ]
