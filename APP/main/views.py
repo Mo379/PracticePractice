@@ -2,41 +2,134 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
+from django.utils.functional import cached_property
+from view_breadcrumbs import BaseBreadcrumbMixin
 
 # Create your views here.
-class IndexView(generic.ListView):
+
+
+
+
+
+
+
+
+class IndexView(BaseBreadcrumbMixin,generic.ListView):
     template_name = "main/index.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("home", reverse("main:index"))
+                ]
     def get_queryset(self):
-        return "base_index"
-class AboutView(generic.ListView):
+        return "base_index hello"
+
+
+
+
+
+
+
+
+class AboutView(BaseBreadcrumbMixin ,generic.ListView):
     template_name = "main/about.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("about", reverse("main:about"))
+                ]
     def get_queryset(self):
         return "base_about"
-class ReviewView(generic.ListView):
+
+
+
+
+
+
+
+
+class ReviewView(BaseBreadcrumbMixin ,generic.ListView):
     template_name = "main/review.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("reviews", reverse("main:review"))
+                ]
     def get_queryset(self):
         return "base_review"
-class ContactView(generic.ListView):
+
+
+
+
+
+
+
+
+class ContactView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/contact.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("contact", reverse("main:contact"))
+                ]
     def get_queryset(self):
         return "base_contact"
-class JobsView(generic.ListView):
+
+
+
+
+
+
+
+
+class JobsView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/jobs.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("jobs", reverse("main:jobs"))
+                ]
     def get_queryset(self):
         return "base_jobs"
-class FAQView(generic.ListView):
+
+
+
+
+
+
+
+
+class FAQView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/faq.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("faqs", reverse("main:faq"))
+                ]
     def get_queryset(self):
         return "base_faq"
-class TermsAndConditionsView(generic.ListView):
+
+
+
+
+
+
+
+
+class TermsAndConditionsView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/tandc.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("terms", reverse("main:tandc"))
+                ]
     def get_queryset(self):
         context = {
                 "CompanyName":"PracticePractice",
@@ -46,9 +139,22 @@ class TermsAndConditionsView(generic.ListView):
                 "TeamContact":"Contact@practicepractice.com",
                 }
         return context
-class PrivacyView(generic.ListView):
+
+
+
+
+
+
+
+
+class PrivacyView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/privacy.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("privacy", reverse("main:privacy"))
+                ]
     def get_queryset(self):
         context = {
                 "CompanyName":"PracticePractice",
@@ -57,13 +163,46 @@ class PrivacyView(generic.ListView):
                 "TeamContact":"Contact@practicepractice.com",
                 }
         return context
-class SiteMapView(generic.ListView):
+
+
+
+
+
+
+
+
+class SiteMapView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/sitemap.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("sitemap", reverse("main:sitemap"))
+                ]
     def get_queryset(self):
         return "base_sitemap"
-class SiteMapSEOView(generic.ListView):
+
+
+
+
+
+
+
+
+class SiteMapSEOView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/sitemapseo.html"
     context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("sitemapseo", reverse("main:sitemapseo"))
+                ]
     def get_queryset(self):
         return "base_sitemap_seo"
+
+
+
+
+
+
+

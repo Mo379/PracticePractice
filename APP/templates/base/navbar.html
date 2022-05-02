@@ -25,6 +25,10 @@
 				<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown"><i class="bi bi-person-circle text-primary"></i> Account </a>
 				<ul class="dropdown-menu dropdown-menu-right">
 					<li><a class="dropdown-item" href="{%url 'user:index'%}"><i class="bi bi-credit-card-2-front"></i>  Profile </a></li>
+					<li><a class="dropdown-item" href="{%url 'user:billing'%}"><i class="bi bi-cash-stack"></i>  Billing</a></li>
+					  <li><a class="dropdown-item" href="{%url 'user:security'%}"><i class="bi bi-shield-plus"></i>  Security</a></li>
+					  <li><a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-gear"></i>  Settings</a></li>
+				  <div class="dropdown-divider"></div>
 				  <li><a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-moon-fill" aria-labelledby="dropdownMenuButton"></i> Appearance </a>
 					 <ul class="submenu submenu-left dropdown-menu">
 						<li><a class="dropdown-item" href="{%url 'user:appearance'%}"><i class="bi bi-moon"></i> Light</a></li>
@@ -40,14 +44,13 @@
 						<li><a class="dropdown-item" href="{%url 'user:appearance'%}">+</a></li>
 					 </ul>
 				  </li>
-				  <li><a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-gear"></i>  Settings</a></li>
 				  <div class="dropdown-divider"></div>
 				  <li><a class="dropdown-item" href="{%url 'user:join'%}"><i class="bi bi-person-plus text-success"></i> Join</a></li>
 				  <div class="dropdown-divider"></div>
 				  <li><a class="dropdown-item" href="{%url 'user:_logout'%}"><i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a></li>
 				  <div class="dropdown-divider"></div>
-				  <li><a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-bar-chart-line"></i>  Your Data</a></li>
-				  <li><a class="dropdown-item" href="{%url 'user:settings'%}"><i class="bi bi-info-circle"></i>  Help</a></li>
+				  <li><a class="dropdown-item" href="{%url 'main:privacy'%}#yourdata"><i class="bi bi-bar-chart-line"></i>  Your Data</a></li>
+				  <li><a class="dropdown-item" href="{%url 'main:faq'%}"><i class="bi bi-info-circle"></i>  FAQs</a></li>
 				</ul>
 			</li>
 		  {%endif%}

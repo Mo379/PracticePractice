@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     #Third party 
     'djstripe',
     'django_mathjax',
+    'view_breadcrumbs',
     #user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
@@ -145,6 +146,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # SMTP settings
 
+EMAIL_BACKEND=decouple_config('SES_endpoint')
+EMAIL_BACKEND='django_smtp_ssl.SSLEmailBackend'
 EMAIL_HOST = decouple_config('SES_endpoint')
 EMAIL_PORT = decouple_config('SES_TLS_PORT', cast=int)
 EMAIL_HOST_USER = decouple_config('SES_SMTP_USER')
@@ -182,6 +185,11 @@ MATHJAX_CONFIG_DATA = {
       ]
   }
 }
+
+
+#Breadcrumb settings
+BREADCRUMBS_TEMPLATE = "base/breadcrumbs.html"
+BREADCRUMBS_HOME_LABEL = "Home"
 
 
 

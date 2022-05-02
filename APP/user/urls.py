@@ -13,6 +13,8 @@ urlpatterns = [
     path('register', views.RegisterView.as_view(), name='register'),
     path('forgotpassword', views.ForgotPasswordView.as_view(), name='forgot-password'),
     #
+    path('billing/', views.BillingView.as_view(), name='billing'),
+    path('security/', views.SecurityView.as_view(), name='security'),
     path('settings/', views.SettingsView.as_view(), name='settings'),
     path('join/', views.JoinView.as_view(), name='join'),
     path('join/checkout/stripe', views.CheckoutStripeView.as_view(), name='checkout-stripe'),

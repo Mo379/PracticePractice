@@ -1,3 +1,4 @@
+{% load view_breadcrumbs %}
 {% load static %}
 <!doctype html>
 <html lang="en">
@@ -30,7 +31,6 @@
       }
     </style>
 	<!-- Custom styles for this footer-->
-    <link href="footers.css" rel="stylesheet">
 	<link rel="stylesheet" href="{%static 'base/css/main.css'%}">
 	<link rel="stylesheet" href="{%static 'base/js/main.js'%}">
 	{% block pagestatic%}
@@ -41,29 +41,42 @@
 	</title>
   </head>
   <body>
-	{%include 'base/navbar.html'%}
-	<div class='PageWallpaper' style="background-image: url('{%static 'base/img/Chemistry.jpg'%}'); background-position: center top;">
-       <h1 class = 'subjectmain' style = 'font-size: 28px;'> 
-			{%block page_name%}
-			{%endblock%}
-		</h1>
-  	</div>
-	<nav aria-label="breadcrumb">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="#">Home</a></li>
-			<li class="breadcrumb-item"><a href="#">Library</a></li>
-			<li class="breadcrumb-item active" aria-current="page">Data</li>
-	  	</ol>
-	</nav>
-	<div id='content' name = 'content', class='main', style='min-height:80vh;'>
-		<div class='col-11 mx-auto'>
-		<h2 class='mt-2'> 
-		</h2>
-		<hr class= 'mt-0 mb-4'> 
-		{% block content %}
-		{% endblock %}
+
+
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+		{%block sidebar%}
+		{%endblock%}
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+			<!-- Main Content -->
+			<div id="content">
+				{%include 'base/navbar.html'%}
+				<div class='PageWallpaper' style="background-image: url('{%static 'base/img/Home.jpg'%}'); background-position: center top;">
+				   <h1 class = 'subjectmain' style = 'font-size: 28px;'> 
+						{%block page_name%}
+						{%endblock%}
+					</h1>
+				</div>
+				{% block breadcrumbs %}
+					{% render_breadcrumbs %}
+				{% endblock %}
+
+
+
+		<div id='content' name = 'content', class='main', style='min-height:80vh;'>
+			<div class='col-11 mx-auto'>
+				<h2 class='mt-2'> 
+				</h2>
+				<hr class= 'mt-0 mb-4'> 
+				{% block content %}
+				{% endblock %}
+			</div>
 		</div>
-	</div>
 	{%include 'base/footer.html'%}
     <!-- Option 1: Bootstrap Bundle with Popper -->
 	<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
