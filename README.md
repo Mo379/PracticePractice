@@ -13,7 +13,6 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] Develop the independent-student process
 	- [ ] Develop the payment process
 	- [ ] Develop Email templates
-	- [ ] 
 
 
 

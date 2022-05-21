@@ -9,6 +9,7 @@ urlpatterns = [
     # Login system
     path('login', views.LoginView.as_view(), name='login'),
     path('_login', views._loginUser, name='_login'),
+    path('_registerUser', views._registerUser, name='_register'),
     path('_logout', views._logoutUser, name='_logout'),
     path('register', views.RegisterView.as_view(), name='register'),
     path('forgotpassword', views.ForgotPasswordView.as_view(), name='forgot-password'),

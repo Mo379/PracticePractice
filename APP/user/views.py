@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
+from .util.GeneralUtil import TokenGenerator
 
 # Create your views here.
 
@@ -249,7 +250,22 @@ def _loginUser(request):
         return redirect('user:index')
     else:
         # Return an 'invalid login' error message.
-        return redirect('user:settings')
+        return redirect('user:login')
+
+def _registerUser(request):
+    first= request.POST['firstname']
+    last= request.POST['lastname']
+    username = request.POST['username']
+    email = request.POST['email']
+    password = request.POST['password']
+    password_conf = request.POST['password_conf']
+    account_activation_token = TokenGenerator()
+    print(account_activation_token)
+    #left to figure out how to put all of this together to register a user properly
+    return redirect('user:register')
+    
+def _confirmUser(request):
+    pass
 def _logoutUser(request):
     logout(request)
     return redirect('main:index')
