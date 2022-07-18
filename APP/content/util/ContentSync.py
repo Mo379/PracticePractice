@@ -15,7 +15,7 @@ class QuestionSync():
         """
         #getting all the question files
         structure= {}
-        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+        for root, dirs, files in os.walk(os.path.join(self.content_dir,subdir), topdown=False):
             for file in files:
                 if('type_question' in file):
                     files = [s for s in files if "type_question" in s]
@@ -73,7 +73,7 @@ class QuestionSync():
             my_question.q_link= q_link
             my_question.q_unique_id= q_unique_id
             my_question.save()
-        return 'full sync'
+        return 1
 
 class PointSync():
     def __init__(self, content_dir=decouple_config('content_dir')):
@@ -84,7 +84,7 @@ class PointSync():
         """
         #getting all the question files
         structure= {}
-        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+        for root, dirs, files in os.walk(os.path.join(self.content_dir,subdir), topdown=False):
             for file in files:
                 if('type_point' in file):
                     files = [s for s in files if "type_point" in s]
@@ -124,7 +124,7 @@ class PointSync():
             my_point.p_link= p_link
             my_point.p_unique_id= p_unique_id
             my_point.save()
-        return 'full sync'
+        return 1
 class VideoSync():
     def __init__(self, content_dir=decouple_config('content_dir')):
         self.content_dir = content_dir
@@ -134,7 +134,7 @@ class VideoSync():
         """
         #getting all the question files
         structure= {}
-        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+        for root, dirs, files in os.walk(os.path.join(self.content_dir,subdir), topdown=False):
             for file in files:
                 if('type_point' in file):
                     files = [s for s in files if "type_point" in s]
@@ -165,7 +165,7 @@ class VideoSync():
                         my_vid.v_link= v_link
                         my_vid.v_pos= v_pos
                         my_vid.save()
-        return 'full sync'
+        return 1
 
 
 
@@ -181,7 +181,7 @@ class SpecificationSync():
         """
         #getting all the question files
         structure= {}
-        for root, dirs, files in os.walk(self.content_dir+subdir, topdown=False):
+        for root, dirs, files in os.walk(os.path.join(self.content_dir,subdir), topdown=False):
             for file in files:
                 if('.json' in file):
                     files = [s for s in files if ".json" in s]
@@ -219,4 +219,4 @@ class SpecificationSync():
                 my_spec.spec_dir= spec_dir
                 my_spec.spec_link= spec_link
                 my_spec.save()
-        return 'full sync'
+        return 1

@@ -10,6 +10,7 @@ Django==4.0.1
 django-mathjax==0.0.8
 django-paypal==2.0
 django-smtp-ssl==1.0
+django-utils-six==2.0
 django-view-breadcrumbs==2.2.7
 filelock==3.6.0
 idna==3.3

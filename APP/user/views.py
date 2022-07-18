@@ -1,12 +1,20 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
-from .util.GeneralUtil import TokenGenerator
+from .util.GeneralUtil import account_activation_token
+from django.contrib.auth.models import User
+from datetime import datetime    
+from .models import *
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str 
+
 
 # Create your views here.
 
@@ -168,48 +176,6 @@ class JoinView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class CheckoutStripeView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "user/checkout-stripe.html"
-    context_object_name = 'context'
-    @cached_property
-    def crumbs(self):
-        return [
-                ("account", reverse("user:index")),
-                ("join", reverse("user:join")),
-                ("checkout", ''),
-                ("stripe", reverse("user:checkout-stripe")),
-                ]
-    def get_queryset(self):
-        return "user_checkout-strip"
-
-
-
-
-
-
-
-
-class CheckoutPaypalView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "user/checkout-paypal.html"
-    context_object_name = 'context'
-    @cached_property
-    def crumbs(self):
-        return [
-                ("account", reverse("user:index")),
-                ("join", reverse("user:join")),
-                ("checkout", ''),
-                ("paypal", reverse("user:checkout-paypal")),
-                ]
-    def get_queryset(self):
-        return "user_checkout-stripe"
-
-
-
-
-
-
-
-
 class AppearanceView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "user/action.html"
     context_object_name = 'context'
@@ -259,13 +225,60 @@ def _registerUser(request):
     email = request.POST['email']
     password = request.POST['password']
     password_conf = request.POST['password_conf']
-    account_activation_token = TokenGenerator()
-    print(account_activation_token)
-    #left to figure out how to put all of this together to register a user properly
-    return redirect('user:register')
+    #check if username and email are unique
+    username_match = User.objects.filter(username__iexact=username).exists()
+    email_match = User.objects.filter(email__iexact=email).exists()
+    if password == password_conf:
+        pass_safe = True
+    else:
+        pass_safe = False
+    #return if signup is invalid
+    if username_match == True or email_match == True or pass_safe==False:
+        return redirect('user:register')
+    # if all checks pass, proceed
+    user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+    )
+    user.first_name = first
+    user.last_name = last
+    user.save()
+    #
+    token = account_activation_token.make_token(user)
+    mail_subject = 'Account activation.'
+    message = render_to_string('registration/email_account_activation.html', {
+        'user': user,
+        'domain': '127.0.0.1:8000',
+        'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+        'token':account_activation_token.make_token(user),
+    })
+    to_email = user.email
+    send_mail(
+        mail_subject,
+        message,
+        'admin@practicepractice.net',
+        [to_email],
+        fail_silently=False,
+    )
+    return redirect('user:login')
     
-def _confirmUser(request):
-    pass
+def _activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        try:
+            u_profile = UserProfile.objects.get(user=user)
+        except:
+            u_profile = UserProfile.objects.create(user_id=user.id)
+        u_profile.registration = 1
+        u_profile.save()
+        return redirect('user:login')
+    else:
+        return redirect('user:register')
 def _logoutUser(request):
     logout(request)
     return redirect('main:index')

@@ -13,8 +13,9 @@ from .GeneralUtil import TagGenerator
 
 
 class QuestionCRUD():
-    def __init__(self, content_dir=decouple_config('content_dir')):
-        self.content_dir = content_dir
+    def __init__(self):#, content_dir=decouple_config('content_dir')):
+        self.data_dir = decouple_config('data_dir')
+        self.content_dir = decouple_config('content_dir')
     def _check_short_link(self,short_link):
         #the short link should match a specific pattern !!
         pattern = ['Z_','A_','B_','C_','D_', 'questions']
@@ -50,10 +51,19 @@ class QuestionCRUD():
         new_dir = os.path.join(self.content_dir,short_link,tag)
         files_dir = os.path.join(new_dir,'files')
         file_name = os.path.join(new_dir,fname)
+        # setting up the dummy data
+        with open(os.path.join(self.data_dir,'templates/question.json'), "r") as jsonFile:
+            file = jsonFile.read()
+        template_data= json.loads(file)
+        template_data['link'] = file_name
+        template_data['object_unique_id'] = {'object_unique_id': tag}
+        # Creating and writing to object
         try:
             os.makedirs(new_dir)
             os.makedirs(files_dir)
-            open(file_name, 'a').close()
+            with open(file_name, 'a') as f:
+                json.dump(template_data, f)
+                f.close()
         except:
             return 0
         else:
@@ -152,10 +162,18 @@ class PointCRUD():
         new_dir = os.path.join(self.content_dir,short_link,nth_point)
         files_dir = os.path.join(new_dir,'files')
         file_name = os.path.join(new_dir,fname)
+        #
+        with open(os.path.join(self.data_dir,'templates/point.json'), "r") as jsonFile:
+            file = jsonFile.read()
+        template_data= json.loads(file)
+        template_data['link'] = file_name
+        template_data['object_unique_id'] = {'object_unique_id': tag}
         try:
             os.makedirs(new_dir)
             os.makedirs(files_dir)
-            open(file_name, 'a').close()
+            with open(file_name, 'a') as f:
+                json.dump(template_data, f)
+                f.close()
         except:
             return 0
         else:

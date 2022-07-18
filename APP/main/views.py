@@ -4,11 +4,9 @@ from django.urls import reverse
 from django.views import generic
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
+from django.core.mail import send_mail
 
 # Create your views here.
-
-
-
 
 
 
@@ -23,7 +21,8 @@ class IndexView(BaseBreadcrumbMixin,generic.ListView):
                 ("home", reverse("main:index"))
                 ]
     def get_queryset(self):
-        return "base_index hello"
+        return "base_index"
+  
 
 
 

@@ -145,14 +145,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # SMTP settings
-
-EMAIL_BACKEND=decouple_config('SES_endpoint')
-EMAIL_BACKEND='django_smtp_ssl.SSLEmailBackend'
+EMAIL_BACKEND=decouple_config('EMAIL_BACKEND')
+# This uses an installed package to handle sending emails, other means dont work for some odd reason
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
 EMAIL_HOST = decouple_config('SES_endpoint')
 EMAIL_PORT = decouple_config('SES_TLS_PORT', cast=int)
 EMAIL_HOST_USER = decouple_config('SES_SMTP_USER')
 EMAIL_HOST_PASSWORD = decouple_config('SES_PASSWORD')
 EMAIL_USE_TLS = decouple_config('SES_USE_TLS', cast=bool)
+
 
 
 # Stripe settings
