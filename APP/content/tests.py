@@ -18,7 +18,7 @@ from content.models import \
 from decouple import config as decouple_config
 
 
-# Utility testing: this tests all of the funcitonality of the utility
+# utility testing: this tests all of the funcitonality of the utility
 class UTILITY_Tests(TestCase):
     def setUp(self):
         # Question objects
