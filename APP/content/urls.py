@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 
+# App name
 app_name = 'content'
 urlpatterns = [
         path('', views.IndexView.as_view(), name='index'),
