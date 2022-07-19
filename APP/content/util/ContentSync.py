@@ -4,7 +4,6 @@ from decouple import config as decouple_config
 from ..models import Question, Point, Video, Specification
 
 
-# left to figure out how to insert the extracted information into the 
 # models with smart features
 class QuestionSync():
     # init
@@ -148,9 +147,10 @@ class VideoSync():
     # sync
     def sync(self, subdir=''):
         """
-        Synchronises all of the points in the files data into the database
+        Synchronises all of the videos in the files (points) data
+        into the database
         """
-        # getting all the question files
+        # getting all the points files
         structure = {}
         for root, dirs, files in \
             os.walk(os.path.join(self.content_dir, subdir), topdown=False):
@@ -159,7 +159,7 @@ class VideoSync():
                     files = [s for s in files if "type_point" in s]
                     structure[root] = files
                     continue
-        # getting all the question information
+        # getting all the points information
         for ddir, point in structure.items():
             p_unique_id = point[0].split('tag_')[1].split('.')[0]
             p_link = ddir + '/' + point[0]
@@ -176,8 +176,8 @@ class VideoSync():
                     v_link = video['vid_link']
                     if v_link:
                         if Video.objects.filter(
-                                p_unique_id=p_unique_id, v_pos=v_pos
-                            ):
+                            p_unique_id=p_unique_id, v_pos=v_pos
+                        ):
                             my_vid = Video.objects.get(
                                     p_unique_id=p_unique_id, v_pos=v_pos
                                 )

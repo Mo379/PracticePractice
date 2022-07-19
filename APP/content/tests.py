@@ -18,7 +18,7 @@ from content.models import \
 from decouple import config as decouple_config
 
 
-# Utility testing
+# Utility testing: this tests all of the funcitonality of the utility
 class UTILITY_Tests(TestCase):
     def setUp(self):
         # Question objects
@@ -92,6 +92,10 @@ class UTILITY_Tests(TestCase):
             )
         # read updated version
         r_status = u_check = self.p_crud_obj.Read(point.p_unique_id)
+        # sync videos
+        sv_status = self.v_sync_obj.sync('Z_test')
+        video = self.Video.objects.all()[0]
+        sv_check = video.v_title
         # delete
         d_status = self.p_crud_obj.Delete(point.p_unique_id)
         # check that all of the above works correctly
@@ -103,6 +107,9 @@ class UTILITY_Tests(TestCase):
         self.assertEqual(u_status, 1)
         # update specific field of the json and check
         self.assertEqual(u_check, new_content)
+        # Video sync functionality
+        self.assertEqual(sv_status, 1)
+        self.assertEqual(sv_check, 'Applications of Numerical Methods')
         # delete file and check it doesnt exist
         self.assertEqual(d_status, 1)
 
@@ -139,9 +146,6 @@ class UTILITY_Tests(TestCase):
         self.assertEqual(u_check, new_content)
         # delete file and check it doesnt exist
         self.assertEqual(d_status, 1)
-
-    def test_sync_video(self):
-        pass
 
 
 # URL testing

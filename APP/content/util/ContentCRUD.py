@@ -161,12 +161,13 @@ class PointCRUD():
         fname = 'type_point.tag_'+tag+'.json'
         total_points = (
                 glob.glob(
-                    os.path.join(self.content_dir, short_link, '*'),
+                    os.path.join(self.content_dir, short_link, 'N_*'),
                     recursive=True
                 )
             )
         points_names = [p.split('/')[-1]for p in total_points]
         points_nums = [int(p.split('_')[-1]) for p in points_names]
+        points_nums.append(0)
         nth_point = str(max(points_nums)+1)
         new_dir = os.path.join(self.content_dir, short_link, f'N_{nth_point}')
         files_dir = os.path.join(new_dir, 'files')
