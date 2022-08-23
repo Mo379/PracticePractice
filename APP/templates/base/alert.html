@@ -1,0 +1,26 @@
+{% load general %}
+{% if messages %}
+<ul class="wrapper_messages", style='padding:0;'>
+	{% for message in messages %}
+	{%definevar message.tags|split:' ' as tags%}
+	{%definevar tags|index:-3 as alerttype %}
+	{%definevar tags|index:-2 as location %}
+	{%if location == alert_loc%}
+	<div 
+		style ='margin-left:0;width:100%;'
+		class="alert alert-dismissible fade show {{alerttype}}" 
+		role="alert"
+		>
+		{{message}}
+		<button 
+			  type="button" 
+			  class="close" 
+			  data-dismiss="alert" 
+			  aria-label="Close">
+		    <span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	{% endif %}
+	{% endfor %}
+</ul>
+{% endif %}

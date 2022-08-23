@@ -1,5 +1,6 @@
 {% extends 'base/base.html'%}
 {%load static %}
+{%load general%}
 
 {%block pagestatic%}
 <link rel="stylesheet" href="{%static 'user/css/main.css'%}">
@@ -15,6 +16,9 @@
 
 {%block content%}
 <div class="container-xl px-4 mt-4">
+
+    {%definevar 'user_profile' as alert_loc%}
+    {%include 'base/alert.html'%}
     <!-- Account page navigation-->
     <nav class="nav nav-borders">
 		<a class="nav-link active ms-0" href="{%url 'user:index'%}">Profile</a>

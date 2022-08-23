@@ -2,6 +2,7 @@
 {%block pagename%}
 Register
 {%endblock%}
+{%load general%}
 
 
 
@@ -29,6 +30,24 @@ Register
 				{%if user.is_authenticated == False%}
 				<form class="user px-3 py-3" action='{%url 'user:_register'%}' method="POST" role ='form'>
 					{% csrf_token %}
+					{%definevar 'registration_form' as alert_loc%}
+					{%include 'base/alert.html'%}
+					<div class="form-group">
+						<select name='usertype' class="form-select" 
+							style="width:100%;padding:10px;
+							border-radius:10rem 5rem 5rem 10rem;" 
+							aria-label="Default select example"
+							>
+						  <option value="False" selected>What are you ? please select... </option>
+						  <option value='Student'>Student</option>
+						  <option value="Teacher">Teacher</option>
+						  <option value="PrivateTutor">Private Tutor</option>
+						  <option value="School">School</option>
+						  <option value="TuitionCenter">Tuition Center</option>
+						  <option value="Editor">Editor</option>
+						  <option value="Affiliate">Affiliate</option>
+						</select>
+					</div>
 					<div class="form-group">
 							<input type="text" class="form-control form-control-user" name='username' placeholder="User Name">
 					</div>

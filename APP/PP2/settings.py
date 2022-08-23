@@ -33,16 +33,17 @@ ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
-    #Third party 
+    # Third party
     'djstripe',
     'django_mathjax',
     'view_breadcrumbs',
-    #user added
+    # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
     'content.apps.ContentConfig',
     'studentdashboard.apps.StudentdashboardConfig',
-    #native
+    'management.apps.ManagementConfig',
+    # native
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
@@ -77,6 +78,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries':{
+               # make your file entry here.
+               'filter_tags': 'management.templatetags.general',
+            }
         },
     },
 ]
@@ -104,16 +109,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.\
+                UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.\
+                MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.\
+                CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.\
+                NumericPasswordValidator',
     },
 ]
 
@@ -144,9 +153,21 @@ STATIC_ROOT = 'staticfiles/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Groups settings
+VALID_GROUPS = [
+        "Admin",
+        "Student",
+        "Teacher",
+        "PrivateTutor",
+        "School",
+        "TuitionCenter",
+        "Editor",
+        "Affiliate",
+    ]
 # SMTP settings
-EMAIL_BACKEND=decouple_config('EMAIL_BACKEND')
-# This uses an installed package to handle sending emails, other means dont work for some odd reason
+EMAIL_BACKEND = decouple_config('EMAIL_BACKEND')
+# This uses an installed package to handle sending emails,
+# other means dont work for some odd reason
 EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
 EMAIL_HOST = decouple_config('SES_endpoint')
 EMAIL_PORT = decouple_config('SES_TLS_PORT', cast=int)
@@ -154,41 +175,39 @@ EMAIL_HOST_USER = decouple_config('SES_SMTP_USER')
 EMAIL_HOST_PASSWORD = decouple_config('SES_PASSWORD')
 EMAIL_USE_TLS = decouple_config('SES_USE_TLS', cast=bool)
 
-
-
 # Stripe settings
 STRIPE_LIVE_SECRET_KEY = decouple_config('Stripe_live_secret')
 STRIPE_TEST_SECRET_KEY = decouple_config('Stripe_test_secret')
+
 # Change to True in production
 STRIPE_LIVE_MODE = decouple_config('Stripe_live_mode', cast=bool)
-# Get it from the section in the Stripe dashboard where you added the webhook endpoint
+
+# Get it from the section in the Stripe dashboard where
+# you added the webhook endpoint
 DJSTRIPE_WEBHOOK_SECRET = decouple_config('Stripe_hook_secret')
+
 # We recommend setting to True for new installations
-DJSTRIPE_USE_NATIVE_JSONFIELD = True  
+DJSTRIPE_USE_NATIVE_JSONFIELD = True
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
-
-# Paypal settings 
-PAYPAL_MODE= decouple_config('PAYPAL_MODE')
-PAYPAL_CLIENT_ID= decouple_config('Paypal_test_client_id')
-PAYPAL_CLIENT_SECRET= decouple_config('Paypal_test_client_secret')
-PAYPAL_WEBHOOK_ID= decouple_config('Paypal_test_webhook_id')
-
+# Paypal settings
+PAYPAL_MODE = decouple_config('PAYPAL_MODE')
+PAYPAL_CLIENT_ID = decouple_config('Paypal_test_client_id')
+PAYPAL_CLIENT_SECRET = decouple_config('Paypal_test_client_secret')
+PAYPAL_WEBHOOK_ID = decouple_config('Paypal_test_webhook_id')
 
 # Mathjax settings
-MATHJAX_ENABLED=True
+MATHJAX_ENABLED = True
 MATHJAX_CONFIG_DATA = {
-  "tex2jax": {
-    "inlineMath":
-      [
-          ['$','$'],
-          ['\\(','\\)']
-      ]
-  }
-}
+      "tex2jax": {
+        "inlineMath": [
+                ['$', '$'],
+                ['\\(', '\\)']
+            ]
+      }
+    }
 
-
-#Breadcrumb settings
+# Breadcrumb settings
 BREADCRUMBS_TEMPLATE = "base/breadcrumbs.html"
 BREADCRUMBS_HOME_LABEL = "Home"
 

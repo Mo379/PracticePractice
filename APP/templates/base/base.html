@@ -1,5 +1,6 @@
 {% load view_breadcrumbs %}
 {% load static %}
+{% load general %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -43,7 +44,6 @@
   <body>
 
 
-
     <!-- Page Wrapper -->
     <div id="wrapper">
 
@@ -73,6 +73,8 @@
 				<h2 class='mt-2'> 
 				</h2>
 				<hr class= 'mt-0 mb-4'> 
+				{%definevar 'top_homepage' as alert_loc %}
+				{%include 'base/alert.html'%}
 				{% block content %}
 				{% endblock %}
 			</div>

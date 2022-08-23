@@ -3,6 +3,7 @@
 Login
 {%endblock%}
 {%block content%}
+{%load general%}
 <!-- Outer Row -->
 <div class="row justify-content-center">
 
@@ -21,6 +22,8 @@ Login
 							{%if user.is_authenticated == False %}
 							<form class="user px-3 py-3"  action="{%url 'user:_login'%}" method="POST" role="form">
 								{% csrf_token %}
+								{%definevar 'login_form' as alert_loc%}
+								{%include 'base/alert.html'%}
 								<div class="form-group">
 						  			<input type="text" class="form-control form-control-user" name="username" placeholder="Username/Email">
 								</div>

@@ -5,24 +5,29 @@ from django.views import generic
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.core.mail import send_mail
+from django.contrib import messages
+
 
 # Create your views here.
-
-
-
-
-
-class IndexView(BaseBreadcrumbMixin,generic.ListView):
+class IndexView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/index.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("home", reverse("main:index"))
                 ]
+
+
     def get_queryset(self):
+        #messages.add_message(
+        #        self.request,
+        #        messages.INFO,
+        #        'This is the top of the home page',
+        #        extra_tags='alert-danger top_homepage'
+        #    )
         return "base_index"
-  
 
 
 
