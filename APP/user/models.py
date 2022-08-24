@@ -11,6 +11,7 @@ class UserProfile(models.Model):
             User, on_delete=models.CASCADE, null=True, db_index=True
         )
     registration = models.BooleanField(default=False)
+    password_set = models.BooleanField(default=True)
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)

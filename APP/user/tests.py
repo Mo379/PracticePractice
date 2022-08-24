@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from user.views import _loginUser, _registerUser, \
         _activate, _logoutUser
-from .util.GeneralUtil import account_activation_token
+from .util.GeneralUtil import account_activation_token, password_reset_token
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
 
@@ -31,6 +31,12 @@ class User_creation_Tests(TestCase):
                 'username': self.user_name,
                 'password': self.password
             }
+        self.pwdreset_data = {
+                'uidb64': '',
+                'token': '',
+                'password': '12345',
+                'password_conf': '12345'
+            }
 
     def test_user_register(self):
         response = self.client.post('/user/_registerUser', self.data)
@@ -53,16 +59,7 @@ class User_creation_Tests(TestCase):
         for user_group in settings.VALID_GROUPS:
             self.data['usertype'] = user_group
             # Test all different types of users and their group assignments
-            response = self.client.post('/user/_registerUser', self.data)
-            # The response should be a redirect to login page
-            self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.url, "/user/login")
-            # The user should be present in the database
-            existance = self.User.objects.filter(
-                    username__iexact=self.user_name
-                ).exists()
-            self.assertEqual(existance, True)
-            # The User should be in the correct group
+            self.test_user_register()
             user = self.User.objects.get(
                     username__iexact=self.user_name
                 )
@@ -73,7 +70,7 @@ class User_creation_Tests(TestCase):
     def test_user_login(self):
         # register user but dont check for that here
         # there should be another test for that
-        self.client.post('/user/_registerUser', self.data)
+        self.test_user_register()
         user = User.objects.get(username__iexact=self.user_name)
         # The user should click the confirmation email
         uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -93,24 +90,53 @@ class User_creation_Tests(TestCase):
     def test_user_logout(self):
         # register user but dont check for that here
         # there should be another test for that
-        self.client.post('/user/_registerUser', self.data)
-        self.client.post('/user/_login', self.login_data)
-        user = User.objects.get(username__iexact=self.user_name)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = account_activation_token.make_token(user)
-        self.client.get(
-                '/user/_activate/'+uid+'/'+token
-            )
+        self.test_user_login()
         logout_res = self.client.post('/user/_logout')
         self.assertEqual(logout_res.status_code, 302)
         self.assertEqual(logout_res.url, "/")
 
     def test_user_password_change(self):
-        pass
-
-    def test_user_password_change(self):
-        pass
-
+        # register and get user
+        self.test_user_logout()
+        user = User.objects.get(username__iexact=self.user_name)
+        # get encrypted id and token
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = password_reset_token.make_token(user)
+        # check access to password reset page
+        pwdreset_page_result = self.client.get(
+                '/user/pwdreset/'+uidb64+'/'+token
+            )
+        self.assertEqual(pwdreset_page_result.status_code, 200)
+        # check password reset functionality
+        self.pwdreset_data['uidb64'] = uidb64
+        self.pwdreset_data['token'] = token
+        pwd_reset_result = self.client.post(
+                '/user/_pwdreset',
+                self.pwdreset_data
+            )
+        self.assertEqual(pwd_reset_result.status_code, 302)
+        self.assertEqual(pwd_reset_result.url, '/user/login')
+        # check password changed
+        oldpass_login = False
+        try:
+            self.test_user_logout()
+        except Exception:
+            pass
+        else:
+            oldpass_login = True
+        #
+        newpass_login = True
+        try:
+            self.data['password'] = self.pwdreset_data['password']
+            self.data['password_conf'] = self.pwdreset_data['password']
+            self.login_data['password'] = self.pwdreset_data['password']
+            self.test_user_logout()
+        except Exception:
+            pass
+        else:
+            newpass_login = True
+        self.assertEqual(oldpass_login, False)
+        self.assertEqual(newpass_login, True)
 
 # Url tests
 class URL_pages_Tests(TestCase):

@@ -6,9 +6,11 @@ from django.views import generic
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
-from .util.GeneralUtil import account_activation_token
+from .util.GeneralUtil import account_activation_token, password_reset_token
 from django.contrib.auth.models import User, Group
 from datetime import datetime   
 from .models import UserProfile
@@ -76,6 +78,24 @@ class ForgotPasswordView(BaseBreadcrumbMixin, generic.ListView):
 
     def get_queryset(self):
         return "user_settings"
+
+
+class PwdResetView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = "registration/password_reset_form.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("forgot-password", reverse("user:forgot-password")),
+                ("Password-Reset", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['uidb64'] = self.kwargs['uidb64']
+        context['token'] = self.kwargs['token']
+        return context
 
 
 # Billing view
@@ -164,19 +184,39 @@ class AppearanceView(BaseBreadcrumbMixin, generic.ListView):
 def _loginUser(request):
     username = request.POST['username']
     password = request.POST['password']
-    auth = authenticate(request, username=username, password=password)
-    user = User.objects.get(username__iexact=username)
+    # chcking if user exits
+    user = User.objects.filter(email__iexact=username).exists()
+    # Email check
+    if user:
+        user = User.objects.get(email__iexact=username)
+        auth = authenticate(request, email=user.email, password=password)
+    else:
+        # Username check
+        user = User.objects.filter(username__iexact=username).exists()
+        if user:
+            user = User.objects.get(username__iexact=username)
+            auth = authenticate(request, username=user.username, password=password)
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'User does not exist.',
+                    extra_tags='alert-danger login_form'
+                )
+            return redirect('user:login')
+    # Chekcing if the user is registered
     try:
         registration = UserProfile.objects.get(user=user).registration
     except Exception:
         registration = False
-        if user.is_superuser is None:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Registration is required before a login is allowed.',
-                    extra_tags='alert-danger login_form'
-                )
+    if registration == False and user.is_superuser == False:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Registration is required before a login is allowed.',
+                extra_tags='alert-danger login_form'
+            )
+    # checking if the user authentication is correct
     if auth is None:
         messages.add_message(
                 request,
@@ -184,7 +224,22 @@ def _loginUser(request):
                 'Incorrect details, plese try again or create an account.',
                 extra_tags='alert-danger login_form'
             )
-    if auth is not None and (registration == True or user.is_superuser):
+    # checking if the user is in the password reset state
+    try:
+        pass_set = UserProfile.objects.get(user=user).password_set
+    except Exception:
+        pass_set = False
+    if pass_set == False and user.is_superuser == False:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'You have to reset your password first!',
+                extra_tags='alert-danger login_form'
+            )
+    # executing checks
+    if auth is not None and (
+            (pass_set == True and registration == True)
+            or user.is_superuser == True):
         login(request, user)
         messages.add_message(
                 request,
@@ -308,6 +363,165 @@ def _registerUser(request):
 
 
 # activate user account action
+def _pwdreset_form(request):
+    username = request.POST['username']
+    # checking if user exists
+    # check email
+    user = User.objects.filter(email__iexact=username).exists()
+    if user:
+        user = User.objects.get(email__iexact=username)
+    else:
+        # check username
+        user = User.objects.filter(username__iexact=username).exists()
+        if user:
+            user = User.objects.get(username__iexact=username)
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'User does not exist.',
+                    extra_tags='alert-danger pwdreset_form'
+                )
+            return redirect('user:forgot-password')
+    # admins cannot do this
+    if user.is_superuser:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Admins cannot reset password, please contact main admin.',
+                    extra_tags='alert-danger pwdreset_form'
+                )
+            return redirect('user:forgot-password')
+    # Activating the password reset sequence
+    profile = UserProfile.objects.get(user=user)
+    profile.password_set = False
+    profile.save()
+    # send email
+    token = password_reset_token.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    #
+    mail_subject = 'Password Reset'
+    message = render_to_string('registration/email_password_reset.html', {
+        'user': user,
+        'domain': '127.0.0.1:8000',
+        'uid': uid,
+        'token': token,
+    })
+    to_email = user.email
+    try:
+        send_mail(
+            mail_subject,
+            message,
+            'admin@practicepractice.net',
+            [to_email],
+            fail_silently=False,
+        )
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Please check your email for the password reset instructions.',
+                extra_tags='alert-success pwdreset_form'
+            )
+        return redirect('user:forgot-password')
+    except Exception:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Cannot send Email, please contact admin.',
+                extra_tags='alert-danger pwdreset_form'
+            )
+        return redirect('user:forgot-password')
+
+
+def _pwdreset(request):
+    # post variables
+    uidb64 = request.POST['uidb64']
+    token = request.POST['token']
+    new_pass = request.POST['password']
+    new_pass_conf = request.POST['password_conf']
+    # error cehcking
+    pass_check = True
+    if new_pass != new_pass_conf:
+        pass_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Passwords do not match.',
+                extra_tags='alert-danger second_pwdreset_form'
+            )
+    passlen_check = True
+    if len(new_pass) < 5:
+        passlen_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your password is too short, \
+                        it should be at least 5 characters long.',
+                extra_tags='alert-danger second_pwdreset_form'
+            )
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+        user_profile = UserProfile.objects.get(user=user)
+    except Exception:
+        user = None
+        user_profile = None
+        messages.add_message(
+                request,
+                messages.INFO,
+                'User is invalid',
+                extra_tags='alert-danger second_pwdreset_form'
+            )
+    super_check = True
+    if user and user.is_superuser:
+        super_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'User is invalid',
+                extra_tags='alert-danger second_pwdreset_form'
+            )
+        return redirect('user:pwdreset', uidb64=uidb64, token=token)
+    token_check = True
+    if password_reset_token.check_token(user, token) == False:
+        token_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Password reset link is invalid, \
+                        please request a new password reset.',
+                extra_tags='alert-danger second_pwdreset_form'
+            )
+    #
+    if user and token_check and pass_check and super_check and passlen_check:
+        # reset password
+        try:
+            user.set_password(new_pass)
+            user.save()
+            # update pass_set settings
+            user_profile.password_set = True
+            user_profile.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your password has been reset, you can now login using the\
+                            new password!',
+                    extra_tags='alert-success login_form'
+                )
+            return redirect('user:login')
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'An unknonw error has occured please contact support \
+                            (see contact page).',
+                    extra_tags='alert-danger second_pwdreset_form'
+                )
+            return redirect('user:pwdreset', uidb64=uidb64, token=token)
+    else:
+        return redirect('user:pwdreset', uidb64=uidb64, token=token)
+
+
 def _activate(request, uidb64, token):
     _logoutUser(request)
     try:
