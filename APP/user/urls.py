@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import views
+from user import views
 
 
 # Create your views here.

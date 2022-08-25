@@ -3,12 +3,12 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.views import generic
-from .util.ContentSync import QuestionSync,PointSync,VideoSync,SpecificationSync
-from .util.ContentCRUD import QuestionCRUD,PointCRUD,SpecificationCRUD
+from content.util.ContentSync import QuestionSync,PointSync,VideoSync,SpecificationSync
+from content.util.ContentCRUD import QuestionCRUD,PointCRUD,SpecificationCRUD
 from view_breadcrumbs import BaseBreadcrumbMixin
 
 #
-from .models import *
+from content.models import *
 
 # Create your views here.
 

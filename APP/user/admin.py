@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import *
+from user.models import User, UserProfile, AffiliateBalance, AffiliateProfit
 
 
 # Register your models here.

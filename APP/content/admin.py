@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question,QuestionTrack,UserPaper, Point,Video, Keyword,EditingTask, Specification
+from content.models import Question,QuestionTrack,UserPaper, Point,Video, Keyword,EditingTask, Specification
 
 
 # Register your models here.

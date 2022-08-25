@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.test import TestCase
-from user.model import User
+from user.models import User
 from user.views import _loginUser, _registerUser, \
         _activate, _logoutUser
 from .util.GeneralUtil import account_activation_token, password_reset_token

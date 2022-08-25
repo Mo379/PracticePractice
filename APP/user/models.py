@@ -9,6 +9,11 @@ from django.dispatch import receiver
 class User(AbstractUser):
     mobile_number = models.CharField(max_length=10, unique=True)
     birth_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class UserProfile(models.Model):
     user = models.ForeignKey(
             User, on_delete=models.CASCADE, null=True, db_index=True
