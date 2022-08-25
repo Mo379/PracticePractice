@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
@@ -29,7 +30,7 @@ class Question(models.Model):
     def __str__(self):
         return self.q_unique_id
 class QuestionTrack(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,db_index=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, 
             db_column='q_unique_id', db_index=True)
     track_mark = models.IntegerField(default=0,null=True) 
@@ -37,7 +38,7 @@ class QuestionTrack(models.Model):
     def __str__(self):
         return self.user
 class UserPaper(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_index=True)
     pap_subject= models.CharField(max_length=50, default='')
     pap_info = models.JSONField(default=dict,null=True)
     pap_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
@@ -83,7 +84,7 @@ class EditingTask(models.Model):
     task_moduel= models.CharField(max_length=255,default='',null=True)
     task_chapter= models.CharField(max_length=255,default='',null=True)
     task_topic= models.CharField(max_length=255,default='',null=True)
-    task_editor = models.ForeignKey(User, on_delete=models.CASCADE,db_index=True)
+    task_editor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,db_index=True)
     task_payment_amount = models.DecimalField(max_digits=6, decimal_places=2)
     task_completion_status= models.BooleanField(default=False,null=True)
     task_approval_status= models.BooleanField(default=False,null=True)

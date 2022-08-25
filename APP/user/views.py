@@ -189,13 +189,11 @@ def _loginUser(request):
     # Email check
     if user:
         user = User.objects.get(email__iexact=username)
-        auth = authenticate(request, email=user.email, password=password)
     else:
         # Username check
         user = User.objects.filter(username__iexact=username).exists()
         if user:
             user = User.objects.get(username__iexact=username)
-            auth = authenticate(request, username=user.username, password=password)
         else:
             messages.add_message(
                     request,
@@ -204,6 +202,8 @@ def _loginUser(request):
                     extra_tags='alert-danger login_form'
                 )
             return redirect('user:login')
+    # Authenticating the user
+    auth = authenticate(request, username=user.username, password=password)
     # Chekcing if the user is registered
     try:
         registration = UserProfile.objects.get(user=user).registration

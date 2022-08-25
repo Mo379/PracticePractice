@@ -31,6 +31,11 @@
         <div class="col-xl-4">
             <!-- Profile picture card-->
             <div class="card mb-4 mb-xl-0">
+		    {% if user.is_authenticated and request.user|has_group:"Student" %} 
+		    <p>User belongs to my group 
+		    {% else %}
+		    <p>User doesn't belong to mygroup</p>
+		    {% endif %}
                 <div class="card-header">Profile Picture</div>
                 <div class="card-body text-center">
                     <!-- Profile picture image-->
