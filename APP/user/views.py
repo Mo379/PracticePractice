@@ -284,7 +284,9 @@ def _registerUser(request):
                         please choose a different one.',
                 extra_tags='alert-danger registration_form'
             )
+    passlen_check = True
     if len(password) < 5:
+        passlen_check = False
         messages.add_message(
                 request,
                 messages.INFO,
@@ -312,7 +314,7 @@ def _registerUser(request):
     # return if signup is invalid
     # Check username, email,password, group
     if username_match == True or email_match == True or pass_safe == False\
-            or utype_match == False:
+            or utype_match == False or passlen_check == False:
         return redirect('user:register')
 
     # if all checks pass, proceed
@@ -325,6 +327,8 @@ def _registerUser(request):
     user.first_name = first
     user.last_name = last
     user.save()
+    u_profile = UserProfile.objects.create(user_id=user.id)
+    u_profile.save()
     AssociatedGroup.user_set.add(user)
     #
     token = account_activation_token.make_token(user)

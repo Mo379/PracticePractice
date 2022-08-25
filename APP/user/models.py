@@ -7,11 +7,11 @@ from django.dispatch import receiver
 
 # Create your models here.
 class User(AbstractUser):
-    mobile_number = models.CharField(max_length=10, unique=True)
+    mobile_number = models.CharField(max_length=10, null=True, blank=True, unique=True)
     birth_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return self.user.username
+        return self.username
 
 
 class UserProfile(models.Model):
@@ -20,7 +20,7 @@ class UserProfile(models.Model):
         )
     registration = models.BooleanField(default=False)
     password_set = models.BooleanField(default=True)
-    is_member = models.BooleanField(default=True)
+    is_member = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
