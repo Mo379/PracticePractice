@@ -1,7 +1,7 @@
 import os
 import json
 from decouple import config as decouple_config
-from ..models import Question, Point, Video, Specification
+from content.models import Question, Point, Video, Specification
 
 
 # models with smart features

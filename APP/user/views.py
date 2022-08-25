@@ -10,10 +10,10 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
-from .util.GeneralUtil import account_activation_token, password_reset_token
-from django.contrib.auth.models import User, Group
-from datetime import datetime   
-from .models import UserProfile
+from django.contrib.auth.models import Group
+from datetime import datetime
+from user.models import User, UserProfile
+from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str

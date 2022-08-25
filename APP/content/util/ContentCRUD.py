@@ -4,8 +4,8 @@ import glob
 import json
 from decouple import config as decouple_config
 from django.shortcuts import get_object_or_404
-from ..models import Question, Point, Specification
-from .GeneralUtil import TagGenerator
+from content.models import Question, Point, Specification
+from content.util.GeneralUtil import TagGenerator
 
 
 # Crut question

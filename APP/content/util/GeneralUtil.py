@@ -1,4 +1,9 @@
-import random, string
+import random
+import string
+
+
 def TagGenerator():
-    x = ''.join(random.choices(string.ascii_letters + string.digits, k=10)).lower()
+    x = ''.join(
+            random.choices(string.ascii_letters + string.digits, k=10)
+        ).lower()
     return x

@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-AUTH_USER_MODEL = 'user.MyUser'
+AUTH_USER_MODEL = 'user.User'
 
 
 MIDDLEWARE = [
