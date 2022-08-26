@@ -16,8 +16,8 @@ class User_creation_Tests(TestCase):
         self.last = 'omar'
         self.user_name = 'user'
         self.email = 'mustafa12211@hotmail.co.uk'
-        self.password = '123'
-        self.password_conf = '123'
+        self.password = '12345'
+        self.password_conf = '12345'
         self.data = {
                 'usertype': 'Student',
                 'firstname': self.first,

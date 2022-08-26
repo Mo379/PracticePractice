@@ -26,7 +26,7 @@ def populate_groups(apps, schema_editor):
     Group.objects.get(name="Admin").permissions.add(*admin_perms)
 
     # For each role assign a propper permission from a dictionary
-    # dictionary = {view_userprofile, delete_question_marking, create_feedback}
+    # Editor_permission = {Add_question, Add_point, etc...}
     # [i for i in all_perms if i.codename in dictionary]
 
 

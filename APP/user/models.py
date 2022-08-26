@@ -7,49 +7,95 @@ from django.dispatch import receiver
 
 # Create your models here.
 class User(AbstractUser):
-    mobile_number = models.CharField(max_length=10, null=True, blank=True, unique=True)
-    birth_date = models.DateField(null=True, blank=True)
+    registration = models.BooleanField(default=False)
+    password_set = models.BooleanField(default=True)
+    is_member = models.BooleanField(default=False)
+    bio = models.TextField(max_length=500, blank=True)
+    Date_of_brith = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.username
 
 
-class UserProfile(models.Model):
+class Admin(models.Model):
     user = models.ForeignKey(
-            User, on_delete=models.CASCADE, null=True, db_index=True
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Admin'
         )
-    registration = models.BooleanField(default=False)
-    password_set = models.BooleanField(default=True)
-    is_member = models.BooleanField(default=False)
-    bio = models.TextField(max_length=500, blank=True)
-    location = models.CharField(max_length=30, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return self.user.username
+        return self.username
 
 
-# Affiliate balance
-class AffiliateBalance(models.Model):
+class Student(models.Model):
     user = models.ForeignKey(
-            User, on_delete=models.SET_NULL, null=True, db_index=True
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Student'
         )
-    balance = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
-        return self.user
+        return self.username
 
 
-# Afiliate profit
-class AffiliateProfit(models.Model):
+class Teacher(models.Model):
     user = models.ForeignKey(
-            User, on_delete=models.DO_NOTHING,
-            db_index=True, related_name='affiliate'
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Teacher'
         )
-    customer = models.ForeignKey(
-            User, on_delete=models.DO_NOTHING, related_name='customer'
-        )
-    amount = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
-        return self.user
+        return self.username
+
+
+class PrivateTutor(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='PrivateTutor'
+        )
+
+    def __str__(self):
+        return self.username
+
+
+
+class School(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='School'
+        )
+
+    def __str__(self):
+        return self.username
+
+
+
+class TuitionCenter(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='TuitionCenter'
+        )
+
+    def __str__(self):
+        return self.username
+
+
+
+class Editor(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Editor'
+        )
+
+    def __str__(self):
+        return self.username
+
+
+
+class Affiliate(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Affiliate'
+        )
+
+    def __str__(self):
+        return self.username

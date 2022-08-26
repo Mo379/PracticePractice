@@ -12,7 +12,7 @@ from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.contrib.auth.models import Group
 from datetime import datetime
-from user.models import User, UserProfile
+from user.models import User
 from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -32,7 +32,7 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_index"
+        return 'user_profile'
 
 
 # Login view
@@ -206,7 +206,7 @@ def _loginUser(request):
     auth = authenticate(request, username=user.username, password=password)
     # Chekcing if the user is registered
     try:
-        registration = UserProfile.objects.get(user=user).registration
+        registration = user.registration
     except Exception:
         registration = False
     if registration == False and user.is_superuser == False:
@@ -226,7 +226,7 @@ def _loginUser(request):
             )
     # checking if the user is in the password reset state
     try:
-        pass_set = UserProfile.objects.get(user=user).password_set
+        pass_set = user.password_set
     except Exception:
         pass_set = False
     if pass_set == False and user.is_superuser == False:
@@ -327,8 +327,6 @@ def _registerUser(request):
     user.first_name = first
     user.last_name = last
     user.save()
-    u_profile = UserProfile.objects.create(user_id=user.id)
-    u_profile.save()
     AssociatedGroup.user_set.add(user)
     #
     token = account_activation_token.make_token(user)
@@ -397,9 +395,8 @@ def _pwdreset_form(request):
                 )
             return redirect('user:forgot-password')
     # Activating the password reset sequence
-    profile = UserProfile.objects.get(user=user)
-    profile.password_set = False
-    profile.save()
+    user.password_set = False
+    user.save()
     # send email
     token = password_reset_token.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -466,10 +463,8 @@ def _pwdreset(request):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-        user_profile = UserProfile.objects.get(user=user)
     except Exception:
         user = None
-        user_profile = None
         messages.add_message(
                 request,
                 messages.INFO,
@@ -501,10 +496,9 @@ def _pwdreset(request):
         # reset password
         try:
             user.set_password(new_pass)
+            user.password_set = True
             user.save()
             # update pass_set settings
-            user_profile.password_set = True
-            user_profile.save()
             messages.add_message(
                     request,
                     messages.INFO,
@@ -541,12 +535,8 @@ def _activate(request, uidb64, token):
                 extra_tags='alert-danger registration_form'
             )
     if user is not None and account_activation_token.check_token(user, token):
-        try:
-            u_profile = UserProfile.objects.get(user=user)
-        except Exception:
-            u_profile = UserProfile.objects.create(user_id=user.id)
-        u_profile.registration = 1
-        u_profile.save()
+        user.registration = 1
+        user.save()
         messages.add_message(
                 request,
                 messages.INFO,
