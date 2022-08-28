@@ -8,13 +8,16 @@ distlib==0.3.4
 dj-stripe==2.6.1
 Django==4.0.1
 django-mathjax==0.0.8
+django-multiselectfield==0.1.12
 django-paypal==2.0
 django-smtp-ssl==1.0
 django-utils-six==2.0
 django-view-breadcrumbs==2.2.7
 filelock==3.6.0
+flake8==4.0.1
 idna==3.3
 jsonfield==3.1.0
+mccabe==0.6.1
 numpy==1.22.0
 packaging==21.3
 paypalrestsdk==1.13.1
@@ -22,7 +25,9 @@ platformdirs==2.5.1
 pluggy==1.0.0
 psycopg2-binary==2.9.3
 py==1.11.0
+pycodestyle==2.8.0
 pycparser==2.21
+pyflakes==2.4.0
 pyOpenSSL==22.0.0
 pyparsing==3.0.7
 python-dateutil==2.8.2
