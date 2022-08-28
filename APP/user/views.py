@@ -1,3 +1,4 @@
+import re
 from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -727,6 +728,86 @@ def _logoutUser(request):
 
 
 def _accountdetails(request):
+    username = request.POST['username']
+    first_name = request.POST['first_name']
+    last_name = request.POST['last_name']
+    email = request.POST['email']
+    date_of_birth = request.POST['date_of_birth']
+    bio = request.POST['bio']
+    # username check
+    username_match = User.objects.filter(username__iexact=username).exists()
+    username_check = True
+    if (username_match and username.lower() != request.user.username.lower()) or \
+            re.match(r'^[A-Za-z0-9_]+$', username) is None:
+        username_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'The username entered already exists or is invalid!, \
+                        please try again.',
+                extra_tags='alert-danger user_profile'
+            )
+    # first name check
+    name_check = True
+    if re.match(r'^[A-Za-z]+$', first_name) is None and \
+            re.match(r'^[A-Za-z]+$', last_name):
+        name_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'The name entered is invalid, please try again.',
+                extra_tags='alert-danger user_profile'
+            )
+    # email check
+    email_match = User.objects.filter(email__iexact=email).exists()
+    email_check = True
+    if (email_match and request.user.email.lower() != email.lower()) \
+            or re.match(r'^[A-Za-z0-9_@.]+$', email) is None:
+        email_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'The email entered is invalid, please try again.',
+                extra_tags='alert-danger user_profile'
+            )
+    # dob check
+    dob_check = True
+    try:
+        datetime.strptime(date_of_birth, '%Y-%m-%d')
+    except Exception:
+        dob_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'The entered date of birth is invalid, please try again.'+str(date_of_birth),
+                extra_tags='alert-danger user_profile'
+            )
+    # bio check
+    bio_check = True
+    if len(bio) > 500 or len(bio) < 25 or re.match(r'^[A-Za-z0-9_.,]+$', bio):
+        bio_check = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your Bio is either invalid;\
+                        25-500 characters and alphanumeric.',
+                extra_tags='alert-danger user_profile'
+            )
+        
+    #
+    if username_check == False or name_check == False or email_check == False\
+            or dob_check == False or bio_check == False:
+        return redirect('user:index')
+    #
+    user = User.objects.get(pk=request.user.id)
+    user.username = username
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.date_of_birth = date_of_birth
+    user.bio = bio
+    user.account_details_complete = True
+    user.save()
     messages.add_message(
             request,
             messages.INFO,

@@ -10,9 +10,11 @@ from multiselectfield import MultiSelectField
 class User(AbstractUser):
     registration = models.BooleanField(default=False)
     password_set = models.BooleanField(default=True)
+    account_details_complete = models.BooleanField(default=False)
+    group_details_complete = models.BooleanField(default=False)
     is_member = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
-    Date_of_brith = models.DateField(null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
     #
     CHOICES_THEME = [
         ('lig', 'Light'),
