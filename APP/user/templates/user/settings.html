@@ -16,9 +16,11 @@
 
 {%block content%}
 <div class="container-xl px-4 mt-4">
+    {%definevar 'user_settings' as alert_loc%}
+    {%include 'base/alert.html'%}
     {%definevar 'settings' as active_link%}
     {%include 'user/parts/_navigation.html'%}
-    <div class="row">
+        <div class="row">
         <div class="col-lg-8">
             <!-- Email notifications preferences card-->
             <div class="card card-header-actions mb-4">
@@ -26,39 +28,135 @@
                     Email Notifications
                 </div>
                 <div class="card-body">
-                    <form>
+		    <form class="user px-3 py-3"  action="{%url 'user:_mailchoiceschange'%}" method="POST" role="form">
+			{% csrf_token %}
                         <!-- Form Group (email updates checkboxes)-->
                         <div class="mb-0">
                             <label class="small mb-2">Choose which types of email updates you receive</label>
+			    {%for choice in user.CHOICES_EMAIL%}
                             <div class="form-check mb-2">
-                                <input class="form-check-input" id="checkAccountChanges" type="checkbox" checked="">
-                                <label class="form-check-label" for="checkAccountChanges">Changes made to your account</label>
+                                <input 
+				class="form-check-input" 
+				id="EC_{{choice|index:0}}" 
+				type="checkbox" 
+				name="{{choice|index:0}}" 
+				{%if choice|index:0 in user.mail_choices%}
+				checked
+				{%endif%}
+				{%if choice|index:0 == 'Core'%}
+				disabled
+				{%endif%}
+			    >
+				<label class="form-check-label" for="EC_{{choice|index:0}}">
+					{%if choice|index:0 == 'GroupChange'%}
+					Changes are made to groups you're part of
+					{%endif%}
+					{%if choice|index:0 == 'ProductUpdate'%}
+					Product updates for products you've purchased or starred
+					{%endif%}
+					{%if choice|index:0 == 'New'%}
+					Information on new products and service
+					{%endif%}
+					{%if choice|index:0 == 'Marketing'%}
+					Marketing and promotional offers
+					{%endif%}
+					{%if choice|index:0 == 'Core'%}
+					Core Emails
+					{%endif%}
+				</label>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" id="checkAccountGroups" type="checkbox" checked="">
-                                <label class="form-check-label" for="checkAccountGroups">Changes are made to groups you're part of</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" id="checkProductUpdates" type="checkbox" checked="">
-                                <label class="form-check-label" for="checkProductUpdates">Product updates for products you've purchased or starred</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" id="checkProductNew" type="checkbox" checked="">
-                                <label class="form-check-label" for="checkProductNew">Information on new products and services</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" id="checkPromotional" type="checkbox">
-                                <label class="form-check-label" for="checkPromotional">Marketing and promotional offers</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" id="checkSecurity" type="checkbox" checked="" disabled="">
-                                <label class="form-check-label" for="checkSecurity">Security alerts</label>
-                            </div>
-                            <div class="" style='margin:0; margin-top:10px;'>
-				<!-- Save changes button-->
-				<button class="btn btn-primary" type="button">Update</button>
-                            </div>
+			    {%endfor%}
                         </div>
+			<br>
+	 	 	<button class="btn btn-primary" type="submit">Save changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <!-- Notifications preferences card-->
+            <div class="card">
+                <div class="card-header">Appearance</div>
+                <div class="card-body">
+		    <form class="user px-3 py-3"  action="{%url 'user:_themechange'%}" method="POST" role="form">
+			{% csrf_token %}
+                        <!-- Form Group (notification preference checkboxes)-->
+			<div class="form-check">
+			  <input class="form-check-input" type="radio" name="theme" id="theme1"
+				{%if user.theme == 'lig'%}
+				checked
+				{%endif%}
+			  value='lig'>
+			  <label class="form-check-label" for="theme1"appearance_light>
+			    <i class="bi bi-moon"></i> Light</a>
+			  </label>
+			</div>
+			<div class="form-check">
+			  <input class="form-check-input" type="radio" name="theme" id="theme2"
+				{%if user.theme == 'dar'%}
+				checked
+				{%endif%}
+			  value='dar'>
+			  <label class="form-check-label" for="theme2">
+			    <i class="bi bi-moon-fill"></i> Dark</a>
+			  </label>
+			</div>
+			<div class="form-check">
+			  <input class="form-check-input" type="radio" name="theme" id="theme3"
+				{%if user.theme == 'lib'%}
+				checked
+				{%endif%}
+			  value='lib'>
+			  <label class="form-check-label" for="theme3">
+		            <i class="bi bi-moon-fill text-warning" style="color:yellow-500;"></i> Library</a>
+			  </label>
+			</div>
+                        <!-- Submit button-->
+			<br>
+			<button class="btn btn-primary" type="submit">Update</button>
+                    </form>
+                </div>
+            </div>
+	    <br>
+            <div class="card">
+                <div class="card-header">Language</div>
+                <div class="card-body">
+		    <form class="user px-3 py-3"  action="{%url 'user:_languagechange'%}" method="POST" role="form">
+			{% csrf_token %}
+                        <!-- Form Group (notification preference checkboxes)-->
+			<div class="form-check">
+			  <input class="form-check-input" type="radio" name="language" id="lan1"
+				{%if user.language == 'en'%}
+				checked
+				{%endif%}
+			  value='en'>
+			  <label class="form-check-label" for="lan1">
+			    English
+			  </label>
+			</div>
+			<div class="form-check">
+			  <input class="form-check-input" type="radio" name="language" id="lan2"
+				{%if user.language == 'fr'%}
+				checked
+				{%endif%}
+			  value='fr'>
+			  <label class="form-check-label" for="lan2">
+			    Français
+			  </label>
+			</div>
+			<div class="form-check">
+			  <input class="form-check-input" type="radio" name="language" id="lan2"
+				{%if user.language == 'es'%}
+				checked
+				{%endif%}
+			  value='es'>
+			  <label class="form-check-label" for="lan2">
+			    Española
+			  </label>
+			</div>
+                        <!-- Submit button-->
+			<br>
+			<button class="btn btn-primary" type="submit">Update</button>
                     </form>
                 </div>
             </div>

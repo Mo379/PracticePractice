@@ -1,0 +1,5 @@
+{% autoescape off %}
+Hi {{ user.first_name}},
+Please click on the link to continue with the account deletion process,
+http://{{ domain }}{% url 'user:deleteaccount' uidb64=uid token=token %}
+{% endautoescape %}

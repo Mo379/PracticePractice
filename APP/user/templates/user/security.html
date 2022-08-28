@@ -16,7 +16,10 @@
 {%endblock%}
 
 {%block content%}
+{%if user.is_authenticated%}
 <div class="container-xl px-4 mt-4">
+        {%definevar 'user_security' as alert_loc%}
+        {%include 'base/alert.html'%}
     	{%definevar 'security' as active_link%}
     	{%include 'user/parts/_navigation.html'%}
         <div class="row">
@@ -25,23 +28,24 @@
                 <div class="card mb-4">
                     <div class="card-header">Change Password</div>
                     <div class="card-body">
-                        <form>
+			<form class="user px-3 py-3"  action="{%url 'user:_updatepassword'%}" method="POST" role="form">
+			    {% csrf_token %}
                             <!-- Form Group (current password)-->
                             <div class="mb-3">
                                 <label class="small mb-1" for="currentPassword">Current Password</label>
-                                <input class="form-control" id="currentPassword" type="password" placeholder="Enter current password">
+                                <input class="form-control" id="currentPassword" type="password" name = 'pass_current' placeholder="Enter current password">
                             </div>
                             <!-- Form Group (new password)-->
                             <div class="mb-3">
                                 <label class="small mb-1" for="newPassword">New Password</label>
-                                <input class="form-control" id="newPassword" type="password" placeholder="Enter new password">
+                                <input class="form-control" id="newPassword" type="password" name='pass_new' placeholder="Enter new password">
                             </div>
                             <!-- Form Group (confirm password)-->
                             <div class="mb-3">
                                 <label class="small mb-1" for="confirmPassword">Confirm Password</label>
-                                <input class="form-control" id="confirmPassword" type="password" placeholder="Confirm new password">
+                                <input class="form-control" id="confirmPassword" type="password" name='pass_conf' placeholder="Confirm new password">
                             </div>
-                            <button class="btn btn-primary" type="button">Save</button>
+                            <button class="btn btn-primary" type="submit">Save</button>
                         </form>
                     </div>
                 </div>
@@ -54,10 +58,74 @@
                     <div class="card-body">
 			    <p><strong style='color:red;'>Deleting</strong> your account is a <strong style='color:red;'>permanent</strong> action that <strong style='color:red;'>cannot be undone</strong>. If you are sure you want to delete your account, 
 			click the button to begin the 3-step account deletion process</p>
-                        <button class="btn btn-danger-soft text-danger" type="button">I understand, delete my account</button>
+			    <form class="user px-3 py-3"  action="{%url 'user:_deleteaccount_1'%}" method="POST" role="form">
+				{% csrf_token %}
+                        	<button class="btn btn-danger-soft text-danger" type="submit">I understand, begin process</button>
+			    </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+{%else%}
+<!-- Outer Row -->
+<div class="row justify-content-center">
+{%definevar 'user_security' as alert_loc%}
+{%include 'base/alert.html'%}
+	<div class="col-xl-10 col-lg-12 col-md-9">
+
+		<div class="card o-hidden border-0 shadow-lg my-5">
+			<div class="card-body p-0">
+				<!-- Nested Row within Card Body -->
+				<div class="row">
+					<div class="col-lg-6 d-none d-lg-block bg-login-image" style='background:Black;'></div>
+					<div class="col-lg-6">
+						<div class="p-5">
+							<div class="text-center">
+								<h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+							</div>
+							{%if user.is_authenticated == False %}
+							<form class="user px-3 py-3"  action="{%url 'user:_login'%}" method="POST" role="form">
+								{% csrf_token %}
+								{%definevar 'login_form' as alert_loc%}
+								{%include 'base/alert.html'%}
+								<div class="form-group">
+						  			<input type="text" class="form-control form-control-user" name="username" placeholder="Username/Email">
+								</div>
+								<div class="form-group">
+						  			<input type="password" class="form-control form-control-user" name="password" placeholder="Password">
+								</div>
+								 <button type="submit" class="btn btn-primary btn-user btn-block">Sign in</button>
+								<hr>
+								<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
+									Home 
+								</a>
+							</form>
+							{%else%}
+							<form class="user px-3 py-3">
+				  				<a class="btn btn-google btn-user btn-block" href="{%url 'user:_logout'%}">
+									<i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
+								</li>
+								<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
+									Home 
+								</a>
+							</form>
+							{%endif%}
+							<hr>
+							<div class="text-center">
+								<a class="small" href="{%url 'user:forgot-password'%}">Forgot Password?</a>
+							</div>
+							<div class="text-center">
+								<a class="small" href="{%url 'user:register'%}">Create an Account!</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+{%endif%}
 {%endblock%}

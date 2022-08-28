@@ -19,6 +19,11 @@ urlpatterns = [
         views.PwdResetView.as_view(),
         name='pwdreset'
     ),
+    path(
+        'deleteaccount/<uidb64>/<token>',
+        views.DeleteAccountView.as_view(),
+        name='deleteaccount'
+    ),
     path('billing', views.BillingView.as_view(), name='billing'),
     path('security', views.SecurityView.as_view(), name='security'),
     path('settings', views.SettingsView.as_view(), name='settings'),
@@ -26,9 +31,48 @@ urlpatterns = [
     # actions
     path('_login', views._loginUser, name='_login'),
     path('_registerUser', views._registerUser, name='_register'),
+    path('_updatepassword', views._updatepassword, name='_updatepassword'),
     path('_pwdreset_form', views._pwdreset_form, name='_pwdreset_form'),
     path('_pwdreset', views._pwdreset, name='_pwdreset'),
     path('_activate/<uidb64>/<token>', views._activate, name='_activate'),
     path('_logout', views._logoutUser, name='_logout'),
+    #
+    path('_deleteaccount_1', views._deleteaccount_1, name='_deleteaccount_1'),
+    path('_deleteaccount_2', views._deleteaccount_2, name='_deleteaccount_2'),
+    path('_logout', views._logoutUser, name='_logout'),
+    path('_logout', views._logoutUser, name='_logout'),
+    #
     path('_appearance', views._logoutUser, name='_appearance'),
+    # actions - detail forms
+    path('_accountdetails', views._accountdetails, name='_accountdetails'),
+    path('_admindetails', views._admindetails, name='_admindetails'),
+    path('_studentdetails', views._studentdetails, name='_studentdetails'),
+    path('_teacherdetails', views._teacherdetails, name='_teacherdetails'),
+    path(
+        '_organisationdetails',
+        views._organisationdetails,
+        name='_organisationdetails'
+    ),
+    path('_educatordetails', views._educatordetails, name='_educatordetails'),
+    path('_editordetails', views._editordetails, name='_editordetails'),
+    path(
+        '_affiliatedetails',
+        views._affiliatedetails,
+        name='_affiliatedetails'
+    ),
+    path(
+        '_themechange',
+        views._themechange,
+        name='_themechange'
+    ),
+    path(
+        '_languagechange',
+        views._languagechange,
+        name='_languagechange'
+    ),
+    path(
+        '_mailchoiceschange',
+        views._mailchoiceschange,
+        name='_mailchoiceschange'
+    ),
 ]

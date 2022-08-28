@@ -80,6 +80,24 @@ class ForgotPasswordView(BaseBreadcrumbMixin, generic.ListView):
         return "user_settings"
 
 
+class DeleteAccountView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = "registration/delete_account.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            _logoutUser(self.request)
+        context = {}
+        context['uidb64'] = self.kwargs['uidb64']
+        context['token'] = self.kwargs['token']
+        return context
+
+
 class PwdResetView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "registration/password_reset_form.html"
     context_object_name = 'context'
@@ -181,6 +199,9 @@ class AppearanceView(BaseBreadcrumbMixin, generic.ListView):
 
 # Authentication system
 # user login action
+
+
+#login 
 def _loginUser(request):
     username = request.POST['username']
     password = request.POST['password']
@@ -365,6 +386,67 @@ def _registerUser(request):
 
 
 # activate user account action
+
+
+def _updatepassword(request):
+    pass_current = request.POST['pass_current']
+    pass_new = request.POST['pass_new']
+    pass_conf = request.POST['pass_conf']
+    #
+    auth = authenticate(request, username=request.user.username, password=pass_current)
+    auth_conf = True
+    if auth is None:
+        auth_conf = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'The current password cannot be confirmed.',
+                extra_tags='alert-danger user_security'
+            )
+    pass_match = True
+    if pass_new != pass_conf:
+        pass_match = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Passwords do not match.',
+                extra_tags='alert-danger user_security'
+            )
+    pass_conf = True
+    if len(pass_new) < 5:
+        pass_conf = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your password is too short, \
+                        it should be at least 5 characters long.',
+                extra_tags='alert-danger user_security'
+            )
+    old_new_conf = True
+    if pass_current == pass_new:
+        old_new_conf = False
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Old and new passwords cannot be the same.',
+                extra_tags='alert-danger user_security'
+            )
+
+    if auth_conf == False or pass_match == False or \
+            pass_conf == False or old_new_conf == False:
+        return redirect('user:security')
+    user = User.objects.get(username__iexact=request.user.username)
+    user.set_password(pass_new)
+    user.save()
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your Password was successfully updated!',
+            extra_tags='alert-success user_security'
+        )
+    return redirect('user:security')
+
+
 def _pwdreset_form(request):
     username = request.POST['username']
     # checking if user exists
@@ -520,6 +602,84 @@ def _pwdreset(request):
         return redirect('user:pwdreset', uidb64=uidb64, token=token)
 
 
+def _deleteaccount_1(request):
+    user = request.user
+    token = account_activation_token.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    #
+    mail_subject = 'Account deletions.'
+    message = render_to_string('registration/email_account_deletion.html', {
+        'user': user,
+        'domain': '127.0.0.1:8000',
+        'uid': uid,
+        'token': token,
+    })
+    to_email = user.email
+    send_mail(
+        mail_subject,
+        message,
+        'admin@practicepractice.net',
+        [to_email],
+        fail_silently=False,
+    )
+    _logoutUser(request)
+    messages.add_message(
+            request,
+            messages.INFO,
+            'A link containing instructions for account deletion has been \
+                    sent to your registered Email.',
+            extra_tags='alert-warning user_security'
+        )
+    return redirect('user:security')
+
+
+def _deleteaccount_2(request):
+    #
+    uidb64 = request.POST['uidb64']
+    token = request.POST['token']
+    username = request.POST['username']
+    password = request.POST['password']
+    #
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+        messages.add_message(
+                request,
+                messages.INFO,
+                "The user to be confirmed does not exist for some reason, \
+                        try creating another account!",
+                extra_tags='alert-danger top_homepage'
+            )
+    if User.objects.filter(username__iexact=username).exists():
+        auth = authenticate(
+                request,
+                username=user.username,
+                password=password
+            )
+    else:
+        auth = None
+    if user is not None and account_activation_token.check_token(user, token) \
+            and auth is not None:
+        user.delete()
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your account has been deleted!',
+                extra_tags='alert-danger top_homepage'
+            )
+        return redirect('main:index')
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                "User Cannot be confirmed",
+                extra_tags='alert-danger deleteaccount2'
+            )
+        return redirect('user:deleteaccount', uidb64=uidb64, token=token)
+
+
 def _activate(request, uidb64, token):
     _logoutUser(request)
     try:
@@ -564,3 +724,149 @@ def _logoutUser(request):
             extra_tags='alert-success top_homepage'
         )
     return redirect('main:index')
+
+
+def _accountdetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Profile) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _admindetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Admin) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _studentdetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Student) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _teacherdetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Teach) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _organisationdetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Organisation) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _educatordetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Educator) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _editordetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Editor) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _affiliatedetails(request):
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your account (Affiliate) details were sucessfully updated!',
+            extra_tags='alert-success user_profile'
+        )
+    return redirect('user:index')
+
+
+def _themechange(request):
+    new_theme = request.POST['theme']
+    choices = [x[0] for x in request.user.CHOICES_THEME]
+    if new_theme not in choices:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Theme cannot be found, nothing has changed.',
+                extra_tags='alert-danger user_settings'
+            )
+        return redirect('user:settings')
+    user = User.objects.get(pk=request.user.id)
+    user.theme = new_theme
+    user.save()
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your theme has been changed!',
+            extra_tags='alert-success user_settings'
+        )
+    return redirect('user:settings')
+
+
+def _languagechange(request):
+    new_language = request.POST['language']
+    choices = [x[0] for x in request.user.CHOICES_LANGUAGE]
+    if new_language not in choices:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Language cannot be found, nothing has changed.',
+                extra_tags='alert-danger user_settings'
+            )
+        return redirect('user:settings')
+    user = User.objects.get(pk=request.user.id)
+    user.language = new_language
+    user.save()
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your theme has been changed!',
+            extra_tags='alert-success user_settings'
+        )
+    return redirect('user:settings')
+
+
+def _mailchoiceschange(request):
+    choices = [i[0] for i in request.user.CHOICES_EMAIL]
+    email_list = []
+    for val in request.POST:
+        if val in choices:
+            if request.POST[val] == 'on':
+                email_list.append(val)
+    email_list.append('Core')
+    user = User.objects.get(pk=request.user.id)
+    user.mail_choices = email_list
+    user.save()
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Your mailing settings have been updated!',
+            extra_tags='alert-success user_settings'
+        )
+    return redirect('user:settings')

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'djstripe',
     'django_mathjax',
     'view_breadcrumbs',
+    'multiselectfield',
     # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
