@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django_mathjax',
     'view_breadcrumbs',
     'multiselectfield',
+    'address',
     # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
@@ -163,6 +164,8 @@ VALID_GROUPS = [
         "Editor",
         "Affiliate",
     ]
+# Google API settings
+GOOGLE_API_KEY = 'None'
 # SMTP settings
 EMAIL_BACKEND = decouple_config('EMAIL_BACKEND')
 # This uses an installed package to handle sending emails,

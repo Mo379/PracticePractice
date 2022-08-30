@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from multiselectfield import MultiSelectField
+from address.models import AddressField
 
 
 # Create your models here.
@@ -13,8 +14,11 @@ class User(AbstractUser):
     account_details_complete = models.BooleanField(default=False)
     group_details_complete = models.BooleanField(default=False)
     is_member = models.BooleanField(default=False)
+    billing_details = models.BooleanField(default=False)
+    verification_status = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
+    Icon_id = models.CharField(max_length=30, default='', null=True)
     #
     CHOICES_THEME = [
         ('lig', 'Light'),
@@ -94,16 +98,25 @@ class PrivateTutor(models.Model):
         return self.username
 
 
-
 class School(models.Model):
     user = models.ForeignKey(
             User, on_delete=models.SET_NULL, null=True, db_index=True,
             related_name='School'
         )
+    name = models.CharField(max_length=30, default='', null=True)
+    phone_number = models.CharField(max_length=15, default='', null=True)
+    incorporation_date = models.DateField(null=True, blank=True)
+    icon_id = models.CharField(max_length=30, default='', null=True)
+    address = AddressField(related_name='+', blank=True, null=True)
+    url = models.URLField(null=True, blank=True)
+    n_managers = models.IntegerField(default=1, null=True)
+    n_classes = models.IntegerField(default=0, null=True)
+    n_teachers = models.IntegerField(default=0, null=True)
+    n_students = models.IntegerField(default=0, null=True)
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.username
-
+        return self.name
 
 
 class TuitionCenter(models.Model):
@@ -111,10 +124,21 @@ class TuitionCenter(models.Model):
             User, on_delete=models.SET_NULL, null=True, db_index=True,
             related_name='TuitionCenter'
         )
+    name = models.CharField(max_length=30, default='', null=True)
+    phone_number = models.CharField(max_length=15, default='', null=True)
+    incorporation_date = models.DateField(null=True, blank=True)
+    icon_id = models.CharField(max_length=30, default='', null=True)
+    address = AddressField(related_name='+', blank=True, null=True)
+    url = models.URLField(null=True, blank=True)
+    n_managers = models.IntegerField(default=1, null=True)
+    n_classes = models.IntegerField(default=0, null=True)
+    n_teachers = models.IntegerField(default=0, null=True)
+    n_students = models.IntegerField(default=0, null=True)
+    is_active = models.BooleanField(default=False)
+    #
 
     def __str__(self):
-        return self.username
-
+        return self.name
 
 
 class Editor(models.Model):
@@ -125,7 +149,6 @@ class Editor(models.Model):
 
     def __str__(self):
         return self.username
-
 
 
 class Affiliate(models.Model):

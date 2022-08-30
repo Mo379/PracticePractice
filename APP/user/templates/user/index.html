@@ -17,7 +17,6 @@
 {%block content%}
 {%if user.is_authenticated%}
 <div class="container-xl px-4 mt-4">
-
     {%definevar 'user_profile' as alert_loc%}
     {%include 'base/alert.html'%}
     {%definevar 'profile' as active_link%}
@@ -43,9 +42,7 @@
 {%definevar 'user_profile' as alert_loc%}
 {%include 'base/alert.html'%}
 <div class="row justify-content-center">
-
 	<div class="col-xl-10 col-lg-12 col-md-9">
-
 		<div class="card o-hidden border-0 shadow-lg my-5">
 			<div class="card-body p-0">
 				<!-- Nested Row within Card Body -->
@@ -95,9 +92,7 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
-
 </div>
 {%endif%}
 {%endblock%}

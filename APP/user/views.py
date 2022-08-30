@@ -18,6 +18,7 @@ from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from user.forms import LoginForm, ForgotPasswordForm
 
 
 # Create your views here.
@@ -48,7 +49,10 @@ class LoginView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_settings"
+        loginform = LoginForm()
+        context = {}
+        context['form_login'] = loginform
+        return context
 
 
 # Register View
@@ -78,7 +82,10 @@ class ForgotPasswordView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_settings"
+        forgotpasswordform = ForgotPasswordForm()
+        context = {}
+        context['form_password'] = forgotpasswordform
+        return context
 
 
 class DeleteAccountView(BaseBreadcrumbMixin, generic.ListView):
@@ -206,6 +213,7 @@ class AppearanceView(BaseBreadcrumbMixin, generic.ListView):
 def _loginUser(request):
     username = request.POST['username']
     password = request.POST['password']
+
     # chcking if user exits
     user = User.objects.filter(email__iexact=username).exists()
     # Email check
@@ -848,10 +856,40 @@ def _teacherdetails(request):
 
 
 def _organisationdetails(request):
+    street_number = request.POST['org_street_number']
+    street_name = request.POST['org_street_name']
+    town = request.POST['org_town']
+    post_code = request.POST['org_post_code']
+    city = request.POST['org_city']
+    country = request.POST['org_country']
+    incorporation_date= request.POST['org_date']
+    url = request.POST['org_url']
+    # check street number
+    streetnum_check = True
+    # check street name
+    streetname_check = True
+    # check town
+    town_check = True
+    # check post_code
+    postcode_check = True
+    # check city
+    city_check = True
+    # check country
+    country_check = True
+    # check incorporation date
+    incorp_check = True
+    # check url
+    url_check = True
+    #
+    if streetnum_check == False or streetname_check == False or \
+            town_check == False or postcode_check == False or \
+            city_check == False or country_check == False or \
+            incorp_check == False or url_check == False:
+                return redirect('user:index')
     messages.add_message(
             request,
             messages.INFO,
-            'Your account (Organisation) details were sucessfully updated!',
+            'Your account (Organisation) details were sucessfully updated!'+str(request.POST),
             extra_tags='alert-success user_profile'
         )
     return redirect('user:index')
