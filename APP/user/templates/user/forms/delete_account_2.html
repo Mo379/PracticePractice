@@ -1,0 +1,25 @@
+{%load static%}
+{%load general%}
+<form class="user px-3 py-3"  action="{%url 'user:_deleteaccount_2'%}" method="POST" role="form">
+	{% csrf_token %}
+	{%definevar 'deleteaccount2' as alert_loc%}
+	{%include 'base/alert.html'%}
+	{{ form.non_field_errors }}
+	<input type="hidden" class="form-control form-control-user" name="uidb64" value='{{context.uidb64}}'>
+	<input type="hidden" class="form-control form-control-user" name="token" value='{{context.token}}'>
+	<div class="form-group">
+	    {{ form.username.errors }}
+	    <label for="{{ form.username.id_for_label }}">Username</label><br>
+	    {{ form.username }}
+	</div>
+	<div class="form-group">
+	    {{ form.password.errors }}
+	    <label for="{{ form.password.id_for_label }}">Password</label><br>
+	    {{ form.password}}
+	</div>
+	 <button type="submit" class="btn btn-danger btn-user btn-block">Delete Account</button>
+	<hr>
+	<a href="{%url 'content:index'%}" class="btn btn-success btn-user btn-block">
+		Home 
+	</a>
+</form>

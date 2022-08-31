@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from multiselectfield import MultiSelectField
-from address.models import AddressField
 
 
 # Create your models here.
@@ -41,11 +40,11 @@ class User(AbstractUser):
         default='en',
     )
     CHOICES_EMAIL = [
-        ('GroupChange', 'GroupChange'),
-        ('ProductUpdate', 'ProductUpdate'),
-        ('New', 'New'),
-        ('Marketing', 'Marketing'),
-        ('Core', 'Core'),
+        ('GroupChange', "Changes made to groups you're part of."),
+        ('ProductUpdate', "Product updates for products you've purchased or starred."),
+        ('New', "Information on new products and service."),
+        ('Marketing', "Marketing and promotional offers."),
+        ('Core', "Core Emails. (This is mandatory)"),
     ]
     mail_choices = MultiSelectField(
             choices=CHOICES_EMAIL,
@@ -78,63 +77,32 @@ class Student(models.Model):
         return self.username
 
 
-class Teacher(models.Model):
+class Educator(models.Model):
     user = models.ForeignKey(
             User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='Teacher'
+            related_name='Educator'
         )
 
     def __str__(self):
         return self.username
 
 
-class PrivateTutor(models.Model):
+class Organisation(models.Model):
     user = models.ForeignKey(
             User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='PrivateTutor'
-        )
-
-    def __str__(self):
-        return self.username
-
-
-class School(models.Model):
-    user = models.ForeignKey(
-            User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='School'
+            related_name='Organisation'
         )
     name = models.CharField(max_length=30, default='', null=True)
     phone_number = models.CharField(max_length=15, default='', null=True)
     incorporation_date = models.DateField(null=True, blank=True)
     icon_id = models.CharField(max_length=30, default='', null=True)
-    address = AddressField(related_name='+', blank=True, null=True)
     url = models.URLField(null=True, blank=True)
+    location = models.TextField(max_length=500, blank=True)
+    is_active = models.BooleanField(default=False)
     n_managers = models.IntegerField(default=1, null=True)
     n_classes = models.IntegerField(default=0, null=True)
     n_teachers = models.IntegerField(default=0, null=True)
     n_students = models.IntegerField(default=0, null=True)
-    is_active = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
-
-class TuitionCenter(models.Model):
-    user = models.ForeignKey(
-            User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='TuitionCenter'
-        )
-    name = models.CharField(max_length=30, default='', null=True)
-    phone_number = models.CharField(max_length=15, default='', null=True)
-    incorporation_date = models.DateField(null=True, blank=True)
-    icon_id = models.CharField(max_length=30, default='', null=True)
-    address = AddressField(related_name='+', blank=True, null=True)
-    url = models.URLField(null=True, blank=True)
-    n_managers = models.IntegerField(default=1, null=True)
-    n_classes = models.IntegerField(default=0, null=True)
-    n_teachers = models.IntegerField(default=0, null=True)
-    n_students = models.IntegerField(default=0, null=True)
-    is_active = models.BooleanField(default=False)
     #
 
     def __str__(self):

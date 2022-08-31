@@ -66,11 +66,16 @@ def in_groups(user, group_list_str):
         return False
 
 
+@register.filter(name='dict')
+def dict(var):
+    """ Return the description of the variable """
+    return var.__dict__
+
+
 @register.simple_tag
 def definevar(val=None):
     """ Define this variable """
     return val
-
 
 
 

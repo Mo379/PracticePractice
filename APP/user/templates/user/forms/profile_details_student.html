@@ -1,0 +1,21 @@
+{%load static %}
+{%load general%}
+
+{%if user|in_groups:'Student'%}
+<!-- Organisation Details -->
+<div class="card mb-4">
+<div class="card-header">Student Details</div>
+<div class="card-body">
+    <form class="user px-3 py-3"  action="{%url 'user:_studentdetails'%}" method="POST" role="form">
+	{% csrf_token %}
+	<!-- Form Group (username)-->
+	<div class="mb-3">
+	    <label class="small mb-1" for="inputUsername">Username (how your name will appear to other users on the site)</label>
+	    <input class="form-control" id="inputUsername" type="text" placeholder="Enter your username" value="{{user.username}}">
+	</div>
+	<!-- Save changes button-->
+	<button class="btn btn-primary" type="submit">Save changes</button>
+    </form>
+</div>
+</div>
+{%endif%}

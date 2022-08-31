@@ -1,0 +1,76 @@
+{%load static %}
+{%load general%}
+
+<div class="card mb-4 mb-xl-0">
+<div class="card-header">Profile Picture</div>
+<div class="card-body text-center">
+    <!-- Profile picture image-->
+    <img class="img-account-profile rounded-circle mb-2" src="{% static 'base/img/logo.png'%}" alt="">
+    <!-- Profile picture help block-->
+    <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
+    <!-- Profile picture upload button-->
+    <button class="btn btn-primary" type="button">Upload new image</button>
+</div>
+</div>
+
+
+<br>
+<div class="card mb-4 mb-xl-0">
+<div class="card-header">Key Information</div>
+<div class="mb-3" style="margin-left:10px;padding:5px;">
+	<label class="large mb-1"><i class="bi bi-person-badge"></i> User Type: {{user.groups.all|list_to_string:', '}}</label><br>
+	<label class="large mb-1"><i class="bi bi-person-plus"></i> Member Status: 
+		{%if user.is_member%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label><br>
+	<label class="large mb-1"><i class="bi bi-credit-card-2-back"></i> Billing Details: 
+		{%if user.billing_details%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label><br>
+	<label class="large mb-1"><i class="bi bi-clipboard2-check"></i> Registration Status: 
+		{%if user.registration%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label><br>
+	<label class="large mb-1"><i class="bi bi-shield-lock"></i> Password Status: 
+		{%if user.password_set%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label><br>
+	<label class="large mb-1"><i class="bi bi-journal-text"></i> Account Details: 
+		{%if user.account_details_complete%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label><br>
+	<label class="large mb-1"><i class="bi bi-journal-plus"></i> Other Details: 
+		{%if user.group_details_complete%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label><br>
+	<label class="large mb-1"><i class="bi bi-check2-square"></i> Admin Verification Status: 
+		{%if user.verification_status%}
+		<i class="bi bi-check-circle-fill" style='color:green;'></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill" style='color:red;'></i>
+		{%endif%}
+	</label>
+</div>
+</div>
+
+
+
+

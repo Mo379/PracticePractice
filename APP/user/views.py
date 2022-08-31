@@ -13,12 +13,23 @@ from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.contrib.auth.models import Group
 from datetime import datetime
-from user.models import User
+from user.models import User, Organisation
 from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from user.forms import LoginForm, ForgotPasswordForm
+from user.forms import (
+        LoginForm,
+        ForgotPasswordForm,
+        RegistrationForm,
+        ResetPasswordForm,
+        ChangePasswordForm,
+        EmailChoiceForm,
+        AppearanceChoiceForm,
+        LanguageChoiceForm,
+        AccountDetailsForm,
+        OrganisationDetailsForm,
+    )
 
 
 # Create your views here.
@@ -34,12 +45,29 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return 'user_profile'
+        user = User.objects.get(pk=self.request.user.id)
+        organisation = Organisation.objects.get(user=user)
+        #
+        accountdetailsform = AccountDetailsForm(instance=user)
+        organisationdetailsform = OrganisationDetailsForm(instance=organisation)
+        loginform = LoginForm()
+        #
+        context = {}
+        context['organisation'] = organisation
+        context['form_login'] = loginform
+        context['form_accountdetails'] = accountdetailsform
+        context['form_admindetails'] = 's'
+        context['form_studentdetails'] = 's'
+        context['form_organisationdetails'] = organisationdetailsform
+        context['form_educatordetails'] = 's'
+        context['form_editordetails'] = 's'
+        context['form_affiliatedetails'] = 's'
+        return context
 
 
 # Login view
 class LoginView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "registration/login.html"
+    template_name = "user/registration/login.html"
     context_object_name = 'context'
 
     @cached_property
@@ -57,7 +85,7 @@ class LoginView(BaseBreadcrumbMixin, generic.ListView):
 
 # Register View
 class RegisterView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "registration/register.html"
+    template_name = "user/registration/register.html"
     context_object_name = 'context'
 
     @cached_property
@@ -67,12 +95,37 @@ class RegisterView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
+        registrationform = RegistrationForm()
+        context = {}
+        context['form_registration'] = registrationform
+        return context
         return "user_settings"
 
 
 # Forgot password view
+
+class PwdResetView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = "user/registration/password_reset_form.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("forgot-password", reverse("user:forgot-password")),
+                ("Password-Reset", '')
+                ]
+
+    def get_queryset(self):
+        resetpasswordform = ResetPasswordForm()
+        context = {}
+        context['uidb64'] = self.kwargs['uidb64']
+        context['token'] = self.kwargs['token']
+        context['form_resetpassword'] = resetpasswordform
+        return context
+
+
 class ForgotPasswordView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "registration/forgot-password.html"
+    template_name = "user/registration/forgot-password.html"
     context_object_name = 'context'
 
     @cached_property
@@ -89,7 +142,7 @@ class ForgotPasswordView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class DeleteAccountView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "registration/delete_account.html"
+    template_name = "user/registration/delete_account.html"
     context_object_name = 'context'
 
     @cached_property
@@ -98,29 +151,13 @@ class DeleteAccountView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
+        loginform = LoginForm()
         if self.request.user.is_authenticated:
             _logoutUser(self.request)
         context = {}
         context['uidb64'] = self.kwargs['uidb64']
         context['token'] = self.kwargs['token']
-        return context
-
-
-class PwdResetView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "registration/password_reset_form.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("forgot-password", reverse("user:forgot-password")),
-                ("Password-Reset", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['uidb64'] = self.kwargs['uidb64']
-        context['token'] = self.kwargs['token']
+        context['form_deleteaccount'] = loginform
         return context
 
 
@@ -153,7 +190,12 @@ class SecurityView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_settings"
+        changepasswordform = ChangePasswordForm()
+        loginform = LoginForm()
+        context = {}
+        context['form_changepassword'] = changepasswordform
+        context['form_login'] = loginform
+        return context
 
 
 # Settings view
@@ -169,7 +211,19 @@ class SettingsView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_settings"
+        context = {}
+        loginform = LoginForm()
+        try:
+            user = User.objects.get(pk=self.request.user.id)
+            emailchoiceform = EmailChoiceForm(instance=user)
+            appearancechoiceform = AppearanceChoiceForm(instance=user)
+            languagechoiceform = LanguageChoiceForm(instance=user)
+            context['form_emailchoice'] = emailchoiceform
+            context['form_appearancechoice'] = appearancechoiceform
+            context['form_languagechoice'] = languagechoiceform
+        except Exception:
+            context['form_login'] = loginform
+        return context
 
 
 # Join view
@@ -287,8 +341,8 @@ def _loginUser(request):
 # Register user action
 def _registerUser(request):
     utype = request.POST['usertype']
-    first = request.POST['firstname']
-    last = request.POST['lastname']
+    first = request.POST['first_name']
+    last = request.POST['last_name']
     username = request.POST['username']
     email = request.POST['email']
     password = request.POST['password']
@@ -363,7 +417,7 @@ def _registerUser(request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     #
     mail_subject = 'Account activation.'
-    message = render_to_string('registration/email_account_activation.html', {
+    message = render_to_string('user/emails/account_activation.html', {
         'user': user,
         'domain': '127.0.0.1:8000',
         'uid': uid,
@@ -493,7 +547,7 @@ def _pwdreset_form(request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     #
     mail_subject = 'Password Reset'
-    message = render_to_string('registration/email_password_reset.html', {
+    message = render_to_string('user/emails/password_reset.html', {
         'user': user,
         'domain': '127.0.0.1:8000',
         'uid': uid,
@@ -529,7 +583,7 @@ def _pwdreset(request):
     # post variables
     uidb64 = request.POST['uidb64']
     token = request.POST['token']
-    new_pass = request.POST['password']
+    new_pass = request.POST['password_new']
     new_pass_conf = request.POST['password_conf']
     # error cehcking
     pass_check = True
@@ -617,7 +671,7 @@ def _deleteaccount_1(request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     #
     mail_subject = 'Account deletions.'
-    message = render_to_string('registration/email_account_deletion.html', {
+    message = render_to_string('user/emails/account_deletion.html', {
         'user': user,
         'domain': '127.0.0.1:8000',
         'uid': uid,
@@ -856,42 +910,27 @@ def _teacherdetails(request):
 
 
 def _organisationdetails(request):
-    street_number = request.POST['org_street_number']
-    street_name = request.POST['org_street_name']
-    town = request.POST['org_town']
-    post_code = request.POST['org_post_code']
-    city = request.POST['org_city']
-    country = request.POST['org_country']
-    incorporation_date= request.POST['org_date']
-    url = request.POST['org_url']
-    # check street number
-    streetnum_check = True
-    # check street name
-    streetname_check = True
-    # check town
-    town_check = True
-    # check post_code
-    postcode_check = True
-    # check city
-    city_check = True
-    # check country
-    country_check = True
-    # check incorporation date
-    incorp_check = True
-    # check url
-    url_check = True
-    #
-    if streetnum_check == False or streetname_check == False or \
-            town_check == False or postcode_check == False or \
-            city_check == False or country_check == False or \
-            incorp_check == False or url_check == False:
-                return redirect('user:index')
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Organisation) details were sucessfully updated!'+str(request.POST),
-            extra_tags='alert-success user_profile'
-        )
+    if request.method == "POST":
+        organisation = Organisation.objects.get(user=request.user)
+        form = OrganisationDetailsForm(
+                request.POST or None,
+                instance=organisation
+            )
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your account (Organisation) details were sucessfully updated!',
+                    extra_tags='alert-success user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
     return redirect('user:index')
 
 
@@ -974,10 +1013,9 @@ def _languagechange(request):
 def _mailchoiceschange(request):
     choices = [i[0] for i in request.user.CHOICES_EMAIL]
     email_list = []
-    for val in request.POST:
+    for val in request.POST.getlist('mail_choices'):
         if val in choices:
-            if request.POST[val] == 'on':
-                email_list.append(val)
+            email_list.append(val)
     email_list.append('Core')
     user = User.objects.get(pk=request.user.id)
     user.mail_choices = email_list

@@ -1,0 +1,8 @@
+{%load static %}
+{%load general%}
+<form class="user px-3 py-3"  action="{%url 'user:_themechange'%}" method="POST" role="form">
+	{% csrf_token %}
+	{{form}}
+	<br>
+	<button class="btn btn-primary" type="submit">Update</button>
+</form>

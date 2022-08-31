@@ -15,152 +15,76 @@
 {%endblock%}
 
 {%block content%}
+{%if user.is_authenticated%}
 <div class="container-xl px-4 mt-4">
-    {%definevar 'user_settings' as alert_loc%}
-    {%include 'base/alert.html'%}
-    {%definevar 'settings' as active_link%}
-    {%include 'user/parts/_navigation.html'%}
-        <div class="row">
-        <div class="col-lg-8">
-            <!-- Email notifications preferences card-->
-            <div class="card card-header-actions mb-4">
-                <div class="card-header">
-                    Email Notifications
-                </div>
-                <div class="card-body">
-		    <form class="user px-3 py-3"  action="{%url 'user:_mailchoiceschange'%}" method="POST" role="form">
-			{% csrf_token %}
-                        <!-- Form Group (email updates checkboxes)-->
-                        <div class="mb-0">
-                            <label class="small mb-2">Choose which types of email updates you receive</label>
-			    {%for choice in user.CHOICES_EMAIL%}
-                            <div class="form-check mb-2">
-                                <input 
-				class="form-check-input" 
-				id="EC_{{choice|index:0}}" 
-				type="checkbox" 
-				name="{{choice|index:0}}" 
-				{%if choice|index:0 in user.mail_choices%}
-				checked
-				{%endif%}
-				{%if choice|index:0 == 'Core'%}
-				disabled
-				{%endif%}
-			    >
-				<label class="form-check-label" for="EC_{{choice|index:0}}">
-					{%if choice|index:0 == 'GroupChange'%}
-					Changes are made to groups you're part of
-					{%endif%}
-					{%if choice|index:0 == 'ProductUpdate'%}
-					Product updates for products you've purchased or starred
-					{%endif%}
-					{%if choice|index:0 == 'New'%}
-					Information on new products and service
-					{%endif%}
-					{%if choice|index:0 == 'Marketing'%}
-					Marketing and promotional offers
-					{%endif%}
-					{%if choice|index:0 == 'Core'%}
-					Core Emails
-					{%endif%}
-				</label>
-                            </div>
-			    {%endfor%}
-                        </div>
-			<br>
-	 	 	<button class="btn btn-primary" type="submit">Save changes</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <!-- Notifications preferences card-->
-            <div class="card">
-                <div class="card-header">Appearance</div>
-                <div class="card-body">
-		    <form class="user px-3 py-3"  action="{%url 'user:_themechange'%}" method="POST" role="form">
-			{% csrf_token %}
-                        <!-- Form Group (notification preference checkboxes)-->
-			<div class="form-check">
-			  <input class="form-check-input" type="radio" name="theme" id="theme1"
-				{%if user.theme == 'lig'%}
-				checked
-				{%endif%}
-			  value='lig'>
-			  <label class="form-check-label" for="theme1"appearance_light>
-			    <i class="bi bi-moon"></i> Light</a>
-			  </label>
-			</div>
-			<div class="form-check">
-			  <input class="form-check-input" type="radio" name="theme" id="theme2"
-				{%if user.theme == 'dar'%}
-				checked
-				{%endif%}
-			  value='dar'>
-			  <label class="form-check-label" for="theme2">
-			    <i class="bi bi-moon-fill"></i> Dark</a>
-			  </label>
-			</div>
-			<div class="form-check">
-			  <input class="form-check-input" type="radio" name="theme" id="theme3"
-				{%if user.theme == 'lib'%}
-				checked
-				{%endif%}
-			  value='lib'>
-			  <label class="form-check-label" for="theme3">
-		            <i class="bi bi-moon-fill text-warning" style="color:yellow-500;"></i> Library</a>
-			  </label>
-			</div>
-                        <!-- Submit button-->
-			<br>
-			<button class="btn btn-primary" type="submit">Update</button>
-                    </form>
-                </div>
-            </div>
-	    <br>
-            <div class="card">
-                <div class="card-header">Language</div>
-                <div class="card-body">
-		    <form class="user px-3 py-3"  action="{%url 'user:_languagechange'%}" method="POST" role="form">
-			{% csrf_token %}
-                        <!-- Form Group (notification preference checkboxes)-->
-			<div class="form-check">
-			  <input class="form-check-input" type="radio" name="language" id="lan1"
-				{%if user.language == 'en'%}
-				checked
-				{%endif%}
-			  value='en'>
-			  <label class="form-check-label" for="lan1">
-			    English
-			  </label>
-			</div>
-			<div class="form-check">
-			  <input class="form-check-input" type="radio" name="language" id="lan2"
-				{%if user.language == 'fr'%}
-				checked
-				{%endif%}
-			  value='fr'>
-			  <label class="form-check-label" for="lan2">
-			    Français
-			  </label>
-			</div>
-			<div class="form-check">
-			  <input class="form-check-input" type="radio" name="language" id="lan2"
-				{%if user.language == 'es'%}
-				checked
-				{%endif%}
-			  value='es'>
-			  <label class="form-check-label" for="lan2">
-			    Española
-			  </label>
-			</div>
-                        <!-- Submit button-->
-			<br>
-			<button class="btn btn-primary" type="submit">Update</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+{%definevar 'user_settings' as alert_loc%}
+{%include 'base/alert.html'%}
+{%definevar 'settings' as active_link%}
+{%include 'user/parts/_navigation.html'%}
+<div class="row">
+	<div class="col-lg-8">
+	<!-- Email notifications preferences card-->
+	<div class="card card-header-actions mb-4">
+	<div class="card-header">
+	Email Notifications
+	</div>
+	<div class="card-body">
+		{%definevar context.form_emailchoice as form%}
+		{%include 'user/forms/emailchoice.html'%}
+	</div>
 </div>
+</div>
+<div class="col-lg-4">
+<!-- Notifications preferences card-->
+<div class="card">
+<div class="card-header">Appearance</div>
+	<div class="card-body">
+		{%definevar context.form_appearancechoice as form%}
+		{%include 'user/forms/appearancechoice.html'%}
+	</div>
+</div>
+<br>
+<div class="card">
+<div class="card-header">Language</div>
+	<div class="card-body">
+		{%definevar context.form_languagechoice as form%}
+		{%include 'user/forms/languagechoice.html'%}
+	</div>
+</div>
+</div>
+</div>
+</div>
+{%else%}
+<!-- Outer Row -->
+{%definevar 'user_settings' as alert_loc%}
+{%include 'base/alert.html'%}
+<div class="row justify-content-center">
+<div class="col-xl-10 col-lg-12 col-md-9">
+<div class="card o-hidden border-0 shadow-lg my-5">
+<div class="card-body p-0">
+<!-- Nested Row within Card Body -->
+<div class="row">
+<div class="col-lg-6 d-none d-lg-block bg-login-image" style='background:Black;'></div>
+<div class="col-lg-6">
+<div class="p-5">
+	<div class="text-center">
+		<h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+	</div>
+	{%definevar context.form_login as form%}
+	{%include 'user/forms/login.html'%}
+	<hr>
+	<div class="text-center">
+		<a class="small" href="{%url 'user:forgot-password'%}">Forgot Password?</a>
+	</div>
+	<div class="text-center">
+		<a class="small" href="{%url 'user:register'%}">Create an Account!</a>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+{%endif%}
 {%endblock%}

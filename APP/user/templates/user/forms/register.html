@@ -1,0 +1,51 @@
+{%load static %}
+{%load general%}
+<form class="user px-3 py-3" action='{%url 'user:_register'%}' method="POST" role ='form'>
+	{% csrf_token %}
+	{%definevar 'registration_form' as alert_loc%}
+	{%include 'base/alert.html'%}
+	<div class="form-group">
+	    {{ form.usertype.errors }}
+	    <label for="{{ form.usertype.id_for_label }}">User Type</label><br>
+	    {{ form.usertype}}
+	</div>
+	<div class="form-group">
+	    {{ form.username.errors }}
+	    <label for="{{ form.username.id_for_label }}">UserName</label><br>
+	    {{ form.username}}
+	</div>
+	<div class="form-group row">
+		<div class="col-sm-6 mb-3 mb-sm-0">
+		    {{ form.first_name.errors }}
+		    <label for="{{ form.first_name.id_for_label }}">First Name</label><br>
+		    {{ form.first_name}}
+		</div>
+		<div class="col-sm-6 mb-3 mb-sm-0">
+		    {{ form.last_name.errors }}
+		    <label for="{{ form.last_name.id_for_label }}">Last Name</label><br>
+		    {{ form.last_name}}
+		</div>
+	</div>
+	<div class="form-group">
+	    {{ form.email.errors }}
+	    <label for="{{ form.email.id_for_label }}">Email</label><br>
+	    {{ form.email}}
+	</div>
+	<div class="form-group row">
+		<div class="col-sm-6 mb-3 mb-sm-0">
+		    {{ form.password.errors }}
+		    <label for="{{ form.password.id_for_label }}">Password</label><br>
+		    {{ form.password}}
+		</div>
+		<div class="col-sm-6 mb-3 mb-sm-0">
+		    {{ form.password_conf.errors }}
+		    <label for="{{ form.password_conf.id_for_label }}">Password Confirmation</label><br>
+		    {{ form.password_conf }}
+		</div>
+	</div>
+	<button type="submit" class="btn btn-primary btn-user btn-block">Register Account</button>
+	<hr>
+	<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
+	Home 
+	</a>
+</form>

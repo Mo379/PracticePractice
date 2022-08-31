@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django_mathjax',
     'view_breadcrumbs',
     'multiselectfield',
-    'address',
     # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
@@ -155,7 +154,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Groups settings
 VALID_GROUPS = [
-        "Admin",
         "Student",
         "Teacher",
         "PrivateTutor",
@@ -163,6 +161,7 @@ VALID_GROUPS = [
         "TuitionCenter",
         "Editor",
         "Affiliate",
+        "Admin",
     ]
 # Google API settings
 GOOGLE_API_KEY = 'None'

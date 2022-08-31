@@ -1,4 +1,4 @@
-{%extends 'registration/base.html'%}
+{%extends 'user/registration/base.html'%}
 {%block pagename%}
 Register
 {%endblock%}
@@ -10,94 +10,33 @@ Register
 {%block content%}
 <!-- Outer Row -->
 <div class="row justify-content-center">
-
-	<div class="col-xl-10 col-lg-12 col-md-9">
-
-		<div class="card o-hidden border-0 shadow-lg my-5">
-			<div class="card-body p-0">
-	<!-- Nested Row within Card Body -->
-	<div class="row">
-		<div class="col-lg-5 d-none d-lg-block bg-register-image" style='background:black;'></div>
-		<div class="col-lg-7">
-			<div class="p-5">
-				<div class="text-center">
-					<h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
-				</div>
-
-
-
-
-				{%if user.is_authenticated == False%}
-				<form class="user px-3 py-3" action='{%url 'user:_register'%}' method="POST" role ='form'>
-					{% csrf_token %}
-					{%definevar 'registration_form' as alert_loc%}
-					{%include 'base/alert.html'%}
-					<div class="form-group">
-						<select name='usertype' class="form-select" 
-							style="width:100%;padding:10px;
-							border-radius:10rem 5rem 5rem 10rem;" 
-							aria-label="Default select example"
-							>
-						  <option value="False" selected>What are you ? please select... </option>
-						  <option value='Student'>Student</option>
-						  <option value="Teacher">Teacher</option>
-						  <option value="PrivateTutor">Private Tutor</option>
-						  <option value="School">School</option>
-						  <option value="TuitionCenter">Tuition Center</option>
-						  <option value="Editor">Editor</option>
-						  <option value="Affiliate">Affiliate</option>
-						</select>
-					</div>
-					<div class="form-group">
-							<input type="text" class="form-control form-control-user" name='username' placeholder="User Name">
-					</div>
-					<div class="form-group row">
-						<div class="col-sm-6 mb-3 mb-sm-0">
-							<input type="text" class="form-control form-control-user" name='firstname' placeholder="First Name">
-						</div>
-						<div class="col-sm-6">
-							<input type="text" class="form-control form-control-user" name='lastname' placeholder="Last Name">
-						</div>
-					</div>
-					<div class="form-group">
-							<input type="text" class="form-control form-control-user" name='email' placeholder="email">
-					</div>
-					<div class="form-group row">
-						<div class="col-sm-6 mb-3 mb-sm-0">
-							<input type="text" class="form-control form-control-user" name='password' placeholder="password">
-						</div>
-						<div class="col-sm-6">
-							<input type="text" class="form-control form-control-user" name='password_conf' placeholder="password repeat">
-						</div>
-					</div>
-					<button type="submit" class="btn btn-primary btn-user btn-block">Register Account</button>
-					<hr>
-					<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
-					Home 
-					</a>
-				</form>
-
-
-				{%else%}
-					<form class="user px-3 py-3">
-						<a class="btn btn-google btn-user btn-block" href="{%url 'user:_logout'%}">
-							<i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
-						</li>
-						<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
-							Home 
-						</a>
-					</form>
-				{%endif%}
-				<hr>
-				<div class="text-center">
-					<a class="small" href="{%url 'user:forgot-password'%}">Forgot Password?</a>
-				</div>
-				<div class="text-center">
-					<a class="small" href="{% url 'user:login'%}">Already have an account? Login!</a>
-				</div>
-			</div>
-		</div>
+<div class="col-xl-10 col-lg-12 col-md-9">
+<div class="card o-hidden border-0 shadow-lg my-5">
+<div class="card-body p-0">
+<!-- Nested Row within Card Body -->
+<div class="row">
+<div class="col-lg-5 d-none d-lg-block bg-register-image" style='background:black;'></div>
+<div class="col-lg-7">
+<div class="p-5">
+	<div class="text-center">
+		<h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
 	</div>
+	{%if user.is_authenticated == False%}
+	{%definevar context.form_registration as form%}
+	{%include 'user/forms/register.html'%}
+	{%else%}
+	{%include 'user/forms/logout.html'%}
+	{%endif%}
+	<hr>
+	<div class="text-center">
+		<a class="small" href="{%url 'user:forgot-password'%}">Forgot Password?</a>
 	</div>
+	<div class="text-center">
+		<a class="small" href="{% url 'user:login'%}">Already have an account? Login!</a>
+	</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 {%endblock%}

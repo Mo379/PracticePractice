@@ -24,16 +24,38 @@
     <div class="row">
 	<div class="col-xl-4">
 	<!-- Profile picture card-->
-	{%include 'user/parts/index_profile.html'%}
+	{%include 'user/forms/index_profile.html'%}
 	</div>
         <div class="col-xl-8">
-	{%include 'user/parts/index_profile_details_account.html'%}
-	{%include 'user/parts/index_profile_details_admin.html'%}
-	{%include 'user/parts/index_profile_details_student.html'%}
-	{%include 'user/parts/index_profile_details_organisation.html'%}
-	{%include 'user/parts/index_profile_details_educator.html'%}
-	{%include 'user/parts/index_profile_details_editor.html'%}
-	{%include 'user/parts/index_profile_details_affiliate.html'%}
+	{%if context.form_accountdetails %}
+		{%definevar context.form_accountdetails as form%}
+		{%include 'user/forms/profile_details_account.html'%}
+	{%endif%}
+	{%if context.form_admindetails%}
+		{%definevar context.form_admindetails as form%}
+		{%include 'user/forms/profile_details_admin.html'%}
+	{%endif%}
+	{%if context.form_studentdetails%}
+		{%definevar context.form_studentdetails as form%}
+		{%include 'user/forms/profile_details_student.html'%}
+	{%endif%}
+	{%if context.form_organisationdetails%}
+		{%definevar context.form_organisationdetails as form%}
+		{%definevar context.organisation as organisation%}
+		{%include 'user/forms/profile_details_organisation.html'%}
+	{%endif%}
+	{%if context.form_educatordetails%}
+		{%definevar context.form_educatordetails as form%}
+		{%include 'user/forms/profile_details_educator.html'%}
+	{%endif%}
+	{%if context.form_editordetails%}
+		{%definevar context.form_editordetails as form%}
+		{%include 'user/forms/profile_details_editor.html'%}
+	{%endif%}
+	{%if context.form_affiliatedetails%}
+		{%definevar context.form_affiliatedetails as form%}
+		{%include 'user/forms/profile_details_affiliate.html'%}
+	{%endif%}
         </div>
     </div>
 </div>
@@ -42,57 +64,32 @@
 {%definevar 'user_profile' as alert_loc%}
 {%include 'base/alert.html'%}
 <div class="row justify-content-center">
-	<div class="col-xl-10 col-lg-12 col-md-9">
-		<div class="card o-hidden border-0 shadow-lg my-5">
-			<div class="card-body p-0">
-				<!-- Nested Row within Card Body -->
-				<div class="row">
-					<div class="col-lg-6 d-none d-lg-block bg-login-image" style='background:Black;'></div>
-					<div class="col-lg-6">
-						<div class="p-5">
-							<div class="text-center">
-								<h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-							</div>
-							{%if user.is_authenticated == False %}
-							<form class="user px-3 py-3"  action="{%url 'user:_login'%}" method="POST" role="form">
-								{% csrf_token %}
-								{%definevar 'login_form' as alert_loc%}
-								{%include 'base/alert.html'%}
-								<div class="form-group">
-						  			<input type="text" class="form-control form-control-user" name="username" placeholder="Username/Email">
-								</div>
-								<div class="form-group">
-						  			<input type="password" class="form-control form-control-user" name="password" placeholder="Password">
-								</div>
-								 <button type="submit" class="btn btn-primary btn-user btn-block">Sign in</button>
-								<hr>
-								<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
-									Home 
-								</a>
-							</form>
-							{%else%}
-							<form class="user px-3 py-3">
-				  				<a class="btn btn-google btn-user btn-block" href="{%url 'user:_logout'%}">
-									<i class="bi bi-box-arrow-in-left text-danger"></i> Logout</a>
-								</li>
-								<a href="{%url 'content:index'%}" class="btn btn-google btn-user btn-block">
-									Home 
-								</a>
-							</form>
-							{%endif%}
-							<hr>
-							<div class="text-center">
-								<a class="small" href="{%url 'user:forgot-password'%}">Forgot Password?</a>
-							</div>
-							<div class="text-center">
-								<a class="small" href="{%url 'user:register'%}">Create an Account!</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+<div class="col-xl-10 col-lg-12 col-md-9">
+<div class="card o-hidden border-0 shadow-lg my-5">
+<div class="card-body p-0">
+<!-- Nested Row within Card Body -->
+<div class="row">
+<div class="col-lg-6 d-none d-lg-block bg-login-image" style='background:Black;'></div>
+<div class="col-lg-6">
+<div class="p-5">
+	<div class="text-center">
+		<h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
 	</div>
+	{%definevar context.form_login as form%}
+	{%include 'user/forms/login.html'%}
+	<hr>
+	<div class="text-center">
+		<a class="small" href="{%url 'user:forgot-password'%}">Forgot Password?</a>
+	</div>
+	<div class="text-center">
+		<a class="small" href="{%url 'user:register'%}">Create an Account!</a>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 {%endif%}
 {%endblock%}

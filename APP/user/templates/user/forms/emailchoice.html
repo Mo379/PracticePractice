@@ -1,0 +1,19 @@
+{%load static %}
+{%load general%}
+<form class="user px-3 py-3"  action="{%url 'user:_mailchoiceschange'%}" method="POST" role="form">
+{% csrf_token %}
+<!-- Form Group (email updates checkboxes)-->
+<div class="mb-0">
+    <div class="form-check mb-2">
+	<div class="form-group">
+	    {{ form.mail_choices.errors }}
+	    {{form.mail_choices.label}}:<br><br>
+	    {% for choice in form.mail_choices%}
+	    {{choice}}<br>
+	    {%endfor%}
+	</div>
+    </div>
+</div>
+<br>
+<button class="btn btn-primary" type="submit">Save changes</button>
+</form>

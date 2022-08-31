@@ -1,0 +1,56 @@
+{%load static %}
+{%load general%}
+
+{%if user|in_groups:'TuitionCenter School'%}
+<!-- Organisation Details -->
+<div class="card mb-4">
+<div class="card-header">Organisation Details</div>
+<div class="card-body">
+        <div class="card-body text-center mb-3">
+            <!-- Profile picture image-->
+            <img class="img-account-profile rounded-circle mb-2" src="{% static 'base/img/logo.png'%}" alt="">
+            <!-- Profile picture help block-->
+            <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
+            <!-- Profile picture upload button-->
+            <button class="btn btn-primary" type="button">Upload new image</button>
+        </div>
+	<form class="user px-3 py-3"  action="{%url 'user:_organisationdetails'%}" method="POST" role="form">
+	{% csrf_token %}
+	<!-- Form Row -->
+	{{ form.non_field_errors }}
+	<div class="form-group">
+	    {{ form.name.errors }}
+	    <label for="{{ form.name.id_for_label }}">{{form.name.label}}</label><br>
+	    {{ form.name }}
+	</div>
+	<!-- Form Row-->
+	<div class="row gx-3 mb-3">
+	    <!-- Form Group (phone number)-->
+	    <div class="col-md-6">
+	        {{ form.phone_number.errors }}
+	        <label for="{{ form.phone_number.id_for_label }}">{{form.phone_number.label}}</label><br>
+	        {{ form.phone_number}}
+	    </div>
+	    <!-- Form Group (birthday)-->
+	    <div class="col-md-6">
+	        {{ form.incorporation_date.errors }}
+	        <label for="{{ form.incorporation_date.id_for_label }}">{{form.incorporation_date.label}}</label><br>
+	        {{ form.incorporation_date}}
+	    </div>
+	</div>
+	<div class="form-group">
+	    {{ form.url.errors }}
+	    <label for="{{ form.url.id_for_label }}">{{form.url.label}}</label><br>
+	    {{ form.url }}
+	</div>
+	<div class="form-group">
+	    {{ form.location.errors }}
+	    <label for="{{ form.location.id_for_label }}">{{form.location.label}}</label><br>
+	    {{ form.location }}
+	</div>
+	<!-- Save changes button-->
+	<button class="btn btn-primary" type="submit">Save changes</button>
+    </form>
+</div>
+</div>
+{%endif%}

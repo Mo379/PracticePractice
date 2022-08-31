@@ -1,0 +1,53 @@
+{%load static %}
+{%load general%}
+<!-- Account details card-->
+<div class="card mb-4">
+<div class="card-header">Account Details</div>
+<div class="card-body">
+    <form class="user px-3 py-3"  action="{%url 'user:_accountdetails'%}" method="POST" role="form">
+        {% csrf_token %}
+	{{ form.non_field_errors }}
+	<!-- Form Group (username)-->
+	<div class="mb-3">
+	    {{ form.username.errors }}
+	    <label for="{{ form.username.id_for_label }}">{{form.username.label}}</label><br>
+	    {{ form.username }}
+	</div>
+	<!-- Form Row-->
+	<div class="row gx-3 mb-3">
+	    <!-- Form Group (first name)-->
+	    <div class="col-md-6">
+	        {{ form.first_name.errors }}
+	        <label for="{{ form.first_name.id_for_label }}">{{form.first_name.label}}</label><br>
+	        {{ form.first_name }}
+	    </div>
+	    <!-- Form Group (last name)-->
+	    <div class="col-md-6">
+	        {{ form.last_name.errors }}
+	        <label for="{{ form.last_name.id_for_label }}">{{form.last_name.label}}</label><br>
+	        {{ form.last_name }}
+	    </div>
+	</div>
+	<!-- Form Group (email address)-->
+	<div class="mb-3">
+	    {{ form.email.errors }}
+	    <label for="{{ form.email.id_for_label }}">{{form.email.label}}</label><br>
+	    {{ form.email }}
+	</div>
+	<!-- Form Group (DOB)-->
+	<div class="mb-3">
+	    {{ form.date_of_brith.errors }}
+	    <label for="{{ form.date_of_birth.id_for_label }}">{{form.date_of_birth.label}}</label><br>
+	    {{ form.date_of_birth }}
+	</div>
+	<!-- User Bio-->
+	<div class="mb-3">
+	    {{ form.bio.errors }}
+	    <label for="{{ form.bio.id_for_label }}">{{form.bio.label}}</label><br>
+	    {{ form.bio }}
+	</div>
+	<!-- Save changes button-->
+	<button class="btn btn-primary" type="submit">Save changes</button>
+    </form>
+</div>
+</div>
