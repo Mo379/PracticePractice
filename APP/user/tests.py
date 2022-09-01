@@ -20,8 +20,8 @@ class User_creation_Tests(TestCase):
         self.password_conf = '12345'
         self.data = {
                 'usertype': 'Student',
-                'firstname': self.first,
-                'lastname': self.last,
+                'first_name': self.first,
+                'last_name': self.last,
                 'username': self.user_name,
                 'email': self.email,
                 'password': self.password,
@@ -34,7 +34,7 @@ class User_creation_Tests(TestCase):
         self.pwdreset_data = {
                 'uidb64': '',
                 'token': '',
-                'password': '12345',
+                'password_new': '12345',
                 'password_conf': '12345'
             }
 
