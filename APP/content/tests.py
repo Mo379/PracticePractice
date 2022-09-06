@@ -151,41 +151,41 @@ class UTILITY_Tests(TestCase):
 # URL testing
 class URL_pages_Tests(TestCase):
     def test_homepage(self):
-        response = self.client.get('/my/')
+        response = self.client.get('/study/')
         self.assertEqual(response.status_code, 200)
 
     def test_hub(self):
-        response = self.client.get('/my/hub')
+        response = self.client.get('/study/hub')
         self.assertEqual(response.status_code, 200)
 
     def test_statistics(self):
-        response = self.client.get('/my/statistics')
+        response = self.client.get('/study/statistics')
         self.assertEqual(response.status_code, 200)
 
     def test_content(self):
-        response = self.client.get('/my/content')
+        response = self.client.get('/study/content')
         self.assertEqual(response.status_code, 200)
 
     def test_content_questions(self):
-        response = self.client.get('/my/content/questions')
+        response = self.client.get('/study/content/questions')
         self.assertEqual(response.status_code, 200)
 
     def test_content_question(self):
-        response = self.client.get('/my/content/question')
+        response = self.client.get('/study/content/question')
         self.assertEqual(response.status_code, 200)
 
     def test_content_notes(self):
-        response = self.client.get('/my/content/notes')
+        response = self.client.get('/study/content/notes')
         self.assertEqual(response.status_code, 200)
 
     def test_content_paper(self):
-        response = self.client.get('/my/content/paper')
+        response = self.client.get('/study/content/paper')
         self.assertEqual(response.status_code, 200)
 
     def test_content_userpaper(self):
-        response = self.client.get('/my/content/user-paper')
+        response = self.client.get('/study/content/user-paper')
         self.assertEqual(response.status_code, 200)
 
     def test_content_userpaper_print(self):
-        response = self.client.get('/my/content/user-paper/print')
+        response = self.client.get('/study/content/user-paper/print')
         self.assertEqual(response.status_code, 200)

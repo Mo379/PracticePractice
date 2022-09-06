@@ -1,10 +1,24 @@
+import re
+from datetime import datetime
 from django.conf import settings
 from django import forms
 from django.db.models.fields import BLANK_CHOICE_DASH
-from user.models import User, Educator, Organisation
+from user.models import (
+        User,
+        Admin,
+        Student,
+        Educator,
+        Organisation,
+        Editor,
+        Affiliate
+    )
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from user.util.GeneralUtil import \
+        account_activation_token, password_reset_token
 
 
 alphanumeric = RegexValidator(
@@ -70,11 +84,34 @@ class ForgotPasswordForm(forms.Form):
                 )
         )
 
+    # checking if user exists
+    #     check email
+    #     check username
+    # admins cannot do this
+    # Activating the password reset sequence
+    def clean_username(self):
+        cleaned_data = super().clean()
+        username = cleaned_data['username']
+        try:
+            user = User.objects.get(email__iexact=username)
+        except Exception:
+            try:
+                user = User.objects.get(username__iexact=username)
+            except Exception:
+                raise ValidationError(
+                        "User does not exist."
+                    )
+        if user.is_superuser:
+            raise ValidationError(
+                    "Action is invalid for this user."
+                )
+        user.password_set = False
+        user.save()
+        return user.username
+
 
 class RegistrationForm(forms.ModelForm):
-    CHOICES = []
-    for choice in settings.VALID_GROUPS:
-        CHOICES.append((choice, choice))
+    CHOICES = [(g, g) for g in settings.VALID_GROUPS]
     usertype = forms.ChoiceField(
             choices=BLANK_CHOICE_DASH+CHOICES,
             label='Please select a string',
@@ -148,24 +185,50 @@ class RegistrationForm(forms.ModelForm):
         password = cleaned_data.get('password')
         password_conf = cleaned_data.get('password_conf')
         if password != password_conf:
-            self.add_error('password', 'Passwords do not match.')
+            self.add_error(
+                    'password', ValidationError('Passwords do not match.')
+                )
         #
         username_c = User.objects.filter(username__iexact=username).exists()
         email_c = User.objects.filter(email__iexact=email).exists()
         if username_c:
             self.add_error(
                     'username',
-                    'An account with this username ' +
-                    'already exists, please try again'
+                    ValidationError('An account with this username ' +
+                    'already exists, please try again')
                 )
         if email_c:
             self.add_error(
                     'email',
-                    'An account with this email ' +
-                    'already exists, please try again'
+                    ValidationError('An account with this email ' +
+                    'already exists, please try again')
                 )
 
+
 class ResetPasswordForm(forms.Form):
+    def __init__(self, uidb64, token, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['uidb64'] = forms.CharField(
+            max_length=50,
+            widget=forms.TextInput(attrs={
+                    'class': "form-control form-control-user",
+                    'placeholder': "",
+                    'type': "hidden",
+                    'value': uidb64
+                    }
+                )
+            )
+        self.fields['token'] = forms.CharField(
+                max_length=50,
+                widget=forms.TextInput(attrs={
+                        'class': "form-control form-control-user",
+                        'placeholder': "",
+                        'type': "hidden",
+                        'value': token
+                        }
+                    )
+            )
+
     password_new = forms.CharField(
             max_length=20,
             widget=forms.TextInput(attrs={
@@ -184,6 +247,41 @@ class ResetPasswordForm(forms.Form):
                     }
                 )
         )
+    uidb64 = forms.CharField()
+    token = forms.CharField()
+
+    # check confirmation password match
+    # password length
+    # get user id from uidb64 and create user
+    # check super user they cannot do this
+    # check token with user
+    def clean(self):
+        cleaned_data = super(ResetPasswordForm, self).clean()
+        try:
+            uid = force_str(urlsafe_base64_decode(cleaned_data['uidb64']))
+            user = User.objects.get(pk=uid)
+            cleaned_data['uidb64'] = uid
+            if user.is_superuser:
+                self.add_error(
+                        'uidb64',
+                        ValidationError('Action is invalid for this user.')
+                    )
+            if password_reset_token.check_token(user, cleaned_data['token']) \
+                    == False:
+                self.add_error(
+                        'token',
+                        ValidationError('Invalid token.')
+                    )
+        except Exception:
+            self.add_error(
+                    'uidb64',
+                    ValidationError('Invalid Information.')
+                )
+        if cleaned_data['password_new'] != cleaned_data['password_conf']:
+            self.add_error(
+                    'password_new',
+                    ValidationError('Passwords do not match.')
+                )
 
 
 class ChangePasswordForm(forms.Form):
@@ -236,6 +334,99 @@ class ChangePasswordForm(forms.Form):
                 )
 
 
+class DeleteAccountForm(forms.Form):
+    def __init__(self, uidb64, token, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['uidb64'] = forms.CharField(
+            max_length=50,
+            widget=forms.TextInput(attrs={
+                    'class': "form-control form-control-user",
+                    'placeholder': "",
+                    'type': "hidden",
+                    'value': uidb64
+                    }
+                )
+            )
+        self.fields['token'] = forms.CharField(
+                max_length=50,
+                widget=forms.TextInput(attrs={
+                        'class': "form-control form-control-user",
+                        'placeholder': "",
+                        'type': "hidden",
+                        'value': token
+                        }
+                    )
+            )
+    uidb64 = forms.CharField()
+    token = forms.CharField()
+    username = forms.CharField(
+            max_length=20,
+            widget=forms.TextInput(attrs={
+                    'class': "form-control form-control-user",
+                    'placeholder': "Username/Email",
+                    'type': "text"
+                    }
+                )
+        )
+    password = forms.CharField(
+            max_length=20,
+            widget=forms.TextInput(attrs={
+                    'class': "form-control form-control-user",
+                    'placeholder': "Password",
+                    'type': "password"
+                    }
+                )
+        )
+
+    def clean(self):
+        cleaned_data = super(DeleteAccountForm, self).clean()
+        # check url information
+        try:
+            uid = force_str(urlsafe_base64_decode(cleaned_data['uidb64']))
+            user = User.objects.get(pk=uid)
+            cleaned_data['uidb64'] = uid
+            if user.is_superuser:
+                self.add_error(
+                        'uidb64',
+                        ValidationError('Action is invalid for this user.')
+                    )
+            if account_activation_token.check_token(
+                    user, cleaned_data['token']
+                    ) == False:
+                self.add_error(
+                        'token',
+                        ValidationError('Invalid token.')
+                    )
+        except Exception:
+            self.add_error(
+                    'uidb64',
+                    ValidationError('Invalid Information.')
+                )
+        username = cleaned_data.get('username')
+        try:
+            user = User.objects.get(email__iexact=username)
+        except Exception:
+            try:
+                user = User.objects.get(username__iexact=username)
+            except Exception:
+                self.add_error(
+                        'username',
+                        ValidationError("User does not exist.")
+                    )
+        if user.registration == False and user.is_superuser == False:
+                self.add_error(
+                        'username',
+                        ValidationError("Incomplete registration.")
+                    )
+        # checking if the user is in the password reset state
+        if user.password_set== False and user.is_superuser == False:
+                self.add_error(
+                        'username',
+                        ValidationError("Incomplete password reset sequence.")
+                    )
+        cleaned_data['username'] = user.username
+
+
 class EmailChoiceForm(forms.ModelForm):
     class Meta:
         model = User
@@ -252,6 +443,13 @@ class EmailChoiceForm(forms.ModelForm):
                     }
                 )
             }
+
+    def clean_mail_choices(self):
+        cleaned_data = super(EmailChoiceForm, self).clean()
+        mail_choices = cleaned_data['mail_choices']
+        if 'Core' not in mail_choices:
+            mail_choices.append('Core')
+        return mail_choices
 
 
 class AppearanceChoiceForm(forms.ModelForm):
@@ -292,6 +490,7 @@ class AccountDetailsForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
+                'profile_upload',
                 'username',
                 'first_name',
                 'last_name',
@@ -300,7 +499,8 @@ class AccountDetailsForm(forms.ModelForm):
                 'bio'
             ]
         labels = {
-                'username': 'Username (how your name will appear to other users on the site)',
+                'profile_upload': 'Profile Picture: (A clear face shot with white background to be professional)',
+                'username': 'Username (This is only a key used for loggin in, no other user will see this.)',
                 'first_name': 'First Name',
                 'last_name': 'Last Name',
                 'email': 'Email',
@@ -308,6 +508,7 @@ class AccountDetailsForm(forms.ModelForm):
                 'bio': 'Biography',
             }
         widgets = {
+            'profile_upload': forms.FileInput(),
             "username": forms.TextInput(attrs={
                         'class': "form-control",
                         'placeholder': "Username",
@@ -346,12 +547,176 @@ class AccountDetailsForm(forms.ModelForm):
                 ),
             }
 
+    def clean(self):
+        cleaned_data = super(AccountDetailsForm, self).clean()
+        username = cleaned_data['username']
+        first_name = cleaned_data['first_name']
+        last_name = cleaned_data['last_name']
+        email = cleaned_data['email']
+        date_of_birth = cleaned_data['date_of_birth']
+        bio = cleaned_data['bio']
+        #
+        if re.match(r'^[A-Za-z0-9_]+$', username) is None:
+            self.add_error(
+                'username',
+                ValidationError(
+                    "Invalid username, you're allowed alphanumeric characters " +
+                    "with underscores only, please try again."
+                )
+            )
+        # first name check
+        if re.match(r'^[A-Za-z]+$', first_name) is None:
+            self.add_error(
+                'first_name',
+                ValidationError(
+                    "Invalid name, you're allowed alphabetical " +
+                    "characters only, please try again."
+                )
+            )
+        # last name check
+        if re.match(r'^[A-Za-z]+$', last_name) is None:
+            self.add_error(
+                'last_name',
+                ValidationError(
+                    "Invalid name, you're allowed alphabetical " +
+                    "characters only, please try again."
+                )
+            )
+        # dob check
+        try:
+            datetime.strptime(str(date_of_birth), '%Y-%m-%d')
+        except Exception:
+            self.add_error(
+                'date_of_birth',
+                ValidationError(
+                    "The entered date of birth is invalid, " +
+                    "please try again."
+                )
+            )
+        # bio check
+        if len(bio) > 500 or len(bio) < 25 or re.match(r'^[A-Za-z0-9_.,]+$', bio):
+            self.add_error(
+                'bio',
+                ValidationError(
+                    'Your Bio is invalid, youre allowed ' +
+                    'alphanumeric and the following (_.,) characters'
+                )
+            )
+
+
+class AdminDetailsForm(forms.ModelForm):
+    class Meta:
+        model = Admin
+        fields = ['roles', 'specialised_subjects']
+        labels = {
+                'roles': 'The Administrator Role:',
+                'Subjects': 'The specialised subjects:'
+            }
+        widgets = {
+                'roles': forms.Select(
+                        attrs={
+                            'class': "form-select mb-3",
+                            'style': "width:100%;padding:10px;\
+                                    border-radius:10rem 5rem 5rem 10rem;",
+                            'placeholder': "Administrator Role",
+                            'type': "text"
+                            },
+                        choices=BLANK_CHOICE_DASH+model.CHOICES_ROLES,
+                    ),
+                "specialised_subjects": forms.CheckboxSelectMultiple(attrs={
+                            'class': "",
+                            'placeholder': "Subjects",
+                            'type': "checkbox",
+                        }
+                    )
+            }
+
+    def clean_roles(self):
+        if self.instance.roles != '':
+            return self.instance.roles
+
+    def clean_specialised_subjects(self):
+        if self.instance.specialised_subjects != []:
+            return self.instance.specialised_subjects
+
+class StudentDetailsForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ['studied_subjects']
+        labels = {
+                'studied_subjects': 'The subejcts you are studying:',
+            }
+        widgets = {
+                "subjects": forms.CheckboxSelectMultiple(attrs={
+                            'class': "",
+                            'placeholder': "Subjects",
+                            'type': "checkbox",
+                        }
+                    )
+            }
+
+
+class EducatorDetailsForm(forms.ModelForm):
+    class Meta:
+        model = Educator
+        fields = ['taught_subjects']
+        labels = {
+                'taught_subjects': 'The subejcts you are teaching:',
+            }
+        widgets = {
+                "taught_subjects": forms.CheckboxSelectMultiple(attrs={
+                            'class': "",
+                            'placeholder': "Subjects",
+                            'type': "checkbox",
+                        }
+                    ),
+            }
+
+
+class EditorDetailsForm(forms.ModelForm):
+    class Meta:
+        model = Editor
+        fields = ['writing_subjects', 'certification', 'example_work']
+        labels = {
+                'writing_subjects': 'The subejcts you are proficcent in:',
+                'certification': 'Certificate of Education (Deploma), and/or CV:',
+                'example_work': 'Example of work for the taught subjects:',
+            }
+        widgets = {
+                "writing_subjects": forms.CheckboxSelectMultiple(attrs={
+                            'class': "",
+                            'placeholder': "Subjects",
+                            'type': "checkbox",
+                        }
+                    ),
+                'certification': forms.FileInput(),
+                'example_work': forms.FileInput(),
+            }
+
+
+class AffiliateDetailsForm(forms.ModelForm):
+    class Meta:
+        model = Affiliate
+        fields = ['platform_url']
+        labels = {
+                'platform_url': 'The URL of your primary platform:',
+            }
+        widgets = {
+                'platform_url': forms.TextInput(attrs={
+                        'class': "form-control form-control-user",
+                        'placeholder': "URL",
+                        'type': "text"
+                        }
+                    )
+            }
+
 
 class OrganisationDetailsForm(forms.ModelForm):
     class Meta:
         model = Organisation
-        fields = ['name', 'phone_number', 'incorporation_date', 'url', 'location']
+        fields = ['logo_upload', 'name', 'phone_number', 'incorporation_date', 'url', 'location']
         labels = {
+                'logo_upload': "Upload your organisation's logo:",
                 'name': 'Organisation Name',
                 'phone_number': 'Phone Number',
                 'incorporation_date': 'Incorporation Date',
@@ -359,6 +724,7 @@ class OrganisationDetailsForm(forms.ModelForm):
                 'location': 'Organisation Physical Location. (Building number, road, town, city, postcode, country)',
             }
         widgets = {
+            'logo_upload': forms.FileInput(),
             "name": forms.TextInput(attrs={
                         'class': "form-control",
                         'placeholder': "Organisation's Name",
@@ -390,4 +756,3 @@ class OrganisationDetailsForm(forms.ModelForm):
                     }
                 )
             }
-

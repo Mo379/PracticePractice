@@ -9,12 +9,9 @@
         <div class="card-body text-center mb-3">
             <!-- Profile picture image-->
             <img class="img-account-profile rounded-circle mb-2" src="{% static 'base/img/logo.png'%}" alt="">
-            <!-- Profile picture help block-->
-            <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
-            <!-- Profile picture upload button-->
-            <button class="btn btn-primary" type="button">Upload new image</button>
         </div>
-	<form class="user px-3 py-3"  action="{%url 'user:_organisationdetails'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'user:_organisationdetails'%}" 
+		method="POST" role="form" enctype="multipart/form-data">
 	{% csrf_token %}
 	<!-- Form Row -->
 	{{ form.non_field_errors }}
@@ -45,8 +42,13 @@
 	</div>
 	<div class="form-group">
 	    {{ form.location.errors }}
-	    <label for="{{ form.location.id_for_label }}">{{form.location.label}}</label><br>
+	    <label for="{{ form.location.id_for_label }}>{{form.location.label}}</label><br>
 	    {{ form.location }}
+	</div>
+	<div class="form-group">
+	    {{ form.logo_upload.errors }}
+	    <label>{{form.logo_upload.label}}</label><br>
+	    {{ form.logo_upload}}
 	</div>
 	<!-- Save changes button-->
 	<button class="btn btn-primary" type="submit">Save changes</button>

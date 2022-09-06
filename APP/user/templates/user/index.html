@@ -39,14 +39,14 @@
 		{%definevar context.form_studentdetails as form%}
 		{%include 'user/forms/profile_details_student.html'%}
 	{%endif%}
+	{%if context.form_educatordetails%}
+		{%definevar context.form_educatordetails as form%}
+		{%include 'user/forms/profile_details_educator.html'%}
+	{%endif%}
 	{%if context.form_organisationdetails%}
 		{%definevar context.form_organisationdetails as form%}
 		{%definevar context.organisation as organisation%}
 		{%include 'user/forms/profile_details_organisation.html'%}
-	{%endif%}
-	{%if context.form_educatordetails%}
-		{%definevar context.form_educatordetails as form%}
-		{%include 'user/forms/profile_details_educator.html'%}
 	{%endif%}
 	{%if context.form_editordetails%}
 		{%definevar context.form_editordetails as form%}

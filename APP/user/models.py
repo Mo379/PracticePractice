@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -17,7 +18,11 @@ class User(AbstractUser):
     verification_status = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    Icon_id = models.CharField(max_length=30, default='', null=True)
+    icon_id = models.CharField(max_length=30, default='', null=True)
+    profile_upload = models.FileField(
+            upload_to='uploads/profile_picture',
+            blank=True
+        )
     #
     CHOICES_THEME = [
         ('lig', 'Light'),
@@ -57,36 +62,6 @@ class User(AbstractUser):
         return self.username
 
 
-class Admin(models.Model):
-    user = models.ForeignKey(
-            User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='Admin'
-        )
-
-    def __str__(self):
-        return self.username
-
-
-class Student(models.Model):
-    user = models.ForeignKey(
-            User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='Student'
-        )
-
-    def __str__(self):
-        return self.username
-
-
-class Educator(models.Model):
-    user = models.ForeignKey(
-            User, on_delete=models.SET_NULL, null=True, db_index=True,
-            related_name='Educator'
-        )
-
-    def __str__(self):
-        return self.username
-
-
 class Organisation(models.Model):
     user = models.ForeignKey(
             User, on_delete=models.SET_NULL, null=True, db_index=True,
@@ -95,6 +70,10 @@ class Organisation(models.Model):
     name = models.CharField(max_length=30, default='', null=True)
     phone_number = models.CharField(max_length=15, default='', null=True)
     incorporation_date = models.DateField(null=True, blank=True)
+    logo_upload = models.FileField(
+            upload_to='uploads/organisation_logo',
+            blank=True
+        )
     icon_id = models.CharField(max_length=30, default='', null=True)
     url = models.URLField(null=True, blank=True)
     location = models.TextField(max_length=500, blank=True)
@@ -109,14 +88,104 @@ class Organisation(models.Model):
         return self.name
 
 
+class Educator(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Educator'
+        )
+    organisation_affiliation = models.ManyToManyField(
+            Organisation, blank=True,
+            related_name='educator_org_affiliation'
+        )
+    CHOICES_SUBJECTS = [(s, s) for s in settings.VALID_SUBJECTS]
+    taught_subjects = MultiSelectField(
+            choices=CHOICES_SUBJECTS,
+            max_choices=len(CHOICES_SUBJECTS),
+            max_length=sum([len(i[0]) for i in CHOICES_SUBJECTS])+50,
+            default=[]
+        )
+
+    def __str__(self):
+        return self.user.username
+
+
+class Admin(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Admin'
+        )
+    CHOICES_ROLES = [
+        ('General', 'Fully Privileged Administrator'),
+        ('Subject', 'Subject Specific Adminstrator'),
+    ]
+    roles = models.CharField(
+        max_length=10,
+        choices=CHOICES_ROLES,
+        null=True
+    )
+    CHOICES_SUBJECTS = [(s, s) for s in settings.VALID_SUBJECTS]
+    specialised_subjects = MultiSelectField(
+            choices=CHOICES_SUBJECTS,
+            max_choices=len(CHOICES_SUBJECTS),
+            max_length=sum([len(i[0]) for i in CHOICES_SUBJECTS])+50,
+            default=[]
+        )
+
+    approval_status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
+
+
+class Student(models.Model):
+    user = models.ForeignKey(
+            User, on_delete=models.SET_NULL, null=True, db_index=True,
+            related_name='Student'
+        )
+    organisation_affiliation = models.ManyToManyField(
+            Organisation, blank=True,
+            related_name='student_org_affiliation'
+        )
+    educator_affiliation = models.ManyToManyField(
+            Educator, blank=True,
+            related_name='student_edu_affiliation'
+        )
+    CHOICES_SUBJECTS = [(s, s) for s in settings.VALID_SUBJECTS]
+    studied_subjects = MultiSelectField(
+            choices=CHOICES_SUBJECTS,
+            max_choices=len(CHOICES_SUBJECTS),
+            max_length=sum([len(i[0]) for i in CHOICES_SUBJECTS])+50,
+            default=[]
+        )
+
+    def __str__(self):
+        return self.user.username
+
+
 class Editor(models.Model):
     user = models.ForeignKey(
             User, on_delete=models.SET_NULL, null=True, db_index=True,
             related_name='Editor'
         )
+    CHOICES_SUBJECTS = [(s, s) for s in settings.VALID_SUBJECTS]
+    writing_subjects = MultiSelectField(
+            choices=CHOICES_SUBJECTS,
+            max_choices=len(CHOICES_SUBJECTS),
+            max_length=sum([len(i[0]) for i in CHOICES_SUBJECTS])+50,
+            default=[]
+        )
+    certification = models.FileField(
+            upload_to='uploads/certification',
+            blank=True
+        )
+    example_work = models.FileField(
+            upload_to='uploads/examplework',
+            blank=True
+        )
+    approval_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.username
+        return self.user.username
 
 
 class Affiliate(models.Model):
@@ -124,6 +193,8 @@ class Affiliate(models.Model):
             User, on_delete=models.SET_NULL, null=True, db_index=True,
             related_name='Affiliate'
         )
+    platform_url = models.URLField(null=True, blank=True)
+    approval_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.username
+        return self.user.username

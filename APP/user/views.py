@@ -13,7 +13,15 @@ from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.contrib.auth.models import Group
 from datetime import datetime
-from user.models import User, Organisation
+from user.models import (
+        User,
+        Admin,
+        Student,
+        Educator,
+        Organisation,
+        Editor,
+        Affiliate
+    )
 from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -24,11 +32,17 @@ from user.forms import (
         RegistrationForm,
         ResetPasswordForm,
         ChangePasswordForm,
+        DeleteAccountForm,
         EmailChoiceForm,
         AppearanceChoiceForm,
         LanguageChoiceForm,
         AccountDetailsForm,
         OrganisationDetailsForm,
+        EducatorDetailsForm,
+        AdminDetailsForm,
+        StudentDetailsForm,
+        EditorDetailsForm,
+        AffiliateDetailsForm,
     )
 
 
@@ -45,23 +59,36 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
+        context = {}
         user = User.objects.get(pk=self.request.user.id)
+        #
+        admin = Admin.objects.get(user=user)
+        student = Student.objects.get(user=user)
         organisation = Organisation.objects.get(user=user)
+        educator = Educator.objects.get(user=user)
+        editor = Editor.objects.get(user=user)
+        affiliate = Affiliate.objects.get(user=user)
         #
         accountdetailsform = AccountDetailsForm(instance=user)
+        admindetailsform = AdminDetailsForm(instance=admin)
+        studentdetailsform = StudentDetailsForm(instance=student)
         organisationdetailsform = OrganisationDetailsForm(instance=organisation)
+        educatordetailsform = EducatorDetailsForm(instance=educator)
+        editordetailsform = EditorDetailsForm(instance=editor)
+        affiliatedetailsform = AffiliateDetailsForm(instance=affiliate)
+        #
         loginform = LoginForm()
         #
-        context = {}
         context['organisation'] = organisation
-        context['form_login'] = loginform
         context['form_accountdetails'] = accountdetailsform
-        context['form_admindetails'] = 's'
-        context['form_studentdetails'] = 's'
+        context['form_admindetails'] = admindetailsform
+        context['form_studentdetails'] = studentdetailsform
         context['form_organisationdetails'] = organisationdetailsform
-        context['form_educatordetails'] = 's'
-        context['form_editordetails'] = 's'
-        context['form_affiliatedetails'] = 's'
+        context['form_educatordetails'] = educatordetailsform
+        context['form_editordetails'] = editordetailsform
+        context['form_affiliatedetails'] = affiliatedetailsform
+        #
+        context['form_login'] = loginform
         return context
 
 
@@ -116,10 +143,11 @@ class PwdResetView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        resetpasswordform = ResetPasswordForm()
+        resetpasswordform = ResetPasswordForm(
+                    self.kwargs['uidb64'],
+                    self.kwargs['token']
+                )
         context = {}
-        context['uidb64'] = self.kwargs['uidb64']
-        context['token'] = self.kwargs['token']
         context['form_resetpassword'] = resetpasswordform
         return context
 
@@ -151,13 +179,14 @@ class DeleteAccountView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        loginform = LoginForm()
+        deleteaccountform = DeleteAccountForm(
+                self.kwargs['uidb64'],
+                self.kwargs['token']
+                )
         if self.request.user.is_authenticated:
-            _logoutUser(self.request)
+            logout(self.request)
         context = {}
-        context['uidb64'] = self.kwargs['uidb64']
-        context['token'] = self.kwargs['token']
-        context['form_deleteaccount'] = loginform
+        context['form_deleteaccount'] = deleteaccountform
         return context
 
 
@@ -294,7 +323,7 @@ def _loginUser(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something is wrong, please check that all' +
+                    'Something is wrong, please check that all ' +
                     'inputs are valid.' + str(form.errors),
                     extra_tags='alert-danger login_form'
                 )
@@ -434,50 +463,128 @@ def _updatepassword(request):
 
 
 def _pwdreset_form(request):
-    username = request.POST['username']
-    # checking if user exists
-    # check email
-    user = User.objects.filter(email__iexact=username).exists()
-    if user:
-        user = User.objects.get(email__iexact=username)
-    else:
-        # check username
-        user = User.objects.filter(username__iexact=username).exists()
-        if user:
-            user = User.objects.get(username__iexact=username)
+    if request.method == 'POST':
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            user = User.objects.get(username=username)
+            token = password_reset_token.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            mail_subject = 'Password Reset'
+            message = render_to_string('user/emails/password_reset.html', {
+                'user': user,
+                'domain': '127.0.0.1:8000',
+                'uid': uid,
+                'token': token,
+            })
+            to_email = user.email
+            try:
+                send_mail(
+                    mail_subject,
+                    message,
+                    'admin@practicepractice.net',
+                    [to_email],
+                    fail_silently=False,
+                )
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Please check your email for the password reset instructions.',
+                        extra_tags='alert-success pwdreset_form'
+                    )
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Cannot send Email, please contact admin.',
+                        extra_tags='alert-danger pwdreset_form'
+                    )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'User does not exist.',
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
                     extra_tags='alert-danger pwdreset_form'
                 )
-            return redirect('user:forgot-password')
-    # admins cannot do this
-    if user.is_superuser:
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger pwdreset_form'
+            )
+    return redirect('user:forgot-password')
+
+
+def _pwdreset(request):
+    if request.method == 'POST':
+        form = ResetPasswordForm(
+                request.POST['uidb64'],
+                request.POST['token'],
+                request.POST,
+            )
+        if form.is_valid():
+            uid = form.cleaned_data['uidb64']
+            new_pass = form.cleaned_data['password_new']
+            try:
+                user = User.objects.get(pk=uid)
+                user.set_password(new_pass)
+                user.password_set = True
+                user.save()
+                # update pass_set settings
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your password has been reset, you can now login using the\
+                                new password!',
+                        extra_tags='alert-success login_form'
+                    )
+                return redirect('user:login')
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'An unknonw error has occured please contact support \
+                                (see contact page).',
+                        extra_tags='alert-danger second_pwdreset_form'
+                    )
+        else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Admins cannot reset password, please contact main admin.',
-                    extra_tags='alert-danger pwdreset_form'
+                    'Something is wrong, please check that ' +
+                    'all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger second_pwdreset_form'
                 )
-            return redirect('user:forgot-password')
-    # Activating the password reset sequence
-    user.password_set = False
-    user.save()
-    # send email
-    token = password_reset_token.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    #
-    mail_subject = 'Password Reset'
-    message = render_to_string('user/emails/password_reset.html', {
-        'user': user,
-        'domain': '127.0.0.1:8000',
-        'uid': uid,
-        'token': token,
-    })
-    to_email = user.email
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger second_pwdreset_form'
+            )
+    return redirect(
+            'user:pwdreset',
+            uidb64=request.POST['uidb64'],
+            token=request.POST['token']
+        )
+
+
+def _deleteaccount_1(request):
     try:
+        # does not use a form
+        user = request.user
+        token = account_activation_token.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        #
+        mail_subject = 'Account deletions.'
+        message = render_to_string('user/emails/account_deletion.html', {
+            'user': user,
+            'domain': '127.0.0.1:8000',
+            'uid': uid,
+            'token': token,
+        })
+        to_email = user.email
         send_mail(
             mail_subject,
             message,
@@ -485,189 +592,84 @@ def _pwdreset_form(request):
             [to_email],
             fail_silently=False,
         )
+        _logoutUser(request)
         messages.add_message(
                 request,
                 messages.INFO,
-                'Please check your email for the password reset instructions.',
-                extra_tags='alert-success pwdreset_form'
+                'A link containing instructions for account deletion has been \
+                        sent to your registered Email, if this was an accident\
+                        you can simply delete the email we sent and log back in.',
+                extra_tags='alert-warning user_security'
             )
-        return redirect('user:forgot-password')
     except Exception:
         messages.add_message(
                 request,
                 messages.INFO,
-                'Cannot send Email, please contact admin.',
-                extra_tags='alert-danger pwdreset_form'
+                'An unknown error has occurred, please contact us.',
+                extra_tags='alert-warning user_security'
             )
-        return redirect('user:forgot-password')
-
-
-def _pwdreset(request):
-    # post variables
-    uidb64 = request.POST['uidb64']
-    token = request.POST['token']
-    new_pass = request.POST['password_new']
-    new_pass_conf = request.POST['password_conf']
-    # error cehcking
-    pass_check = True
-    if new_pass != new_pass_conf:
-        pass_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Passwords do not match.',
-                extra_tags='alert-danger second_pwdreset_form'
-            )
-    passlen_check = True
-    if len(new_pass) < 5:
-        passlen_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Your password is too short, \
-                        it should be at least 5 characters long.',
-                extra_tags='alert-danger second_pwdreset_form'
-            )
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except Exception:
-        user = None
-        messages.add_message(
-                request,
-                messages.INFO,
-                'User is invalid',
-                extra_tags='alert-danger second_pwdreset_form'
-            )
-    super_check = True
-    if user and user.is_superuser:
-        super_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'User is invalid',
-                extra_tags='alert-danger second_pwdreset_form'
-            )
-        return redirect('user:pwdreset', uidb64=uidb64, token=token)
-    token_check = True
-    if password_reset_token.check_token(user, token) == False:
-        token_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Password reset link is invalid, \
-                        please request a new password reset.',
-                extra_tags='alert-danger second_pwdreset_form'
-            )
-    #
-    if user and token_check and pass_check and super_check and passlen_check:
-        # reset password
-        try:
-            user.set_password(new_pass)
-            user.password_set = True
-            user.save()
-            # update pass_set settings
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your password has been reset, you can now login using the\
-                            new password!',
-                    extra_tags='alert-success login_form'
-                )
-            return redirect('user:login')
-        except Exception:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'An unknonw error has occured please contact support \
-                            (see contact page).',
-                    extra_tags='alert-danger second_pwdreset_form'
-                )
-            return redirect('user:pwdreset', uidb64=uidb64, token=token)
-    else:
-        return redirect('user:pwdreset', uidb64=uidb64, token=token)
-
-
-def _deleteaccount_1(request):
-    user = request.user
-    token = account_activation_token.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    #
-    mail_subject = 'Account deletions.'
-    message = render_to_string('user/emails/account_deletion.html', {
-        'user': user,
-        'domain': '127.0.0.1:8000',
-        'uid': uid,
-        'token': token,
-    })
-    to_email = user.email
-    send_mail(
-        mail_subject,
-        message,
-        'admin@practicepractice.net',
-        [to_email],
-        fail_silently=False,
-    )
-    _logoutUser(request)
-    messages.add_message(
-            request,
-            messages.INFO,
-            'A link containing instructions for account deletion has been \
-                    sent to your registered Email.',
-            extra_tags='alert-warning user_security'
-        )
     return redirect('user:security')
 
 
 def _deleteaccount_2(request):
-    #
-    uidb64 = request.POST['uidb64']
-    token = request.POST['token']
-    username = request.POST['username']
-    password = request.POST['password']
-    #
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-        messages.add_message(
-                request,
-                messages.INFO,
-                "The user to be confirmed does not exist for some reason, \
-                        try creating another account!",
-                extra_tags='alert-danger top_homepage'
+    if request.method == 'POST':
+        form = DeleteAccountForm(
+                request.POST['uidb64'],
+                request.POST['token'],
+                request.POST
             )
-    if User.objects.filter(username__iexact=username).exists():
-        auth = authenticate(
-                request,
-                username=user.username,
-                password=password
-            )
+        if form.is_valid():
+            #
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            #
+            try:
+                user = authenticate(
+                        request,
+                        username=username,
+                        password=password
+                    )
+                user.delete()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your account has been deleted, \
+                                along with all of your data!',
+                        extra_tags='alert-danger top_homepage'
+                    )
+                return redirect('main:index')
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Incorrect information please try again.',
+                        extra_tags='alert-danger deleteaccount2'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that ' +
+                    'all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger deleteaccount2'
+                )
     else:
-        auth = None
-    if user is not None and account_activation_token.check_token(user, token) \
-            and auth is not None:
-        user.delete()
         messages.add_message(
                 request,
                 messages.INFO,
-                'Your account has been deleted!',
-                extra_tags='alert-danger top_homepage'
-            )
-        return redirect('main:index')
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                "User Cannot be confirmed",
+                'Invalid Request Method',
                 extra_tags='alert-danger deleteaccount2'
             )
-        return redirect('user:deleteaccount', uidb64=uidb64, token=token)
+    return redirect(
+            'user:deleteaccount',
+            uidb64=request.POST['uidb64'],
+            token=request.POST['token']
+        )
 
 
 def _activate(request, uidb64, token):
-    _logoutUser(request)
+    # Does not use a form
+    logout(request)
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -702,133 +704,161 @@ def _activate(request, uidb64, token):
 
 # Logout user view
 def _logoutUser(request):
-    logout(request)
-    messages.add_message(
-            request,
-            messages.INFO,
-            "Successfull logout!",
-            extra_tags='alert-success top_homepage'
-        )
+    try:
+        logout(request)
+        messages.add_message(
+                request,
+                messages.INFO,
+                "Successfull logout!",
+                extra_tags='alert-success top_homepage'
+            )
+    except Exception:
+        messages.add_message(
+                request,
+                messages.INFO,
+                "Nothing to do!",
+                extra_tags='alert-warning top_homepage'
+            )
     return redirect('main:index')
 
 
 def _accountdetails(request):
-    username = request.POST['username']
-    first_name = request.POST['first_name']
-    last_name = request.POST['last_name']
-    email = request.POST['email']
-    date_of_birth = request.POST['date_of_birth']
-    bio = request.POST['bio']
-    # username check
-    username_match = User.objects.filter(username__iexact=username).exists()
-    username_check = True
-    if (username_match and username.lower() != request.user.username.lower()) or \
-            re.match(r'^[A-Za-z0-9_]+$', username) is None:
-        username_check = False
+    if request.method == 'POST':
+        # dont allow the email to change
+        # the input email is overridden by the registered email
+        request.POST = request.POST.copy()
+        request.POST['email'] = request.user.email
+        form = AccountDetailsForm(
+                request.POST,
+                request.FILES,
+                instance=request.user
+            )
+        if form.is_valid():
+            # make sure username is not the same
+            # username check
+            username = form.cleaned_data['username']
+            # check user name is new and unique
+            username_match = User.objects.filter(username__iexact=username).exists()
+            if (
+                username_match and
+                username.lower() != request.user.username.lower()
+            ):
+                form.add_error(
+                    'username',
+                    ValidationError(
+                        'An account with this username ' +
+                        'already exits or is the same as your current username.'
+                    )
+                )
+            else:
+                form.save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your account (Profile) details were sucessfully updated!',
+                        extra_tags='alert-success user_profile'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
+    else:
         messages.add_message(
                 request,
                 messages.INFO,
-                'The username entered already exists or is invalid!, \
-                        please try again.',
+                'Invalid Request Method',
                 extra_tags='alert-danger user_profile'
             )
-    # first name check
-    name_check = True
-    if re.match(r'^[A-Za-z]+$', first_name) is None and \
-            re.match(r'^[A-Za-z]+$', last_name):
-        name_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'The name entered is invalid, please try again.',
-                extra_tags='alert-danger user_profile'
-            )
-    # email check
-    email_match = User.objects.filter(email__iexact=email).exists()
-    email_check = True
-    if (email_match and request.user.email.lower() != email.lower()) \
-            or re.match(r'^[A-Za-z0-9_@.]+$', email) is None:
-        email_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'The email entered is invalid, please try again.',
-                extra_tags='alert-danger user_profile'
-            )
-    # dob check
-    dob_check = True
-    try:
-        datetime.strptime(date_of_birth, '%Y-%m-%d')
-    except Exception:
-        dob_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'The entered date of birth is invalid, please try again.'+str(date_of_birth),
-                extra_tags='alert-danger user_profile'
-            )
-    # bio check
-    bio_check = True
-    if len(bio) > 500 or len(bio) < 25 or re.match(r'^[A-Za-z0-9_.,]+$', bio):
-        bio_check = False
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Your Bio is either invalid;\
-                        25-500 characters and alphanumeric.',
-                extra_tags='alert-danger user_profile'
-            )
-        
-    #
-    if username_check == False or name_check == False or email_check == False\
-            or dob_check == False or bio_check == False:
-        return redirect('user:index')
-    #
-    user = User.objects.get(pk=request.user.id)
-    user.username = username
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email
-    user.date_of_birth = date_of_birth
-    user.bio = bio
-    user.account_details_complete = True
-    user.save()
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Profile) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
     return redirect('user:index')
 
 
 def _admindetails(request):
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Admin) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
+    if request.method == 'POST':
+        admin, was_created = Admin.objects.get_or_create(user=request.user)
+        form = AdminDetailsForm(request.POST, instance=admin)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your account (Admin) details were sucessfully updated!',
+                    extra_tags='alert-success user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
     return redirect('user:index')
 
 
 def _studentdetails(request):
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Student) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
+    if request.method == 'POST':
+        student, was_created = Student.objects.get_or_create(user=request.user)
+        form = StudentDetailsForm(request.POST, instance=student)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your account (Student) details were sucessfully updated!',
+                    extra_tags='alert-success user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
     return redirect('user:index')
 
 
-def _teacherdetails(request):
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Teach) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
+def _educatordetails(request):
+    if request.method == 'POST':
+        educator, was_created = Educator.objects.get_or_create(user=request.user)
+        form = EducatorDetailsForm(request.POST, instance=educator)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your account (Educator) details were sucessfully updated!',
+                    extra_tags='alert-success user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
     return redirect('user:index')
 
 
@@ -837,6 +867,7 @@ def _organisationdetails(request):
         organisation = Organisation.objects.get(user=request.user)
         form = OrganisationDetailsForm(
                 request.POST or None,
+                request.FILES,
                 instance=organisation
             )
         if form.is_valid():
@@ -857,96 +888,147 @@ def _organisationdetails(request):
     return redirect('user:index')
 
 
-def _educatordetails(request):
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Educator) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
-    return redirect('user:index')
-
-
 def _editordetails(request):
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Editor) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
+    if request.method == 'POST':
+        editor, was_created = Editor.objects.get_or_create(user=request.user)
+        form = EditorDetailsForm(request.POST, request.FILES, instance=editor)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your account (Editor) details were sucessfully updated!',
+                    extra_tags='alert-success user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all ' +
+                    'inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
     return redirect('user:index')
 
 
 def _affiliatedetails(request):
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your account (Affiliate) details were sucessfully updated!',
-            extra_tags='alert-success user_profile'
-        )
+    if request.method == 'POST':
+        affiliate, was_created = Affiliate.objects.get_or_create(user=request.user)
+        form = AffiliateDetailsForm(request.POST, request.FILES, instance=affiliate)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your account (Affiliate) details were sucessfully updated!',
+                    extra_tags='alert-success user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all ' +
+                    'inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_profile'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
     return redirect('user:index')
 
 
 def _themechange(request):
-    new_theme = request.POST['theme']
-    choices = [x[0] for x in request.user.CHOICES_THEME]
-    if new_theme not in choices:
+    if request.method == 'POST':
+        form = AppearanceChoiceForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your preffered theme was successfully updated ' +
+                    '(Try to refresh your browser if no changes show).',
+                    extra_tags='alert-success user_settings'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_settings'
+                )
+    else:
         messages.add_message(
                 request,
                 messages.INFO,
-                'Theme cannot be found, nothing has changed.',
+                'Invalid Request Method',
                 extra_tags='alert-danger user_settings'
             )
-        return redirect('user:settings')
-    user = User.objects.get(pk=request.user.id)
-    user.theme = new_theme
-    user.save()
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your theme has been changed!',
-            extra_tags='alert-success user_settings'
-        )
     return redirect('user:settings')
 
 
 def _languagechange(request):
-    new_language = request.POST['language']
-    choices = [x[0] for x in request.user.CHOICES_LANGUAGE]
-    if new_language not in choices:
+    if request.method == 'POST':
+        form = LanguageChoiceForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your preffered language was successfully updated.',
+                    extra_tags='alert-success user_settings'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_settings'
+                )
+    else:
         messages.add_message(
                 request,
                 messages.INFO,
-                'Language cannot be found, nothing has changed.',
+                'Invalid Request Method',
                 extra_tags='alert-danger user_settings'
             )
-        return redirect('user:settings')
-    user = User.objects.get(pk=request.user.id)
-    user.language = new_language
-    user.save()
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your theme has been changed!',
-            extra_tags='alert-success user_settings'
-        )
     return redirect('user:settings')
 
 
 def _mailchoiceschange(request):
-    choices = [i[0] for i in request.user.CHOICES_EMAIL]
-    email_list = []
-    for val in request.POST.getlist('mail_choices'):
-        if val in choices:
-            email_list.append(val)
-    email_list.append('Core')
-    user = User.objects.get(pk=request.user.id)
-    user.mail_choices = email_list
-    user.save()
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Your mailing settings have been updated!',
-            extra_tags='alert-success user_settings'
-        )
+    if request.method == 'POST':
+        request.POST = request.POST.copy()
+        form = EmailChoiceForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your preffered Email types were successfully updated.',
+                    extra_tags='alert-success user_settings'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_settings'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_settings'
+            )
     return redirect('user:settings')

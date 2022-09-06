@@ -3,7 +3,7 @@ from . import views
 
 
 # Create your views here.
-app_name = 'studentdashboard'
+app_name = 'dashboard'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('buttons', views.ButtonsView.as_view(), name='buttons'),

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'user.apps.UserConfig',
     'content.apps.ContentConfig',
-    'studentdashboard.apps.StudentdashboardConfig',
+    'dashboard.apps.dashboardConfig',
     'management.apps.ManagementConfig',
     # native
     'django.contrib.auth',
@@ -162,6 +162,14 @@ VALID_GROUPS = [
         "Editor",
         "Affiliate",
         "Admin",
+    ]
+# Valid Subjects
+VALID_SUBJECTS = [
+        'Mathematics',
+        'Physics',
+        'Chemistry',
+        'Biology',
+        'Other',
     ]
 # Google API settings
 GOOGLE_API_KEY = 'None'

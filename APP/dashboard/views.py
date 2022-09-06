@@ -16,13 +16,13 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 
 
 class IndexView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "studentdashboard/index.html"
+    template_name = "dashboard/index.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("main", reverse("studentdashboard:index"))
+                ("dashboard", reverse("dashboard:index")),
+                ("main", reverse("dashboard:index"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -35,13 +35,13 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class ButtonsView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "studentdashboard/buttons.html"
+    template_name = "dashboard/buttons.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("buttons", reverse("studentdashboard:buttons"))
+                ("dashboard", reverse("dashboard:index")),
+                ("buttons", reverse("dashboard:buttons"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -54,13 +54,13 @@ class ButtonsView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class CardsView(BaseBreadcrumbMixin,generic.ListView):
-    template_name = "studentdashboard/cards.html"
+    template_name = "dashboard/cards.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("cards", reverse("studentdashboard:cards"))
+                ("dashboard", reverse("dashboard:index")),
+                ("cards", reverse("dashboard:cards"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -73,13 +73,13 @@ class CardsView(BaseBreadcrumbMixin,generic.ListView):
 
 
 class UtilColorView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "s-dash-utilities/utilities-color.html"
+    template_name = "dashboard/utilities/utilities-color.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("color", reverse("studentdashboard:util-color"))
+                ("dashboard", reverse("dashboard:index")),
+                ("color", reverse("dashboard:util-color"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -92,13 +92,13 @@ class UtilColorView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class UtilBorderView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "s-dash-utilities/utilities-border.html"
+    template_name = "dashboard/utilities/utilities-border.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("border", reverse("studentdashboard:util-border"))
+                ("dashboard", reverse("dashboard:index")),
+                ("border", reverse("dashboard:util-border"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -111,13 +111,13 @@ class UtilBorderView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class UtilAnimationView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "s-dash-utilities/utilities-animation.html"
+    template_name = "dashboard/utilities/utilities-animation.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("animation", reverse("studentdashboard:util-animation"))
+                ("dashboard", reverse("dashboard:index")),
+                ("animation", reverse("dashboard:util-animation"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -130,13 +130,13 @@ class UtilAnimationView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class UtilOtherView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "s-dash-utilities/utilities-other.html"
+    template_name = "dashboard/utilities/utilities-other.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("other", reverse("studentdashboard:util-other"))
+                ("dashboard", reverse("dashboard:index")),
+                ("other", reverse("dashboard:util-other"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -149,13 +149,13 @@ class UtilOtherView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class BlankView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "studentdashboard/blank.html"
+    template_name = "dashboard/blank.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("blank", reverse("studentdashboard:blank"))
+                ("dashboard", reverse("dashboard:index")),
+                ("blank", reverse("dashboard:blank"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -168,13 +168,13 @@ class BlankView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class ChartsView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "studentdashboard/charts.html"
+    template_name = "dashboard/charts.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("charts", reverse("studentdashboard:charts"))
+                ("dashboard", reverse("dashboard:index")),
+                ("charts", reverse("dashboard:charts"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -187,13 +187,13 @@ class ChartsView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class TablesView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "studentdashboard/tables.html"
+    template_name = "dashboard/tables.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("tables", reverse("studentdashboard:tables"))
+                ("dashboard", reverse("dashboard:index")),
+                ("tables", reverse("dashboard:tables"))
                 ]
     def get_queryset(self):
         return "user_index"
@@ -206,13 +206,13 @@ class TablesView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "studentdashboard/404.html"
+    template_name = "dashboard/404.html"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("studentdashboard:index")),
-                ("404", reverse("studentdashboard:404"))
+                ("dashboard", reverse("dashboard:index")),
+                ("404", reverse("dashboard:404"))
                 ]
     def get_queryset(self):
         return "user_index"

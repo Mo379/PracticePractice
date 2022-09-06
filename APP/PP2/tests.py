@@ -15,7 +15,7 @@ class URL_pages_Tests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_my(self):
-        response = self.client.get('/my/')
+        response = self.client.get('/study/')
         self.assertEqual(response.status_code, 200)
 
     def test_user(self):
@@ -23,7 +23,7 @@ class URL_pages_Tests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_student_dash(self):
-        response = self.client.get('/s-dash/')
+        response = self.client.get('/dashboard/')
         self.assertEqual(response.status_code, 200)
 
     def test_admin(self):

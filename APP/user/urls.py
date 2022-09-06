@@ -47,7 +47,6 @@ urlpatterns = [
     path('_accountdetails', views._accountdetails, name='_accountdetails'),
     path('_admindetails', views._admindetails, name='_admindetails'),
     path('_studentdetails', views._studentdetails, name='_studentdetails'),
-    path('_teacherdetails', views._teacherdetails, name='_teacherdetails'),
     path(
         '_organisationdetails',
         views._organisationdetails,

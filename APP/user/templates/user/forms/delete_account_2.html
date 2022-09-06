@@ -5,8 +5,8 @@
 	{%definevar 'deleteaccount2' as alert_loc%}
 	{%include 'base/alert.html'%}
 	{{ form.non_field_errors }}
-	<input type="hidden" class="form-control form-control-user" name="uidb64" value='{{context.uidb64}}'>
-	<input type="hidden" class="form-control form-control-user" name="token" value='{{context.token}}'>
+	{{form.uidb64}}
+	{{form.token}}
 	<div class="form-group">
 	    {{ form.username.errors }}
 	    <label for="{{ form.username.id_for_label }}">Username</label><br>

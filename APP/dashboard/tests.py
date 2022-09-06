@@ -4,45 +4,45 @@ from django.test import TestCase
 # Create your tests here.
 class URL_pages_Tests(TestCase):
     def test_homepage(self):
-        response = self.client.get('/s-dash/')
+        response = self.client.get('/dashboard/')
         self.assertEqual(response.status_code, 200)
 
     def test_buttons(self):
-        response = self.client.get('/s-dash/buttons')
+        response = self.client.get('/dashboard/buttons')
         self.assertEqual(response.status_code, 200)
 
     def test_cards(self):
-        response = self.client.get('/s-dash/cards')
+        response = self.client.get('/dashboard/cards')
         self.assertEqual(response.status_code, 200)
 
     def test_util_color(self):
-        response = self.client.get('/s-dash/util-color')
+        response = self.client.get('/dashboard/util-color')
         self.assertEqual(response.status_code, 200)
 
     def test_util_border(self):
-        response = self.client.get('/s-dash/util-border')
+        response = self.client.get('/dashboard/util-border')
         self.assertEqual(response.status_code, 200)
 
     def test_util_animation(self):
-        response = self.client.get('/s-dash/util-animation')
+        response = self.client.get('/dashboard/util-animation')
         self.assertEqual(response.status_code, 200)
 
     def test_util_other(self):
-        response = self.client.get('/s-dash/util-other')
+        response = self.client.get('/dashboard/util-other')
         self.assertEqual(response.status_code, 200)
 
     def test_charts(self):
-        response = self.client.get('/s-dash/charts')
+        response = self.client.get('/dashboard/charts')
         self.assertEqual(response.status_code, 200)
 
     def test_tables(self):
-        response = self.client.get('/s-dash/tables')
+        response = self.client.get('/dashboard/tables')
         self.assertEqual(response.status_code, 200)
 
     def test_blank(self):
-        response = self.client.get('/s-dash/blank')
+        response = self.client.get('/dashboard/blank')
         self.assertEqual(response.status_code, 200)
 
     def test_404(self):
-        response = self.client.get('/s-dash/404')
+        response = self.client.get('/dashboard/404')
         self.assertEqual(response.status_code, 200)

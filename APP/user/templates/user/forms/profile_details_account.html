@@ -4,7 +4,8 @@
 <div class="card mb-4">
 <div class="card-header">Account Details</div>
 <div class="card-body">
-    <form class="user px-3 py-3"  action="{%url 'user:_accountdetails'%}" method="POST" role="form">
+    <form class="user px-3 py-3"  action="{%url 'user:_accountdetails'%}" 
+	    method="POST" role="form" enctype="multipart/form-data">
         {% csrf_token %}
 	{{ form.non_field_errors }}
 	<!-- Form Group (username)-->
@@ -31,7 +32,7 @@
 	<!-- Form Group (email address)-->
 	<div class="mb-3">
 	    {{ form.email.errors }}
-	    <label for="{{ form.email.id_for_label }}">{{form.email.label}}</label><br>
+	    <label for="{{ form.email.id_for_label }}">{{form.email.label}} (The email cannot be changed)</label><br>
 	    {{ form.email }}
 	</div>
 	<!-- Form Group (DOB)-->
@@ -45,6 +46,11 @@
 	    {{ form.bio.errors }}
 	    <label for="{{ form.bio.id_for_label }}">{{form.bio.label}}</label><br>
 	    {{ form.bio }}
+	</div>
+	<div class="mb-3">
+	    {{ form.profile_upload.errors }}
+	    <label>{{form.profile_upload.label}}</label><br>
+	    {{ form.profile_upload }}
 	</div>
 	<!-- Save changes button-->
 	<button class="btn btn-primary" type="submit">Save changes</button>
