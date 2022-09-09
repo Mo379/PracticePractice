@@ -26,18 +26,15 @@
 {%block page_name%}
 404
 {%endblock%}
-{%block sidebar%}
-{%include 'dashboard/sidebar.html'%}
-{%endblock%}
 {%block content%}
 	<!-- Begin Page Content -->
 	<div class="container-fluid">
 		<!-- 404 Error Text -->
 		<div class="text-center">
 			<div class="error mx-auto" data-text="404">404</div>
-			<p class="lead text-gray-800 mb-5">Page Not Found</p>
+			<p class="lead text-gray-800 mb-5">Not Found</p>
 			<p class="text-gray-500 mb-0">It looks like this is no possible.</p>
-			<a href="{%url 'dashboard:index'%}">&larr; Back to Dashboard</a>
+			<a href="{%url 'main:index'%}">&larr; Back to Home</a>
 		</div>
 
 	</div>

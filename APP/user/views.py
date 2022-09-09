@@ -26,6 +26,7 @@ from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.mixins import LoginRequiredMixin
 from user.forms import (
         LoginForm,
         ForgotPasswordForm,
@@ -47,7 +48,10 @@ from user.forms import (
 
 
 # Create your views here.
-class IndexView(BaseBreadcrumbMixin, generic.ListView):
+class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
+
     template_name = "user/index.html"
     context_object_name = 'context'
 
@@ -95,6 +99,7 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
 # Login view
 class LoginView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "user/registration/login.html"
+    redirect_field_name = None
     context_object_name = 'context'
 
     @cached_property
@@ -191,7 +196,9 @@ class DeleteAccountView(BaseBreadcrumbMixin, generic.ListView):
 
 
 # Billing view
-class BillingView(BaseBreadcrumbMixin, generic.ListView):
+class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "user/billing.html"
     context_object_name = 'context'
 
@@ -207,7 +214,10 @@ class BillingView(BaseBreadcrumbMixin, generic.ListView):
 
 
 # Secutiry view
-class SecurityView(BaseBreadcrumbMixin, generic.ListView):
+class SecurityView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
+
     template_name = "user/security.html"
     context_object_name = 'context'
 
@@ -228,7 +238,10 @@ class SecurityView(BaseBreadcrumbMixin, generic.ListView):
 
 
 # Settings view
-class SettingsView(BaseBreadcrumbMixin, generic.ListView):
+class SettingsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
+
     template_name = "user/settings.html"
     context_object_name = 'context'
 
@@ -272,25 +285,6 @@ class JoinView(BaseBreadcrumbMixin, generic.ListView):
 
 
 # Appearance View
-class AppearanceView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "user/action.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("account", reverse("user:index")),
-                ("settings", reverse("user:settings")),
-                ("apperance", reverse("user:apperance")),
-            ]
-
-    def get_queryset(self):
-        return "user_appearance_action"
-
-
-# Authentication system
-# user login action
-
 
 #login 
 def _loginUser(request):
@@ -752,6 +746,8 @@ def _accountdetails(request):
                 )
             else:
                 form.save()
+                request.user.account_details_complete = True
+                request.user.save()
                 messages.add_message(
                         request,
                         messages.INFO,
@@ -781,6 +777,8 @@ def _admindetails(request):
         form = AdminDetailsForm(request.POST, instance=admin)
         if form.is_valid():
             form.save()
+            request.user.group_details_complete = True
+            request.user.save()
             messages.add_message(
                     request,
                     messages.INFO,
@@ -810,6 +808,8 @@ def _studentdetails(request):
         form = StudentDetailsForm(request.POST, instance=student)
         if form.is_valid():
             form.save()
+            request.user.group_details_complete = True
+            request.user.save()
             messages.add_message(
                     request,
                     messages.INFO,
@@ -839,6 +839,8 @@ def _educatordetails(request):
         form = EducatorDetailsForm(request.POST, instance=educator)
         if form.is_valid():
             form.save()
+            request.user.group_details_complete = True
+            request.user.save()
             messages.add_message(
                     request,
                     messages.INFO,
@@ -872,6 +874,8 @@ def _organisationdetails(request):
             )
         if form.is_valid():
             form.save()
+            request.user.group_details_complete = True
+            request.user.save()
             messages.add_message(
                     request,
                     messages.INFO,
@@ -894,6 +898,8 @@ def _editordetails(request):
         form = EditorDetailsForm(request.POST, request.FILES, instance=editor)
         if form.is_valid():
             form.save()
+            request.user.group_details_complete = True
+            request.user.save()
             messages.add_message(
                     request,
                     messages.INFO,
@@ -924,6 +930,8 @@ def _affiliatedetails(request):
         form = AffiliateDetailsForm(request.POST, request.FILES, instance=affiliate)
         if form.is_valid():
             form.save()
+            request.user.group_details_complete = True
+            request.user.save()
             messages.add_message(
                     request,
                     messages.INFO,

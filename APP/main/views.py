@@ -209,4 +209,15 @@ class SiteMapSEOView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
+class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = "main/404.html"
+    context_object_name = 'context'
+    @cached_property
+    def crumbs(self):
+        return [
+                ("Home", reverse("main:index")),
+                ("404", reverse("main:404"))
+                ]
+    def get_queryset(self):
+        return "user_index"
 

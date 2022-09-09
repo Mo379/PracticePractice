@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -15,7 +16,9 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 
 
 
-class IndexView(BaseBreadcrumbMixin, generic.ListView):
+class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/index.html"
     context_object_name = 'context'
     @cached_property
@@ -34,7 +37,9 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class ButtonsView(BaseBreadcrumbMixin, generic.ListView):
+class ButtonsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/buttons.html"
     context_object_name = 'context'
     @cached_property
@@ -53,7 +58,9 @@ class ButtonsView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class CardsView(BaseBreadcrumbMixin,generic.ListView):
+class CardsView(LoginRequiredMixin, BaseBreadcrumbMixin,generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/cards.html"
     context_object_name = 'context'
     @cached_property
@@ -72,7 +79,9 @@ class CardsView(BaseBreadcrumbMixin,generic.ListView):
 
 
 
-class UtilColorView(BaseBreadcrumbMixin, generic.ListView):
+class UtilColorView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/utilities/utilities-color.html"
     context_object_name = 'context'
     @cached_property
@@ -91,7 +100,9 @@ class UtilColorView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class UtilBorderView(BaseBreadcrumbMixin, generic.ListView):
+class UtilBorderView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/utilities/utilities-border.html"
     context_object_name = 'context'
     @cached_property
@@ -110,7 +121,9 @@ class UtilBorderView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class UtilAnimationView(BaseBreadcrumbMixin, generic.ListView):
+class UtilAnimationView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/utilities/utilities-animation.html"
     context_object_name = 'context'
     @cached_property
@@ -129,7 +142,9 @@ class UtilAnimationView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class UtilOtherView(BaseBreadcrumbMixin, generic.ListView):
+class UtilOtherView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/utilities/utilities-other.html"
     context_object_name = 'context'
     @cached_property
@@ -148,7 +163,9 @@ class UtilOtherView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class BlankView(BaseBreadcrumbMixin, generic.ListView):
+class BlankView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/blank.html"
     context_object_name = 'context'
     @cached_property
@@ -167,7 +184,9 @@ class BlankView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class ChartsView(BaseBreadcrumbMixin, generic.ListView):
+class ChartsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/charts.html"
     context_object_name = 'context'
     @cached_property
@@ -186,7 +205,9 @@ class ChartsView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class TablesView(BaseBreadcrumbMixin, generic.ListView):
+class TablesView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/tables.html"
     context_object_name = 'context'
     @cached_property
@@ -205,7 +226,9 @@ class TablesView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
+class NotFoundView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
     template_name = "dashboard/404.html"
     context_object_name = 'context'
     @cached_property

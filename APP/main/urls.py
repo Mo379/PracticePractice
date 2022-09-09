@@ -14,4 +14,5 @@ urlpatterns = [
         path('privacy', views.PrivacyView.as_view(), name='privacy'),
         path('sitemap', views.SiteMapView.as_view(), name='sitemap'),
         path('sitemapseo', views.SiteMapSEOView.as_view(), name='sitemapseo'),
+        path('404', views.NotFoundView.as_view(), name='404'),
 ]
