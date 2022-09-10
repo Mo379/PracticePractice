@@ -334,6 +334,18 @@ class ChangePasswordForm(forms.Form):
                 )
 
 
+class TriggerDeleteAccountForm(forms.Form):
+    password = forms.CharField(
+            max_length=200,
+            widget=forms.TextInput(attrs={
+                    'class': "form-control form-control-user",
+                    'placeholder': "Password",
+                    'type': "password"
+                    }
+                )
+        )
+
+
 class DeleteAccountForm(forms.Form):
     def __init__(self, uidb64, token, *args, **kwargs):
         super().__init__(*args, **kwargs)

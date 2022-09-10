@@ -34,6 +34,7 @@ from user.forms import (
         RegistrationForm,
         ResetPasswordForm,
         ChangePasswordForm,
+        TriggerDeleteAccountForm,
         DeleteAccountForm,
         EmailChoiceForm,
         AppearanceChoiceForm,
@@ -221,9 +222,11 @@ class SecurityView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
 
     def get_queryset(self):
         changepasswordform = ChangePasswordForm()
+        triggeraccountdeleteform = TriggerDeleteAccountForm()
         loginform = LoginForm()
         context = {}
         context['form_changepassword'] = changepasswordform
+        context['form_tad'] = triggeraccountdeleteform
         context['form_login'] = loginform
         return context
 
@@ -562,42 +565,73 @@ def _pwdreset(request):
 
 
 def _deleteaccount_1(request):
-    try:
-        # does not use a form
-        user = request.user
-        token = account_activation_token.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        #
-        mail_subject = 'Account deletions.'
-        message = render_to_string('user/emails/account_deletion.html', {
-            'user': user,
-            'domain': '127.0.0.1:8000',
-            'uid': uid,
-            'token': token,
-        })
-        to_email = user.email
-        send_mail(
-            mail_subject,
-            message,
-            'admin@practicepractice.net',
-            [to_email],
-            fail_silently=False,
-        )
-        _logoutUser(request)
+    if request.method == 'POST':
+        form = TriggerDeleteAccountForm(request.POST)
+        if form.is_valid():
+            password = form.cleaned_data['password']
+            user = authenticate(
+                    request,
+                    username=request.user.username,
+                    password=password
+                )
+            if user:
+                try:
+                    #
+                    token = account_activation_token.make_token(user)
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    mail_subject = 'Account deletions.'
+                    message = render_to_string('user/emails/account_deletion.html', {
+                        'user': user,
+                        'domain': '127.0.0.1:8000',
+                        'uid': uid,
+                        'token': token,
+                    })
+                    to_email = user.email
+                    send_mail(
+                        mail_subject,
+                        message,
+                        'admin@practicepractice.net',
+                        [to_email],
+                        fail_silently=False,
+                    )
+                    _logoutUser(request)
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'A link containing instructions for account deletion has been \
+                                    sent to your registered Email, if this was an accident, \
+                                    you can simply delete the email we sent and log back in.',
+                            extra_tags='alert-warning login_form'
+                        )
+                    return redirect('user:login')
+                except Exception:
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'An unknown error has occurred, please contact us.',
+                            extra_tags='alert-warning user_security'
+                        )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Invalid details',
+                        extra_tags='alert-warning user_security'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that ' +
+                    'all inputs are valid.'+str(form.errors),
+                    extra_tags='alert-danger user_security'
+                )
+    else:
         messages.add_message(
                 request,
                 messages.INFO,
-                'A link containing instructions for account deletion has been \
-                        sent to your registered Email, if this was an accident\
-                        you can simply delete the email we sent and log back in.',
-                extra_tags='alert-warning user_security'
-            )
-    except Exception:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'An unknown error has occurred, please contact us.',
-                extra_tags='alert-warning user_security'
+                'Invalid Request Method',
+                extra_tags='alert-danger user_security'
             )
     return redirect('user:security')
 
@@ -887,6 +921,13 @@ def _organisationdetails(request):
                     'Something is wrong, please check that all inputs are valid.'+str(form.errors),
                     extra_tags='alert-danger user_profile'
                 )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
     return redirect('user:index')
 
 

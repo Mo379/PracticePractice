@@ -42,9 +42,10 @@
     <strong style='color:red;'>Deleting</strong> your account is a 
     <strong style='color:red;'>permanent</strong> action that 
     <strong style='color:red;'>cannot be undone</strong>. 
-    If you are sure you want to delete your account, 
+    If you are sure you want to delete your account, enter your password, and  
     click the button to begin the 3-step account deletion process
     </p>
+    {%definevar context.form_tad as form%}
     {%include 'user/forms/delete_account.html'%}
 </div>
 </div>

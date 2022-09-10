@@ -1,4 +1,6 @@
 <form class="user px-3 py-3"  action="{%url 'user:_deleteaccount_1'%}" method="POST" role="form">
 	{% csrf_token %}
+        {{ form.password.errors }}
+	{{ form.password }} <br>
 	<button class="btn btn-danger-soft text-danger" type="submit">I understand, begin process</button>
 </form>
