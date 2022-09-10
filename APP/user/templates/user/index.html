@@ -26,33 +26,33 @@
 	{%include 'user/forms/index_profile.html'%}
 	</div>
         <div class="col-xl-8">
-	{%if context.form_accountdetails %}
-		{%definevar context.form_accountdetails as form%}
+	{%if context.AccountDetailsForm %}
+		{%definevar context.AccountDetailsForm as form%}
 		{%include 'user/forms/profile_details_account.html'%}
 	{%endif%}
-	{%if context.form_admindetails%}
-		{%definevar context.form_admindetails as form%}
+	{%if context.AdminDetailsForm %}
+		{%definevar context.AdminDetailsForm as form%}
 		{%include 'user/forms/profile_details_admin.html'%}
 	{%endif%}
-	{%if context.form_studentdetails%}
-		{%definevar context.form_studentdetails as form%}
+	{%if context.StudentDetailsForm %}
+		{%definevar context.StudentDetailsForm as form%}
 		{%include 'user/forms/profile_details_student.html'%}
 	{%endif%}
-	{%if context.form_educatordetails%}
-		{%definevar context.form_educatordetails as form%}
+	{%if context.EducatorDetailsForm %}
+		{%definevar context.EducatorDetailsForm as form%}
 		{%include 'user/forms/profile_details_educator.html'%}
 	{%endif%}
-	{%if context.form_organisationdetails%}
-		{%definevar context.form_organisationdetails as form%}
-		{%definevar context.organisation as organisation%}
+	{%if context.OrganisationDetailsForm %}
+		{%definevar context.OrganisationDetailsForm  as form%}
+		{%definevar context.group_object_Organisation as organisation%}
 		{%include 'user/forms/profile_details_organisation.html'%}
 	{%endif%}
-	{%if context.form_editordetails%}
-		{%definevar context.form_editordetails as form%}
+	{%if context.EditorDetailsForm %}
+		{%definevar context.EditorDetailsForm as form%}
 		{%include 'user/forms/profile_details_editor.html'%}
 	{%endif%}
-	{%if context.form_affiliatedetails%}
-		{%definevar context.form_affiliatedetails as form%}
+	{%if context.AffiliateDetailsForm %}
+		{%definevar context.AffiliateDetailsForm as form%}
 		{%include 'user/forms/profile_details_affiliate.html'%}
 	{%endif%}
         </div>

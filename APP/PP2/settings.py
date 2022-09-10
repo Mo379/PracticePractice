@@ -163,6 +163,16 @@ VALID_GROUPS = [
         "Affiliate",
         "Admin",
     ]
+GROUP_MODEL_MAP = {
+        "Student": ['Student', 'StudentDetailsForm'],
+        "Teacher": ['Educator', 'EducatorDetailsForm'],
+        "PrivateTutor": ['Educator', 'EducatorDetailsForm'],
+        "School": ['Organisation', 'OrganisationDetailsForm'],
+        "TuitionCenter": ['Organisation', 'OrganisationDetailsForm'],
+        "Editor": ['Editor', 'EditorDetailsForm'],
+        "Affiliate": ['Affiliate', 'AffiliateDetailsForm'],
+        "Admin": ['Admin', 'AdminDetailsForm'],
+    }
 # Valid Subjects
 VALID_SUBJECTS = [
         'Mathematics',

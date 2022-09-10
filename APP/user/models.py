@@ -106,7 +106,7 @@ class Educator(models.Model):
         )
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'Unknown'
 
 
 class Admin(models.Model):
@@ -134,7 +134,7 @@ class Admin(models.Model):
     approval_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'Unknown' 
 
 
 class Student(models.Model):
@@ -159,7 +159,7 @@ class Student(models.Model):
         )
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'Unknown' 
 
 
 class Editor(models.Model):
@@ -185,7 +185,7 @@ class Editor(models.Model):
     approval_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'Unknown' 
 
 
 class Affiliate(models.Model):
@@ -197,4 +197,4 @@ class Affiliate(models.Model):
     approval_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else 'Unknown' 

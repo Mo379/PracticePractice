@@ -1,5 +1,6 @@
 import re
 from django.conf import settings
+from django.apps import apps, AppConfig
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -65,34 +66,24 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         context = {}
         user = User.objects.get(pk=self.request.user.id)
-        #
-        admin = Admin.objects.get(user=user)
-        student = Student.objects.get(user=user)
-        organisation = Organisation.objects.get(user=user)
-        educator = Educator.objects.get(user=user)
-        editor = Editor.objects.get(user=user)
-        affiliate = Affiliate.objects.get(user=user)
+        # update context: Add groups details forms and obejcts
+        for group in user.groups.all():
+            group = str(group)
+            group_model = settings.GROUP_MODEL_MAP[group][0]
+            group_extra_detail_form = settings.GROUP_MODEL_MAP[group][1]
+            model = apps.get_model(app_label='user', model_name=group_model)
+            # ignore error stating variable isn't used
+            group_model_object = model.objects.get(user=user)
+            # safe eval usage because it's no dependant on user input ;).
+            form = eval(
+                    group_extra_detail_form+'(instance=group_model_object)'
+                )
+            context[group_extra_detail_form] = form
+            context['group_object_'+group_model] = group_model_object
+            
         #
         accountdetailsform = AccountDetailsForm(instance=user)
-        admindetailsform = AdminDetailsForm(instance=admin)
-        studentdetailsform = StudentDetailsForm(instance=student)
-        organisationdetailsform = OrganisationDetailsForm(instance=organisation)
-        educatordetailsform = EducatorDetailsForm(instance=educator)
-        editordetailsform = EditorDetailsForm(instance=editor)
-        affiliatedetailsform = AffiliateDetailsForm(instance=affiliate)
-        #
-        loginform = LoginForm()
-        #
-        context['organisation'] = organisation
-        context['form_accountdetails'] = accountdetailsform
-        context['form_admindetails'] = admindetailsform
-        context['form_studentdetails'] = studentdetailsform
-        context['form_organisationdetails'] = organisationdetailsform
-        context['form_educatordetails'] = educatordetailsform
-        context['form_editordetails'] = editordetailsform
-        context['form_affiliatedetails'] = affiliatedetailsform
-        #
-        context['form_login'] = loginform
+        context['AccountDetailsForm'] = accountdetailsform
         return context
 
 
@@ -342,6 +333,12 @@ def _registerUser(request):
             # Hash password
             user.set_password(password)
             user.save()
+            settings.GROUP_MODEL_MAP[utype][0]
+            group_model = apps.get_model(
+                    app_label='user',
+                    model_name=settings.GROUP_MODEL_MAP[utype][0]
+                )
+            group_model.objects.create(user=user)
             # Give group
             AssociatedGroup = Group.objects.get(name=utype)  # Get group
             AssociatedGroup.user_set.add(user)
@@ -809,6 +806,7 @@ def _studentdetails(request):
         if form.is_valid():
             form.save()
             request.user.group_details_complete = True
+            request.user.verification_status= True
             request.user.save()
             messages.add_message(
                     request,
