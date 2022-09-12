@@ -17,6 +17,8 @@
 
 {%block content%}
 <div class="container-xl px-4 mt-4">
+    {%definevar 'user_billing' as alert_loc%}
+    {%include 'base/alert.html'%}
     {%definevar 'billing' as active_link%}
     {%include 'user/parts/_navigation.html'%}
     <div class="row">
@@ -64,53 +66,47 @@
     <div class="card card-header-actions mb-4">
         <div class="card-header">
             Payment Methods
-            <button class="btn btn-sm btn-primary" type="button">Add Payment Method</button>
+	    <form ass="ml-2"  action="{%url 'user:addpaymentmethod'%}" 
+		    method="GET" role="form" style='display:inline-block;'>
+            	<button class="btn btn-sm btn-primary" type="submit">Add Payment Method</button>
+	    </form>
         </div>
         <div class="card-body px-0">
+	    {%for paymethod in context.paymentmethods%}
             <!-- Payment method 1-->
             <div class="d-flex align-items-center justify-content-between px-4">
                 <div class="d-flex align-items-center">
-                     <i class="fab fa-cc-visa fa-2x cc-color-visa"></i>
+                    <i class="fab fa-cc-{{paymethod.card.brand}} fa-2x cc-color-{{paymethod.card.brand}}"></i>
                     <div class="ms-4 ml-3">
-                        <div class="small">Visa ending in 1234</div>
-                        <div class="text-xs text-muted">Expires 04/2024</div>
+			    <div class="small">{{paymethod.card.brand}} ending in {{paymethod.card.last4}} | Added {{paymethod.created}}</div>
+	    <div class="text-xs text-muted">Expires {{paymethod.card.exp_month}}/{{paymethod.card.exp_year}}</div>
                     </div>
                 </div>
                 <div class="ms-4 small">
+	    	    {%if context.customer.default_payment_method.id == paymethod.id%}
                     <div class="badge bg-light text-dark me-3">Default</div>
-                    <a href="#!">Edit</a>
+		    {%else%}
+		    <form style='display:inline-block;' 
+			  method='POST' 
+			  action="{%url 'user:_makedefaultpaymentmethod'%}"
+		    >
+			{% csrf_token %}
+		        <input type='hidden' name='method_id'value='{{paymethod.id}}'>
+			<input type="submit" style='color:black;'value="Make Default" class='my_link_button' />
+		    </form>
+		    {%endif%}
+		    <form style='display:inline-block;' 
+			  method='POST' 
+			  action="{%url 'user:_deletepaymentmethod'%}"
+		    >
+			{% csrf_token %}
+		        <input type='hidden' name='method_id'value='{{paymethod.id}}'>
+			<input type="submit" style='color:red;'value="| Delete" class='my_link_button link-danger' />
+		    </form>
                 </div>
             </div>
             <hr>
-            <!-- Payment method 2-->
-            <div class="d-flex align-items-center justify-content-between px-4">
-                <div class="d-flex align-items-center">
-                    <i class="fab fa-cc-mastercard fa-2x cc-color-mastercard"></i>
-                    <div class="ms-4 ml-3">
-                        <div class="small">Mastercard ending in 5678</div>
-                        <div class="text-xs text-muted">Expires 05/2022</div>
-                    </div>
-                </div>
-                <div class="ms-4 small">
-                    <a class="text-muted me-3" href="#!">Make Default</a>
-                    <a href="#!">Edit</a>
-                </div>
-            </div>
-            <hr>
-            <!-- Payment method 3-->
-            <div class="d-flex align-items-center justify-content-between px-4">
-                <div class="d-flex align-items-center">
-                    <i class="fab fa-cc-amex fa-2x cc-color-amex"></i>
-                    <div class="ms-4 ml-3">
-                        <div class="small">American Express ending in 9012</div>
-                        <div class="text-xs text-muted">Expires 01/2026</div>
-                    </div>
-                </div>
-                <div class="ms-4 small">
-                    <a class="text-muted me-3" href="#!">Make Default</a>
-                    <a href="#!">Edit</a>
-                </div>
-            </div>
+	    {%endfor%}
         </div>
     </div>
     <!-- Billing history card-->

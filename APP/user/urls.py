@@ -28,6 +28,12 @@ urlpatterns = [
     path('security', views.SecurityView.as_view(), name='security'),
     path('settings', views.SettingsView.as_view(), name='settings'),
     path('join', views.JoinView.as_view(), name='join'),
+    # payments views
+    path(
+        'addpaymentmethod',
+        views.AddPaymentMethodView.as_view(),
+        name='addpaymentmethod'
+    ),
     # actions
     path('_login', views._loginUser, name='_login'),
     path('_registerUser', views._registerUser, name='_register'),
@@ -73,5 +79,16 @@ urlpatterns = [
         '_mailchoiceschange',
         views._mailchoiceschange,
         name='_mailchoiceschange'
+    ),
+    # payment actions
+    path(
+        '_makedefaultpaymentmethod',
+        views._makedefaultpaymentmethod,
+        name='_makedefaultpaymentmethod'
+    ),
+    path(
+        '_deletepaymentmethod',
+        views._deletepaymentmethod,
+        name='_deletepaymentmethod'
     ),
 ]

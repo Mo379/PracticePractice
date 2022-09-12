@@ -196,14 +196,23 @@ EMAIL_USE_TLS = decouple_config('SES_USE_TLS', cast=bool)
 
 # Stripe settings
 STRIPE_LIVE_SECRET_KEY = decouple_config('Stripe_live_secret')
+STRIPE_LIVE_PUBLISHABLE_KEY = decouple_config('Stripe_live_publishable')
+#
 STRIPE_TEST_SECRET_KEY = decouple_config('Stripe_test_secret')
+STRIPE_TEST_Publishable_KEY = decouple_config('Stripe_test_publishable')
 
 # Change to True in production
 STRIPE_LIVE_MODE = decouple_config('Stripe_live_mode', cast=bool)
+if STRIPE_LIVE_MODE:
+    STRIPE_SECRET_KEY = decouple_config('Stripe_live_secret')
+    STRIPE_PUBLISHABLE_KEY = decouple_config('Stripe_live_publishable')
+else:
+    STRIPE_SECRET_KEY = decouple_config('Stripe_test_secret')
+    STRIPE_PUBLISHABLE_KEY = decouple_config('Stripe_test_publishable')
 
 # Get it from the section in the Stripe dashboard where
 # you added the webhook endpoint
-DJSTRIPE_WEBHOOK_SECRET = decouple_config('Stripe_hook_secret')
+DJSTRIPE_WEBHOOK_SECRET = decouple_config('Stripe_webhook_secret')
 
 # We recommend setting to True for new installations
 DJSTRIPE_USE_NATIVE_JSONFIELD = True

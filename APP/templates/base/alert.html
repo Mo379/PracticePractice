@@ -1,4 +1,20 @@
 {% load general %}
+{%if request.GET.message and alert_loc == 'top_homepage'%}
+<div 
+	style ='margin-left:0;width:100%;'
+	class="alert alert-dismissible fade show alert-info" 
+	role="alert"
+	>
+	{{request.GET.message}}
+	<button 
+		  type="button" 
+		  class="close" 
+		  data-dismiss="alert" 
+		  aria-label="Close">
+	    <span aria-hidden="true">&times;</span>
+	</button>
+</div>
+{%endif%}
 {% if messages %}
 <ul class="wrapper_messages", style='padding:0;'>
 	{% for message in messages %}

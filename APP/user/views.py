@@ -50,6 +50,21 @@ from user.forms import (
 
 
 # Create your views here.
+import stripe
+from django.db import transaction
+from djstripe import webhooks
+from djstripe.models import Customer, PaymentMethod
+
+
+
+
+@webhooks.handler("payment_intent.succeeded")
+def my_handler(event, **kwargs):
+    def do_something():
+        print("We should probably notify the user at this pointsss")
+    transaction.on_commit(do_something)
+
+
 class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     login_url = 'user:login'
     redirect_field_name = None
@@ -202,7 +217,15 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_settings"
+        context = {}
+        # think about adding checks for robustness.
+        user = self.request.user
+        customer_object = Customer.objects.get(id=user.id)
+        payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
+        context['customer'] = customer_object
+        context['paymentmethods'] = payment_methods
+        context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
+        return context
 
 
 # Secutiry view
@@ -278,9 +301,36 @@ class JoinView(BaseBreadcrumbMixin, generic.ListView):
         return "user_join"
 
 
-# Appearance View
+class AddPaymentMethodView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = None
+    template_name = "user/payments/add_payment_method.html"
+    context_object_name = 'context'
 
-#login 
+    @cached_property
+    def crumbs(self):
+        return [
+                ("account", reverse("user:index")),
+                ("billing", reverse("user:billing")),
+            ]
+
+    def get_queryset(self):
+        context = {}
+        # think about adding checks for robustness.
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        intent = stripe.SetupIntent.create(
+                customer=str(self.request.user.id),
+                payment_method_types=["card"],
+          )
+        context['client_secret'] = intent.client_secret
+        context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
+        return context
+
+
+# Appearance View
+# login
 def _loginUser(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -335,8 +385,9 @@ def _registerUser(request):
             password = form.cleaned_data['password']
             # Hash password
             user.set_password(password)
-            user.save()
             settings.GROUP_MODEL_MAP[utype][0]
+            user.save()
+            # link customer object to user object
             group_model = apps.get_model(
                     app_label='user',
                     model_name=settings.GROUP_MODEL_MAP[utype][0]
@@ -707,9 +758,18 @@ def _activate(request, uidb64, token):
                         try creating another account!",
                 extra_tags='alert-danger registration_form'
             )
-    if user is not None and account_activation_token.check_token(user, token):
+    if user is not None \
+            and account_activation_token.check_token(user, token)\
+            and user.registration==0:
         user.registration = 1
         user.save()
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe.Customer.create(
+                email=user.email,
+                name=user.first_name+' '+user.last_name,
+                id=user.id,
+                metadata={'username':user.username}
+            )
         messages.add_message(
                 request,
                 messages.INFO,
@@ -721,7 +781,7 @@ def _activate(request, uidb64, token):
         messages.add_message(
                 request,
                 messages.INFO,
-                "User Cannot be confirmed",
+                "User Cannot be confirmed, or is already registered.",
                 extra_tags='alert-danger registration_form'
             )
         return redirect('user:register')
@@ -1079,3 +1139,90 @@ def _mailchoiceschange(request):
                 extra_tags='alert-danger user_settings'
             )
     return redirect('user:settings')
+
+
+def _makedefaultpaymentmethod(request):
+    if request.method == 'POST':
+        request.POST = request.POST.copy()
+        payment_methods = PaymentMethod.objects.filter(customer=str(request.user.id))
+        payment_methods_ids = {method.id: method for method in payment_methods}
+        new_default_method_id = request.POST['method_id']
+        if new_default_method_id in payment_methods_ids:
+            # do stripe defaulting
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            stripe.Customer.modify(
+                    sid=str(request.user.id),
+                    invoice_settings={'default_payment_method': str(new_default_method_id)}
+              )
+            # do local defaulting
+            customer = Customer.objects.get(id=request.user.id)
+            customer.default_payment_method=payment_methods_ids[str(new_default_method_id)]
+            customer.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your preffered default payment method has been updated.',
+                    extra_tags='alert-success user_billing'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Invalid payment method.',
+                    extra_tags='alert-danger user_billing'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_billing'
+            )
+    return redirect('user:billing')
+
+
+def _deletepaymentmethod(request):
+    if request.method == 'POST':
+        request.POST = request.POST.copy()
+        payment_methods = PaymentMethod.objects.filter(customer=str(request.user.id))
+        payment_methods_ids = {method.id: method for method in payment_methods}
+        deleted_payment_method_id= request.POST['method_id']
+        if deleted_payment_method_id in payment_methods_ids:
+            method_object = payment_methods_ids[deleted_payment_method_id]
+            customer = Customer.objects.get(id=request.user.id)
+            if customer.default_payment_method != method_object or len(payment_methods_ids)==1:
+                # do stripe deleting
+                stripe.api_key = settings.STRIPE_SECRET_KEY
+                stripe.PaymentMethod.detach(
+                    deleted_payment_method_id,
+                )
+                PaymentMethod.objects.get(id=deleted_payment_method_id).delete()
+                # do local deleting
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your payment method has been deleted from all of our records.',
+                        extra_tags='alert-success user_billing'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'You cannot remove your default payment method, unless it is the last one left.',
+                        extra_tags='alert-danger user_billing'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Invalid payment method.',
+                    extra_tags='alert-danger user_billing'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_billing'
+            )
+    return redirect('user:billing')

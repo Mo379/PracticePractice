@@ -1,0 +1,127 @@
+{%extends 'user/registration/base.html'%}
+{%block pagename%}
+Add Payment Method
+{%endblock%}
+{%block content%}
+{%load general%}
+<!-- Outer Row -->
+<div class="row justify-content-center">
+<div class="col-xl-10 col-lg-12 col-md-9">
+<div class="card o-hidden border-0 shadow-lg my-5">
+<div class="card-body p-0">
+<!-- Nested Row within Card Body -->
+<div class="row">
+<div class="col-lg-6 d-none d-lg-block bg-login-image" style='background:Black;'></div>
+<div class="col-lg-6">
+<div class="p-5">
+	<div class="text-center">
+		<h1 class="h4 text-gray-900 mb-4">Add Payment Method</h1>
+	</div>
+	<!-- placeholder for Elements -->
+	<form id="payment-form" data-secret="{{ context.client_secret }}">
+		  <div id="payment-element">
+		    <!-- Elements will create form elements here -->
+		  </div>
+		 <button type="submit" class="mt-3 btn btn-primary btn-user btn-block d-none" id="card-button">
+		    <p id='button-text' style='margin:0;'>Save Card</p>
+		    <div id='spinner_and_wait' class='d-none'>
+		        <div class="d-flex justify-content-center">
+		          <div class="spinner-border spinner-border-sm" role="status">
+		            <span class="sr-only">Loading...</span>
+		          </div>
+		        </div>
+		    </div>
+		 </button>
+		  <div id="error-message">
+		    <!-- Display error message to your customers here -->
+		  </div>
+	</form>
+	    <div id='initial_waiter' class=''>
+		<div class="d-flex justify-content-center">
+		  <div class="spinner-border spinner-border-sm" role="status">
+		    <span class="sr-only">Loading...</span>
+		  </div>
+		</div>
+	    </div>
+	<a href="{%url 'user:billing'%}" class=" mt-5 btn btn-danger btn-user btn-block">
+		Go Back	
+	</a>
+	<script>
+		var stripe = Stripe("{{context.publishable_key}}");
+		const options = {
+		  clientSecret: '{{context.client_secret}}',
+		  // Fully customizable with appearance API.
+		  appearance: {/*...*/},
+		};
+		// Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in step 2
+		const elements = stripe.elements(options);
+		// Create and mount the Payment Element
+		const paymentElement = elements.create('payment');
+		paymentElement.mount('#payment-element');
+		var setupForm = document.getElementById('payment-form');
+		var clientSecret = setupForm.dataset.secret;
+		const form = document.getElementById('payment-form');
+		paymentElement.on('ready', function(event) {
+		  // Handle ready event
+		  document.querySelector("#card-button").classList.remove("d-none");
+		  document.querySelector("#initial_waiter").classList.add("d-none");
+		});
+		// helper function 
+		    // Show a spinner on payment submission
+		    var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+			document.querySelector("#card-button").disabled = true;
+			document.querySelector("#spinner_and_wait").classList.remove("d-none");
+			document.querySelector("#button-text").classList.add("d-none");
+		      } else {
+			document.querySelector("#card-button").disabled = false;
+			document.querySelector("#spinner_and_wait").classList.add("d-none");
+			document.querySelector("#button-text").classList.remove("d-none");
+		      }
+		    };
+	</script>
+	<script>
+		// event listener to the element
+		const delay = ms => new Promise(res => setTimeout(res, ms));
+		form.addEventListener('submit', async (event) => {
+		  event.preventDefault();
+		  loading(true);
+
+		  const {error} = await stripe.confirmSetup({
+		    //`Elements` instance that was used to create the Payment Element
+		    elements,
+		    confirmParams: {
+			    //return_url: "{%url 'user:billing'%}",
+			    return_url: "https://practicepractice.net/",
+		    }
+		  });
+
+		  if (error) {
+		    // This point will only be reached if there is an immediate error when
+		    // confirming the payment. Show error to your customer (for example, payment
+		    // details incomplete)
+		    const messageContainer = document.querySelector('#error-message');
+		    messageContainer.textContent = error.message;
+		    await delay(400);
+		    loading(false);
+		  } else {
+		    // Your customer will be redirected to your `return_url`. For some payment
+		    // methods like iDEAL, your customer will be redirected to an intermediate
+		    // site first to authorize the payment, then redirected to the `return_url`.
+		    //window.location.href = "{%url 'user:billing' %}"
+		    window.location.href = "https://practicepractice.net/"
+		    await delay(400);
+		    loading(false);
+		  }
+		});
+
+	</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+{%endblock%}
