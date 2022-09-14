@@ -23,7 +23,7 @@
 		{%endif%}
 	</label><br>
 	<label class="large mb-1"><i class="bi bi-credit-card-2-back"></i> Billing Details: 
-		{%if user.billing_details%}
+		{%if context.user_billing_bool%}
 		<i class="bi bi-check-circle-fill" style='color:green;'></i>
 		{%else%}
 		<i class="bi bi-x-circle-fill" style='color:red;'></i>

@@ -60,3 +60,11 @@
 		display: block;
 	}
 }
+.badge {
+  margin-left: 5px;
+  font-size: 10px;
+  padding: 4px 4px;
+  border-radius: 50%;
+  background: white;
+  color: black;
+}

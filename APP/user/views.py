@@ -100,6 +100,8 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         #
         accountdetailsform = AccountDetailsForm(instance=user)
         context['AccountDetailsForm'] = accountdetailsform
+        # checking if billing information exists
+        context['user_billing_bool'] = PaymentMethod.objects.filter(customer=user.id).exists()
         return context
 
 
@@ -825,16 +827,15 @@ def _accountdetails(request):
             # check user name is new and unique
             username_match = User.objects.filter(username__iexact=username).exists()
             if (
-                username_match and
+                username_match or
                 username.lower() != request.user.username.lower()
             ):
-                form.add_error(
-                    'username',
-                    ValidationError(
-                        'An account with this username ' +
-                        'already exits or is the same as your current username.'
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Username already exists or is the same.',
+                        extra_tags='alert-warning user_profile'
                     )
-                )
             else:
                 form.save()
                 request.user.account_details_complete = True

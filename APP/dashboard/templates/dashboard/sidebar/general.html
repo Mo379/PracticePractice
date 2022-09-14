@@ -1,0 +1,23 @@
+<!-- Heading -->
+<div class="sidebar-heading"
+{%if 'dashboard' in sidebar_active%}
+style='color:white;'
+{%endif%}
+>
+	General
+</div>
+<li class="nav-item">
+	<a class="nav-link" href="{%url 'dashboard:index'%}">
+		<i class="bi bi-house-fill" 
+		     {%if sidebar_active == 'dashboard/index'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'dashboard/index'%}
+		     style='color:white;'
+		     {%endif%}
+		>Home</span>
+	</a>
+</li>
+<hr class="sidebar-divider">

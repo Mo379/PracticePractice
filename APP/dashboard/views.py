@@ -8,159 +8,194 @@ from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+
 # Create your views here.
-
-
-
-
-
-
-
 class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     login_url = 'user:login'
     redirect_field_name = None
     template_name = "dashboard/index.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("main", reverse("dashboard:index"))
+                ("Home", reverse("dashboard:index"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'dashboard/index'
+        return context
 
 
-
-
-
-
-
-
-class ButtonsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+# Admin views
+class AdminTrafficView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = None
-    template_name = "dashboard/buttons.html"
+    template_name = "dashboard/admin/traffic.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("buttons", reverse("dashboard:buttons"))
+                ("traffic", reverse("dashboard:admin_traffic"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'admin/traffic'
+        return context
 
 
-
-
-
-
-
-
-class CardsView(LoginRequiredMixin, BaseBreadcrumbMixin,generic.ListView):
+class StudentPerformanceView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = None
-    template_name = "dashboard/cards.html"
+    template_name = "dashboard/student/performance.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("cards", reverse("dashboard:cards"))
+                ("perfromance", reverse("dashboard:student_performance"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'student/performance'
+        return context
 
 
-
-
-
-
-
-
-class UtilColorView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class TeacherClassesView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = None
-    template_name = "dashboard/utilities/utilities-color.html"
+    template_name = "dashboard/teacher/classes.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("color", reverse("dashboard:util-color"))
+                ("classes", reverse("dashboard:teacher_classes"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'teacher/classes'
+        return context
 
 
-
-
-
-
-
-
-class UtilBorderView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class TutorClassesView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = None
-    template_name = "dashboard/utilities/utilities-border.html"
+    template_name = "dashboard/tutor/classes.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("border", reverse("dashboard:util-border"))
+                ("classes", reverse("dashboard:tutor_classes"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'tutor/classes'
+        return context
 
 
-
-
-
-
-
-
-class UtilAnimationView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class SchoolManagementView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = None
-    template_name = "dashboard/utilities/utilities-animation.html"
+    template_name = "dashboard/school/management.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("animation", reverse("dashboard:util-animation"))
+                ("management", reverse("dashboard:school_management"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'school/management'
+        return context
 
 
-
-
-
-
-
-
-class UtilOtherView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class CenterManagementView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = None
-    template_name = "dashboard/utilities/utilities-other.html"
+    template_name = "dashboard/center/management.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("other", reverse("dashboard:util-other"))
+                ("management", reverse("dashboard:center_management"))
                 ]
+
     def get_queryset(self):
-        return "user_index"
+        context = {}
+        context['sidebar_active'] = 'center/management'
+        return context
 
 
+class EditorTasksView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = None
+    template_name = "dashboard/editor/tasks.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("tasks", reverse("dashboard:editor_tasks"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'editor/tasks'
+        return context
 
 
+class AffiliateStatisticsView(
+            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = None
+    template_name = "dashboard/affiliate/statistics.html"
+    context_object_name = 'context'
 
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("statistics", reverse("dashboard:affiliate_statistics"))
+                ]
 
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'affiliate/statistics'
+        return context
 
 
 class BlankView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
@@ -168,62 +203,16 @@ class BlankView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     redirect_field_name = None
     template_name = "dashboard/blank.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
                 ("blank", reverse("dashboard:blank"))
                 ]
+
     def get_queryset(self):
         return "user_index"
-
-
-
-
-
-
-
-
-class ChartsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
-    login_url = 'user:login'
-    redirect_field_name = None
-    template_name = "dashboard/charts.html"
-    context_object_name = 'context'
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("charts", reverse("dashboard:charts"))
-                ]
-    def get_queryset(self):
-        return "user_index"
-
-
-
-
-
-
-
-
-class TablesView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
-    login_url = 'user:login'
-    redirect_field_name = None
-    template_name = "dashboard/tables.html"
-    context_object_name = 'context'
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("tables", reverse("dashboard:tables"))
-                ]
-    def get_queryset(self):
-        return "user_index"
-
-
-
-
-
-
 
 
 class NotFoundView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
@@ -231,11 +220,13 @@ class NotFoundView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     redirect_field_name = None
     template_name = "dashboard/404.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
                 ("404", reverse("dashboard:404"))
                 ]
+
     def get_queryset(self):
         return "user_index"

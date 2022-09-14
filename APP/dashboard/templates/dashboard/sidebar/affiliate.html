@@ -1,0 +1,23 @@
+<!-- Heading -->
+<div class="sidebar-heading"
+{%if 'affiliate' in sidebar_active%}
+style='color:white;'
+{%endif%}
+>
+	Affiliate
+</div>
+<li class="nav-item">
+	<a class="nav-link" href="{%url 'dashboard:affiliate_statistics'%}">
+		<i class="fas fa-fw fa-chart-area" 
+		     {%if sidebar_active == 'affiliate/statistics'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'affiliate/statistics'%}
+		     style='color:white;'
+		     {%endif%}
+		>Statistics</span>
+	</a>
+</li>
+<hr class="sidebar-divider">

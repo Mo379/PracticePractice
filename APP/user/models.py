@@ -14,7 +14,6 @@ class User(AbstractUser):
     account_details_complete = models.BooleanField(default=False)
     group_details_complete = models.BooleanField(default=False)
     is_member = models.BooleanField(default=False)
-    billing_details = models.BooleanField(default=False)
     verification_status = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)

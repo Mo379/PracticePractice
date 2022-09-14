@@ -1,0 +1,23 @@
+<!-- Heading -->
+<div class="sidebar-heading"
+{%if 'center' in sidebar_active%}
+style='color:white;'
+{%endif%}
+>
+	Tuition Center
+</div>
+<li class="nav-item">
+	<a class="nav-link" href="{%url 'dashboard:center_management'%}">
+		<i class="bi bi-pc-display-horizontal" 
+		     {%if sidebar_active == 'center/management'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'center/management'%}
+		     style='color:white;'
+		     {%endif%}
+		>Management</span>
+	</a>
+</li>
+<hr class="sidebar-divider">
