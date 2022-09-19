@@ -1,11 +1,13 @@
 import re
+import json
 from django.conf import settings
 from django.apps import apps, AppConfig
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
@@ -53,9 +55,7 @@ from user.forms import (
 import stripe
 from django.db import transaction
 from djstripe import webhooks
-from djstripe.models import Customer, PaymentMethod
-
-
+from djstripe.models import Customer, PaymentMethod, Price, Plan, Subscription, Charge
 
 
 @webhooks.handler("payment_intent.succeeded")
@@ -101,6 +101,7 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         accountdetailsform = AccountDetailsForm(instance=user)
         context['AccountDetailsForm'] = accountdetailsform
         # checking if billing information exists
+        context['user_member_bool'] = Subscription.objects.filter(customer=user.id, status='active').exists()
         context['user_billing_bool'] = PaymentMethod.objects.filter(customer=user.id).exists()
         return context
 
@@ -220,13 +221,24 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
 
     def get_queryset(self):
         context = {}
-        # think about adding checks for robustness.
         user = self.request.user
-        customer_object = Customer.objects.get(id=user.id)
-        payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
-        context['customer'] = customer_object
-        context['paymentmethods'] = payment_methods
+        # think about adding checks for robustness.
         context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
+        #
+        customer_object = Customer.objects.get(id=user.id)
+        context['customer'] = customer_object
+        #
+        context['billing_history'] = Charge.objects.filter(customer=user.id)
+        #
+        payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
+        context['paymentmethods'] = payment_methods
+        #
+        if Subscription.objects.filter(customer=user.id, status='active').exists():
+            subscription = Subscription.objects.get(customer=user.id, status='active')
+            context['billing_interval'] = subscription.plan.interval
+            context['billing_amount'] = subscription.plan.amount
+            context['billing_next'] = subscription.current_period_end
+            context['plan_name'] = subscription.plan.nickname
         return context
 
 
@@ -300,7 +312,18 @@ class JoinView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        return "user_join"
+        context = {}
+        context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
+        context['student_monthly_plan'] = Price.objects.get(nickname='student_monthly_plan')
+        context['student_yearly_plan'] = Price.objects.get(nickname='student_yearly_plan')
+        #
+        context['educator_monthly_plan'] = Price.objects.get(nickname='Educator_monthly_plan')
+        context['educator_yearly_plan'] = Price.objects.get(nickname='Educator_yearly_plan')
+        #
+        context['organisation_monthly_limited_plan'] = Price.objects.get(nickname='Organisation_monthly_limited_plan')
+        context['organisation_monthly_plan'] = Price.objects.get(nickname='Organisation_monthly_plan')
+        context['organisation_yearly_plan'] = Price.objects.get(nickname='Organisation_yearly_plan')
+        return context
 
 
 class AddPaymentMethodView(
@@ -827,8 +850,8 @@ def _accountdetails(request):
             # check user name is new and unique
             username_match = User.objects.filter(username__iexact=username).exists()
             if (
-                username_match or
-                username.lower() != request.user.username.lower()
+                username_match and
+                username.lower() == request.user.username.lower()
             ):
                 messages.add_message(
                         request,
@@ -1064,7 +1087,7 @@ def _themechange(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Your preffered theme was successfully updated ' +
+                    'Your preferred theme was successfully updated ' +
                     '(Try to refresh your browser if no changes show).',
                     extra_tags='alert-success user_settings'
                 )
@@ -1093,7 +1116,7 @@ def _languagechange(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Your preffered language was successfully updated.',
+                    'Your preferred language was successfully updated.',
                     extra_tags='alert-success user_settings'
                 )
         else:
@@ -1122,7 +1145,7 @@ def _mailchoiceschange(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Your preffered Email types were successfully updated.',
+                    'Your preferred Email types were successfully updated.',
                     extra_tags='alert-success user_settings'
                 )
         else:
@@ -1162,7 +1185,7 @@ def _makedefaultpaymentmethod(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Your preffered default payment method has been updated.',
+                    'Your default payment method has been updated.',
                     extra_tags='alert-success user_billing'
                 )
         else:
@@ -1227,3 +1250,61 @@ def _deletepaymentmethod(request):
                 extra_tags='alert-danger user_billing'
             )
     return redirect('user:billing')
+
+
+@login_required(login_url='/user/login', redirect_field_name=None)
+def _create_checkout_session(request):
+    if request.method == 'POST':
+        customer = Customer.objects.get(id=request.user.id)
+        price_id = json.loads(request.body)['price_id']
+        if Price.objects.filter(id=price_id).exists():
+            # See if subscription exists or not
+            # check if the user group allows for this susbscription
+            price_object = Price.objects.get(id=price_id)
+            product_name = price_object.product.name
+            groups = request.user.groups.all()
+            correct_group = False
+            for group in groups:
+                if str(group) == 'TuitionCenter' or str(group) == 'School':
+                    group = 'Organisation'
+                if str(group) == 'PrivateTutor' or str(group) == 'Teacher':
+                    group = 'Educator'
+                if str(group) == str(product_name):
+                    correct_group = True
+            #
+            if Subscription.objects.filter(
+                        customer=request.user.id, status='active'
+                    ).exists() == False and correct_group == True:
+                # Set Stripe API key
+                stripe.api_key = settings.STRIPE_SECRET_KEY
+                # Create Stripe Checkout session
+                checkout_session = stripe.checkout.Session.create(
+                        payment_method_types=["card"],
+                        mode="subscription",
+                        line_items=[
+                            {
+                                "price": price_id,
+                                "quantity": 1
+                            }
+                        ],
+                        customer=customer.id,
+                        success_url=f"http://127.0.0.1:8000/user/join/success?sessid={{CHECKOUT_SESSION_ID}}",
+                        # The cancel_url is typically set to the original product page
+                        cancel_url=f"http://127.0.0.1:8000/user/join",
+                    )
+                return JsonResponse({'sessionId': checkout_session['id'] if checkout_session else None})
+            else:
+                return JsonResponse({'error': "Subscription not allowed, you " +
+                            "either already have a subscription or this subscription " +
+                            "is't available for your account type."}
+                        )
+        else:
+            return JsonResponse({'error': 'product does not exist.'})
+    else:
+        return JsonResponse({'error': 'Invalid Request Method.'})
+
+
+
+
+
+

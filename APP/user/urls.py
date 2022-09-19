@@ -91,4 +91,9 @@ urlpatterns = [
         views._deletepaymentmethod,
         name='_deletepaymentmethod'
     ),
+    path(
+        '_create_checkout_session',
+        views._create_checkout_session,
+        name='_create_checkout_session'
+    ),
 ]

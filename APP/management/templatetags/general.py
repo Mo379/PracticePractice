@@ -32,6 +32,12 @@ def has_group(user, group_name):
     return user.groups.filter(name=group_name).exists()
 
 
+@register.filter(name='field_name_to_label')
+def field_name_to_label(value):
+    value = value.replace('_', ' ')
+    return value.title()
+
+
 @register.filter(name='has_many_groups')
 def has_many_groups(user, group_list_str):
     """ The user is in all of these groups """
@@ -78,4 +84,10 @@ def definevar(val=None):
     return val
 
 
+@register.filter(name='divide')
+def divide(value, arg):
+    try:
+        return int(value) // int(arg)
+    except (ValueError, ZeroDivisionError):
+        return None
 

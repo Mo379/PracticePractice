@@ -23,15 +23,37 @@
     {%include 'user/parts/_navigation.html'%}
     <div class="row">
         <div class="col-lg-4 mb-4">
+            <!-- Billing card 3-->
+            <div class="card h-100 border-start-lg border-start-success">
+                <div class="card-body">
+                    <div class="small text-muted">Current plan</div>
+		    {%if context.plan_name%}
+		    <div class="h3 d-flex align-items-center">{{context.plan_name|field_name_to_label}}</div>
+                    <a class="text-arrow-icon small" href="#!">
+                        Cancel Subscription
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+		    {%else%}
+		    -
+		    {%endif%}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
             <!-- Billing card 1-->
             <div class="card h-100 border-start-lg border-start-primary">
                 <div class="card-body">
-                    <div class="small text-muted">Current monthly bill</div>
-                    <div class="h3">$20.00</div>
+		    {%if context.billing_interval%}
+			<div class="small text-muted">Current {{context.billing_interval}}ly bill</div>
+			<div class="h3">£ {{context.billing_amount}}</div>
                     <a class="text-arrow-icon small" href="#!">
-                        Switch to yearly billing
+                        Switch to a different subscription
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </a>
+		    {%else%}
+			<div class="small text-muted">Current bill</div>
+		    -
+		    {%endif%}
                 </div>
             </div>
         </div>
@@ -40,24 +62,15 @@
             <div class="card h-100 border-start-lg border-start-secondary">
                 <div class="card-body">
                     <div class="small text-muted">Next payment due</div>
-                    <div class="h3">July 15</div>
+		    {%if context.billing_next%}
+                    <div class="h3">{{context.billing_next|date:'Y-m-d'}}</div>
                     <a class="text-arrow-icon small text-secondary" href="#!">
-                        View payment history
+                        View billing history
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 mb-4">
-            <!-- Billing card 3-->
-            <div class="card h-100 border-start-lg border-start-success">
-                <div class="card-body">
-                    <div class="small text-muted">Current plan</div>
-                    <div class="h3 d-flex align-items-center">Freelancer</div>
-                    <a class="text-arrow-icon small text-success" href="#!">
-                        Upgrade plan
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </a>
+		    {%else%}
+		    -
+		    {%endif%}
                 </div>
             </div>
         </div>
@@ -119,48 +132,30 @@
                     <thead>
                         <tr>
                             <th class="border-gray-200" scope="col">Transaction ID</th>
-                            <th class="border-gray-200" scope="col">Type</th>
+                            <th class="border-gray-200" scope="col">Description</th>
                             <th class="border-gray-200" scope="col">Date</th>
                             <th class="border-gray-200" scope="col">Amount</th>
-                            <th class="border-gray-200" scope="col">Status</th>
+                            <th class="border-gray-200" scope="col">Charge Status</th>
                         </tr>
                     </thead>
                     <tbody>
+	 	    {%for charge in context.billing_history%}
                         <tr>
-                            <td>#39201</td>
-			    <td> Enterprise gold subscription</td>
-                            <td>06/15/2099</td>
-                            <td>$29.99</td>
-                            <td><span class="badge bg-light text-dark">Planned</span></td>
+			    <td><a href='{{charge.receipt_url}}' target='blank'>{{charge.id}}</a></td>
+			    <td>{{charge.description}}</td>
+			    <td>{{charge.created}}</td>
+			    <td>£{{charge.amount}}</td>
+			    <td>
+				    {%if charge.status == 'succeeded'%}
+				    <i class="bi bi-check-circle-fill" style='color:green;'></i>
+				    {%elif charge.status == 'pending'%}
+				    <i class="bi bi-circle" style='color:grey;'></i>
+				    {%elif charge.status == 'failed'%}
+				    <i class="bi bi-x-circle-fill" style='color:red;'></i>
+				    {%endif%}
+			    </td>
                         </tr>
-                        <tr>
-                            <td>#39201</td>
-			    <td> Enterprise gold subscription</td>
-                            <td>06/15/2021</td>
-                            <td>$29.99</td>
-                            <td><span class="badge bg-light text-dark">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>#38594</td>
-			    <td> Enterprise gold subscription</td>
-                            <td>05/15/2021</td>
-                            <td>$29.99</td>
-                            <td><span class="badge bg-success">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>#38223</td>
-			    <td> Student basic subscription</td>
-                            <td>04/15/2021</td>
-                            <td>$29.99</td>
-                            <td><span class="badge bg-success">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>#38125</td>
-			    <td> Lesson </td>
-                            <td>03/15/2021</td>
-                            <td>$29.99</td>
-                            <td><span class="badge bg-success">Paid</span></td>
-                        </tr>
+		     {%endfor%}
                     </tbody>
                 </table>
             </div>
