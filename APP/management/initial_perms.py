@@ -30,6 +30,3 @@ def populate_groups(apps, schema_editor):
     # [i for i in all_perms if i.codename in dictionary]
 
 
-
-
-

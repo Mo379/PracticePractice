@@ -6,13 +6,48 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
+from braces.views import (
+        LoginRequiredMixin,
+        GroupRequiredMixin,
+        SuperuserRequiredMixin,
+    )
+
+
+# Superuser views
+class SuperuserMonitorView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/monitor.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("traffic", reverse("dashboard:admin_traffic"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/monitor'
+        return context
 
 
 # Create your views here.
-class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class IndexView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+    ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = ''
+
+
     template_name = "dashboard/index.html"
     context_object_name = 'context'
 
@@ -31,10 +66,14 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
 
 # Admin views
 class AdminTrafficView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u"Admin"
     template_name = "dashboard/admin/traffic.html"
     context_object_name = 'context'
 
@@ -52,10 +91,14 @@ class AdminTrafficView(
 
 
 class StudentPerformanceView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u"Student"
     template_name = "dashboard/student/performance.html"
     context_object_name = 'context'
 
@@ -73,10 +116,14 @@ class StudentPerformanceView(
 
 
 class TeacherClassesView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u'Teacher'
     template_name = "dashboard/teacher/classes.html"
     context_object_name = 'context'
 
@@ -94,10 +141,14 @@ class TeacherClassesView(
 
 
 class TutorClassesView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u"PrivateTutor"
     template_name = "dashboard/tutor/classes.html"
     context_object_name = 'context'
 
@@ -115,10 +166,14 @@ class TutorClassesView(
 
 
 class SchoolManagementView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u"School"
     template_name = "dashboard/school/management.html"
     context_object_name = 'context'
 
@@ -136,10 +191,14 @@ class SchoolManagementView(
 
 
 class CenterManagementView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u"TuitionCenter"
     template_name = "dashboard/center/management.html"
     context_object_name = 'context'
 
@@ -157,10 +216,14 @@ class CenterManagementView(
 
 
 class EditorTasksView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u"Editor"
     template_name = "dashboard/editor/tasks.html"
     context_object_name = 'context'
 
@@ -178,10 +241,14 @@ class EditorTasksView(
 
 
 class AffiliateStatisticsView(
-            LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
         ):
     login_url = 'user:login'
-    redirect_field_name = None
+    redirect_field_name = False
+    group_required = u'Affiliate'
     template_name = "dashboard/affiliate/statistics.html"
     context_object_name = 'context'
 

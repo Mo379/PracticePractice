@@ -55,7 +55,16 @@ from user.forms import (
 import stripe
 from django.db import transaction
 from djstripe import webhooks
-from djstripe.models import Customer, PaymentMethod, Price, Plan, Subscription, Charge
+from djstripe.models import (
+        Customer,
+        PaymentMethod,
+        Price,
+        Plan,
+        Subscription,
+        Charge,
+        Session
+    )
+import markdown
 
 
 @webhooks.handler("payment_intent.succeeded")
@@ -66,6 +75,7 @@ def my_handler(event, **kwargs):
 
 
 class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+
     login_url = 'user:login'
     redirect_field_name = None
 
@@ -235,10 +245,12 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         #
         if Subscription.objects.filter(customer=user.id, status='active').exists():
             subscription = Subscription.objects.get(customer=user.id, status='active')
+            context['subscription_status'] = subscription.status
             context['billing_interval'] = subscription.plan.interval
             context['billing_amount'] = subscription.plan.amount
             context['billing_next'] = subscription.current_period_end
             context['plan_name'] = subscription.plan.nickname
+            context['cancel_later'] = subscription.cancel_at_period_end
         return context
 
 
@@ -301,6 +313,7 @@ class SettingsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
 
 # Join view
 class JoinView(BaseBreadcrumbMixin, generic.ListView):
+
     template_name = "user/join.html"
     context_object_name = 'context'
 
@@ -323,6 +336,46 @@ class JoinView(BaseBreadcrumbMixin, generic.ListView):
         context['organisation_monthly_limited_plan'] = Price.objects.get(nickname='Organisation_monthly_limited_plan')
         context['organisation_monthly_plan'] = Price.objects.get(nickname='Organisation_monthly_plan')
         context['organisation_yearly_plan'] = Price.objects.get(nickname='Organisation_yearly_plan')
+        return context
+
+
+class JoinSuccess(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
+    template_name = "user/joinsuccess.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("account", reverse("user:index")),
+                ("join", reverse("user:join")),
+                ]
+
+    def get_queryset(self):
+        context = {}
+        payment_session_id = self.kwargs['sessid']
+        if Session.objects.filter(id=payment_session_id):
+            session = Session.objects.get(id=payment_session_id)
+            context['payment_session'] = session
+        return context
+
+
+class CancelSubscription(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
+    template_name = "user/CancelSubscription.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        loginform = LoginForm()
+        context = {}
+        context['form_login'] = loginform
         return context
 
 
@@ -486,6 +539,7 @@ def _registerUser(request):
 # activate user account action
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _updatepassword(request):
     if request.method == 'POST':
         form = ChangePasswordForm(request.POST)
@@ -640,6 +694,7 @@ def _pwdreset(request):
         )
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _deleteaccount_1(request):
     if request.method == 'POST':
         form = TriggerDeleteAccountForm(request.POST)
@@ -813,6 +868,7 @@ def _activate(request, uidb64, token):
 
 
 # Logout user view
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _logoutUser(request):
     try:
         logout(request)
@@ -832,6 +888,7 @@ def _logoutUser(request):
     return redirect('main:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _accountdetails(request):
     if request.method == 'POST':
         # dont allow the email to change
@@ -886,6 +943,7 @@ def _accountdetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _admindetails(request):
     if request.method == 'POST':
         admin, was_created = Admin.objects.get_or_create(user=request.user)
@@ -917,6 +975,7 @@ def _admindetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _studentdetails(request):
     if request.method == 'POST':
         student, was_created = Student.objects.get_or_create(user=request.user)
@@ -949,6 +1008,7 @@ def _studentdetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _educatordetails(request):
     if request.method == 'POST':
         educator, was_created = Educator.objects.get_or_create(user=request.user)
@@ -980,6 +1040,7 @@ def _educatordetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _organisationdetails(request):
     if request.method == "POST":
         organisation = Organisation.objects.get(user=request.user)
@@ -1015,6 +1076,7 @@ def _organisationdetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _editordetails(request):
     if request.method == 'POST':
         editor, was_created = Editor.objects.get_or_create(user=request.user)
@@ -1047,6 +1109,7 @@ def _editordetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _affiliatedetails(request):
     if request.method == 'POST':
         affiliate, was_created = Affiliate.objects.get_or_create(user=request.user)
@@ -1079,6 +1142,7 @@ def _affiliatedetails(request):
     return redirect('user:index')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _themechange(request):
     if request.method == 'POST':
         form = AppearanceChoiceForm(request.POST, instance=request.user)
@@ -1108,6 +1172,7 @@ def _themechange(request):
     return redirect('user:settings')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _languagechange(request):
     if request.method == 'POST':
         form = LanguageChoiceForm(request.POST, instance=request.user)
@@ -1136,6 +1201,7 @@ def _languagechange(request):
     return redirect('user:settings')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _mailchoiceschange(request):
     if request.method == 'POST':
         request.POST = request.POST.copy()
@@ -1165,6 +1231,7 @@ def _mailchoiceschange(request):
     return redirect('user:settings')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _makedefaultpaymentmethod(request):
     if request.method == 'POST':
         request.POST = request.POST.copy()
@@ -1205,6 +1272,7 @@ def _makedefaultpaymentmethod(request):
     return redirect('user:billing')
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _deletepaymentmethod(request):
     if request.method == 'POST':
         request.POST = request.POST.copy()
@@ -1288,7 +1356,7 @@ def _create_checkout_session(request):
                             }
                         ],
                         customer=customer.id,
-                        success_url=f"http://127.0.0.1:8000/user/join/success?sessid={{CHECKOUT_SESSION_ID}}",
+                        success_url=f"http://127.0.0.1:8000/user/joinsuccess/{{CHECKOUT_SESSION_ID}}",
                         # The cancel_url is typically set to the original product page
                         cancel_url=f"http://127.0.0.1:8000/user/join",
                     )
@@ -1302,6 +1370,109 @@ def _create_checkout_session(request):
             return JsonResponse({'error': 'product does not exist.'})
     else:
         return JsonResponse({'error': 'Invalid Request Method.'})
+
+
+@login_required(login_url='/user/login', redirect_field_name=None)
+def _cancelsubscription(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            # checking if the user authentication is correct
+            # Log user in
+            user = authenticate(request, username=username, password=password)
+            if user:
+                try:
+                    subscription = Subscription.objects.get(customer=user.id, status='active')
+                    stripe.api_key = settings.STRIPE_SECRET_KEY
+                    # Create Stripe Checkout session
+                    stripe.Subscription.modify(
+                            subscription.id,
+                            cancel_at_period_end=True
+                        )
+                except Exception as e :
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'Something went wrong, please try again or contact us.'+str(e),
+                            extra_tags='alert-danger cancelsubscription_form'
+                        )
+                    # Redirect to a success page.
+                    return redirect('user:cancelsubscription')
+                else:
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'Your subscription has been cancelled, see the billing page to see when your membership will end.',
+                            extra_tags='alert-success user_profile'
+                        )
+                    # Redirect to a success page.
+                    return redirect('user:index')
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Incorrect details, please try again.',
+                        extra_tags='alert-danger cancelsubscription_form'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that all ' +
+                    'inputs are valid.' + str(form.errors),
+                    extra_tags='alert-danger cancelsubscription_form'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger cancelsubscription_form'
+            )
+    return redirect('user:cancelsubscription')
+
+
+@login_required(login_url='/user/login', redirect_field_name=None)
+def _reactivatemembership(request):
+    if request.method == "GET":
+        user = request.user
+        # Log user in
+        try:
+            subscription = Subscription.objects.get(
+                    customer=user.id,
+                    status='active',
+                    cancel_at_period_end=True
+                )
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            # Create Stripe Checkout session
+            stripe.Subscription.modify(
+                    subscription.id,
+                    cancel_at_period_end=False
+                )
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, please try again or contact us.'+str(e),
+                    extra_tags='alert-danger user_profile'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Success, your subscription has been reactivated.',
+                    extra_tags='alert-success user_profile'
+                )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger user_profile'
+            )
+    return redirect('user:index')
 
 
 

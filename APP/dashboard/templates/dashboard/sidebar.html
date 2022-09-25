@@ -1,16 +1,46 @@
+{%load general%}
 <!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-dark sidebar sidebar-dark accordion" id="accordionSidebar" style='background:rgb(28, 28, 28);background:black;'>
 <!-- Divider -->
 <p style='margin-top:0px;'></p>
+{%if user.is_superuser%}
+{%include 'dashboard/sidebar/superuser.html'%}
+{%endif%}
+
 {%include 'dashboard/sidebar/general.html'%}
+
+{%if user|has_many_groups:'Admin'%}
 {%include 'dashboard/sidebar/admin.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'Student'%}
 {%include 'dashboard/sidebar/student.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'Teacher'%}
 {%include 'dashboard/sidebar/teacher.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'PrivateTutor'%}
 {%include 'dashboard/sidebar/privatetutor.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'School'%}
 {%include 'dashboard/sidebar/school.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'TuitionCenter'%}
 {%include 'dashboard/sidebar/center.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'Editor'%}
 {%include 'dashboard/sidebar/editor.html'%}
+{%endif%}
+
+{%if user|has_many_groups:'Affiliate'%}
 {%include 'dashboard/sidebar/affiliate.html'%}
+{%endif%}
+
 <!-- Sidebar Toggler (Sidebar) -->
 <div class="text-center d-none d-md-inline" style='color:black'>
 <button class="rounded-circle border-0" id="sidebarToggle"></button>
