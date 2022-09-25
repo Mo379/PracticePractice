@@ -75,6 +75,7 @@ class Video(models.Model):
     v_title = models.CharField(max_length=255, default='')
     v_link= models.CharField(max_length=255, default='')
     v_pos = models.IntegerField(default=0,null=True) 
+    v_health = models.BooleanField(null=True)
     def __str__(self):
         return self.v_title
 class Keyword(models.Model):

@@ -11,6 +11,7 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from content.models import Video
 
 
 # Superuser views
@@ -38,12 +39,37 @@ class SuperuserMonitorView(
         return context
 
 
+class SuperuserContentManagementView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/contentmanagement.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("traffic", reverse("dashboard:admin_traffic"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/contentmanagement'
+        context['bad_videos'] = Video.objects.filter(v_health=False)
+        return context
+
+
 # Create your views here.
 class IndexView(
-        LoginRequiredMixin,
-        BaseBreadcrumbMixin,
-        generic.ListView
-    ):
+            LoginRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
     login_url = 'user:login'
     redirect_field_name = ''
 

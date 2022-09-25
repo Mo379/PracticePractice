@@ -8,7 +8,12 @@ urlpatterns = [
     # general
     path('', views.IndexView.as_view(), name='index'),
     # Superuser
-    path('monitor', views.SuperuserMonitorView.as_view(), name='useruser_monitor'),
+    path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
+    path(
+        'contentmanagement',
+        views.SuperuserContentManagementView.as_view(),
+        name='superuser_contentmanagement'
+    ),
     # admin
     path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),
     # student

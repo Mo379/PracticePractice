@@ -108,7 +108,7 @@ class PointSync():
             p_subject = ddir.split('/A_')[1].split('/')[0]
             p_moduel = ddir.split('/B_')[1].split('/')[0]
             p_chapter = ddir.split('/C_')[1].split('/')[0]
-            p_topic = ddir.split('/D_')[1].split('/')[0] 
+            p_topic = ddir.split('/D_')[1].split('/')[0]
             #
             p_dir = ddir
             p_files_dir = ddir+'/files'
