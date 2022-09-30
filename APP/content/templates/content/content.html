@@ -1,4 +1,5 @@
 {% extends 'base/base.html'%}
+{%load static%}
 
 {%block page_name%}
 	Content
@@ -9,11 +10,36 @@
 {%endblock%}
 
 {%block content%}
-	{{context}}
-	<br><a href = '{% url 'content:questions'%}' class = 'text-primary'> Questions</a>
-	<br><a href = '{% url 'content:question'%}' class = 'text-primary'> Question</a>
-	<br><a href = '{% url 'content:notes'%}' class = 'text-primary'> Notes</a>
-	<br><a href = '{% url 'content:paper'%}' class = 'text-primary'> Paper </a>
-	<br><a href = '{% url 'content:user-paper'%}' class = 'text-primary'> User paper</a>
-	<br><a href = '{% url 'content:user-paper-print'%}' class = 'text-primary'> User paper print</a>
+	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
+	  <img class="card-img-top" src="{%static 'base/img/Home.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
+	  <div class="card-body">
+	    <h5 class="card-title">Notes</h5>
+	    <h5 class="card-title">Universal Specification</h5>
+	    <p class="card-text">This includes all of the notes we have for all subjects and specifications.</p>
+	    <a href="{%url 'content:notes'%}" class="btn btn-primary">Study</a>
+	  </div>
+	</div>
+
+
+
+	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
+	  <img class="card-img-top" src="{%static 'base/img/maths.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
+	  <div class="card-body">
+	    <h5 class="card-title">Practice Questions</h5>
+	    <h5 class="card-title">Universal Question Bank</h5>
+	    <p class="card-text">Questions split by topic and difficulty, to target your weakest points.</p>
+	    <a href="{% url 'content:questions'%}" class="btn btn-primary">Practice</a>
+	  </div>
+	</div>
+
+
+	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
+	  <img class="card-img-top" src="{%static 'base/img/Physics.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
+	  <div class="card-body">
+	    <h5 class="card-title">Papers</h5>
+	    <h5 class="card-title">Past Papers</h5>
+	    <p class="card-text">Relevant Past Papers from the most popular exam boards.</p>
+	    <a href="{% url 'content:paper'%}" class="btn btn-primary">Practice</a>
+	  </div>
+	</div>
 {%endblock%}

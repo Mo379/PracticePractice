@@ -1,4 +1,6 @@
 import requests
+import collections
+import pandas as pd
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -18,23 +20,10 @@ from content.util.ContentCRUD import (
         SpecificationCRUD
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
+from django.forms import model_to_dict
 from content.models import *
+from content.forms import MDEditorModleForm
 # Create your views here.
-
-
-class IndexView(BaseBreadcrumbMixin, generic.TemplateView):
-    template_name = 'content/index.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("my", reverse("content:index"))
-                ]
-
-    def get_queryset(self):
-        """Return the last three published questions."""
-        return 'content_index'
 
 
 class ContentView(BaseBreadcrumbMixin, generic.ListView):
@@ -44,44 +33,12 @@ class ContentView(BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("my", reverse("content:index")),
                 ("content", reverse("content:content"))
                 ]
 
     def get_queryset(self):
         """Return all of the required hub information"""
         return 'content_content'
-
-
-class HubView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/hub.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("my", reverse("content:index")),
-                ("hub", reverse("content:hub"))
-                ]
-
-    def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_hub'
-
-
-class StatisticsView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/statistics.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("my", reverse("content:index")),
-                ("statistics", reverse("content:statistics"))
-                ]
-    def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_statistics'
 
 
 class QuestionsView(BaseBreadcrumbMixin, generic.ListView):
@@ -91,7 +48,6 @@ class QuestionsView(BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("my", reverse("content:index")),
                 ("content", reverse("content:content")),
                 ("questions", reverse("content:questions"))
                 ]
@@ -108,7 +64,6 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("my", reverse("content:index")),
                 ("content", reverse("content:content")),
                 ("questions", reverse("content:questions")),
                 ("question", reverse("content:question"))
@@ -126,14 +81,80 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("my", reverse("content:index")),
                 ("content", reverse("content:content")),
                 ("notes", reverse("content:notes")),
                 ]
 
     def get_queryset(self):
         """Return all of the required hub information"""
-        return 'content_notes'
+        context = {}
+        Notes = Point.objects.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                )
+        Notes_objs = [obj for obj in Notes]
+        df = pd.DataFrame(Notes_objs)
+        dic = {}
+        for le, s, m, c in zip(
+                list(df['p_level']),
+                list(df['p_subject']),
+                list(df['p_moduel']),
+                list(df['p_chapter']),
+                ):
+            if le not in dic:
+                dic[le] = {}
+            if s not in dic[le]:
+                dic[le][s] = {}
+            if m not in dic[le][s]:
+                dic[le][s][m] = []
+            dic[le][s][m].append(c)
+        context['notes'] = dic
+        return context
+
+
+
+class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = 'content/note.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
+                ("notes", reverse("content:notes")),
+                ("article", ''),
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        subject = self.kwargs['subject']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        context['title'] = chapter
+        article_objects = Point.objects.filter(
+                    p_subject=subject,
+                    p_moduel=module,
+                    p_chapter=chapter,
+                )
+        article_points = [model_to_dict(obj) for obj in article_objects]
+        df = pd.DataFrame(article_points)
+        dic = {}
+        for topic, p_id in zip(list(df['p_topic']), list(df['id'])):
+            if topic not in dic:
+                dic[topic] = []
+            dic[topic].append(Point.objects.get(pk=p_id))
+        context['article'] = dic
+        editor_form = MDEditorModleForm()
+        context['editor_form'] = editor_form
+        return context
 
 
 class PaperView(BaseBreadcrumbMixin, generic.ListView):
@@ -143,7 +164,6 @@ class PaperView(BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("my", reverse("content:index")),
                 ("content", reverse("content:content")),
                 ("paper", reverse("content:paper")),
                 ]
@@ -151,41 +171,6 @@ class PaperView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         """Return all of the required hub information"""
         return 'content_paper'
-
-
-class UserPaperView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/user-paper.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("my", reverse("content:index")),
-                ("content", reverse("content:content")),
-                ("user-paper", reverse("content:user-paper")),
-                ]
-
-    def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_user_paper'
-
-
-class UserPaperPrintView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/user-paper-print.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("my", reverse("content:index")),
-                ("content", reverse("content:content")),
-                ("user-paper", reverse("content:user-paper")),
-                ("print", reverse("content:user-paper-print")),
-                ]
-
-    def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_user_paper-print'
 
 
 def _syncnotes(request):

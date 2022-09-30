@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
 from user.models import User
+from mdeditor.fields import MDTextField
 
 
 # Create your models here.
@@ -8,7 +9,7 @@ class Question(models.Model):
     #
     q_level = models.CharField(max_length=30, default='', null=True)
     q_board = models.CharField(max_length=10, default='', null=True)
-    q_board_moduel = models.CharField(max_length=10, default='', null=True)
+    q_board_moduel = models.CharField(max_length=50, default='', null=True)
     q_exam_month = models.IntegerField(default=0, null=True)
     q_exam_year = models.IntegerField(default=0, null=True)
     q_is_exam = models.BooleanField(default=False, null=True)
@@ -115,3 +116,9 @@ class Specification(models.Model):
         return self.spec_board+'-' + self.spec_subject + '-' + self.spec_name
 
 
+class ExampleModel(models.Model):
+    name = models.CharField(max_length=10)
+    content = MDTextField()
+
+    def __str__(self):
+        return self.name

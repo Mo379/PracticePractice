@@ -32,7 +32,7 @@ class QuestionSync():
             q_moduel = ddir.split('/B_')[1].split('/')[0]
             q_chapter = ddir.split('/C_')[1].split('/')[0]
             try:
-                q_topic = ddir.split('/D_')[1].split('/')[0] 
+                q_topic = ddir.split('/D_')[1].split('/')[0]
             except Exception:
                 q_topic = ''
             q_dir = ddir

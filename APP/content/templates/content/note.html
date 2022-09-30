@@ -1,0 +1,34 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+{%block page_name%}
+	Notes
+{%endblock%}
+
+{%block title%}
+	Content
+{%endblock%}
+
+{%block content%}
+<div class="container col-9 text-justify" style='border-left:1px solid black;'>
+	<h4 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+		{{context.title|field_name_to_label}}
+	</h4>
+	{{context}}<br>
+	{%for topic in context.article%}
+	    {{topic|field_name_to_label}}<br>
+	    {%for point in context.article|index:topic%}
+	    	{{point}}
+		<h5>
+		</h5>
+	    {%endfor%}
+	{%endfor%}
+	<form method = "post" action = "./">
+            {% csrf_token %}
+            {{ context.editor_form.media }}
+            {{ context.editor_form.as_p }}
+            <p> <input type = "submit" value = "post"> </ p>
+        </ form>
+	<br><br>
+</div>
+{%endblock%}
