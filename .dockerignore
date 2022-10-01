@@ -2,4 +2,3 @@
 /APP/.gitignore
 /extras/data
 /venv/
-.env

@@ -20,11 +20,7 @@ RUN chmod 775 /var/www/html/PP2
 RUN chmod 775 /var/www/html/logs 
 RUN chown :www-data /var/www/html/PP2
 RUN chown :www-data /var/www/html/logs
-#venv
-WORKDIR /var/www/
-RUN apt install -y python3.8-venv
-RUN python3 -m venv venv
-RUN source venv/bin/activate
+#requirements
 RUN pip install --upgrade pip
 RUN pip install -r /var/www/html/requirements.txt 
 #expose and run
