@@ -1,4 +1,8 @@
+import os
 from django import template
+from content.util.GeneralUtil import TagGenerator
+import markdown
+from django.template import Context, Template, loader
 
 register = template.Library()
 
@@ -90,4 +94,68 @@ def divide(value, arg):
         return int(value) // int(arg)
     except (ValueError, ZeroDivisionError):
         return None
+
+
+@register.filter(name='ToMarkdown')
+def ToMarkdown(content, point):
+    # setup output
+    html = ""
+    # kw items in content
+    details = content['details']
+    # kw items in details
+    hidden = details['hidden']
+    description = details['description']
+    # numbered items in hidden and description
+    # hidden has only one numbered element containing two children
+    point_title = hidden['0']['point_title']
+    html += markdown.markdown("###### " + point_title)
+    hidden_content = hidden['0']['content']
+    # the content element is numbered
+    for item in range(len(hidden_content)):
+        # to keep the order of the content
+        item = str(item)
+        if 'vid' in hidden_content[item]:
+            video = hidden_content[item]['vid']
+            vid_title = video['vid_title']
+            vid_link = video['vid_link']
+            if vid_link:
+                context = {
+                        'vid_unique': TagGenerator(),
+                        'vid_title': vid_title,
+                        'vid_link': vid_link
+                    }
+                template = loader.get_template('content/video_popup.html')
+                content = template.render(context)
+                html += content
+
+    # the description has many numbered elements
+    for item in range(len(description)):
+        # to keep the order of the description
+        item = str(item)
+        # each item has a single child either text or img
+        # the text element is direct access
+        if 'text' in description[item]:
+            text = description[item]['text']
+            text = text.replace('\\', '\\\\')
+            html += markdown.markdown(text)
+        # the image element is made of two parts, info and file name
+        if 'img' in description[item]:
+            img_element = description[item]['img']
+            img_info = img_element['img_info']
+            img_name = img_element['img_name']
+            if img_name and img_info:
+                point_dir = point.p_directory.split('/universal/')[1]
+                file_path = os.path.join(point_dir,'files',img_name)
+                context = {
+                        'img_info': img_info,
+                        'file_path': file_path,
+                    }
+                template = loader.get_template('content/image_main.html')
+                content = template.render(context)
+                html += content
+    # convert markdown to html for display
+    return html
+
+
+
 

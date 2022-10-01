@@ -1,0 +1,11 @@
+<div style='margin:auto;text-align:center;'>
+<img src="{%url 'content:_media'%}?path={{file_path|urlencode}}" alt="{{img_info}}" style='max-height:300px;max-width:500px; margin:auto;'>
+<p class='mb-2 mt-4' style='max-width:500px;border-bottom:1px solid black;margin:auto;'>
+{%if img_info%}
+{{img_info}}
+{%else%}
+Caption needed, please report this.
+{%endif%}
+</p>
+</div>
+

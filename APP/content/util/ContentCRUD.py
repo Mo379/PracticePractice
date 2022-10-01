@@ -97,7 +97,7 @@ class QuestionCRUD():
         try:
             with open(q_object.q_link, 'w') as f:
                 f.write(content)
-        except Exception:
+        except Exception as e:
             return 0
         else:
             return 1

@@ -25,7 +25,6 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
-    path('editor/', include('dashboard.urls')),
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
 ]
 

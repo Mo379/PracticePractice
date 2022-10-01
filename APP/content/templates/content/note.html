@@ -1,6 +1,8 @@
 {% extends 'base/base.html'%}
 {%load general %}
 {%load static %}
+{% load mathjax %}
+
 {%block page_name%}
 	Notes
 {%endblock%}
@@ -10,25 +12,41 @@
 {%endblock%}
 
 {%block content%}
+{% mathjax_scripts %}
+<style>
+.MathJax{
+	margin-left:5px;
+	margin-right:5px;
+}
+</style>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
+
+
+
 <div class="container col-9 text-justify" style='border-left:1px solid black;'>
-	<h4 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+	<h2 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
 		{{context.title|field_name_to_label}}
-	</h4>
-	{{context}}<br>
+	</h2>
 	{%for topic in context.article%}
-	    {{topic|field_name_to_label}}<br>
-	    {%for point in context.article|index:topic%}
-	    	{{point}}
-		<h5>
-		</h5>
-	    {%endfor%}
+	<h4>
+		{{topic|field_name_to_label}}
+	</h4>
+	<div class='ml-1' style='border-left: 1px solid grey;'>
+        {%for point in context.article|index:topic%}
+	    <div class='ml-1' style='border-left: 2px dashed silver; padding-left:5px;'>
+            {{point.p_content|ToMarkdown:point|safe}}
+	    </div>
+        {%endfor%}
+	</div>
+	<h5 style='border-bottom: 1px dashed silver;'></h5>
 	{%endfor%}
-	<form method = "post" action = "./">
+</div>
+{%endblock%}
+	<form method = "post" action = "./" style='display:none;'>
             {% csrf_token %}
             {{ context.editor_form.media }}
             {{ context.editor_form.as_p }}
             <p> <input type = "submit" value = "post"> </ p>
-        </ form>
-	<br><br>
-</div>
-{%endblock%}
+        </form>

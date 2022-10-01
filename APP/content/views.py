@@ -1,7 +1,8 @@
+import os
 import requests
 import collections
 import pandas as pd
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -23,6 +24,7 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
 from content.forms import MDEditorModleForm
+from decouple import config as decouple_config
 # Create your views here.
 
 
@@ -171,6 +173,18 @@ class PaperView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         """Return all of the required hub information"""
         return 'content_paper'
+
+
+def _media(request):
+    path = request.GET.get('path', None)
+    content_dir = decouple_config('content_dir')
+    file_loc = os.path.join(content_dir, path)
+    try:
+        fsock = open(file_loc, "rb")
+    except Exception as e:
+        return None
+    else:
+        return FileResponse(fsock)
 
 
 def _syncnotes(request):

@@ -5,7 +5,7 @@ from content import views
 # App name
 app_name = 'content'
 urlpatterns = [
-    path('content', views.ContentView.as_view() , name='content'),
+    path('content', views.ContentView.as_view(), name='content'),
     path('content/questions', views.QuestionsView.as_view(), name='questions'),
     path('content/question', views.QuestionView.as_view(), name='question'),
     path('content/notes', views.NotesView.as_view(), name='notes'),
@@ -16,6 +16,7 @@ urlpatterns = [
     ),
     path('content/paper', views.PaperView.as_view(), name='paper'),
     #
+    path('content/_media', views._media, name='_media'),
     path(
         'content/_syncnotes',
         views._syncnotes,
