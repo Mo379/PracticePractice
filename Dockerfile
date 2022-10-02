@@ -33,10 +33,6 @@ RUN chown :www-data /var/www/html/logs
 #requirements
 RUN pip install --upgrade pip
 RUN pip install -r /var/www/html/requirements.txt 
-# migrations
-RUN python3 manage.py makemigrations \                                          
-        && python3 manage.py migrate \                                          
-        && python3 manage.py collectstatic
 #expose and run
 EXPOSE 80 3500
 CMD ["apache2ctl", "-D", "FOREGROUND"]
