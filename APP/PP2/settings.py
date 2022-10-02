@@ -53,10 +53,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites'
 ]
 AUTH_USER_MODEL = 'user.User'
-SITE_ID = 1
+SITE_URL = decouple_config('django_secret')
 
 
 
