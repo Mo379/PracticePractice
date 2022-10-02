@@ -7,7 +7,11 @@ app_name = 'content'
 urlpatterns = [
     path('content', views.ContentView.as_view(), name='content'),
     path('content/questions', views.QuestionsView.as_view(), name='questions'),
-    path('content/question', views.QuestionView.as_view(), name='question'),
+    path(
+        'content/question/<level>/<subject>/<specification>/<module>/<chapter>/<page>/',
+        views.QuestionView.as_view(),
+        name='question'
+        ),
     path('content/notes', views.NotesView.as_view(), name='notes'),
     path(
         'content/note-article/<level>/<subject>/<specification>/<module>/<chapter>/',

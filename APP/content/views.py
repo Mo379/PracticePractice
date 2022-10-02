@@ -55,8 +55,36 @@ class QuestionsView(BaseBreadcrumbMixin, generic.ListView):
                 ]
 
     def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_questions'
+        context = {}
+        Notes = Question.objects.values(
+                    'q_level',
+                    'q_subject',
+                    'q_moduel',
+                    'q_chapter',
+                ).distinct().order_by(
+                    'q_level',
+                    'q_subject',
+                    'q_moduel',
+                    'q_chapter',
+                )
+        Notes_objs = [obj for obj in Notes]
+        df = pd.DataFrame(Notes_objs)
+        dic = {}
+        for le, s, m, c in zip(
+                list(df['q_level']),
+                list(df['q_subject']),
+                list(df['q_moduel']),
+                list(df['q_chapter']),
+                ):
+            if le not in dic:
+                dic[le] = {}
+            if s not in dic[le]:
+                dic[le][s] = {}
+            if m not in dic[le][s]:
+                dic[le][s][m] = []
+            dic[le][s][m].append(c)
+        context['questions'] = dic
+        return context
 
 
 class QuestionView(BaseBreadcrumbMixin, generic.ListView):
@@ -68,12 +96,32 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
         return [
                 ("content", reverse("content:content")),
                 ("questions", reverse("content:questions")),
-                ("question", reverse("content:question"))
+                ("question", '')
                 ]
 
     def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_questions'
+        context = {}
+        level = self.kwargs['level']
+        subject = self.kwargs['subject']
+        specification = self.kwargs['specification']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        page = self.kwargs['page']
+        context['title'] = chapter
+        article_objects = Question.objects.filter(
+                    q_subject=subject,
+                    q_moduel=module,
+                    q_chapter=chapter,
+                )
+        article_questions = [model_to_dict(obj) for obj in article_objects]
+        df = pd.DataFrame(article_questions)
+        dic = {}
+        for difficulty, p_id in zip(list(df['q_difficulty']), list(df['id'])):
+            if difficulty not in dic:
+                dic[difficulty] = []
+            dic[difficulty].append(Question.objects.get(pk=p_id))
+        context['questions'] = dic
+        return context
 
 
 class NotesView(BaseBreadcrumbMixin, generic.ListView):
@@ -137,7 +185,9 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         """Return all of the required hub information"""
         context = {}
+        level = self.kwargs['level']
         subject = self.kwargs['subject']
+        specification = self.kwargs['specification']
         module = self.kwargs['module']
         chapter = self.kwargs['chapter']
         context['title'] = chapter

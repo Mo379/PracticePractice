@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 AUTH_USER_MODEL = 'user.User'
-SITE_URL = decouple_config('django_secret')
+SITE_URL = decouple_config('Site_domain')
 
 
 

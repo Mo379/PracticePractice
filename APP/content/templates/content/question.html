@@ -1,4 +1,7 @@
 {% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+{% load mathjax %}
 
 {%block page_name%}
 	My Home
@@ -10,4 +13,36 @@
 
 {%block content%}
 	{{context}}
+{% mathjax_scripts %}
+<style>
+.MathJax{
+	margin-left:5px;
+	margin-right:5px;
+}
+</style>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
+
+
+
+<div class="container col-9 text-justify" style='border-left:1px solid black;'>
+	<h2 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+	Questions: 
+		{{context.title|field_name_to_label}}
+	</h2>
+	{%for difficulty in context.questions%}
+	<h4>
+		{{difficulty}}
+	</h4>
+	<div class='ml-1' style='border-left: 1px solid grey;'>
+        {%for question in context.questions|index:difficulty%}
+	    <div class='ml-1 mb-3' style='border-left: 2px dashed silver; padding-left:5px;'>
+            {{question.q_content}}
+	    </div>
+        {%endfor%}
+	</div>
+	<h5 style='border-bottom: 1px dashed silver;'></h5>
+	{%endfor%}
+</div>
 {%endblock%}

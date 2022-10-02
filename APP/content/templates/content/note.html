@@ -18,6 +18,11 @@
 	margin-left:5px;
 	margin-right:5px;
 }
+.point_div h6 {
+	border-left: 2px solid green;
+	border-top: 1px dashed green;
+	padding-left: 3px;
+}
 </style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
@@ -35,7 +40,7 @@
 	</h4>
 	<div class='ml-1' style='border-left: 1px solid grey;'>
         {%for point in context.article|index:topic%}
-	    <div class='ml-1' style='border-left: 2px dashed silver; padding-left:5px;'>
+	    <div class='point_div ml-1 mb-2' style='border-left: 2px dashed silver; padding-left:5px;'>
             {{point.p_content|ToMarkdown:point|safe}}
 	    </div>
         {%endfor%}

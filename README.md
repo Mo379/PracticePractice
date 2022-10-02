@@ -4,8 +4,8 @@ A website for delivering A-level content directly to student, with great feature
 
 ## General Development process
 - Development
-	- [ ] Allow all kinds of accounts to be created
-	- [ ] Develop the outline of different dashboards
+	- [x] Allow all kinds of accounts to be created
+	- [x] Develop the outline of different dashboards
 	- [ ] Develop the appropriate viewing for every user
 	- [ ] Develop the content editing process
 	- [ ] Develop the Statistics
@@ -18,10 +18,10 @@ A website for delivering A-level content directly to student, with great feature
 
 
 ## Secondary considerations
-- [ ] project root
-	- [ ] other
+- [x] project root
+	- [x] other
 	- [x] add .env file
-	- [ ] Mount SMTP
+	- [x] Mount SMTP
 - [ ] Base
 	- [ ] other
 		- [ ] Use a django-javascript workflow
@@ -33,8 +33,8 @@ A website for delivering A-level content directly to student, with great feature
 
 
 ## APPS
-- [ ] Main APP 
-	- [ ] templates 
+- [x] Main APP 
+	- [x] templates 
 		- [x] index page
 		- [x] About page
 		- [x] Contact page
@@ -44,7 +44,7 @@ A website for delivering A-level content directly to student, with great feature
 
 
 - [ ] User APP
-	- [ ] templates
+	- [x] templates
 		- [x] login page
 		- [x] Subscriptions page
 		- [x] checkout pages
@@ -53,21 +53,21 @@ A website for delivering A-level content directly to student, with great feature
 	- [ ] models
 		- [x] Affiliate balance
 		- [x] Affiliate history
-		- [ ] User details
-			- [ ] Payment details
-			- [ ] Regular user details
-			- [ ] Choice of level
-			- [ ] Choice of subject
+		- [x] User details
+			- [x] Payment details
+			- [x] Regular user details
+			- [x] Choice of level
+			- [x] Choice of subject
 			- [ ] Choice of specifications
-			- [ ] user groups and group permissions
+			- [x] user groups and group permissions
 	- [ ] Features
 		- [x] Login
-		- [ ] Register
-		- [ ] change/Reset password
+		- [x] Register
+		- [x] change/Reset password
 
 
 - [ ] Content APP
-	- [ ] templates 
+	- [x] templates 
 		- [x] Subject's page
 		- [x] Questions page
 		- [x] Notes page
@@ -75,7 +75,7 @@ A website for delivering A-level content directly to student, with great feature
 		- [x] Paper view page
 		- [x] user paper view page
 		- [x] user paper print page
-	- [ ] Models
+	- [x] Models
 		- [x] Specifications
 		- [x] Question 
 		- [x] Point 
@@ -84,7 +84,7 @@ A website for delivering A-level content directly to student, with great feature
 		- [x] Question track 
 		- [x] Keywords
 		- [x] Editing tasks
-	- [ ] Utility
+	- [x] Utility
 		- [x] Make a synchroniser for the data with smart logic
 			- [x] Load all questions
 			- [x] Load all points
@@ -119,7 +119,7 @@ A website for delivering A-level content directly to student, with great feature
 		- [ ] Question tracking features
 			- [ ] Question marking
 			- [ ] Elo performance tracking
-		- [ ] Video lazy loader
+		- [x] Video lazy loader
 		- [ ] Reporting feature for content improvement
 	- [ ] other
 
@@ -128,17 +128,17 @@ A website for delivering A-level content directly to student, with great feature
 ## Allowable user actions
 - [ ] Group Action map
 	- [ ] Everyone
-		- [ ] Register
-		- [ ] Login
-		- [ ] Logout
-		- [ ] RecoverPass
-		- [ ] ResetPass
+		- [x] Register
+		- [x] Login
+		- [x] Logout
+		- [x] RecoverPass
+		- [x] ResetPass
 		- [ ] Give an experince review
 	- [ ] Admins 
 		- [ ] Manage editors
 		- [ ] Write content
 	- [ ] Free user
-		- [ ] View Notes
+		- [x] View Notes
 		- [ ] View Pastpaper questions
 		- [ ] View pastpapers
 		- [ ] Mark questions
@@ -154,7 +154,7 @@ A website for delivering A-level content directly to student, with great feature
 		- [ ] View performance tracker
 	- [ ] Small Organisations (Tuition centers)
 		- [ ] Create class
-		- [ ] Create seating plat
+		- [ ] Create seating plans
 		- [ ] Create homework
 		- [ ] Release homework answers
 	- [ ] Teachers

@@ -79,4 +79,11 @@
 .modal.in .modal-dialog {
 
 }
-
+@media only screen and (max-width: 769px) {
+  .content_main {
+	  width: 95%;
+  }
+  .content_main .container{
+	  width: 100%;
+  }
+}
