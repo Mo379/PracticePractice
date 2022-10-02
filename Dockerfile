@@ -15,7 +15,7 @@ RUN ln /usr/bin/python3 /usr/bin/python
 RUN wget https://github.com/GrahamDumpleton/mod_wsgi/archive/refs/tags/4.9.4.tar.gz \
 	&& tar xvfz 4.9.4.tar.gz \
 	&& cd mod_wsgi-4.9.4 \
-	&& ./configure --with-python=/usr/bin/python3.8 \
+	&& ./configure --with-python=/usr/local/bin/python3.8 \
 	&& make \
 	&& make install 
 #app periferals
@@ -33,6 +33,10 @@ RUN chown :www-data /var/www/html/logs
 #requirements
 RUN pip install --upgrade pip
 RUN pip install -r /var/www/html/requirements.txt 
+# migrations
+RUN python3 manage.py makemigrations \                                          
+        && python3 manage.py migrate \                                          
+        && python3 manage.py collectstatic
 #expose and run
 EXPOSE 80 3500
 CMD ["apache2ctl", "-D", "FOREGROUND"]
