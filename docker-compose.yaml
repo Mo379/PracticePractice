@@ -21,6 +21,9 @@ services:
       - PP2_network 
     ports:
       - '8005:80'
+    extra_hosts:
+        - "practicepractice.net:54.78.240.123" #host and ip
+        - "www.practicepractice.net:54.78.240.123" #host and ip
 
 networks:
   PP2_network:
