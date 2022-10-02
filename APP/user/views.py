@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.models import Site
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
@@ -482,7 +483,7 @@ def _registerUser(request):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             message = render_to_string('user/emails/account_activation.html', {
                 'user': user,
-                'domain': '127.0.0.1:8000',
+                'domain': Site.objects.get_current().domain,
                 'uid': uid,
                 'token': token,
             })
@@ -597,7 +598,7 @@ def _pwdreset_form(request):
             mail_subject = 'Password Reset'
             message = render_to_string('user/emails/password_reset.html', {
                 'user': user,
-                'domain': '127.0.0.1:8000',
+                'domain': Site.objects.get_current().domain,
                 'uid': uid,
                 'token': token,
             })
@@ -713,7 +714,7 @@ def _deleteaccount_1(request):
                     mail_subject = 'Account deletions.'
                     message = render_to_string('user/emails/account_deletion.html', {
                         'user': user,
-                        'domain': '127.0.0.1:8000',
+                        'domain': Site.objects.get_current().domain,
                         'uid': uid,
                         'token': token,
                     })
@@ -1356,9 +1357,9 @@ def _create_checkout_session(request):
                             }
                         ],
                         customer=customer.id,
-                        success_url=f"http://127.0.0.1:8000/user/joinsuccess/{{CHECKOUT_SESSION_ID}}",
+                        success_url=Site.objects.get_current().domain + f"/user/joinsuccess/{{CHECKOUT_SESSION_ID}}",
                         # The cancel_url is typically set to the original product page
-                        cancel_url=f"http://127.0.0.1:8000/user/join",
+                        cancel_url=Site.objects.get_current().domain + f"/user/join",
                     )
                 return JsonResponse({'sessionId': checkout_session['id'] if checkout_session else None})
             else:
