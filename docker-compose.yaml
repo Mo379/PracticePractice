@@ -19,6 +19,8 @@ services:
     container_name: container_pp2
     networks: 
       - PP2_network 
+    volumes:
+      - ./extras/data/content/:/pp2/content/
     ports:
       - '8005:80'
     extra_hosts:
