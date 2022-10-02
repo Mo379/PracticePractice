@@ -4,10 +4,20 @@ FROM python:3.8
 ENV TZ=Europe/Minsk
 ENV DEBIAN_FRONTEND=noninteractive 
 RUN apt-get update
+RUN apt-get install build-essential checkinstall
+RUN apt-get -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+RUN apt-get -y install libffi-dev
 RUN apt-get -y install apt-utils vim curl apache2 apache2-utils
-RUN apt-get -y install libapache2-mod-wsgi-py3
 RUN ln /usr/bin/python3 /usr/bin/python
 #RUN ln /usr/bin/pip3 /usr/bin/pip
+#RUN apt-get -y install libapache2-mod-wsgi-py3
+# WSGI
+RUN wget https://github.com/GrahamDumpleton/mod_wsgi/archive/refs/tags/4.9.4.tar.gz
+RUN tar xvfz 4.7.1.tar.gz
+RUN cd mod_wsgi-4.7.1
+RUN ./configure --with-python=/usr/bin/python3.8
+RUN make
+RUN make install 
 #app periferals
 ADD ./APP/ /var/www/html
 ADD ./.env /var/www/html/
