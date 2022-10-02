@@ -1,0 +1,27 @@
+<!-- Account page navigation-->
+<nav class="nav nav-borders">
+	{%if active_link == 'profile'%}
+	<a class="nav-link active" href="{%url 'user:index' %}">Profile</a>
+	{%else%}
+	<a class="nav-link" href="{%url 'user:index'%}">Profile</a>
+	{%endif%}
+
+	{%if active_link == 'billing'%}
+	<a class="nav-link active" href="{%url 'user:billing'%}">Billing</a>
+	{%else%}
+	<a class="nav-link" href="{%url 'user:billing'%}">Billing</a>
+	{%endif%}
+
+	{%if active_link == 'security'%}
+	<a class="nav-link active" href="{%url 'user:security'%}">Security</a>
+	{%else%}
+	<a class="nav-link " href="{%url 'user:security'%}">Security</a>
+	{%endif%}
+
+	{%if active_link == 'settings'%}
+	<a class="nav-link active ms-0" href="{%url 'user:settings'%}">Settings</a>
+	{%else%}
+	<a class="nav-link ms-0" href="{%url 'user:settings'%}">Settings</a>
+	{%endif%}
+</nav>
+<hr class="mt-0 mb-4">
