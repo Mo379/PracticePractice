@@ -28,6 +28,7 @@ SECRET_KEY = decouple_config('django_secret')
 DEBUG = decouple_config('django_debug_state', cast=bool)
 
 ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
+CSRF_TRUSTED_ORIGINS = decouple_config('CSRF_TRUSTED_ORIGINS', cast=Csv())
 
 
 # Application definition
