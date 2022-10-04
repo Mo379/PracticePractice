@@ -108,7 +108,7 @@ def ToMarkdown(content, point):
     # numbered items in hidden and description
     # hidden has only one numbered element containing two children
     point_title = hidden['0']['point_title']
-    html += markdown.markdown("###### " + point_title)
+    html += markdown.markdown("###### " + str(point.p_number) + ': ' +point_title)
     hidden_content = hidden['0']['content']
     # the content element is numbered
     for item in range(len(hidden_content)):
@@ -158,4 +158,48 @@ def ToMarkdown(content, point):
 
 
 
+@register.filter(name='ToMarkdownQuestion')
+def ToMarkdownQuestion(content, question):
+    # setup output
+    html = ""
+    # kw items in content
+    details = content['details']
+    # kw items in details
+    question_parts = details['questions']
+    answer_parts= details['answers']
+    # Title
+    html += markdown.markdown("###### some question title")
+    # The question part is different from the answer part
+    for item in range(len(question_parts)):
+        # to keep the order of the description
+        item = str(item)
+        q_part = question_parts[item]
+        q_part_name = q_part['q_part']
+        q_part_content= q_part['content']
+        q_part_mark = q_part['q_part_mark']
+        for content_item in range(len(q_part_content)):
+            content_item = str(content_item)
+            # each item has a single child either text or img
+            # the text element is direct access
+            if 'text' in q_part_content[content_item]:
+                text = q_part_content[content_item]['text']['text']['text']
+                text = text.replace('\\', '\\\\')
+                html += markdown.markdown(text)
+            # the image element is made of two parts, info and file name
+            if 'img' in q_part_content[content_item]:
+                img_element = q_part_content[content_item]['img']
+                img_info = img_element['img_info']
+                img_name = img_element['img_name']
+                if img_name:
+                    question_dir = question.q_dir.split('/universal/')[1]
+                    file_path = os.path.join(question_dir,'files',img_name)
+                    context = {
+                            'img_info': img_info,
+                            'file_path': file_path,
+                        }
+                    template = loader.get_template('content/image_question.html')
+                    content = template.render(context)
+                    html += content
+    # convert markdown to html for display
+    return html
 

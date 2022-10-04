@@ -2,6 +2,7 @@ import os
 import requests
 import collections
 import pandas as pd
+from collections import OrderedDict
 from django.http import HttpResponseRedirect, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -112,10 +113,10 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
                     q_subject=subject,
                     q_moduel=module,
                     q_chapter=chapter,
-                )
+                ).order_by('q_difficulty')
         article_questions = [model_to_dict(obj) for obj in article_objects]
         df = pd.DataFrame(article_questions)
-        dic = {}
+        dic = OrderedDict()
         for difficulty, p_id in zip(list(df['q_difficulty']), list(df['id'])):
             if difficulty not in dic:
                 dic[difficulty] = []
@@ -195,7 +196,7 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
                     p_subject=subject,
                     p_moduel=module,
                     p_chapter=chapter,
-                )
+                ).order_by('p_chapter', 'p_topic', 'p_number')
         article_points = [model_to_dict(obj) for obj in article_objects]
         df = pd.DataFrame(article_points)
         dic = {}

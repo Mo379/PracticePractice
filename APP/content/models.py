@@ -65,6 +65,7 @@ class Point(models.Model):
     p_moduel= models.CharField(max_length=255,default='',null=True)
     p_chapter= models.CharField(max_length=255,default='',null=True)
     p_topic= models.CharField(max_length=255,default='',null=True)
+    p_number = models.IntegerField(default=-1,null=True)
     p_content = models.JSONField(default=dict,null=True)  
     p_directory= models.CharField(max_length=255,default='',null=True)
     p_link= models.CharField(max_length=256,default='',null=True)
