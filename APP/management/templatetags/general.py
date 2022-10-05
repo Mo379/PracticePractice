@@ -168,7 +168,6 @@ def ToMarkdownQuestion(content, question):
     question_parts = details['questions']
     answer_parts= details['answers']
     # Title
-    html += markdown.markdown("###### some question title")
     # The question part is different from the answer part
     for item in range(len(question_parts)):
         # to keep the order of the description

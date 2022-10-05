@@ -8,7 +8,7 @@ urlpatterns = [
     path('content', views.ContentView.as_view(), name='content'),
     path('content/questions', views.QuestionsView.as_view(), name='questions'),
     path(
-        'content/question/<level>/<subject>/<specification>/<module>/<chapter>/<page>/',
+        'content/question/<level>/<subject>/<specification>/<module>/<chapter>/',
         views.QuestionView.as_view(),
         name='question'
         ),
@@ -18,7 +18,8 @@ urlpatterns = [
         views.NoteArticleView.as_view(),
         name='notearticle'
     ),
-    path('content/paper', views.PaperView.as_view(), name='paper'),
+    path('content/papers', views.PapersView.as_view(), name='papers'),
+    path('content/paper/<subject>/<board>/<board_moduel>/<exam_year>/<exam_month>/', views.PaperView.as_view(), name='paper'),
     #
     path('content/_media', views._media, name='_media'),
     path(

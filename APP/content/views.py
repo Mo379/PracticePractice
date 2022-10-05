@@ -107,7 +107,6 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
         specification = self.kwargs['specification']
         module = self.kwargs['module']
         chapter = self.kwargs['chapter']
-        page = self.kwargs['page']
         context['title'] = chapter
         article_objects = Question.objects.filter(
                     q_subject=subject,
@@ -210,6 +209,62 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         return context
 
 
+class PapersView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = 'content/papers.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
+                ("papers", reverse("content:papers")),
+                ]
+
+    def get_queryset(self):
+        context = {}
+        Notes = Question.objects.values(
+                    'q_subject',
+                    'q_board',
+                    'q_board_moduel',
+                    'q_exam_year',
+                    'q_exam_month',
+                    'q_is_exam',
+                ).distinct().order_by(
+                    'q_subject',
+                    'q_board',
+                    'q_board_moduel',
+                    'q_exam_year',
+                    'q_exam_month',
+                )
+        Notes_objs = [obj for obj in Notes]
+        df = pd.DataFrame(Notes_objs)
+        dic = {}
+        for su, b, mod, y, mon, ex in zip(
+                list(df['q_subject']),
+                list(df['q_board']),
+                list(df['q_board_moduel']),
+                list(df['q_exam_year']),
+                list(df['q_exam_month']),
+                list(df['q_is_exam']),
+                ):
+            if ex == 1:
+                if su not in dic:
+                    dic[su] = {}
+                if b not in dic[su]:
+                    dic[su][b] = {}
+                if mod not in dic[su][b]:
+                    dic[su][b][mod] = {}
+                if y not in dic[su][b][mod]:
+                    dic[su][b][mod][y] = {}
+                if mon not in dic[su][b][mod][y]:
+                    dic[su][b][mod][y][mon] = []
+                dic[su][b][mod][y][mon].append('Paper')
+        context['papers'] = dic
+        return context
+
+
+
+
 class PaperView(BaseBreadcrumbMixin, generic.ListView):
     template_name = 'content/paper.html'
     context_object_name = 'context'
@@ -218,12 +273,34 @@ class PaperView(BaseBreadcrumbMixin, generic.ListView):
     def crumbs(self):
         return [
                 ("content", reverse("content:content")),
-                ("paper", reverse("content:paper")),
+                ("papers", reverse("content:papers")),
+                ("paper", ''),
                 ]
 
     def get_queryset(self):
-        """Return all of the required hub information"""
-        return 'content_paper'
+        context = {}
+        subject = self.kwargs['subject']
+        board = self.kwargs['board']
+        board_module = self.kwargs['board_moduel']
+        exam_year = self.kwargs['exam_year']
+        exam_month = self.kwargs['exam_month']
+        context['title'] = 'paper title'
+        article_objects = Question.objects.filter(
+                    q_subject=subject,
+                    q_board=board,
+                    q_board_moduel=board_module,
+                    q_exam_year=exam_year,
+                    q_exam_month=exam_month,
+                ).order_by('q_exam_num')
+        article_questions = [model_to_dict(obj) for obj in article_objects]
+        df = pd.DataFrame(article_questions)
+        dic = OrderedDict()
+        for exam_num, p_id in zip(list(df['q_exam_num']), list(df['id'])):
+            if exam_num not in dic:
+                dic[exam_num] = []
+            dic[exam_num].append(Question.objects.get(pk=p_id))
+        context['questions'] = dic
+        return context
 
 
 def _media(request):

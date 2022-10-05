@@ -10,14 +10,15 @@
 {%endblock%}
 
 {%block content%}
-{%definevar context.questions as information%}
-{%definevar 'Subject' as A_tag%}
-{%definevar 'Module' as B_tag%}
-{%definevar 'Chapter' as C_tag%}
+{%definevar context.papers as information%}
+{%definevar 'Exam Board' as A_tag%}
+{%definevar 'Board Module' as B_tag%}
+{%definevar 'Examination Year' as C_tag%}
+{%definevar 'Examination Month' as D_tag%}
 
 <section class="py-5">
     <div class="container">
-	<h2 class="text-center pb-3 mb-4">Filter to find the exact questions you need</h2>
+	<h2 class="text-center pb-3 mb-4">Filter to find the exact Paper you need</h2>
 	<div id='error-message' style='text-align:center; color:red;'></div>
 
 	<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
@@ -35,7 +36,8 @@
 				<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin:auto;margin-bottom:30px;'>
 				    {%for B in information|index:A%}
 				    <a class="nav-item nav-link mr-1 mb-1" data-toggle="tab" href="#ref-{{A}}-{{B}}" 
-					id="id-{{A}}-{{B}}" style='border: 1px solid black;'>{{B|field_name_to_label}}</a>
+					id="id-{{A}}-{{B}}" style='border: 1px solid black;'>{{B}}</a>
+{%load general%}
 				    {%endfor%}
 				</nav>
 			</div>
@@ -51,7 +53,7 @@
 						    <a class="nav-item nav-link mr-1 mb-1" data-toggle="tab" 
 							href="#ref-{{A}}-{{B}}-{{C}}" 
 							id="id-{{A}}-{{B}}-{{C}}" 
-							style='border: 1px solid black;'>{{C|field_name_to_label}}</a>
+							style='border: 1px solid black;'>{{C}}</a>
 						    {%endfor%}
 						</nav>
 					</div>
@@ -64,12 +66,48 @@
 							<div class="row">
 								<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 								    {%for D in information|index:A|index:B|index:C%}
-								    <a class="nav-item nav-link mr-1 mb-1" 
-								       href="{% url 'content:question' A B 'universal' C D %}" 
-									style='border: 1px solid black;'>{{D|field_name_to_label}}</a>
+								    <a class="nav-item nav-link mr-1 mb-1" data-toggle="tab" 
+									href="#ref-{{A}}-{{B}}-{{C}}-{{D}}" 
+									id="id-{{A}}-{{B}}-{{C}}-{{D}}" 
+									style='border: 1px solid black;'>{{D}}</a>
 								    {%endfor%}
 								</nav>
 							</div>
+
+
+							<div class="tab-content" id="pricingTab">
+							<hr class="sidebar-divider bg-dark">
+							    {%for D in information|index:A|index:B|index:C%}
+							    <div class="tab-pane fade" id="ref-{{A}}-{{B}}-{{C}}-{{D}}" 
+								role="tabpanel" aria-labelledby="id-{{A}}-{{B}}-{{C}}-{{D}}">
+									<h6>{{D_tag}}</h6>
+									<div class="row">
+										<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
+										    {%for E in information|index:A|index:B|index:C|index:D%}
+										    <a class="nav-item nav-link mr-1 mb-1" 
+											href="{% url 'content:paper' A B C D E%}" 
+											style='border: 1px solid black;'>
+											    {%if E == 1%}
+											    January
+											    {%elif E == 6%}
+											    June
+											    {%else%}
+											    {{E}}
+											    {%endif%}
+										    </a>
+										    {%endfor%}
+										</nav>
+									</div>
+							    </div>
+							    {%endfor%}
+							</div>
+
+
+
+
+
+
+
 					    </div>
 					    {%endfor%}
 					</div>
