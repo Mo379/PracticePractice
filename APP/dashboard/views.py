@@ -1,3 +1,4 @@
+import pandas as pd
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -11,7 +12,7 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import Video
+from content.models import Video, Specification
 
 
 # Superuser views
@@ -62,6 +63,88 @@ class SuperuserContentManagementView(
         context['sidebar_active'] = 'superuser/contentmanagement'
         context['bad_videos'] = Video.objects.filter(v_health=False)
         return context
+
+
+class SuperuserSpecificationsView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/specifications.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:superuser_specifications"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/specifications'
+        #
+        Notes = Specification.objects.values(
+                    'spec_level',
+                    'spec_subject',
+                    'spec_board',
+                    'spec_name',
+                    'id',
+                ).distinct().order_by(
+                    'spec_level',
+                    'spec_subject',
+                    'spec_board',
+                    'spec_name',
+                )
+        Notes_objs = [obj for obj in Notes]
+        df = pd.DataFrame(Notes_objs)
+        dic = {}
+        for le, s, m, c, idd in zip(
+                list(df['spec_level']),
+                list(df['spec_subject']),
+                list(df['spec_board']),
+                list(df['spec_name']),
+                list(df['id']),
+                ):
+            if le not in dic:
+                dic[le] = {}
+            if s not in dic[le]:
+                dic[le][s] = {}
+            if m not in dic[le][s]:
+                dic[le][s][m] = []
+            dic[le][s][m].append(Specification.objects.get(pk=idd))
+        context['specifications'] = dic
+        return context
+
+
+class SuperuserSpecDesignerView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/specdesigner.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("designer", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/specifications'
+        return context
+
+
 
 
 # Create your views here.

@@ -33,6 +33,11 @@ urlpatterns = [
         name='_syncquestions'
     ),
     path(
+        'content/_syncspecifications',
+        views._syncspecifications,
+        name='_syncspecifications'
+    ),
+    path(
         'content/_syncvideos',
         views._syncvideos,
         name='_syncvideos'

@@ -14,6 +14,16 @@ urlpatterns = [
         views.SuperuserContentManagementView.as_view(),
         name='superuser_contentmanagement'
     ),
+    path(
+        'specifications',
+        views.SuperuserSpecificationsView.as_view(),
+        name='superuser_specifications'
+    ),
+    path(
+        'specdesigner/<level>/<subject>/<board>/<name>',
+        views.SuperuserSpecDesignerView.as_view(),
+        name='superuser_specdesigner'
+    ),
     # admin
     path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),
     # student

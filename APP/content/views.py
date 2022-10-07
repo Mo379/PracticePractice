@@ -357,6 +357,27 @@ def _syncquestions(request):
     return redirect('dashboard:superuser_contentmanagement')
 
 
+def _syncspecifications(request):
+    try:
+        sync_obj = SpecificationSync()
+        sync_obj.sync()
+    except Exception as e:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Failed to sync specifications.'+str(e),
+                extra_tags='alert-danger syncspecifications_form'
+            )
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Successfully synced specifications',
+                extra_tags='alert-success syncspecifications_form'
+            )
+    return redirect('dashboard:superuser_contentmanagement')
+
+
 def _syncvideos(request):
     try:
         sync_obj = VideoSync()

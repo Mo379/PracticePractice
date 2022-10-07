@@ -14,6 +14,40 @@
 
 
 
+
+	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
+	  <img class="card-img-top" src="{%static 'base/img/Home.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
+	  <div class="card-body">
+	    <h5 class="card-title">Notes</h5>
+	    <h5 class="card-title">Universal Specification</h5>
+	    <p class="card-text">This includes all of the notes we have for all subjects and specifications.</p>
+	    <a href="{%url 'content:notes'%}" class="btn btn-primary">Study</a>
+	  </div>
+	</div>
+
+
+
+	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
+	  <img class="card-img-top" src="{%static 'base/img/maths.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
+	  <div class="card-body">
+	    <h5 class="card-title">Practice Questions</h5>
+	    <h5 class="card-title">Universal Question Bank</h5>
+	    <p class="card-text">Questions split by topic and difficulty, to target your weakest points.</p>
+	    <a href="{% url 'content:questions'%}" class="btn btn-primary">Practice</a>
+	  </div>
+	</div>
+
+
+	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
+	  <img class="card-img-top" src="{%static 'base/img/Physics.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
+	  <div class="card-body">
+	    <h5 class="card-title">Papers</h5>
+	    <h5 class="card-title">Past Papers</h5>
+	    <p class="card-text">Relevant Past Papers from the most popular exam boards.</p>
+	    <a href="{% url 'content:papers'%}" class="btn btn-primary">Practice</a>
+	  </div>
+	</div>
+{%endblock%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
 <style>
 .gu-mirror {
@@ -91,37 +125,3 @@ dragula([document.getElementById('left'), document.getElementById('right')], {
 
 
 
-
-	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
-	  <img class="card-img-top" src="{%static 'base/img/Home.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
-	  <div class="card-body">
-	    <h5 class="card-title">Notes</h5>
-	    <h5 class="card-title">Universal Specification</h5>
-	    <p class="card-text">This includes all of the notes we have for all subjects and specifications.</p>
-	    <a href="{%url 'content:notes'%}" class="btn btn-primary">Study</a>
-	  </div>
-	</div>
-
-
-
-	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
-	  <img class="card-img-top" src="{%static 'base/img/maths.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
-	  <div class="card-body">
-	    <h5 class="card-title">Practice Questions</h5>
-	    <h5 class="card-title">Universal Question Bank</h5>
-	    <p class="card-text">Questions split by topic and difficulty, to target your weakest points.</p>
-	    <a href="{% url 'content:questions'%}" class="btn btn-primary">Practice</a>
-	  </div>
-	</div>
-
-
-	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
-	  <img class="card-img-top" src="{%static 'base/img/Physics.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
-	  <div class="card-body">
-	    <h5 class="card-title">Papers</h5>
-	    <h5 class="card-title">Past Papers</h5>
-	    <p class="card-text">Relevant Past Papers from the most popular exam boards.</p>
-	    <a href="{% url 'content:papers'%}" class="btn btn-primary">Practice</a>
-	  </div>
-	</div>
-{%endblock%}

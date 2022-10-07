@@ -31,5 +31,17 @@ style='color:white;'
 		     {%endif%}
 		>Management</span>
 	</a>
+	<a class="nav-link" href="{%url 'dashboard:superuser_specifications'%}">
+		<i class="bi bi-folder-fill" 
+		     {%if sidebar_active == 'superuser/specifications'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'superuser/specifications'%}
+		     style='color:white;'
+		     {%endif%}
+		>Specifications</span>
+	</a>
 </li>
 <hr class="sidebar-divider">

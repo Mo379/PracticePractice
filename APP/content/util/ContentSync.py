@@ -218,7 +218,10 @@ class SpecificationSync():
                 # getting source information from name
                 spec_level = ddir.split('/Z_')[1].split('/')[0]
                 spec_subject = ddir.split('/A_')[1].split('/')[0]
-                spec_board = ddir.split('/B_')[1].split('/')[0]
+                if '/B_' in ddir:
+                    spec_board = ddir.split('/B_')[1].split('/')[0]
+                else:
+                    spec_board = 'Universal'
                 #
                 spec_dir = ddir
                 spec_name = spec.split('.')[0]
@@ -233,8 +236,18 @@ class SpecificationSync():
                 # extracting info from json file data
                 spec_content = data
                 # Load question information to model
-                if Specification.objects.filter(spec_name=spec_name):
-                    my_spec = Specification.objects.get(spec_name=spec_name)
+                if Specification.objects.filter(
+                        spec_level=spec_level,
+                        spec_subject=spec_subject,
+                        spec_board=spec_board,
+                        spec_name=spec_name
+                    ):
+                    my_spec = Specification.objects.get(
+                        spec_level=spec_level,
+                        spec_subject=spec_subject,
+                        spec_board=spec_board,
+                        spec_name=spec_name
+                        )
                 else:
                     my_spec = Specification()
                 my_spec.spec_level = spec_level

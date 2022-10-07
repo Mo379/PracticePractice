@@ -113,6 +113,8 @@ class Specification(models.Model):
     spec_content= models.JSONField(default=dict,null=True) 
     spec_dir= models.CharField(max_length=255,default='',null=True)
     spec_link= models.CharField(max_length=255,default='',null=True)
+    spec_health= models.BooleanField(default=False, null=True)
+    q_exam_num = models.IntegerField(default=0, null=True)
     def __str__(self):
         return self.spec_board+'-' + self.spec_subject + '-' + self.spec_name
 
