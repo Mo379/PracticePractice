@@ -49,6 +49,9 @@
 	{% block title %}
     {% endblock %}
 	</title>
+
+    {% block meta%}
+    {% endblock %}
   </head>
 
   <body>
@@ -70,10 +73,10 @@
 			<div id="content">
 				{%include 'base/navbar.html'%}
 				<div class='PageWallpaper' style="background-image: url('{%static 'base/img/Home.jpg'%}'); background-position: center top;">
-				   <h1 class = 'subjectmain' style = 'font-size: 28px;'> 
+				   <p class = 'subjectmain' style = 'font-size: 28px;'> 
 						{%block page_name%}
 						{%endblock%}
-					</h1>
+					</p>
 				</div>
 				{% block breadcrumbs %}
 					{% render_breadcrumbs %}

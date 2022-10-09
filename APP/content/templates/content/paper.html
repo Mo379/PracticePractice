@@ -4,11 +4,17 @@
 {% load mathjax %}
 
 {%block page_name%}
-	My Home
+	PastPapers
 {%endblock%}
 
 {%block title%}
-	Content
+PastPaper | {{context.sampl_object.q_level|field_name_to_label}} {{context.sampl_object.q_board|field_name_to_label}} {{context.sampl_object.q_board_moduel|field_name_to_label}} {{context.sampl_object.q_exam_year|paper_year}} {{context.sampl_object.q_exam_month|paper_month}}
+{%endblock%}
+
+{%block meta%}
+<meta name="description" content="
+Past paper from {{context.sampl_object.q_level|field_name_to_label}} {{context.sampl_object.q_board|field_name_to_label}} {{context.sampl_object.q_board_moduel|field_name_to_label}} {{context.sampl_object.q_exam_year|paper_year}} {{context.sampl_object.q_exam_month|paper_month}}, including worked solutions, revision notes, videos, and solved examples.
+">
 {%endblock%}
 
 {%block content%}

@@ -120,6 +120,7 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
             if difficulty not in dic:
                 dic[difficulty] = []
             dic[difficulty].append(Question.objects.get(pk=p_id))
+        context['sampl_object'] = Question.objects.get(pk=p_id)
         context['questions'] = dic
         return context
 
@@ -203,6 +204,7 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
             if topic not in dic:
                 dic[topic] = []
             dic[topic].append(Point.objects.get(pk=p_id))
+        context['sampl_object'] = Point.objects.get(pk=p_id)
         context['article'] = dic
         editor_form = MDEditorModleForm()
         context['editor_form'] = editor_form
@@ -297,6 +299,7 @@ class PaperView(BaseBreadcrumbMixin, generic.ListView):
             if exam_num not in dic:
                 dic[exam_num] = []
             dic[exam_num].append(Question.objects.get(pk=p_id))
+        context['sampl_object'] = Question.objects.get(pk=p_id)
         context['questions'] = dic
         return context
 

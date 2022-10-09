@@ -4,11 +4,17 @@
 {% load mathjax %}
 
 {%block page_name%}
-	My Home
+	Questions
 {%endblock%}
 
 {%block title%}
-	Content
+{{context.title|field_name_to_label}} - {{context.sampl_object.q_level|field_name_to_label}} {{context.sampl_object.q_subject|field_name_to_label}} {{context.sampl_object.q_moduel|field_name_to_label}} Questions
+{%endblock%}
+
+{%block meta%}
+<meta name="description" content="
+{{context.title|field_name_to_label}} {{context.sampl_object.q_level|field_name_to_label}} {{context.sampl_object.q_subject|field_name_to_label}} practice questions, looking at {{context.sampl_object.q_moduel|field_name_to_label}}, including worked solutions, all in one place!
+">
 {%endblock%}
 
 {%block content%}

@@ -38,8 +38,27 @@ def has_group(user, group_name):
 
 @register.filter(name='field_name_to_label')
 def field_name_to_label(value):
+    if value.lower() == 'alevels':
+        value = 'A-Level'
     value = value.replace('_', ' ')
     return value.title()
+
+
+@register.filter(name='paper_year')
+def paper_year(value):
+    value = str('20')+str(value)
+    return value
+
+
+
+@register.filter(name='paper_month')
+def paper_year(value):
+    value = str(value)
+    if value in ['01', '1', '12', '11']:
+        value = 'January'
+    if value in ['05', '5', '06', '6', '07', '7']:
+        value = 'June'
+    return value
 
 
 @register.filter(name='has_many_groups')

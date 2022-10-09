@@ -8,7 +8,13 @@
 {%endblock%}
 
 {%block title%}
-	Content
+{{context.title|field_name_to_label}} - {{context.sampl_object.p_level|field_name_to_label}} {{context.sampl_object.p_subject|field_name_to_label}} {{context.sampl_object.p_moduel|field_name_to_label}} Revision
+{%endblock%}
+
+{%block meta%}
+<meta name="description" content="
+{{context.title|field_name_to_label}} {{context.sampl_object.p_level|field_name_to_label}} {{context.sampl_object.p_subject|field_name_to_label}} revision, looking at {{context.sampl_object.p_moduel|field_name_to_label}}, including definitions, examples, formulara, practice questions and worked solutions, all in one place!
+">
 {%endblock%}
 
 {%block content%}
@@ -46,9 +52,9 @@
 
 
 <div class="container col-9 text-justify" style='border-left:1px solid black;'>
-	<h2 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+	<h1 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
 		{{context.title|field_name_to_label}}
-	</h2>
+	</h1>
 	{%for topic in context.article%}
 	<h4>
 		{{topic|field_name_to_label}}
