@@ -194,7 +194,7 @@ class SiteMapView(BaseBreadcrumbMixin, generic.ListView):
 
 
 class SiteMapSEOView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "main/sitemapseo.html"
+    template_name = "main/sitemapseo.xml"
     context_object_name = 'context'
     @cached_property
     def crumbs(self):
@@ -202,22 +202,37 @@ class SiteMapSEOView(BaseBreadcrumbMixin, generic.ListView):
                 ("sitemapseo", reverse("main:sitemapseo"))
                 ]
     def get_queryset(self):
-        return "base_sitemap_seo"
-
-
-
-
+        context = {}
+        context['urls'] = []
+        return context
 
 
 class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/404.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("Home", reverse("main:index")),
-                ("404", reverse("main:404"))
+                ("404", '')
                 ]
+
+    def get_queryset(self):
+        return "user_index"
+
+
+class ErrorView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = "main/500.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("Home", reverse("main:index")),
+                ("500", '')
+                ]
+
     def get_queryset(self):
         return "user_index"
 

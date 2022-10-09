@@ -14,9 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from main.views import NotFoundView, ErrorView
+from main.sitemaps import StaticViewSitemap
+
+sitemaps = {
+    'static': StaticViewSitemap
+}
 
 
 urlpatterns = [
@@ -26,7 +33,11 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}),
 ]
+handler404 = NotFoundView.as_view()
+handler500 = ErrorView.as_view()
+
 
 
 if settings.DEBUG:

@@ -12,7 +12,7 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import Video, Specification
+from content.models import Point, Video, Specification
 
 
 # Superuser views
@@ -142,6 +142,29 @@ class SuperuserSpecDesignerView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'superuser/specifications'
+        #
+        level = self.kwargs['level']
+        subject = self.kwargs['subject']
+        board = self.kwargs['board']
+        name = self.kwargs['name']
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+                )
+        moduels = Point.objects.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                ).filter(p_level=level, p_subject=subject)
+        moduels_objs= [obj for obj in moduels]
+        context['spec'] = spec
+        context['moduels'] = moduels_objs
         return context
 
 

@@ -1,0 +1,19 @@
+{%block content%}
+{%for link in context.urls%}
+<urlset xmlns=”http://www.sitemaps.org/schemas/sitemap/0.9″>
+	<url>
+		<loc>
+		link.url
+		</loc>
+		<lastmod>
+		link.last_mod
+		</lastmod>
+		<changefreq>
+		link.change_freq
+		</changefreq>
+		<priority>
+		link.priority
+		</priority>
+	</url>
+{%endfor%}
+{%endblock%}
