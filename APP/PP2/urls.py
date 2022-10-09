@@ -20,9 +20,13 @@ from django.conf.urls.static import static
 from django.conf import settings
 from main.views import NotFoundView, ErrorView
 from main.sitemaps import StaticViewSitemap
+from content.sitemaps import NotesSitemap, QuestionsSitemap, PapersSitemap
 
 sitemaps = {
-    'static': StaticViewSitemap
+    'static': StaticViewSitemap,
+    'notes': NotesSitemap,
+    'questions': QuestionsSitemap,
+    'papers': PapersSitemap,
 }
 
 

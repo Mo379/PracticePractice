@@ -235,30 +235,28 @@ class PapersView(BaseBreadcrumbMixin, generic.ListView):
                     'q_board_moduel',
                     'q_exam_year',
                     'q_exam_month',
-                )
+                ).filter(q_is_exam=1)
         Notes_objs = [obj for obj in Notes]
         df = pd.DataFrame(Notes_objs)
         dic = {}
-        for su, b, mod, y, mon, ex in zip(
+        for su, b, mod, y, mon in zip(
                 list(df['q_subject']),
                 list(df['q_board']),
                 list(df['q_board_moduel']),
                 list(df['q_exam_year']),
                 list(df['q_exam_month']),
-                list(df['q_is_exam']),
                 ):
-            if ex == 1:
-                if su not in dic:
-                    dic[su] = {}
-                if b not in dic[su]:
-                    dic[su][b] = {}
-                if mod not in dic[su][b]:
-                    dic[su][b][mod] = {}
-                if y not in dic[su][b][mod]:
-                    dic[su][b][mod][y] = {}
-                if mon not in dic[su][b][mod][y]:
-                    dic[su][b][mod][y][mon] = []
-                dic[su][b][mod][y][mon].append('Paper')
+            if su not in dic:
+                dic[su] = {}
+            if b not in dic[su]:
+                dic[su][b] = {}
+            if mod not in dic[su][b]:
+                dic[su][b][mod] = {}
+            if y not in dic[su][b][mod]:
+                dic[su][b][mod][y] = {}
+            if mon not in dic[su][b][mod][y]:
+                dic[su][b][mod][y][mon] = []
+            dic[su][b][mod][y][mon].append('Paper')
         context['papers'] = dic
         return context
 
