@@ -43,7 +43,12 @@ Past paper from {{context.sampl_object.q_level|field_name_to_label}} {{context.s
 
 <section class="py-5 " style='margin-bottom:250px;'>
     <div class="container">
-	<h2 class="text-center pb-3 mb-4">Question Number</h2>
+	<h1 class="text-center pb-3 mb-4">
+	    {{context.sampl_object.q_board|field_name_to_label|upper}}
+	    {{context.sampl_object.q_board_moduel|field_name_to_label}}
+	    {{context.sampl_object.q_exam_year|paper_year}}
+	    {{context.sampl_object.q_exam_month|paper_month|upper}}
+	</h1>
 	<div id='error-message' style='text-align:center; color:red;'></div>
 
 	<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
@@ -56,6 +61,9 @@ Past paper from {{context.sampl_object.q_level|field_name_to_label}} {{context.s
         <hr class="sidebar-divider bg-dark">
             {%for A in information%}
 	    <div class="tab-pane fade" id="ref-{{A}}" role="tabpanel" aria-labelledby="id-{{A}}">
+			    <h2 style='font-size: 16px;'>
+				    Question {{A}}:
+			    </h2>
 			<div class="tab-content" id="pricingTab">
 			    {%for B in information|index:A%}
 				<div class="container col-9 text-justify" style='border-left:1px solid black;'>

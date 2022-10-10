@@ -56,9 +56,9 @@
 		{{context.title|field_name_to_label}}
 	</h1>
 	{%for topic in context.article%}
-	<h4>
+	<h2>
 		{{topic|field_name_to_label}}
-	</h4>
+	</h2>
 	<div class='ml-1' style='border-left: 1px solid grey;'>
         {%for point in context.article|index:topic%}
 	    <div class='point_div ml-1 mb-2' style='border-left: 2px dashed silver; padding-left:5px;'>
@@ -66,7 +66,7 @@
 	    </div>
         {%endfor%}
 	</div>
-	<h5 style='border-bottom: 1px dashed silver;'></h5>
+	<div style='border-bottom: 1px dashed silver;'></div>
 	{%endfor%}
 </div>
 {%endblock%}

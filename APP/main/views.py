@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
@@ -6,6 +6,9 @@ from django.utils.functional import cached_property
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.core.mail import send_mail
 from django.contrib import messages
+from django.views.decorators.http import require_GET
+
+
 
 
 # Create your views here.
@@ -187,26 +190,6 @@ class SiteMapView(BaseBreadcrumbMixin, generic.ListView):
         return "base_sitemap"
 
 
-
-
-
-
-
-
-class SiteMapSEOView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = "main/sitemapseo.xml"
-    context_object_name = 'context'
-    @cached_property
-    def crumbs(self):
-        return [
-                ("sitemapseo", reverse("main:sitemapseo"))
-                ]
-    def get_queryset(self):
-        context = {}
-        context['urls'] = []
-        return context
-
-
 class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/404.html"
     context_object_name = 'context'
@@ -236,3 +219,13 @@ class ErrorView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         return "user_index"
 
+
+@require_GET
+def robots_txt(request):
+    lines = [
+        "User-Agent: *",
+        "Disallow: /user/",
+        "Disallow: /_*/",
+        "Sitemap: https://www.practicepractice.net/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")

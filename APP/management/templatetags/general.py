@@ -52,7 +52,7 @@ def paper_year(value):
 
 
 @register.filter(name='paper_month')
-def paper_year(value):
+def paper_month(value):
     value = str(value)
     if value in ['01', '1', '12', '11']:
         value = 'January'
@@ -127,7 +127,7 @@ def ToMarkdown(content, point):
     # numbered items in hidden and description
     # hidden has only one numbered element containing two children
     point_title = hidden['0']['point_title']
-    html += markdown.markdown("###### " + str(point.p_number) + ': ' +point_title)
+    html += markdown.markdown("### " + str(point.p_number) + ': ' +point_title)
     hidden_content = hidden['0']['content']
     # the content element is numbered
     for item in range(len(hidden_content)):
