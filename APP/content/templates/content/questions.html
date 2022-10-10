@@ -23,7 +23,7 @@ Find practice questions for specific chapters and topics. with notes and detaile
 
 <section class="py-5">
     <div class="container">
-	<h2 class="text-center pb-3 mb-4">Filter to find the exact questions you need</h2>
+	<h1 class="text-center pb-3 mb-4">Filter to find the exact questions you need</h1>
 	<div id='error-message' style='text-align:center; color:red;'></div>
 
 	<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
@@ -36,7 +36,7 @@ Find practice questions for specific chapters and topics. with notes and detaile
         <hr class="sidebar-divider bg-dark">
             {%for A in information%}
 	    <div class="tab-pane fade" id="ref-{{A}}" role="tabpanel" aria-labelledby="id-{{A}}">
-		        <h6>{{A_tag}}</h6>
+		        <h2 style='font-size: 16px;'>{{A_tag}}</h2>
 			<div class="row">
 				<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin:auto;margin-bottom:30px;'>
 				    {%for B in information|index:A%}
@@ -50,7 +50,7 @@ Find practice questions for specific chapters and topics. with notes and detaile
 			    {%for B in information|index:A%}
 			    <div class="tab-pane fade" id="ref-{{A}}-{{B}}" 
 				role="tabpanel" aria-labelledby="id-{{A}}-{{B}}">
-					<h6>{{B_tag}}</h6>
+					<h3 style='font-size: 16px;'>{{B_tag}}</h3>
 					<div class="row">
 						<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 						    {%for C in information|index:A|index:B%}
@@ -66,7 +66,7 @@ Find practice questions for specific chapters and topics. with notes and detaile
 					    {%for C in information|index:A|index:B%}
 					    <div class="tab-pane fade" id="ref-{{A}}-{{B}}-{{C}}" 
 						role="tabpanel" aria-labelledby="id-{{A}}-{{B}}-{{C}}">
-							<h6>{{C_tag}}</h6>
+							<h3 style='font-size: 16px;'>{{C_tag}}</h3>
 							<div class="row">
 								<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 								    {%for D in information|index:A|index:B|index:C%}
