@@ -431,3 +431,131 @@ def _checkvideohealth(request):
                 extra_tags='alert-success videohealth_form'
             )
     return redirect('dashboard:superuser_contentmanagement')
+
+
+def _ordermoduels(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        ordered_moduels = request.POST.getlist('ordered_items[]')
+        if 'completed' in request.POST:
+            completed = True
+        else:
+            completed = False
+        # Get objects
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+            )
+        content = spec.spec_content.copy()
+        for idd, moduel in enumerate(ordered_moduels):
+            if moduel in content:
+                content[moduel]['position'] = idd
+            else:
+                content[moduel] = {}
+                content[moduel]['position'] = idd
+                content[moduel]['active'] = True
+                content[moduel]['content'] = {}
+        for moduel in content:
+            if moduel not in ordered_moduels:
+                content[moduel]['position'] = -1
+                content[moduel]['active'] = False
+        # Update the values
+        if completed:
+            spec.spec_health = True
+        else:
+            spec.spec_health = False
+        spec.spec_content = content
+        spec.save()
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Specification Updated !',
+                extra_tags='alert-success specmoduel'
+            )
+
+        #
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
+
+
+def _orderchapters(request):
+    level = request.POST['level']
+    subject = request.POST['subject']
+    board = request.POST['board']
+    name = request.POST['name']
+    moduel = request.POST['moduel']
+    ordered_chapters = request.POST.getlist('ordered_items[]')
+    print(level, subject, board, name, moduel, ordered_chapters)
+    kwargs = {
+        'level': level,
+        'subject': subject,
+        'board': board,
+        'name': name,
+        'moduel': moduel,
+    }
+    return redirect(
+            'dashboard:superuser_specchapter',
+            **kwargs
+        )
+
+
+def _ordertopics(request):
+    level = request.POST['level']
+    subject = request.POST['subject']
+    board = request.POST['board']
+    name = request.POST['name']
+    moduel = request.POST['moduel']
+    chapter = request.POST['chapter']
+    ordered_topics = request.POST.getlist('ordered_items[]')
+    print(level, subject, board, name, moduel, chapter, ordered_topics)
+    kwargs = {
+        'level': level,
+        'subject': subject,
+        'board': board,
+        'name': name,
+        'moduel': moduel,
+        'chapter': chapter,
+    }
+    return redirect(
+            'dashboard:superuser_spectopic',
+            **kwargs
+        )
+
+
+def _orderpoints(request):
+    level = request.POST['level']
+    subject = request.POST['subject']
+    board = request.POST['board']
+    name = request.POST['name']
+    moduel = request.POST['moduel']
+    chapter = request.POST['chapter']
+    topic = request.POST['topic']
+    ordered_topics = request.POST.getlist('ordered_items[]')
+    print(level, subject, board, name, moduel, chapter, topic, ordered_topics)
+    kwargs = {
+        'level': level,
+        'subject': subject,
+        'board': board,
+        'name': name,
+        'moduel': moduel,
+        'chapter': chapter,
+        'topic': topic,
+    }
+    return redirect(
+            'dashboard:superuser_spectopic',
+            **kwargs
+        )
+

@@ -1,0 +1,57 @@
+{% extends 'dashboard/base.html'%}
+{%load static%}
+{%load general%}
+{%block page_name%}
+Topic Selection and ordering
+{%endblock%}
+{%block content%}
+{%definevar context.spec as spec %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+	<!-- Page Heading -->
+	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}} {{context.sample_obj.p_chapter}}</h1>
+</div>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
+
+<form class="user px-3 py-3"  action="{%url 'user:_login'%}" method="POST" role="form">
+{%csrf_token%}
+<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
+<div class='container' >
+	<ol class='list'id='right'>
+		{%for obj in context.topics%}
+		<li class='child'>
+			<span class='handle mr-1 ml-1'style='font-size:25px;'>
+				+
+			</span>
+			<a href='{%url 'dashboard:superuser_specpoint' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter obj.p_topic%}' target='_blank'>
+			{{obj.p_topic|field_name_to_label}}
+			</a>
+		</li >
+		{%endfor%}
+	</ol>
+	<ol class = 'list' id='left'>
+		{%for obj in context.specification_moduels%}
+		<li class='child'>
+			<span class='handle mr-1 ml-1'style='font-size:25px;'>
+				+
+			</span>
+			{{obj.p_moduel|field_name_to_label}}
+		</li >
+		{%endfor%}
+	</ol>
+</div>
+</form>
+<script>
+dragula([document.getElementById('left'), document.getElementById('right')], {
+  moves: function (el, container, handle) {
+    return handle.classList.contains('handle');
+  },
+  copy: function (el, source) {
+    return source === document.getElementById(left)
+  },
+  accepts: function (el, target) {
+    return target !== document.getElementById(left)
+  },
+});
+</script>
+{%endblock%}

@@ -120,7 +120,7 @@ class SuperuserSpecificationsView(
         return context
 
 
-class SuperuserSpecDesignerView(
+class SuperuserSpecModuelHandlerView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
@@ -128,7 +128,7 @@ class SuperuserSpecDesignerView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = "dashboard/superuser/specdesigner.html"
+    template_name = "dashboard/superuser/specmoduelhandler.html"
     context_object_name = 'context'
 
     @cached_property
@@ -161,12 +161,205 @@ class SuperuserSpecDesignerView(
                     'p_level',
                     'p_subject',
                     'p_moduel',
-                ).filter(p_level=level, p_subject=subject)
-        moduels_objs= [obj for obj in moduels]
+                ).filter(
+                        p_level=level,
+                        p_subject=subject,
+                )
+        moduels_objs = [obj for obj in moduels]
+        spec_moduels = spec.spec_content.keys()
+        spec_moduels_objs = [None] * len(spec_moduels)
+        for idd, a in enumerate(moduels_objs):
+            if a['p_moduel'] in spec_moduels:
+                spec_moduels_objs.append(a)
+                position = spec.spec_content[a['p_moduel']]['position']
+                spec_moduels_objs[int(position)] = a
+                del moduels_objs[idd]
         context['spec'] = spec
+        context['sample_obj'] = moduels_objs[0]
         context['moduels'] = moduels_objs
+        context['specification_moduels'] = spec_moduels_objs
         return context
 
+
+class SuperuserSpecChapterHandlerView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/specchapterhandler.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("designer", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/specifications'
+        #
+        level = self.kwargs['level']
+        subject = self.kwargs['subject']
+        board = self.kwargs['board']
+        name = self.kwargs['name']
+        moduel = self.kwargs['module']
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
+                )
+        chapters = Point.objects.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                ).filter(
+                        p_level=level,
+                        p_subject=subject,
+                        p_moduel=moduel,
+                )
+        chapter_objs = [obj for obj in chapters]
+        context['spec'] = spec
+        context['sample_obj'] = chapter_objs[0]
+        context['chapters'] = chapter_objs
+        return context
+
+
+class SuperuserSpecTopicHandlerView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/spectopichandler.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("designer", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/specifications'
+        #
+        level = self.kwargs['level']
+        subject = self.kwargs['subject']
+        board = self.kwargs['board']
+        name = self.kwargs['name']
+        moduel = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
+                )
+        topics = Point.objects.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                    'p_topic',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                    'p_topic',
+                ).filter(
+                        p_level=level,
+                        p_subject=subject,
+                        p_moduel=moduel,
+                        p_chapter=chapter,
+                )
+        topics_objs = [obj for obj in topics]
+        context['spec'] = spec
+        context['sample_obj'] = topics_objs[0]
+        context['topics'] = topics_objs
+        return context
+
+
+class SuperuserSpecPointHandlerView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/specpointhandler.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("designer", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/specifications'
+        #
+        level = self.kwargs['level']
+        subject = self.kwargs['subject']
+        board = self.kwargs['board']
+        name = self.kwargs['name']
+        moduel = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        topic = self.kwargs['topic']
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
+                )
+        points = Point.objects.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                    'p_topic',
+                    'p_number',
+                    'p_content',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                    'p_topic',
+                    'p_number',
+                ).filter(
+                        p_level=level,
+                        p_subject=subject,
+                        p_moduel=moduel,
+                        p_chapter=chapter,
+                        p_topic=topic,
+                )
+        point_objs = [obj for obj in points]
+        context['spec'] = spec
+        context['sample_obj'] = point_objs[0]
+        context['points'] = point_objs
+        return context
 
 
 

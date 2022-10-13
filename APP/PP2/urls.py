@@ -41,6 +41,7 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", robots_txt)
 ]
+
 handler404 = NotFoundView.as_view()
 handler500 = ErrorView.as_view()
 

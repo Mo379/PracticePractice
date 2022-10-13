@@ -47,4 +47,9 @@ urlpatterns = [
         views._checkvideohealth,
         name='_checkvideohealth'
     ),
+    path(
+        'content/_ordermoduels',
+        views._ordermoduels,
+        name='_ordermoduels'
+    ),
 ]

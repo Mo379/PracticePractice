@@ -20,9 +20,24 @@ urlpatterns = [
         name='superuser_specifications'
     ),
     path(
-        'specdesigner/<level>/<subject>/<board>/<name>',
-        views.SuperuserSpecDesignerView.as_view(),
-        name='superuser_specdesigner'
+        'specmodule/<level>/<subject>/<board>/<name>',
+        views.SuperuserSpecModuelHandlerView.as_view(),
+        name='superuser_specmoduel'
+    ),
+    path(
+        'specchapter/<level>/<subject>/<board>/<name>/<module>',
+        views.SuperuserSpecChapterHandlerView.as_view(),
+        name='superuser_specchapter'
+    ),
+    path(
+        'spectopic/<level>/<subject>/<board>/<name>/<module>/<chapter>',
+        views.SuperuserSpecTopicHandlerView.as_view(),
+        name='superuser_spectopic'
+    ),
+    path(
+        'specpoint/<level>/<subject>/<board>/<name>/<module>/<chapter>/<topic>',
+        views.SuperuserSpecPointHandlerView.as_view(),
+        name='superuser_specpoint'
     ),
     # admin
     path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),

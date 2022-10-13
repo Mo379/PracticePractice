@@ -200,6 +200,10 @@ class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
                 ("Home", reverse("main:index")),
                 ("404", '')
                 ]
+    def get(self, request, *args, **kwargs):
+        response = super(generic.ListView, self).get(request, *args, **kwargs)
+        response.status_code = 404
+        return response
 
     def get_queryset(self):
         return "user_index"
@@ -215,6 +219,11 @@ class ErrorView(BaseBreadcrumbMixin, generic.ListView):
                 ("Home", reverse("main:index")),
                 ("500", '')
                 ]
+
+    def get(self, request, *args, **kwargs):
+        response = super(generic.ListView, self).get(request, *args, **kwargs)
+        response.status_code = 500
+        return response
 
     def get_queryset(self):
         return "user_index"

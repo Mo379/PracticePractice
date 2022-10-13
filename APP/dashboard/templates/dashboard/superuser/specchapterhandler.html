@@ -2,78 +2,30 @@
 {%load static%}
 {%load general%}
 {%block page_name%}
-Moduel Selection and ordering
+Chapter Selection and ordering
 {%endblock%}
 {%block content%}
+{%definevar context.spec as spec %}
 <!-- Begin Page Content -->
 <div class="container-fluid">
-
 	<!-- Page Heading -->
-	<h1 class="h3 mb-4 text-gray-800">Module selection and ordering</h1>
-
+	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}}</h1>
 </div>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
-<style>
-.gu-mirror {
-  position: fixed !important;
-  margin: 0 !important;
-  z-index: 9999 !important;
-  opacity: 0.8;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
-  filter: alpha(opacity=80);
-}
-.gu-hide {
-  display: none !important;
-}
-.gu-unselectable {
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  user-select: none !important;
-}
-.gu-transit {
-  opacity: 0.2;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
-  filter: alpha(opacity=20);
-}
-.container
-{
-    display: table-row;
-    margin:auto;
-}
 
-.list
-{
-    display: table-cell;
-    width: auto;
-    background: #eee;
-    border: 1px solid black;
-    height: 100%;
-    list-style-type: none;
-    background: white;
-}
-.child{
-	background:black;
-	padding:10px;
-	text-align: left;
-	margin:20px;
-	cursor: pointer;
-	width: auto;
-	color:white;
-	border-radius: 15px;
-}
-</style>
 <form class="user px-3 py-3"  action="{%url 'user:_login'%}" method="POST" role="form">
 {%csrf_token%}
 <button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
 <div class='container' >
 	<ol class='list'id='right'>
-		{%for obj in context.moduels%}
+		{%for obj in context.chapters%}
 		<li class='child'>
 			<span class='handle mr-1 ml-1'style='font-size:25px;'>
 				+
 			</span>
-			{{obj.p_moduel|field_name_to_label}}
+			<a href='{%url 'dashboard:superuser_spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter%}' target='_blank'>
+			{{obj.p_chapter|field_name_to_label}}
+			</a>
 		</li >
 		{%endfor%}
 	</ol>

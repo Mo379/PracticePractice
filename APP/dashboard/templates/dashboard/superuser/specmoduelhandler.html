@@ -1,0 +1,74 @@
+{% extends 'dashboard/base.html'%}
+{%load static%}
+{%load general%}
+{%block page_name%}
+Moduel Selection and ordering
+{%endblock%}
+{%block content%}
+{%definevar context.spec as spec %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+	<!-- Page Heading -->
+	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}</h1>
+</div>
+{%definevar 'specmoduel' as alert_loc%}
+{%include 'base/alert.html'%}
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
+
+
+
+
+
+<div class='container' >
+	<ol class='list' id='right'>
+		{%for obj in context.moduels%}
+		<li class='child' value='{{obj.p_moduel}}'>
+			<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
+			<span class='handle mr-1 ml-1'style='font-size:25px;'>
+				+
+			</span>
+			<a href='{%url 'dashboard:superuser_specchapter' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel%}' target='_blank'>
+			{{obj.p_moduel|field_name_to_label}}
+			</a>
+		</li >
+		{%endfor%}
+	</ol>
+
+	<form class="list user px-3 py-3"  action="{%url 'content:_ordermoduels'%}" method="POST" role="form">
+		{%csrf_token%}
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<br><input type="checkbox" name="completed" value="1">
+		<label for="completed">Completed ? </label><br>
+		<ol class = 'list' id='left' style='height:50px;'>
+			{%for obj in context.specification_moduels%}
+			<li class='child' value='{{obj.p_moduel}}'>
+				<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
+				<span class='handle mr-1 ml-1'style='font-size:25px;'>
+					+
+				</span>
+			<a href='{%url 'dashboard:superuser_specchapter' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel%}' target='_blank'>
+			{{obj.p_moduel|field_name_to_label}}
+			</a>
+			</li>
+			{%endfor%}
+		</ol>
+	</form>
+</div>
+<script>
+dragula([document.getElementById('left'), document.getElementById('right')], {
+  moves: function (el, container, handle) {
+    return handle.classList.contains('handle');
+  },
+  copy: function (el, source) {
+    return source === document.getElementById(left)
+  },
+  accepts: function (el, target) {
+    return target !== document.getElementById(left)
+  },
+});
+</script>
+{%endblock%}
