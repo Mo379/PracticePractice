@@ -1,3 +1,4 @@
+import collections
 import pandas as pd
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -13,6 +14,7 @@ from braces.views import (
         SuperuserRequiredMixin,
     )
 from content.models import Point, Video, Specification
+from content.util.ContentCRUD import filter_drag_drop_selection
 
 
 # Superuser views
@@ -142,17 +144,19 @@ class SuperuserSpecModuelHandlerView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'superuser/specifications'
-        #
+        # get kwargs
         level = self.kwargs['level']
         subject = self.kwargs['subject']
         board = self.kwargs['board']
         name = self.kwargs['name']
+        # get spec from db
         spec = Specification.objects.get(
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
                 spec_name=name
                 )
+        # get moduels from db
         moduels = Point.objects.values(
                     'p_level',
                     'p_subject',
@@ -165,19 +169,22 @@ class SuperuserSpecModuelHandlerView(
                         p_level=level,
                         p_subject=subject,
                 )
+        # reformat moduels
         moduels_objs = [obj for obj in moduels]
-        spec_moduels = spec.spec_content.keys()
-        spec_moduels_objs = [None] * len(spec_moduels)
-        for idd, a in enumerate(moduels_objs):
-            if a['p_moduel'] in spec_moduels:
-                spec_moduels_objs.append(a)
-                position = spec.spec_content[a['p_moduel']]['position']
-                spec_moduels_objs[int(position)] = a
-                del moduels_objs[idd]
+        # get moduels already ordered saved previously
+        dict2 = [
+                str(content['position'])+'_'+key
+                for key, content in spec.spec_content.items()
+            ]
+        moduels_objs_final, final_spec_objs = filter_drag_drop_selection(
+                moduels_objs, dict2, 'p_moduel'
+            )
+        # return result
         context['spec'] = spec
         context['sample_obj'] = moduels_objs[0]
-        context['moduels'] = moduels_objs
-        context['specification_moduels'] = spec_moduels_objs
+        context['moduels'] = moduels_objs_final
+        context['specification_moduels'] = final_spec_objs
+        context['spec_active'] = spec.spec_health
         return context
 
 

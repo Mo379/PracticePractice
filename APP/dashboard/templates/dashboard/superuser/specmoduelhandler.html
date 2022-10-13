@@ -41,9 +41,14 @@ Moduel Selection and ordering
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<br><input type="checkbox" name="completed" value="1">
+		<br>
+		<input type="checkbox" name="completed" value="1" 
+		{%if context.spec_active%}
+		checked
+		{%endif%}
+		>
 		<label for="completed">Completed ? </label><br>
-		<ol class = 'list' id='left' style='height:50px;'>
+		<ol class = 'list' id='left' style='min-height:100%;'>
 			{%for obj in context.specification_moduels%}
 			<li class='child' value='{{obj.p_moduel}}'>
 				<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
