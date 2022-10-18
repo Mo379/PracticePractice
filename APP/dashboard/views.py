@@ -171,10 +171,11 @@ class SuperuserSpecModuelHandlerView(
                 )
         # reformat moduels
         moduels_objs = [obj for obj in moduels]
+        spec_content = spec.spec_content
         # get moduels already ordered saved previously
         dict2 = [
                 str(content['position'])+'_'+key
-                for key, content in spec.spec_content.items()
+                for key, content in spec_content.items()
             ]
         moduels_objs_final, final_spec_objs = filter_drag_drop_selection(
                 moduels_objs, dict2, 'p_moduel'
@@ -238,9 +239,19 @@ class SuperuserSpecChapterHandlerView(
                         p_moduel=moduel,
                 )
         chapter_objs = [obj for obj in chapters]
+        moduel_content = spec.spec_content[moduel]['content']
+        dict2 = [
+                str(content['position'])+'_'+key
+                for key, content in moduel_content.items()
+            ]
+        chapter_objs_final, final_spec_objs = filter_drag_drop_selection(
+                chapter_objs, dict2, 'p_chapter'
+            )
         context['spec'] = spec
         context['sample_obj'] = chapter_objs[0]
-        context['chapters'] = chapter_objs
+        context['chapters'] = chapter_objs_final
+        context['specification_chapters'] = final_spec_objs
+        # return result
         return context
 
 
@@ -298,9 +309,19 @@ class SuperuserSpecTopicHandlerView(
                         p_chapter=chapter,
                 )
         topics_objs = [obj for obj in topics]
+        chapter_content = spec.spec_content[moduel]['content'][chapter]['content']
+        dict2 = [
+                str(content['position'])+'_'+key
+                for key, content in chapter_content.items()
+            ]
+        topic_objs_final, final_spec_objs = filter_drag_drop_selection(
+                topics_objs, dict2, 'p_topic'
+            )
         context['spec'] = spec
         context['sample_obj'] = topics_objs[0]
-        context['topics'] = topics_objs
+        context['topics'] = topic_objs_final
+        context['specification_topics'] = final_spec_objs
+        # return result
         return context
 
 
@@ -348,6 +369,7 @@ class SuperuserSpecPointHandlerView(
                     'p_topic',
                     'p_number',
                     'p_content',
+                    'p_unique_id',
                 ).distinct().order_by(
                     'p_level',
                     'p_subject',
@@ -363,9 +385,19 @@ class SuperuserSpecPointHandlerView(
                         p_topic=topic,
                 )
         point_objs = [obj for obj in points]
+        chapter_content = spec.spec_content[moduel]['content'][chapter]['content'][topic]['content']
+        dict2 = [
+                str(content['position'])+'_'+key
+                for key, content in chapter_content.items()
+            ]
+        point_objs_final, final_spec_objs = filter_drag_drop_selection(
+                point_objs, dict2, 'p_unique_id'
+            )
         context['spec'] = spec
         context['sample_obj'] = point_objs[0]
-        context['points'] = point_objs
+        context['points'] = point_objs_final
+        context['specification_points'] = final_spec_objs
+        # return result
         return context
 
 

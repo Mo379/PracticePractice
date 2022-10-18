@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 import collections
 import pandas as pd
@@ -17,6 +18,7 @@ from content.util.ContentSync import (
         SpecificationSync
         )
 from content.util.ContentCRUD import (
+        insert_new_spec_order,
         QuestionCRUD,
         PointCRUD,
         SpecificationCRUD
@@ -151,6 +153,7 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                     'p_chapter',
                 )
         Notes_objs = [obj for obj in Notes]
+        print(Notes_objs)
         df = pd.DataFrame(Notes_objs)
         dic = {}
         for le, s, m, c in zip(
@@ -452,18 +455,8 @@ def _ordermoduels(request):
                 spec_name=name
             )
         content = spec.spec_content.copy()
-        for idd, moduel in enumerate(ordered_moduels):
-            if moduel in content:
-                content[moduel]['position'] = idd
-            else:
-                content[moduel] = {}
-                content[moduel]['position'] = idd
-                content[moduel]['active'] = True
-                content[moduel]['content'] = {}
-        for moduel in content:
-            if moduel not in ordered_moduels:
-                content[moduel]['position'] = -1
-                content[moduel]['active'] = False
+        new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
+        content = new_information
         # Update the values
         if completed:
             spec.spec_health = True
@@ -471,10 +464,13 @@ def _ordermoduels(request):
             spec.spec_health = False
         spec.spec_content = content
         spec.save()
+        json_content = json.dumps(spec.spec_content, indent=4)
+        crud_obj = SpecificationCRUD()
+        crud_obj.Update(level, subject, board, name, json_content)
         messages.add_message(
                 request,
                 messages.INFO,
-                'Specification Updated !',
+                'Specification Moduels Updated!',
                 extra_tags='alert-success specmoduel'
             )
 
@@ -492,70 +488,148 @@ def _ordermoduels(request):
 
 
 def _orderchapters(request):
-    level = request.POST['level']
-    subject = request.POST['subject']
-    board = request.POST['board']
-    name = request.POST['name']
-    moduel = request.POST['moduel']
-    ordered_chapters = request.POST.getlist('ordered_items[]')
-    print(level, subject, board, name, moduel, ordered_chapters)
-    kwargs = {
-        'level': level,
-        'subject': subject,
-        'board': board,
-        'name': name,
-        'moduel': moduel,
-    }
-    return redirect(
-            'dashboard:superuser_specchapter',
-            **kwargs
-        )
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        moduel = request.POST['moduel']
+        ordered_chapters = request.POST.getlist('ordered_items[]')
+        # Get objects
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+            )
+        content = spec.spec_content.copy()
+        new_information = insert_new_spec_order(
+                ordered_chapters,
+                content[moduel]['content'],
+                'chapter'
+            )
+        content[moduel]['content'] = new_information
+        spec.spec_content = content
+        spec.save()
+        json_content = json.dumps(spec.spec_content, indent=4)
+        crud_obj = SpecificationCRUD()
+        crud_obj.Update(level, subject, board, name, json_content)
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Specification Moduel-Chapters Updated !',
+                extra_tags='alert-success specchapter'
+            )
+        #
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name,
+            'module': moduel,
+        }
+        return redirect(
+                'dashboard:superuser_specchapter',
+                **kwargs
+            )
 
 
 def _ordertopics(request):
-    level = request.POST['level']
-    subject = request.POST['subject']
-    board = request.POST['board']
-    name = request.POST['name']
-    moduel = request.POST['moduel']
-    chapter = request.POST['chapter']
-    ordered_topics = request.POST.getlist('ordered_items[]')
-    print(level, subject, board, name, moduel, chapter, ordered_topics)
-    kwargs = {
-        'level': level,
-        'subject': subject,
-        'board': board,
-        'name': name,
-        'moduel': moduel,
-        'chapter': chapter,
-    }
-    return redirect(
-            'dashboard:superuser_spectopic',
-            **kwargs
-        )
-
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        moduel = request.POST['moduel']
+        chapter = request.POST['chapter']
+        ordered_topics = request.POST.getlist('ordered_items[]')
+        # Get objects
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+            )
+        content = spec.spec_content.copy()
+        new_information = insert_new_spec_order(
+                ordered_topics,
+                content[moduel]['content'][chapter]['content'],
+                'topic'
+            )
+        print(new_information)
+        content[moduel]['content'][chapter]['content'] = new_information
+        spec.spec_content = content
+        spec.save()
+        json_content = json.dumps(spec.spec_content, indent=4)
+        crud_obj = SpecificationCRUD()
+        crud_obj.Update(level, subject, board, name, json_content)
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Specification Chapter-Topics Updated !',
+                extra_tags='alert-success spectopic'
+            )
+        #
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name,
+            'module': moduel,
+            'chapter': chapter,
+        }
+        return redirect(
+                'dashboard:superuser_spectopic',
+                **kwargs
+            )
 
 def _orderpoints(request):
-    level = request.POST['level']
-    subject = request.POST['subject']
-    board = request.POST['board']
-    name = request.POST['name']
-    moduel = request.POST['moduel']
-    chapter = request.POST['chapter']
-    topic = request.POST['topic']
-    ordered_topics = request.POST.getlist('ordered_items[]')
-    print(level, subject, board, name, moduel, chapter, topic, ordered_topics)
-    kwargs = {
-        'level': level,
-        'subject': subject,
-        'board': board,
-        'name': name,
-        'moduel': moduel,
-        'chapter': chapter,
-        'topic': topic,
-    }
-    return redirect(
-            'dashboard:superuser_spectopic',
-            **kwargs
-        )
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        moduel = request.POST['moduel']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        ordered_topics = request.POST.getlist('ordered_items[]')
+        # Get objects
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+            )
+        content = spec.spec_content.copy()
+        new_information = insert_new_spec_order(
+                ordered_topics,
+                content[moduel]['content'][chapter]['content'][topic]['content'],
+                'point'
+            )
+        content[moduel]['content'][chapter]['content'][topic]['content'] = new_information
+        spec.spec_content = content
+        spec.save()
+        json_content = json.dumps(spec.spec_content, indent=4)
+        crud_obj = SpecificationCRUD()
+        crud_obj.Update(level, subject, board, name, json_content)
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Specification Topic-Points Updated !',
+                extra_tags='alert-success specpoint'
+            )
+        #
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name,
+            'module': moduel,
+            'chapter': chapter,
+            'topic': topic,
+        }
+        return redirect(
+                'dashboard:superuser_specpoint',
+                **kwargs
+            )
 

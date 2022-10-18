@@ -40,23 +40,19 @@ class QuestionTrack(models.Model):
             db_column='q_unique_id', db_index=True)
     track_mark = models.IntegerField(default=0,null=True) 
     track_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
+
     def __str__(self):
         return self.user
+
+
 class UserPaper(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
     pap_subject= models.CharField(max_length=50, default='')
     pap_info = models.JSONField(default=dict,null=True)
     pap_creation_time = models.DateTimeField('date created', auto_now_add=True, blank=True)
+
     def __str__(self):
         return self.pap_subject
-
-
-
-
-
-
-
-
 
 
 class Point(models.Model):
@@ -70,22 +66,30 @@ class Point(models.Model):
     p_directory= models.CharField(max_length=255,default='',null=True)
     p_link= models.CharField(max_length=256,default='',null=True)
     p_unique_id= models.CharField(max_length=11, db_index=True,default='',null=True,unique=True)
+
     def __str__(self):
         return self.p_unique_id
+
+
 class Video(models.Model):
     p_unique_id = models.CharField(max_length=11, db_index=True,default='',null=True)
     v_title = models.CharField(max_length=255, default='')
     v_link= models.CharField(max_length=255, default='')
     v_pos = models.IntegerField(default=0,null=True) 
     v_health = models.BooleanField(null=True)
+
     def __str__(self):
         return self.v_title
+
+
 class Keyword(models.Model):
     kw_subject= models.CharField(max_length=50, db_index=True,default='',null=True)
     kw_word = models.CharField(max_length=50,default='',null=True) 
     kw_multiple_context = models.JSONField(default=dict,null=True) 
     def __str__(self):
         return self.kw_subject + '-' + self.kw_word
+
+
 class EditingTask(models.Model):
     task_subject= models.CharField(max_length=255,default='',null=True)
     task_moduel= models.CharField(max_length=255,default='',null=True)
@@ -117,6 +121,15 @@ class Specification(models.Model):
     q_exam_num = models.IntegerField(default=0, null=True)
     def __str__(self):
         return self.spec_board+'-' + self.spec_subject + '-' + self.spec_name
+
+
+class SpecificationSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    specification = models.ForeignKey(Specification, on_delete=models.CASCADE, db_index=True)
+
+    def __str__(self):
+        return self.user.username+'-' + self.specification.spec_subject + \
+                '-' + self.specification.spec_name 
 
 
 class ExampleModel(models.Model):

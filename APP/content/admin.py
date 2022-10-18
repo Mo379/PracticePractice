@@ -9,6 +9,7 @@ from content.models import (
         Keyword,
         EditingTask,
         Specification,
+        SpecificationSubscription,
         ExampleModel
         )
 
@@ -31,4 +32,5 @@ admin.site.register(Video)
 admin.site.register(Keyword)
 admin.site.register(EditingTask)
 admin.site.register(Specification)
+admin.site.register(SpecificationSubscription)
 admin.site.register(ExampleModel, ExampleModelAdmin)

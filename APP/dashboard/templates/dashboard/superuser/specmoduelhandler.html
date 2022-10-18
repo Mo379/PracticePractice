@@ -27,7 +27,7 @@ Moduel Selection and ordering
 			<span class='handle mr-1 ml-1'style='font-size:25px;'>
 				+
 			</span>
-			<a href='{%url 'dashboard:superuser_specchapter' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel%}' target='_blank'>
+			<a style='text-decoration:none'>
 			{{obj.p_moduel|field_name_to_label}}
 			</a>
 		</li >
@@ -48,7 +48,7 @@ Moduel Selection and ordering
 		{%endif%}
 		>
 		<label for="completed">Completed ? </label><br>
-		<ol class = 'list' id='left' style='min-height:100%;'>
+		<ol class = 'list' id='left' style='height:1000px;'>
 			{%for obj in context.specification_moduels%}
 			<li class='child' value='{{obj.p_moduel}}'>
 				<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>

@@ -52,4 +52,19 @@ urlpatterns = [
         views._ordermoduels,
         name='_ordermoduels'
     ),
+    path(
+        'content/_orderchapters',
+        views._orderchapters,
+        name='_orderchapters'
+    ),
+    path(
+        'content/_ordertopics',
+        views._ordertopics,
+        name='_ordertopics'
+    ),
+    path(
+        'content/_orderpoints',
+        views._orderpoints,
+        name='_orderpoints'
+    ),
 ]

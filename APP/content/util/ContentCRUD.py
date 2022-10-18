@@ -38,6 +38,23 @@ def filter_drag_drop_selection(global_objects, selected_options, item_name):
     return global_objects_final, selected_options_final
 
 
+def insert_new_spec_order(ordered_items, content, item_name):
+    for idd, item in enumerate(ordered_items):
+        if item not in content:
+            content[item] = {}
+            if item_name != 'point':
+                content[item]['content'] = {}
+            if item_name == 'chapter':
+                content[item]['questions'] = {}
+        content[item]['position'] = idd
+        content[item]['active'] = True
+    for item in content:
+        if item not in ordered_items:
+            content[item]['position'] = -1
+            content[item]['active'] = False
+    return content
+
+
 # Crut question
 class QuestionCRUD():
 
@@ -291,7 +308,7 @@ class SpecificationCRUD():
     # Create
     def Create(self, short_link, name):
         """
-        Create a new point in the files
+        Create a new specification in the files
         """
         link_check = self._check_short_link(short_link)
         if link_check == 1:
@@ -315,12 +332,14 @@ class SpecificationCRUD():
             return 1
 
     # Read
-    def Read(self, spec_board, spec_name):
+    def Read(self, spec_level, spec_subject, spec_board, spec_name):
         """
         Read spec in the files
         """
         spec_object = get_object_or_404(
                 Specification,
+                spec_level=spec_level,
+                spec_subject=spec_subject,
                 spec_board=spec_board,
                 spec_name=spec_name
             )
@@ -334,30 +353,34 @@ class SpecificationCRUD():
             return content
 
     # update
-    def Update(self, spec_board, spec_name, content):
+    def Update(self, spec_level, spec_subject, spec_board, spec_name, content):
         """
         Update spec in the files
         """
         spec_object = get_object_or_404(
                 Specification,
+                spec_level=spec_level,
+                spec_subject=spec_subject,
                 spec_board=spec_board,
                 spec_name=spec_name
             )
         try:
             with open(spec_object.spec_link, 'w') as f:
                 f.write(content)
-        except Exception:
-            return 0
+        except Exception as e:
+            return e
         else:
             return 1
 
     # Delete
-    def Delete(self, spec_board, spec_name):
+    def Delete(self, spec_level, spec_subject, spec_board, spec_name):
         """
         Delete spec in the files
         """
         spec_object = get_object_or_404(
                 Specification,
+                spec_level=spec_level,
+                spec_subject=spec_subject,
                 spec_board=spec_board,
                 spec_name=spec_name
             )
