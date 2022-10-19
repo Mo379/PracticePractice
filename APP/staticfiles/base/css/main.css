@@ -117,7 +117,7 @@
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
   filter: alpha(opacity=20);
 }
-.container
+.spec_organiser_container
 {
     display: table-row;
     margin:auto;

@@ -1,0 +1,57 @@
+{% extends 'dashboard/base.html'%}
+{%load static%}
+{%load general%}
+{%block page_name%}
+Content Management
+{%endblock%}
+{%block content%}
+	<!-- Begin Page Content -->
+	<div class="container-fluid">
+
+		<!-- Page Heading -->
+		<h1 class="h3 mb-4 text-gray-800">Specifications Subscriptions</h1>
+		{%definevar 'specsubscriptions' as alert_loc%}
+		{%include 'base/alert.html'%}
+		<div class="card border-dark">
+
+		  <div class="card-header bg-primary text-white">
+		    Select Specification
+		  </div>
+		  {%definevar context.specifications as specs%}
+		  {%for level in specs%}
+		    <div class="card-body">
+			    <div class='ml-1 mb-3' style='border-left: 1px solid black;padding-left: 5px;'>
+			    <h3 class="card-title">{{level}}</h3>
+			    {%for subject in specs|index:level%}
+			    <div class='ml-2 mb-3' style='border-left: 2px dashed silver;padding-left: 5px;'>
+			    <h4 class="card-title">{{subject}}</h4>
+				    {%for board in specs|index:level|index:subject%}
+			    	    <div class='ml-3 mb-3'style='border-left: 1px dashed black;padding-left: 5px;'>
+			    	    <h5 class="card-title">{{board}}</h5>
+					    {%for spec in specs|index:level|index:subject|index:board%}
+						<a 
+						href='{%url 'content:_specificationsubscription' level subject board spec.spec_name%}'
+						class="btn 
+							{%if spec.id in context.subscriptions%}
+							btn-primary
+							{%else%}
+							btn-secondary
+							{%endif%}
+						">
+							{%if spec.id in context.subscriptions%}
+							<i class="bi bi-check-circle"></i>
+							{%endif%}
+							{{spec.spec_name}}
+						</a>
+					    {%endfor%}
+			    	    </div>
+				    {%endfor%}
+			    </div>
+			    {%endfor%}
+			    </div>
+		    </div>
+		  {%endfor%}
+		</div><br>
+
+	</div>
+{%endblock%}

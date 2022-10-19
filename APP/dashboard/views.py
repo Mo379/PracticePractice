@@ -13,7 +13,7 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import Point, Video, Specification
+from content.models import (Point, Video, Specification, SpecificationSubscription)
 from content.util.ContentCRUD import filter_drag_drop_selection
 
 
@@ -476,6 +476,65 @@ class StudentPerformanceView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'student/performance'
+        return context
+
+
+class StudentContentManagementView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/student/contentmanagement.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("content management", reverse("dashboard:student_contentmanagement"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'student/contentmanagement'
+        user_subscriptions = SpecificationSubscription.objects.values('specification').filter(user=self.request.user)
+        context['subscriptions'] = [obj['specification'] for obj in user_subscriptions]
+        #
+        Notes = Specification.objects.values(
+                    'spec_level',
+                    'spec_subject',
+                    'spec_board',
+                    'spec_name',
+                    'id',
+                ).distinct().order_by(
+                    'spec_level',
+                    'spec_subject',
+                    'spec_board',
+                    'spec_name',
+                ).filter(spec_health=True)
+        Notes_objs = [obj for obj in Notes]
+        df = pd.DataFrame(Notes_objs)
+        dic = {}
+        for le, s, m, c, idd in zip(
+                list(df['spec_level']),
+                list(df['spec_subject']),
+                list(df['spec_board']),
+                list(df['spec_name']),
+                list(df['id']),
+                ):
+            if le not in dic:
+                dic[le] = {}
+            if s not in dic[le]:
+                dic[le][s] = {}
+            if m not in dic[le][s]:
+                dic[le][s][m] = []
+            spec = Specification.objects.get(pk=idd)
+            dic[le][s][m].append(Specification.objects.get(pk=idd))
+        context['specifications'] = dic
         return context
 
 

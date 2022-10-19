@@ -67,4 +67,9 @@ urlpatterns = [
         views._orderpoints,
         name='_orderpoints'
     ),
+    path(
+        'content/_specificationsubscription/<level>/<subject>/<board>/<name>',
+        views._specificationsubscription,
+        name='_specificationsubscription'
+    ),
 ]

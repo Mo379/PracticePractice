@@ -19,6 +19,7 @@ from content.util.ContentSync import (
         )
 from content.util.ContentCRUD import (
         insert_new_spec_order,
+        order_full_spec_content,
         QuestionCRUD,
         PointCRUD,
         SpecificationCRUD
@@ -141,31 +142,58 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         """Return all of the required hub information"""
         context = {}
-        Notes = Point.objects.values(
+        subjects = Point.objects.values(
                     'p_level',
                     'p_subject',
-                    'p_moduel',
-                    'p_chapter',
                 ).distinct().order_by(
                     'p_level',
                     'p_subject',
-                    'p_moduel',
-                    'p_chapter',
                 )
-        Notes_objs = [obj for obj in Notes]
-        print(Notes_objs)
-        df = pd.DataFrame(Notes_objs)
-        dic = {}
+        subjects = [obj for obj in subjects]
+        spec_subscriptions = SpecificationSubscription.objects.filter(
+                user=self.request.user
+            ) if self.request.user.is_authenticated else ''
+        Note_objs = []
+        for subject in subjects:
+            # optain the subscribed spec or the unviersal spec
+            subject_loc = subject['p_level']+subject['p_subject']
+            status = 0
+            for user_spec in spec_subscriptions:
+                spec = user_spec.specification
+                spec_loc = spec.spec_level+spec.spec_subject
+                if spec_loc == subject_loc:
+                    content = spec.spec_content
+                    status = 1
+            if status == 0:
+                spec = Specification.objects.get(
+                        spec_level=subject['p_level'],
+                        spec_subject=subject['p_subject'],
+                        spec_board='Universal',
+                        spec_name='Universal',
+                    )
+                content = spec.spec_content
+            content = order_full_spec_content(content)
+            for key, value in content.items():
+                for k, v in value['content'].items():
+                    Note_objs.append({
+                            'p_level': subject['p_level'],
+                            'p_subject': subject['p_subject'],
+                            'p_moduel': key,
+                            'p_chapter': k,
+                        })
+        df = pd.DataFrame(Note_objs)
+        dic = OrderedDict()
         for le, s, m, c in zip(
                 list(df['p_level']),
                 list(df['p_subject']),
                 list(df['p_moduel']),
                 list(df['p_chapter']),
+                list(df['p_spec_name']),
                 ):
             if le not in dic:
-                dic[le] = {}
+                dic[le] = OrderedDict()
             if s not in dic[le]:
-                dic[le][s] = {}
+                dic[le][s] = OrderedDict()
             if m not in dic[le][s]:
                 dic[le][s][m] = []
             dic[le][s][m].append(c)
@@ -556,7 +584,6 @@ def _ordertopics(request):
                 content[moduel]['content'][chapter]['content'],
                 'topic'
             )
-        print(new_information)
         content[moduel]['content'][chapter]['content'] = new_information
         spec.spec_content = content
         spec.save()
@@ -607,6 +634,7 @@ def _orderpoints(request):
                 'point'
             )
         content[moduel]['content'][chapter]['content'][topic]['content'] = new_information
+        content = order_full_spec_content(content)
         spec.spec_content = content
         spec.save()
         json_content = json.dumps(spec.spec_content, indent=4)
@@ -633,3 +661,32 @@ def _orderpoints(request):
                 **kwargs
             )
 
+
+def _specificationsubscription(request, level, subject, board, name):
+    if request.method == 'GET':
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+            )
+        new_spec_region = level+subject
+        #
+        current_subscriptions = SpecificationSubscription.objects.filter(user=request.user)
+        for cs in current_subscriptions:
+            old_spec = cs.specification
+            spec_region = old_spec.spec_level+old_spec.spec_subject
+            if new_spec_region == spec_region:
+                cs.delete()
+        SpecificationSubscription.objects.create(user=request.user, specification=spec)
+        #
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Specification Subscriptions Updated!',
+                extra_tags='alert-success specsubscriptions'
+            )
+        #
+        return redirect(
+                'dashboard:student_contentmanagement',
+            )

@@ -1,4 +1,5 @@
 from django.utils import timezone
+from collections import OrderedDict
 from django.db import models
 from user.models import User
 from mdeditor.fields import MDTextField
@@ -108,19 +109,26 @@ class EditingTask(models.Model):
 
 
 class Specification(models.Model):
-    spec_level = models.CharField(max_length=50,default='',null=True)
-    spec_subject= models.CharField(max_length=50,default='',null=True)
-    spec_board= models.CharField(max_length=50,default='',null=True)
-    spec_name= models.CharField(max_length=50,default='',null=True)
-    spec_first_assessment= models.DateTimeField('First assessment', blank=True,null = True)
-    spec_last_assessment= models.DateTimeField('Last assessment', blank=True, null = True)
-    spec_content= models.JSONField(default=dict,null=True) 
-    spec_dir= models.CharField(max_length=255,default='',null=True)
-    spec_link= models.CharField(max_length=255,default='',null=True)
-    spec_health= models.BooleanField(default=False, null=True)
+    spec_level = models.CharField(max_length=50, default='', null=True)
+    spec_subject = models.CharField(max_length=50, default='', null=True)
+    spec_board = models.CharField(max_length=50, default='', null=True)
+    spec_name = models.CharField(max_length=50, default='', null=True)
+    spec_first_assessment = models.DateTimeField(
+            'First assessment', blank=True, null=True
+        )
+    spec_last_assessment = models.DateTimeField(
+            'Last assessment', blank=True, null=True
+            )
+    spec_content = models.JSONField(default=OrderedDict, null=True)
+    spec_dir = models.CharField(max_length=255, default='', null=True)
+    spec_link = models.CharField(max_length=255, default='', null=True)
+    spec_health = models.BooleanField(default=False, null=True)
+    spec_publication = models.BooleanField(default=False, null=True)
     q_exam_num = models.IntegerField(default=0, null=True)
+
     def __str__(self):
-        return self.spec_board+'-' + self.spec_subject + '-' + self.spec_name
+        return self.spec_level + '-' + self.spec_board+'-'\
+                + self.spec_subject + '-' + self.spec_name
 
 
 class SpecificationSubscription(models.Model):

@@ -43,6 +43,11 @@ urlpatterns = [
     path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),
     # student
     path('student-performance', views.StudentPerformanceView.as_view(), name='student_performance'),
+    path(
+        'student-contentmanagement',
+        views.StudentContentManagementView.as_view(),
+        name='student_contentmanagement'
+    ),
     # teacher
     path('teacher-classes', views.TeacherClassesView.as_view(), name='teacher_classes'),
     # private tutor
