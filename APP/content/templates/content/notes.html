@@ -30,10 +30,17 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 	grid-template-rows: auto 20px;
 }
 </style>
+
 <section class="py-5">
     <div class="container">
 	<h2 class="text-center pb-3 mb-4">Filter to find the exact notes you need</h2>
-	<p class="text-center pb-3 mb-4">Filter to find the exact notes you need</p>
+	<p class="text-center pb-3 mb-4">
+	{%if user.is_authenticated%}
+	Click here to select your specifications
+	{%else%}
+	Create a free account to be able to choose your specification
+	{%endif%}
+	</p>
 	<div id='error-message' style='text-align:center; color:red;'></div>
 
 	<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
@@ -51,7 +58,7 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 				<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin:auto;margin-bottom:30px;'>
 				    {%for B in information|index:A%}
 				    <a class="prog-nav-item nav-item nav-link mr-1 mb-1" data-toggle="tab" href="#ref-{{A}}-{{B}}" 
-					id="id-{{A}}-{{B}}" style='border: 1px solid black;'>{{B|field_name_to_label}}
+					id="id-{{A}}-{{B}}" style='border: 1px solid black;'>{{B|field_name_to_label}} {{context.spec_names|index:B|index:1}}
 					<div class="progress" style='height:10px;'>
 					  <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
 					</div>
@@ -64,7 +71,7 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 			    {%for B in information|index:A%}
 			    <div class="tab-pane fade" id="ref-{{A}}-{{B}}" 
 				role="tabpanel" aria-labelledby="id-{{A}}-{{B}}">
-					<h6>{{B_tag}}: specification ____</h6>
+				    <h6>{{B_tag}}</h6>
 					<div class="row">
 						<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 						    {%for C in information|index:A|index:B%}
@@ -89,8 +96,8 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 								<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 								    {%for D in information|index:A|index:B|index:C%}
 								    <a class="prog-nav-item nav-item nav-link mr-1 mb-1" 
-								       href="{% url 'content:notearticle' A B 'universal' C D%}" 
-									style='border: 1px solid black;'>{{D|field_name_to_label}}
+								       href="{% url 'content:notearticle' A B context.spec_names|index:B|index:0 context.spec_names|index:B|index:1 C D%}" 
+									style='border: 1px solid black;' target='_blank'>{{D|field_name_to_label}}
 					<div class="progress" style='height:10px;'>
 					  <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
 					</div>

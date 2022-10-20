@@ -154,6 +154,7 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                 user=self.request.user
             ) if self.request.user.is_authenticated else ''
         Note_objs = []
+        spec_names = {}
         for subject in subjects:
             # optain the subscribed spec or the unviersal spec
             subject_loc = subject['p_level']+subject['p_subject']
@@ -181,6 +182,7 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                             'p_moduel': key,
                             'p_chapter': k,
                         })
+                    spec_names[subject['p_subject']] = [spec.spec_board,spec.spec_name]
         df = pd.DataFrame(Note_objs)
         dic = OrderedDict()
         for le, s, m, c in zip(
@@ -188,7 +190,6 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                 list(df['p_subject']),
                 list(df['p_moduel']),
                 list(df['p_chapter']),
-                list(df['p_spec_name']),
                 ):
             if le not in dic:
                 dic[le] = OrderedDict()
@@ -198,6 +199,8 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                 dic[le][s][m] = []
             dic[le][s][m].append(c)
         context['notes'] = dic
+        context['spec_names'] = spec_names
+        print(spec_names)
         return context
 
 
@@ -217,17 +220,52 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         """Return all of the required hub information"""
         context = {}
+        # Get details of page
         level = self.kwargs['level']
         subject = self.kwargs['subject']
-        specification = self.kwargs['specification']
+        board = self.kwargs['board']
+        spec_name = self.kwargs['specification']
         module = self.kwargs['module']
         chapter = self.kwargs['chapter']
         context['title'] = chapter
-        article_objects = Point.objects.filter(
-                    p_subject=subject,
-                    p_moduel=module,
-                    p_chapter=chapter,
-                ).order_by('p_chapter', 'p_topic', 'p_number')
+        #
+
+        spec = Specification.objects.get(
+                    spec_level=level,
+                    spec_subject=subject,
+                    spec_board=board,
+                    spec_name=spec_name
+                )
+        content = spec.spec_content
+        content = order_full_spec_content(content)
+        chapter_info = content[module]['content'][chapter]
+        previous_chapter = chapter_info['position'] - 1 \
+                if chapter_info['position'] > 0 else None
+        next_chapter = chapter_info['position'] + 1 \
+                if len(content[module]['content']) > chapter_info['position'] + 1 else None
+
+        keys = list(content[module]['content'].keys())
+        print(keys)
+        previous_link = keys[previous_chapter] if type(previous_chapter) == int else None
+        next_link = keys[next_chapter] if type(next_chapter) == int else None
+        print(previous_link, next_link)
+
+
+        #
+        chapter_content = chapter_info['content']
+        filtered_chapter_content = OrderedDict({
+                key: val
+                for key, val in chapter_content.items()
+                if val['active'] == True
+            })
+        article_objects = []
+        for topic, topic_info in filtered_chapter_content.items():
+            for point_unique, info in topic_info['content'].items():
+                if info['active'] == True:
+                    obj = Point.objects.get(p_unique_id=point_unique)
+                    article_objects.append(obj)
+
+        #
         article_points = [model_to_dict(obj) for obj in article_objects]
         df = pd.DataFrame(article_points)
         dic = {}
@@ -235,8 +273,13 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
             if topic not in dic:
                 dic[topic] = []
             dic[topic].append(Point.objects.get(pk=p_id))
+
+        #
         context['sampl_object'] = Point.objects.get(pk=p_id)
         context['article'] = dic
+        context['spec'] = spec
+        context['next'] = next_link
+        context['previous'] = previous_link
         editor_form = MDEditorModleForm()
         context['editor_form'] = editor_form
         return context

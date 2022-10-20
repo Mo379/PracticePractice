@@ -14,7 +14,7 @@ urlpatterns = [
         ),
     path('content/notes', views.NotesView.as_view(), name='notes'),
     path(
-        'content/note-article/<level>/<subject>/<specification>/<module>/<chapter>/',
+        'content/note-article/<level>/<subject>/<board>/<specification>/<module>/<chapter>/',
         views.NoteArticleView.as_view(),
         name='notearticle'
     ),

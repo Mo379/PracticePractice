@@ -29,7 +29,8 @@ class NotesSitemap(Sitemap):
                 kwargs={
                     'level': level,
                     'subject': subject,
-                    'specification': 'universal',
+                    'board': 'Universal',
+                    'specification': 'Universal',
                     'module': moduel,
                     'chapter': chapter
                 }
