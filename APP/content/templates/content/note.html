@@ -54,6 +54,7 @@
 
 
 {%definevar context.spec as spec%}
+{%definevar context.sampl_object as sample%}
 
 <div class="container col-9 text-justify" style='padding:5px;border:1px solid black;'>
 	{%if context.previous != None%}
@@ -84,7 +85,7 @@
 	{%endif%}
 	<br>
 	<a class="" 
-		href="#" 
+	   href="{% url 'content:question' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name sample.p_moduel sample.p_chapter%}" 
 		style='color:black;border-bottom: 1px solid black;'>
 		<i class="bi bi-star-fill"></i> Practice Questions
 	</a>

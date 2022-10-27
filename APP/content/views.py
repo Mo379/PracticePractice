@@ -60,33 +60,69 @@ class QuestionsView(BaseBreadcrumbMixin, generic.ListView):
 
     def get_queryset(self):
         context = {}
-        Notes = Question.objects.values(
+        subjects = Question.objects.values(
                     'q_level',
                     'q_subject',
-                    'q_moduel',
-                    'q_chapter',
                 ).distinct().order_by(
                     'q_level',
                     'q_subject',
-                    'q_moduel',
-                    'q_chapter',
                 )
-        Notes_objs = [obj for obj in Notes]
-        df = pd.DataFrame(Notes_objs)
-        dic = {}
+        subjects = [obj for obj in subjects]
+        spec_subscriptions = SpecificationSubscription.objects.filter(
+                user=self.request.user
+            ) if self.request.user.is_authenticated else ''
+        #
+        Note_objs = []
+        spec_names = {}
+        for subject in subjects:
+            # optain the subscribed spec or the unviersal spec
+            subject_loc = subject['q_level']+subject['q_subject']
+            status = 0
+            for user_spec in spec_subscriptions:
+                spec = user_spec.specification
+                spec_loc = spec.spec_level+spec.spec_subject
+                if spec_loc == subject_loc:
+                    content = spec.spec_content
+                    status = 1
+                    break
+            if status == 0:
+                spec = Specification.objects.get(
+                        spec_level=subject['q_level'],
+                        spec_subject=subject['q_subject'],
+                        spec_board='Universal',
+                        spec_name='Universal',
+                    )
+                content = spec.spec_content
+            content = order_full_spec_content(content)
+            #
+            for key, value in content.items():
+                if value['active'] == True:
+                    for k, v in value['content'].items():
+                        if v['active'] == True:
+                                Note_objs.append({
+                                        'p_level': subject['q_level'],
+                                        'p_subject': subject['q_subject'],
+                                        'p_moduel': key,
+                                        'p_chapter': k,
+                                    })
+                                spec_names[subject['q_subject']] = [spec.spec_board,spec.spec_name]
+        df = pd.DataFrame(Note_objs)
+        dic = OrderedDict()
         for le, s, m, c in zip(
-                list(df['q_level']),
-                list(df['q_subject']),
-                list(df['q_moduel']),
-                list(df['q_chapter']),
+                list(df['p_level']),
+                list(df['p_subject']),
+                list(df['p_moduel']),
+                list(df['p_chapter']),
                 ):
             if le not in dic:
-                dic[le] = {}
+                dic[le] = OrderedDict()
             if s not in dic[le]:
-                dic[le][s] = {}
+                dic[le][s] = OrderedDict()
             if m not in dic[le][s]:
                 dic[le][s][m] = []
             dic[le][s][m].append(c)
+        context['spec'] = spec
+        context['spec_names'] = spec_names
         context['questions'] = dic
         return context
 
@@ -107,10 +143,20 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
         context = {}
         level = self.kwargs['level']
         subject = self.kwargs['subject']
+        board = self.kwargs['board']
         specification = self.kwargs['specification']
         module = self.kwargs['module']
         chapter = self.kwargs['chapter']
         context['title'] = chapter
+        #
+        spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=specification
+            )
+        chapter_qs = spec.spec_content[module]['content'][chapter]['questions']
+        print(chapter_qs)
         article_objects = Question.objects.filter(
                     q_subject=subject,
                     q_moduel=module,
@@ -119,12 +165,13 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
         article_questions = [model_to_dict(obj) for obj in article_objects]
         df = pd.DataFrame(article_questions)
         dic = OrderedDict()
-        for difficulty, p_id in zip(list(df['q_difficulty']), list(df['id'])):
-            if difficulty not in dic:
-                dic[difficulty] = []
-            dic[difficulty].append(Question.objects.get(pk=p_id))
-        context['sampl_object'] = Question.objects.get(pk=p_id)
-        context['questions'] = dic
+        if len(df) > 0:
+            for difficulty, p_id in zip(list(df['q_difficulty']), list(df['id'])):
+                if difficulty not in dic:
+                    dic[difficulty] = []
+                dic[difficulty].append(Question.objects.get(pk=p_id))
+            context['sampl_object'] = Question.objects.get(pk=p_id)
+            context['questions'] = dic
         return context
 
 
@@ -153,6 +200,7 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
         spec_subscriptions = SpecificationSubscription.objects.filter(
                 user=self.request.user
             ) if self.request.user.is_authenticated else ''
+        #
         Note_objs = []
         spec_names = {}
         for subject in subjects:
@@ -165,6 +213,7 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                 if spec_loc == subject_loc:
                     content = spec.spec_content
                     status = 1
+                    break
             if status == 0:
                 spec = Specification.objects.get(
                         spec_level=subject['p_level'],
@@ -174,15 +223,18 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                     )
                 content = spec.spec_content
             content = order_full_spec_content(content)
+            #
             for key, value in content.items():
-                for k, v in value['content'].items():
-                    Note_objs.append({
-                            'p_level': subject['p_level'],
-                            'p_subject': subject['p_subject'],
-                            'p_moduel': key,
-                            'p_chapter': k,
-                        })
-                    spec_names[subject['p_subject']] = [spec.spec_board,spec.spec_name]
+                if value['active'] == True:
+                    for k, v in value['content'].items():
+                        if v['active'] == True:
+                            Note_objs.append({
+                                    'p_level': subject['p_level'],
+                                    'p_subject': subject['p_subject'],
+                                    'p_moduel': key,
+                                    'p_chapter': k,
+                                })
+                            spec_names[subject['p_subject']] = [spec.spec_board,spec.spec_name]
         df = pd.DataFrame(Note_objs)
         dic = OrderedDict()
         for le, s, m, c in zip(
@@ -200,7 +252,6 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
             dic[le][s][m].append(c)
         context['notes'] = dic
         context['spec_names'] = spec_names
-        print(spec_names)
         return context
 
 
@@ -229,7 +280,6 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         chapter = self.kwargs['chapter']
         context['title'] = chapter
         #
-
         spec = Specification.objects.get(
                     spec_level=level,
                     spec_subject=subject,
@@ -239,18 +289,17 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         content = spec.spec_content
         content = order_full_spec_content(content)
         chapter_info = content[module]['content'][chapter]
+        keys = [
+                k for k, v in
+                content[module]['content'].items() if v['position'] >= 0
+            ]
         previous_chapter = chapter_info['position'] - 1 \
                 if chapter_info['position'] > 0 else None
         next_chapter = chapter_info['position'] + 1 \
-                if len(content[module]['content']) > chapter_info['position'] + 1 else None
-
-        keys = list(content[module]['content'].keys())
-        print(keys)
+                if len(keys) > chapter_info['position'] + 1 else None
+        #
         previous_link = keys[previous_chapter] if type(previous_chapter) == int else None
         next_link = keys[next_chapter] if type(next_chapter) == int else None
-        print(previous_link, next_link)
-
-
         #
         chapter_content = chapter_info['content']
         filtered_chapter_content = OrderedDict({
@@ -264,7 +313,6 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
                 if info['active'] == True:
                     obj = Point.objects.get(p_unique_id=point_unique)
                     article_objects.append(obj)
-
         #
         article_points = [model_to_dict(obj) for obj in article_objects]
         df = pd.DataFrame(article_points)
@@ -273,7 +321,6 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
             if topic not in dic:
                 dic[topic] = []
             dic[topic].append(Point.objects.get(pk=p_id))
-
         #
         context['sampl_object'] = Point.objects.get(pk=p_id)
         context['article'] = dic
@@ -453,6 +500,53 @@ def _syncspecifications(request):
     return redirect('dashboard:superuser_contentmanagement')
 
 
+def _syncspecquestions(request):
+    specs = Specification.objects.all()
+    for spec in specs:
+        for m_name, moduel in spec.spec_content.items():
+            for c_name, chapter in moduel['content'].items():
+                questions = chapter['questions']
+                keys = questions.keys()
+                for i in range(5):
+                    i = i+1
+                    if i not in keys:
+                        questions[i] = []
+                    n_questions = len(questions[i])
+                    if n_questions < 5:
+                        n_diff = 5 - n_questions
+                        new_questions = Question.objects.filter(
+                                q_level=spec.spec_level,
+                                q_subject=spec.spec_subject,
+                                q_moduel=m_name,
+                                q_chapter=c_name,
+                                q_difficulty=i
+                            ).exclude(
+                                    q_unique_id__in=questions[i]
+                                )[:n_diff]
+                        for new_q in new_questions:
+                            questions[i].append(new_q.q_unique_id)
+                    else:
+                        questions[i] = questions[i][0:5]
+                chapter['questions'] = questions
+        spec.save()
+        json_content = json.dumps(spec.spec_content, indent=4)
+        crud_obj = SpecificationCRUD()
+        crud_obj.Update(
+                spec.spec_level,
+                spec.spec_subject,
+                spec.spec_board,
+                spec.spec_name,
+                json_content
+            )
+    messages.add_message(
+            request,
+            messages.INFO,
+            'Successfully synced specification questions',
+            extra_tags='alert-success syncspecquestions_form'
+        )
+    return redirect('dashboard:superuser_contentmanagement')
+
+
 def _syncvideos(request):
     try:
         sync_obj = VideoSync()
@@ -505,6 +599,63 @@ def _checkvideohealth(request):
                 extra_tags='alert-success videohealth_form'
             )
     return redirect('dashboard:superuser_contentmanagement')
+
+
+def _inheritfromspec(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        inheritance_parent = request.POST['inheritance_parent'].split(' ')
+        # Get objects
+        child_spec = Specification.objects.get(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name
+            )
+        parent_spec = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=inheritance_parent[0],
+                spec_name=inheritance_parent[1],
+            )
+        if parent_spec:
+            parent_spec = Specification.objects.get(
+                    spec_level=level,
+                    spec_subject=subject,
+                    spec_board=inheritance_parent[0],
+                    spec_name=inheritance_parent[1],
+                )
+            content = parent_spec.spec_content
+            child_spec.spec_content = content
+            child_spec.save()
+            # Update the values
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successful Inheritance',
+                    extra_tags='alert-success specmoduel'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wront, check that the parent input is correct.',
+                    extra_tags='alert-danger specmoduel'
+                )
+        #
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
 
 
 def _ordermoduels(request):

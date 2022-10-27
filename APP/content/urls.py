@@ -8,7 +8,7 @@ urlpatterns = [
     path('content', views.ContentView.as_view(), name='content'),
     path('content/questions', views.QuestionsView.as_view(), name='questions'),
     path(
-        'content/question/<level>/<subject>/<specification>/<module>/<chapter>/',
+        'content/question/<level>/<subject>/<board>/<specification>/<module>/<chapter>/',
         views.QuestionView.as_view(),
         name='question'
         ),
@@ -38,6 +38,11 @@ urlpatterns = [
         name='_syncspecifications'
     ),
     path(
+        'content/_syncspecquestions',
+        views._syncspecquestions,
+        name='_syncspecquestions'
+    ),
+    path(
         'content/_syncvideos',
         views._syncvideos,
         name='_syncvideos'
@@ -46,6 +51,11 @@ urlpatterns = [
         'content/_checkvideohealth',
         views._checkvideohealth,
         name='_checkvideohealth'
+    ),
+    path(
+        'content/_inheritfromspec',
+        views._inheritfromspec,
+        name='_inheritfromspec'
     ),
     path(
         'content/_ordermoduels',

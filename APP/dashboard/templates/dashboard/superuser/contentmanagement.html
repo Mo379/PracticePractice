@@ -57,6 +57,19 @@ Content Management
 
 
 	  <div class="card-body">
+	    <h5 class="card-title">Sync Specification Questions</h5>
+	    <p class="card-text">Add/Fill in random questions to the specification chapters</p>
+	    <form class="user px-3 py-3"  action="{%url 'content:_syncspecquestions'%}" method="POST" role="form">
+		    {%csrf_token%}
+		    <button type='submit' class="btn btn-primary">Sync Spec Qs</button>
+	    </form>
+	    {%definevar 'syncspecquestions_form' as alert_loc%}
+	    {%include 'base/alert.html'%}
+	  </div>
+	  <div class="dropdown-divider bg-dark"></div>
+
+
+	  <div class="card-body">
 	    <h5 class="card-title">Sync Videos</h5>
 	    <p class="card-text">Sync the videos of the universal specification</p>
 	    <form class="user px-3 py-3"  action="{%url 'content:_syncvideos'%}" method="POST" role="form">

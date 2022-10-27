@@ -17,6 +17,7 @@ Find practice questions for specific chapters and topics. with notes and detaile
 
 {%block content%}
 {%definevar context.questions as information%}
+{%definevar context.spec as spec %}
 {%definevar 'Subject' as A_tag%}
 {%definevar 'Module' as B_tag%}
 {%definevar 'Chapter' as C_tag%}
@@ -71,7 +72,7 @@ Find practice questions for specific chapters and topics. with notes and detaile
 								<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 								    {%for D in information|index:A|index:B|index:C%}
 								    <a class="nav-item nav-link mr-1 mb-1" 
-								       href="{% url 'content:question' A B 'universal' C D %}" 
+								       href="{% url 'content:question' A B spec.spec_board spec.spec_name C D %}" 
 									style='border: 1px solid black;'>{{D|field_name_to_label}}</a>
 								    {%endfor%}
 								</nav>
