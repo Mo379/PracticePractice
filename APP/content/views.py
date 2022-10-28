@@ -156,22 +156,18 @@ class QuestionView(BaseBreadcrumbMixin, generic.ListView):
                 spec_name=specification
             )
         chapter_qs = spec.spec_content[module]['content'][chapter]['questions']
-        print(chapter_qs)
-        article_objects = Question.objects.filter(
-                    q_subject=subject,
-                    q_moduel=module,
-                    q_chapter=chapter,
-                ).order_by('q_difficulty')
-        article_questions = [model_to_dict(obj) for obj in article_objects]
-        df = pd.DataFrame(article_questions)
         dic = OrderedDict()
-        if len(df) > 0:
-            for difficulty, p_id in zip(list(df['q_difficulty']), list(df['id'])):
-                if difficulty not in dic:
-                    dic[difficulty] = []
-                dic[difficulty].append(Question.objects.get(pk=p_id))
-            context['sampl_object'] = Question.objects.get(pk=p_id)
-            context['questions'] = dic
+        question = None
+        for difficulty in range(5):
+            difficulty += 1
+            d = str(difficulty)
+            if len(chapter_qs[d]) >0:
+                for question in chapter_qs[d]:
+                    if d not in dic:
+                        dic[d] = []
+                    dic[d].append(Question.objects.get(q_unique_id=question))
+        context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
+        context['questions'] = dic if question else None
         return context
 
 
