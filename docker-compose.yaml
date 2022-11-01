@@ -13,21 +13,6 @@ services:
     ports:
       - '5432:5432'
 
-  PP2MMDB:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: mmuser
-      POSTGRES_PASSWORD: mmuser_password
-      POSTGRES_DB: mattermost
-
-    volumes:
-      - ./extras/data/postress_data_MM:/var/lib/postgresql/data
-    networks: 
-      - MM_network
-    ports:
-      - '5432:5432'
-
   practicepractice:
     build: .
     depends_on: 
@@ -43,25 +28,5 @@ services:
         - "practicepractice.net:54.78.240.123" #host and ip
         - "www.practicepractice.net:54.78.240.123" #host and ip
 
-  mattermost:
-    image: mattermost/mattermost-team-edition
-    depends_on: 
-      - PP2MMDB
-    container_name: mattermost
-    networks: 
-      - MM_network
-    volumes:
-      - ./extras/data/mattermost:/mattermost
-    ports:
-      - '8065:8065'
-    extra_hosts:
-        - "team.practicepractice.net:54.78.240.123" #host and ip
-    environment:
-      DOMAIN: team.practicepractice.net
-      POSTGRES_USER: mmuser
-      POSTGRES_PASSWORD: mmuser_password
-      POSTGRES_DB: mattermost
-
 networks:
   PP2_network:
-  MM_network:
