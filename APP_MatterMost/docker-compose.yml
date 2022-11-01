@@ -23,12 +23,13 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
+    networks: 
+      - MatterMost
 
   mattermost:
     depends_on:
       - postgres
-    image: mattermost/${MATTERMOST_IMAGE}
-      #:${MATTERMOST_IMAGE_TAG}
+    image: mattermost/${MATTERMOST_IMAGE}:${MATTERMOST_IMAGE_TAG}
     restart: ${RESTART_POLICY}
     security_opt:
       - no-new-privileges:true
@@ -60,6 +61,8 @@ services:
 
       # additional settings
       - MM_SERVICESETTINGS_SITEURL
+    networks: 
+      - MatterMost
 
 # If you use rolling image tags and feel lucky watchtower can automatically pull new images and
 # instantiate containers from it. https://containrrr.dev/watchtower/
@@ -71,3 +74,5 @@ services:
 #    restart: unless-stopped
 #    volumes:
 #      - /var/run/docker.sock:/var/run/docker.sock
+networks:
+  MatterMost:

@@ -10,8 +10,6 @@ services:
       - ./extras/data/postress_data:/var/lib/postgresql/data
     networks: 
       - PP2_network 
-    ports:
-      - '5432:5432'
 
   practicepractice:
     build: .
