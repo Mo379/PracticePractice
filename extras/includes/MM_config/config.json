@@ -79,6 +79,7 @@
         "ExperimentalEnableDefaultChannelLeaveJoinMessages": true,
         "ExperimentalGroupUnreadChannels": "disabled",
         "EnableAPITeamDeletion": false,
+        "EnableAPITriggerAdminNotifications": false,
         "EnableAPIUserDeletion": false,
         "ExperimentalEnableHardenedMode": false,
         "ExperimentalStrictCSRFEnforcement": false,
@@ -88,6 +89,7 @@
         "EnableSVGs": true,
         "EnableLatex": true,
         "EnableInlineLatex": true,
+        "PostPriority": false,
         "EnableAPIChannelDeletion": false,
         "EnableLocalMode": false,
         "LocalModeSocketLocation": "/var/tmp/mattermost_local.socket",
@@ -114,7 +116,7 @@
         "RestrictDirectMessage": "any",
         "UserStatusAwayTimeout": 300,
         "MaxChannelsPerTeam": 2000,
-        "MaxNotificationsPerChannel": 10,
+        "MaxNotificationsPerChannel": 1000,
         "EnableConfirmNotificationsToChannel": true,
         "TeammateNameDisplay": "username",
         "ExperimentalViewArchivedChannels": true,
@@ -210,7 +212,8 @@
         "AmazonS3SSL": true,
         "AmazonS3SignV2": false,
         "AmazonS3SSE": false,
-        "AmazonS3Trace": false
+        "AmazonS3Trace": false,
+        "AmazonS3RequestTimeoutMilliseconds": 30000
     },
     "EmailSettings": {
         "EnableSignUpWithEmail": true,
@@ -533,7 +536,7 @@
         "ClientDirectory": "./client/plugins",
         "Plugins": {
             "playbooks": {
-                "BotUserID": "yyajpqdxwtfw9nzb3omtnzhuso"
+                "BotUserID": "oq9szfmt8fyd8km17a8w6h6t4y"
             }
         },
         "PluginStates": {
