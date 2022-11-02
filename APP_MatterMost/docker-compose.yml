@@ -38,7 +38,7 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - ${MATTERMOST_CONFIG_PATH}:/mattermost/config:rw
+      - ../extras/includes/MM_config:/mattermost/config:rw
       - ${MATTERMOST_DATA_PATH}:/mattermost/data:rw
       - ${MATTERMOST_LOGS_PATH}:/mattermost/logs:rw
       - ${MATTERMOST_PLUGINS_PATH}:/mattermost/plugins:rw
