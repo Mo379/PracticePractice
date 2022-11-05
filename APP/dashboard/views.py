@@ -122,6 +122,31 @@ class SuperuserSpecificationsView(
         return context
 
 
+class SuperUserTaskAssignmentView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/superuser/taskassignment.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("Editing Tasks", reverse("dashboard:superuser_taskassignment"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'superuser/taskassignment'
+        #
+        return context
+
+
 class SuperuserSpecModuelHandlerView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
@@ -401,7 +426,6 @@ class SuperuserSpecPointHandlerView(
         return context
 
 
-
 # Create your views here.
 class IndexView(
             LoginRequiredMixin,
@@ -660,6 +684,56 @@ class EditorTasksView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'editor/tasks'
+        return context
+
+
+class EditorMyTasksView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Editor"
+    template_name = "dashboard/editor/mytasks.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("mytasks", reverse("dashboard:editor_mytasks"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'editor/mytasks'
+        return context
+
+
+class EditorEditorView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Editor"
+    template_name = "dashboard/editor/editor.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("editor", reverse("dashboard:editor_editor"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'editor/editor'
         return context
 
 

@@ -10,6 +10,25 @@ Specifications
 
 		<!-- Page Heading -->
 		<h1 class="h3 mb-4 text-gray-800">Specifications Design</h1>
+		{%definevar 'specification' as alert_loc%}
+		{%include 'base/alert.html'%}
+		<div class="card border-dark">
+
+		  <div class="card-header bg-primary text-white">
+			  Create Specification
+		  </div>
+		<form class="list user px-3 py-3"  action="{%url 'content:_createspec'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input 
+				type='text' 
+				name='specification_information' 
+				placeholder='Create Spec'
+			/>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
+		</form>
+		</div><br>
+
+
 		<div class="card border-dark">
 
 		  <div class="card-header bg-primary text-white">
@@ -52,6 +71,23 @@ Specifications
 			    </div>
 		    </div>
 		  {%endfor%}
+		</div><br>
+
+
+		<div class="card border-dark">
+
+		  <div class="card-header bg-primary text-white">
+			  Delete Specification
+		  </div>
+			<form class="list user px-3 py-3"  action="{%url 'content:_deletespec'%}" method="POST" role="form">
+				{%csrf_token%}
+				<input 
+					type='text' 
+					name='specification_information' 
+					placeholder='Delete Spec'
+				/>
+				<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete </button>
+			</form>
 		</div><br>
 
 	</div>

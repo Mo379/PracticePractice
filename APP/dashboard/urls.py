@@ -20,6 +20,11 @@ urlpatterns = [
         name='superuser_specifications'
     ),
     path(
+        'taskassignment',
+        views.SuperUserTaskAssignmentView.as_view(),
+        name='superuser_taskassignment'
+    ),
+    path(
         'specmodule/<level>/<subject>/<board>/<name>',
         views.SuperuserSpecModuelHandlerView.as_view(),
         name='superuser_specmoduel'
@@ -58,6 +63,8 @@ urlpatterns = [
     path('center-management', views.CenterManagementView.as_view(), name='center_management'),
     # editor
     path('editor-tasks', views.EditorTasksView.as_view(), name='editor_tasks'),
+    path('mytasks', views.EditorMyTasksView.as_view(), name='editor_mytasks'),
+    path('editor', views.EditorEditorView.as_view(), name='editor_editor'),
     # affiliate
     path('affiliate-statistics', views.AffiliateStatisticsView.as_view(), name='affiliate_statistics'),
     # extra

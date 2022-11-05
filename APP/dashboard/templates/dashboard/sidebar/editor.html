@@ -17,7 +17,19 @@ style='color:white;'
 		     {%if sidebar_active == 'editor/tasks'%}
 		     style='color:white;'
 		     {%endif%}
-		>Tasks</span>
+		>Available Tasks</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:editor_mytasks'%}">
+		<i class="bi bi-list-ol" 
+		     {%if sidebar_active == 'editor/mytasks'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'editor/mytasks'%}
+		     style='color:white;'
+		     {%endif%}
+		>My Tasks</span>
 	</a>
 </li>
 <hr class="sidebar-divider">

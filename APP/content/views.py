@@ -880,3 +880,94 @@ def _specificationsubscription(request, level, subject, board, name):
         return redirect(
                 'dashboard:student_contentmanagement',
             )
+def _createspec(request):
+    if request.method == 'POST':
+        spec_name = request.POST['specification_information']
+        spec_desc = spec_name.split(' ')
+        if len(spec_desc) == 4:
+            level = spec_desc[0]
+            subject = spec_desc[1]
+            board = spec_desc[2]
+            name = spec_desc[3]
+            spec = Specification.objects.filter(
+                    spec_level=level,
+                    spec_subject=subject,
+                    spec_board=board,
+                    spec_name=name,
+                    )
+            if len(spec) == 0:
+                crud_obj = SpecificationCRUD()
+                sync_obj = SpecificationSync()
+                short_link = f"Z_{level}/A_{subject}/B_{board}"
+                create_status = crud_obj.Create(short_link, name)
+                sync_status = sync_obj.sync(short_link)
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Specification Was Created',
+                        extra_tags='alert-success specification'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                        extra_tags='alert-danger specification'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wront, check that the input is correct. (level, subject, board, name)',
+                    extra_tags='alert-danger specification'
+                )
+        #
+        return redirect(
+                'dashboard:superuser_specifications',
+            )
+
+
+def _deletespec(request):
+    if request.method == 'POST':
+        spec_name = request.POST['specification_information']
+        spec_desc = spec_name.split(' ')
+        if len(spec_desc) == 4:
+            level = spec_desc[0]
+            subject = spec_desc[1]
+            board = spec_desc[2]
+            name = spec_desc[3]
+            spec = Specification.objects.filter(
+                    spec_level=level,
+                    spec_subject=subject,
+                    spec_board=board,
+                    spec_name=name,
+                    )
+            if len(spec) == 1:
+                spec_this = spec[0]
+                crud_obj = SpecificationCRUD()
+                delete_status = crud_obj.Delete(level, subject, board, name)
+                print(delete_status)
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Specification Was Deleted',
+                        extra_tags='alert-warning specification'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                        extra_tags='alert-danger specification'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wront, check that the input is correct. (level, subject, board, name)',
+                    extra_tags='alert-danger specification'
+                )
+        #
+        return redirect(
+                'dashboard:superuser_specifications',
+            )

@@ -82,4 +82,14 @@ urlpatterns = [
         views._specificationsubscription,
         name='_specificationsubscription'
     ),
+    path(
+        'content/_createspec/',
+        views._createspec,
+        name='_createspec'
+    ),
+    path(
+        'content/_deletespec/',
+        views._deletespec,
+        name='_deletespec'
+    ),
 ]

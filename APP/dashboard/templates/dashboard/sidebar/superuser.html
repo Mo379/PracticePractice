@@ -43,5 +43,17 @@ style='color:white;'
 		     {%endif%}
 		>Specifications</span>
 	</a>
+	<a class="nav-link" href="{%url 'dashboard:superuser_taskassignment'%}">
+		<i class="bi bi-pencil-square" 
+		     {%if sidebar_active == 'superuser/taskassignment'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'superuser/taskassignment'%}
+		     style='color:white;'
+		     {%endif%}
+		>Task Assignment</span>
+	</a>
 </li>
 <hr class="sidebar-divider">

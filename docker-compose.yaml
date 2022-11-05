@@ -8,6 +8,8 @@ services:
       POSTGRES_PASSWORD: Password123
     volumes:
       - ./extras/data/postress_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
     networks: 
       - PP2_network 
 
