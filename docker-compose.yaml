@@ -21,7 +21,7 @@ services:
     networks: 
       - PP2_network 
     volumes:
-      - ./extras/data/content/:/pp2/content/
+      - ./extras/data/content/:/pp2/content/:rw
     ports:
       - '8005:80'
     extra_hosts:
