@@ -946,7 +946,6 @@ def _deletespec(request):
                 spec_this = spec[0]
                 crud_obj = SpecificationCRUD()
                 delete_status = crud_obj.Delete(level, subject, board, name)
-                print(delete_status)
                 messages.add_message(
                         request,
                         messages.INFO,
