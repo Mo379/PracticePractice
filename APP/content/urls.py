@@ -92,4 +92,19 @@ urlpatterns = [
         views._deletespec,
         name='_deletespec'
     ),
+    path(
+        'content/_renamespec/',
+        views._renamespec,
+        name='_renamespec'
+    ),
+    path(
+        'content/_createmoduel/',
+        views._createmoduel,
+        name='_createmoduel'
+    ),
+    path(
+        'content/_deletemoduel/',
+        views._deletemoduel,
+        name='_deletemoduel'
+    ),
 ]

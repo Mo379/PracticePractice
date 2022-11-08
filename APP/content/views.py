@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import collections
+import shutil
 import pandas as pd
 from collections import OrderedDict
 from django.http import HttpResponseRedirect, FileResponse
@@ -24,6 +25,7 @@ from content.util.ContentCRUD import (
         PointCRUD,
         SpecificationCRUD
     )
+from content.util.GeneralUtil import TagGenerator
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
@@ -627,6 +629,9 @@ def _inheritfromspec(request):
             content = parent_spec.spec_content
             child_spec.spec_content = content
             child_spec.save()
+            crud_obj = SpecificationCRUD()
+            json_content = json.dumps(content, indent=4)
+            crud_obj.Update(level, subject, board, name, json_content)
             # Update the values
             messages.add_message(
                     request,
@@ -969,4 +974,291 @@ def _deletespec(request):
         #
         return redirect(
                 'dashboard:superuser_specifications',
+            )
+
+
+def _renamespec(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_name = request.POST['new_name']
+        spec = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
+                )
+        if len(spec) == 1:
+            spec_this = spec[0]
+            crud_obj = SpecificationCRUD()
+            sync_obj = SpecificationSync()
+            short_link = f"Z_{level}/A_{subject}/B_{board}"
+            create_status = crud_obj.Create(short_link, new_name)
+            sync_status = sync_obj.sync(short_link)
+            if create_status == 1 and sync_status == 1:
+                try:
+                    new_spec = Specification.objects.get(
+                            spec_level=level,
+                            spec_subject=subject,
+                            spec_board=board,
+                            spec_name=new_name,
+                            )
+                    new_spec.spec_content = spec_this.spec_content
+                    new_spec.save()
+                except Exception as e:
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'Something is wrong: ' + str(e),
+                            extra_tags='alert-success specification'
+                        )
+                else:
+                    crud_obj.Delete(level, subject, board, name)
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'Specification Was Renamed',
+                            extra_tags='alert-success specification'
+                        )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong, cannot rename the spec.',
+                        extra_tags='alert-danger specification'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                    extra_tags='alert-danger specification'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': new_name,
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
+
+
+def _createmoduel(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_module = request.POST['new_module']
+        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        crud_obj = PointCRUD()
+        sync_obj = PointSync()
+        create_status = crud_obj.Create(short_link)
+        if create_status == 1:
+            sync_status = sync_obj.sync(short_link)
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successfully created a new moduel',
+                    extra_tags='alert-danger specmoduel'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                    extra_tags='alert-danger specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
+
+def _deletemoduel(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        deleted_moduel = request.POST['delete_moduel']
+        #
+        short_link = f"Z_{level}/A_{subject}/B_{deleted_moduel}"
+        sync_obj = PointSync()
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        bin_link = os.path.join(
+                sync_obj.content_dir, 'bin', level, subject, deleted_moduel + '_' +str(TagGenerator())
+            )
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject
+            )
+        try:
+            shutil.move(full_link, bin_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not delete: {deleted_moduel}, Something is wrong \
+                            with the real delete operation.' + str(e),
+                    extra_tags='alert-warning specmoduel'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel__iexact=deleted_moduel,
+                ).delete()
+            for spec in specs:
+                content = spec.spec_content
+                if deleted_moduel in content.keys():
+                    del content[deleted_moduel]
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully BINNED the moduel: {deleted_moduel}',
+                    extra_tags='alert-warning specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
+
+def _createchapter(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_module = request.POST['new_module']
+        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        crud_obj = PointCRUD()
+        sync_obj = PointSync()
+        create_status = crud_obj.Create(short_link)
+        if create_status == 1:
+            sync_status = sync_obj.sync(short_link)
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successfully created a new moduel',
+                    extra_tags='alert-danger specmoduel'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                    extra_tags='alert-danger specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
+
+
+def _createtopic(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_module = request.POST['new_module']
+        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        crud_obj = PointCRUD()
+        sync_obj = PointSync()
+        create_status = crud_obj.Create(short_link)
+        if create_status == 1:
+            sync_status = sync_obj.sync(short_link)
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successfully created a new moduel',
+                    extra_tags='alert-danger specmoduel'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                    extra_tags='alert-danger specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
+            )
+
+
+def _createpoint(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_module = request.POST['new_module']
+        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        crud_obj = PointCRUD()
+        sync_obj = PointSync()
+        create_status = crud_obj.Create(short_link)
+        if create_status == 1:
+            sync_status = sync_obj.sync(short_link)
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successfully created a new moduel',
+                    extra_tags='alert-danger specmoduel'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
+                    extra_tags='alert-danger specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specmoduel',
+                **kwargs
             )
