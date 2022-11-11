@@ -107,4 +107,49 @@ urlpatterns = [
         views._deletemoduel,
         name='_deletemoduel'
     ),
+    path(
+        'content/_renamemodule/',
+        views._renamemodule,
+        name='_renamemodule'
+    ),
+    path(
+        'content/_createchapter/',
+        views._createchapter,
+        name='_createchapter'
+    ),
+    path(
+        'content/_deletechpter/',
+        views._deletechapter,
+        name='_deletechapter'
+    ),
+    path(
+        'content/_renamechapter/',
+        views._renamechapter,
+        name='_renamechapter'
+    ),
+    path(
+        'content/_createtopic/',
+        views._createtopic,
+        name='_createtopic'
+    ),
+    path(
+        'content/_deletetopic/',
+        views._deletetopic,
+        name='_deletetopic'
+    ),
+    path(
+        'content/_renametopic/',
+        views._renametopic,
+        name='_renametopic'
+    ),
+    path(
+        'content/_createpoint/',
+        views._createpoint,
+        name='_createpoint'
+    ),
+    path(
+        'content/_deletepoint/',
+        views._deletepoint,
+        name='_deletepoint'
+    ),
 ]

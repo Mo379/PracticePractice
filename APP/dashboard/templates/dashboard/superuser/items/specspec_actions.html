@@ -1,0 +1,48 @@
+<div class="modal fade" id="CrateSpecModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create New Specification</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="list user px-3 py-3"  action="{%url 'content:_createspec'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input 
+				type='text' 
+				name='specification_information' 
+				placeholder='Create Spec'
+			/>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="DeleteSpecificationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Specification</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="list user px-3 py-3"  action="{%url 'content:_deletespec'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input 
+				type='text' 
+				name='specification_information' 
+				placeholder='Delete Spec'
+			/>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete </button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+

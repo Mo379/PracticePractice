@@ -6,11 +6,30 @@ Point Selection and ordering
 {%endblock%}
 {%block content%}
 {%definevar context.spec as spec %}
+{%definevar context.sample_obj as sample %}
 <!-- Begin Page Content -->
 <div class="container-fluid">
 	<!-- Page Heading -->
 	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}} {{context.sample_obj.p_chapter}} {{context.sample_obj.p_topic}}</h1>
-</div>
+	</h1>
+	<div class="dropdown" style='display:inline-block;'>
+	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		  Actions
+	  </button>
+	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameTopicModal">
+			Rename Topic
+		</a>
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CratePointModal">
+			Create New Point
+		</a>
+		<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeletePointModal">
+			Delete Point
+		</a>
+	  </div>
+	</div>
+</div><br>
+{%include 'dashboard/superuser/items/specpoint_actions.html'%}
 {%definevar 'specpoint' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
@@ -24,6 +43,7 @@ Point Selection and ordering
 				+
 			</span>
 			<a style='text-decoration:none;'>
+			{{obj.p_unique_id}} -
 			{{obj.p_content.details.hidden.0.point_title}}
 			</a>
 		</li >
@@ -48,6 +68,7 @@ Point Selection and ordering
 					+
 				</span>
 				<a style='text-decoration:none;'>
+				{{obj.p_unique_id}}-
 				{{obj.p_content.details.hidden.0.point_title}}
 				</a>
 			</li >

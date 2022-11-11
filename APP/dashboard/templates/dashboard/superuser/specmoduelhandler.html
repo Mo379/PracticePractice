@@ -10,70 +10,33 @@ Moduel Selection and ordering
 <!-- Begin Page Content -->
 <div class="container-fluid">
 	<!-- Page Heading -->
-	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}</h1>
-</div>
+	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}
+	</h1>
+	<div class="dropdown" style='display:inline-block;'>
+	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		  Actions
+	  </button>
+	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#InheritModal">
+			Inherit
+		</a>
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameModal">
+			Rename Specification
+		</a>
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateModuelModal">
+			Create New Module
+		</a>
+		<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteModuleModal">
+			Delete Module
+		</a>
+	  </div>
+	</div>
+</div><br>
+{%include 'dashboard/superuser/items/specmoduel_actions.html'%}
 {%definevar 'specmoduel' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
 
-
-<div class='spec_organiser_container'>
-	<form class="list user px-3 py-3"  action="{%url 'content:_inheritfromspec'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='inheritance_parent' 
-			placeholder='Inherit from ?'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Inherit </button>
-	</form>
-	<form class="list user px-3 py-3"  action="{%url 'content:_renamespec'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='new_name' 
-			placeholder='Rename specification'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
-	</form>
-</div>
-<div class='spec_organiser_container'>
-	<form class="list user px-3 py-3"  action="{%url 'content:_createmoduel'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='new_module' 
-			placeholder='New Module'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create New Moduel</button>
-	</form>
-
-	<form class="list user px-3 py-3"  action="{%url 'content:_deletemoduel'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='delete_moduel' 
-			placeholder='Absolute Name of Moduel'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete Moduel</button>
-	</form>
-</div>
 
 
 

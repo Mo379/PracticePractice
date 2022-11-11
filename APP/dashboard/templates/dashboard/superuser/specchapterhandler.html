@@ -6,12 +6,30 @@ Chapter Selection and ordering
 {%endblock%}
 {%block content%}
 {%definevar context.spec as spec %}
+{%definevar context.sample_obj as sample%}
 {{context.sample_obj.p_moduel}}
 <!-- Begin Page Content -->
 <div class="container-fluid">
 	<!-- Page Heading -->
 	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}}</h1>
-</div>
+	<div class="dropdown" style='display:inline-block;'>
+	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		  Actions
+	  </button>
+	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameModuleModal">
+			Rename Module
+		</a>
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateChapterModal">
+			Create New Chapter
+		</a>
+		<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteChapterModal">
+			Delete Chapter
+		</a>
+	  </div>
+	</div>
+</div><br>
+{%include 'dashboard/superuser/items/specchapter_actions.html'%}
 {%definevar 'specchapter' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>

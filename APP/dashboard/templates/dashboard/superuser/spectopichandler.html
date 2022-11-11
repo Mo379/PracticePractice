@@ -6,11 +6,31 @@ Topic Selection and ordering
 {%endblock%}
 {%block content%}
 {%definevar context.spec as spec %}
+{%definevar context.sample_obj as sample %}
 <!-- Begin Page Content -->
 <div class="container-fluid">
 	<!-- Page Heading -->
-	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}} {{context.sample_obj.p_chapter}}</h1>
-</div>
+	<h1 class="h3 mb-4 text-gray-800">
+		{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}} {{context.sample_obj.p_chapter}}
+	</h1>
+	<div class="dropdown" style='display:inline-block;'>
+	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		  Actions
+	  </button>
+	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameChapterModal">
+			Rename Chapter
+		</a>
+		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateTopicModal">
+			Create New Topic
+		</a>
+		<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteTopicModal">
+			Delete Topic
+		</a>
+	  </div>
+	</div>
+</div><br>
+{%include 'dashboard/superuser/items/spectopic_actions.html'%}
 {%definevar 'spectopic' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>

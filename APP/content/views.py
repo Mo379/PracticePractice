@@ -805,6 +805,7 @@ def _ordertopics(request):
                 **kwargs
             )
 
+
 def _orderpoints(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -885,6 +886,8 @@ def _specificationsubscription(request, level, subject, board, name):
         return redirect(
                 'dashboard:student_contentmanagement',
             )
+
+
 def _createspec(request):
     if request.method == 'POST':
         spec_name = request.POST['specification_information']
@@ -1065,7 +1068,7 @@ def _createmoduel(request):
                     request,
                     messages.INFO,
                     'Successfully created a new moduel',
-                    extra_tags='alert-danger specmoduel'
+                    extra_tags='alert-success specmoduel'
                 )
         else:
             messages.add_message(
@@ -1084,6 +1087,7 @@ def _createmoduel(request):
                 'dashboard:superuser_specmoduel',
                 **kwargs
             )
+
 
 def _deletemoduel(request):
     if request.method == 'POST':
@@ -1150,14 +1154,85 @@ def _deletemoduel(request):
                 **kwargs
             )
 
+
+def _renamemodule(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_name = request.POST['new_name']
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject,
+                )
+        sync_obj = PointSync()
+        short_link = f"Z_{level}/A_{subject}/B_{module}"
+        short_link_new = f"Z_{level}/A_{subject}/B_{new_name}"
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        new_link = os.path.join(sync_obj.content_dir, short_link_new)
+        try:
+            shutil.move(full_link, new_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not rename: {module}, Something is wrong \
+                            with the renaming/move operation.' + str(e),
+                    extra_tags='alert-warning specmoduel'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=module
+                ).delete()
+            sync_status = sync_obj.sync(short_link_new)
+            for spec in specs:
+                content = spec.spec_content.copy()
+                if module in content.keys():
+                    content[new_name] = content.pop(module)
+                spec.spec_content = content
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully Renamed the moduel: {module} -> {new_name}, \
+                            and updated specifictions',
+                    extra_tags='alert-warning specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': new_name,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:superuser_specchapter',
+                **kwargs
+            )
+
+
 def _createchapter(request):
     if request.method == 'POST':
         level = request.POST['level']
         subject = request.POST['subject']
+        module = request.POST['moduel']
         board = request.POST['board']
         name = request.POST['name']
-        new_module = request.POST['new_module']
-        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        new_chapter = request.POST['new_chapter']
+        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{new_chapter}/D_topic"
         crud_obj = PointCRUD()
         sync_obj = PointSync()
         create_status = crud_obj.Create(short_link)
@@ -1166,24 +1241,173 @@ def _createchapter(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Successfully created a new moduel',
-                    extra_tags='alert-danger specmoduel'
+                    'Successfully created a new chapter',
+                    extra_tags='alert-success specchapter'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                    extra_tags='alert-danger specmoduel'
+                    'Something went wrong, check that the chapter is unique. (level, subject, moduel, chapter, board, name)',
+                    extra_tags='alert-danger specchapter'
                 )
         kwargs = {
             'level': level,
             'subject': subject,
+            'module': module,
             'board': board,
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:superuser_specchapter',
+                **kwargs
+            )
+
+
+def _deletechapter(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        board = request.POST['board']
+        name = request.POST['name']
+        deleted_chapter = request.POST['delete_chapter']
+        #
+        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{deleted_chapter}"
+        sync_obj = PointSync()
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        bin_link = os.path.join(
+                sync_obj.content_dir,
+                'bin',
+                level,
+                subject,
+                module,
+                deleted_chapter + '_' + str(TagGenerator())
+            )
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject
+            )
+        try:
+            shutil.move(full_link, bin_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not delete: {deleted_chapter}, Something is wrong \
+                            with the real delete operation.' + str(e),
+                    extra_tags='alert-warning specchapter'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=module,
+                    p_chapter__iexact=deleted_chapter,
+                ).delete()
+            for spec in specs:
+                content = spec.spec_content
+                if module in content.keys():
+                    if deleted_chapter in content[module]['content'].keys():
+                        del content[module]['content'][deleted_chapter]
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully BINNED the chapter: {deleted_chapter}',
+                    extra_tags='alert-warning specchapter'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specchapter',
+                **kwargs
+            )
+
+
+def _renamechapter(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        chapter = request.POST['chapter']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_name = request.POST['new_name']
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject,
+                )
+        sync_obj = PointSync()
+        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}"
+        short_link_new = f"Z_{level}/A_{subject}/B_{module}/C_{new_name}"
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        new_link = os.path.join(sync_obj.content_dir, short_link_new)
+        try:
+            shutil.move(full_link, new_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not rename: {chapter}, Something is wrong \
+                            with the renaming/move operation.' + str(e),
+                    extra_tags='alert-warning spectopic'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=module,
+                    p_chapter=chapter
+                ).delete()
+            sync_status = sync_obj.sync(short_link_new)
+            for spec in specs:
+                content = spec.spec_content.copy()
+                if module in content.keys():
+                    if chapter in content[module]['content'].keys():
+                        content[module]['content'][new_name] = content[module]['content'].pop(chapter)
+                spec.spec_content = content
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully Renamed the chapter: {chapter} -> {new_name}, \
+                            and updated specifictions',
+                    extra_tags='alert-warning spectopic'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'chapter': new_name,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:superuser_spectopic',
                 **kwargs
             )
 
@@ -1193,9 +1417,11 @@ def _createtopic(request):
         level = request.POST['level']
         subject = request.POST['subject']
         board = request.POST['board']
+        moduel = request.POST['moduel']
+        chapter = request.POST['chapter']
         name = request.POST['name']
-        new_module = request.POST['new_module']
-        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        new_topic = request.POST['new_topic']
+        short_link = f"Z_{level}/A_{subject}/B_{moduel}/C_{chapter}/D_{new_topic}"
         crud_obj = PointCRUD()
         sync_obj = PointSync()
         create_status = crud_obj.Create(short_link)
@@ -1205,7 +1431,7 @@ def _createtopic(request):
                     request,
                     messages.INFO,
                     'Successfully created a new moduel',
-                    extra_tags='alert-danger specmoduel'
+                    extra_tags='alert-success specmoduel'
                 )
         else:
             messages.add_message(
@@ -1218,10 +1444,169 @@ def _createtopic(request):
             'level': level,
             'subject': subject,
             'board': board,
+            'module': moduel,
+            'chapter': chapter,
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:superuser_spectopic',
+                **kwargs
+            )
+
+
+def _deletetopic(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        chapter = request.POST['chapter']
+        board = request.POST['board']
+        name = request.POST['name']
+        deleted_topic = request.POST['delete_topic']
+        #
+        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{deleted_topic}"
+        sync_obj = PointSync()
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        bin_link = os.path.join(
+                sync_obj.content_dir,
+                'bin',
+                level,
+                subject,
+                module,
+                chapter,
+                deleted_topic+ '_' + str(TagGenerator())
+            )
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject
+            )
+        try:
+            shutil.move(full_link, bin_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not delete: {deleted_topic}, Something is wrong \
+                            with the real delete operation.' + str(e),
+                    extra_tags='alert-warning specchapter'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=module,
+                    p_chapter=chapter,
+                    p_topic__iexact=deleted_topic,
+                ).delete()
+            for spec in specs:
+                content = spec.spec_content
+                if module in content.keys():
+                    if chapter in content[module]['content'].keys():
+                        if deleted_topic in content[module]['content'][chapter]['content'].keys():
+                            del content[module]['content'][chapter]['content'][deleted_topic]
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully BINNED the topic: {deleted_topic}',
+                    extra_tags='alert-warning spectopic'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'chapter': chapter,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_spectopic',
+                **kwargs
+            )
+
+
+def _renametopic(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_name = request.POST['new_name']
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject,
+                )
+        sync_obj = PointSync()
+        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{topic}"
+        short_link_new = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{new_name}"
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        new_link = os.path.join(sync_obj.content_dir, short_link_new)
+        try:
+            shutil.move(full_link, new_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not rename: {topic}, Something is wrong \
+                            with the renaming/move operation.' + str(e),
+                    extra_tags='alert-warning specpoint'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=module,
+                    p_chapter=chapter,
+                    p_topic=topic,
+                ).delete()
+            sync_status = sync_obj.sync(short_link_new)
+            for spec in specs:
+                content = spec.spec_content.copy()
+                if module in content.keys():
+                    if chapter in content[module]['content'].keys():
+                        if topic in content[module]['content'][chapter]['content'].keys():
+                            content[module]['content'][chapter]['content'][new_name] = content[module]['content'][chapter]['content'].pop(topic)
+                spec.spec_content = content
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully Renamed the topic: {topic} -> {new_name}, \
+                            and updated specifictions',
+                    extra_tags='alert-warning specpoint'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'chapter': chapter,
+            'topic': new_name,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:superuser_specpoint',
                 **kwargs
             )
 
@@ -1231,34 +1616,151 @@ def _createpoint(request):
         level = request.POST['level']
         subject = request.POST['subject']
         board = request.POST['board']
+        moduel = request.POST['moduel']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
         name = request.POST['name']
-        new_module = request.POST['new_module']
-        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
+        new_point = request.POST['new_point']
+        short_link = f"Z_{level}/A_{subject}/B_{moduel}/C_{chapter}/D_{topic}"
         crud_obj = PointCRUD()
         sync_obj = PointSync()
         create_status = crud_obj.Create(short_link)
         if create_status == 1:
             sync_status = sync_obj.sync(short_link)
+            topic_points = Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=moduel,
+                    p_chapter=chapter,
+                    p_topic=topic,
+                ).order_by('p_number')
+            new = topic_points[len(topic_points)-1]
+            new.p_content['details']['hidden']['0']['point_title'] = new_point
+            new.save()
+            json_content = json.dumps(new.p_content, indent=4)
+            crud_obj = PointCRUD()
+            crud_obj.Update(
+                    new.p_unique_id,
+                    json_content
+                )
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Successfully created a new moduel',
-                    extra_tags='alert-danger specmoduel'
+                    'Successfully created a new point',
+                    extra_tags='alert-success specpoint'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
                     'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                    extra_tags='alert-danger specmoduel'
+                    extra_tags='alert-danger specpoint'
                 )
         kwargs = {
             'level': level,
             'subject': subject,
             'board': board,
+            'module': moduel,
+            'chapter': chapter,
+            'topic': topic,
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:superuser_specpoint',
                 **kwargs
             )
+
+
+def _deletepoint(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        board = request.POST['board']
+        name = request.POST['name']
+        deleted_point = request.POST['delete_point']
+        #
+        point_obj = Point.objects.get(
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=chapter,
+                p_topic=topic,
+                p_unique_id=deleted_point
+            )
+        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{topic}/N_{point_obj.p_number}"
+        sync_obj = PointSync()
+        full_link = os.path.join(sync_obj.content_dir, short_link)
+        bin_link = os.path.join(
+                sync_obj.content_dir,
+                'bin',
+                level,
+                subject,
+                module,
+                chapter,
+                topic,
+                deleted_point
+            )
+        specs = Specification.objects.filter(
+                spec_level=level,
+                spec_subject=subject
+            )
+        try:
+            shutil.move(full_link, bin_link)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Could not delete: {deleted_point}, Something is wrong \
+                            with the real delete operation.' + str(e),
+                    extra_tags='alert-warning specpoint'
+                )
+        else:
+            Point.objects.filter(
+                    p_level=level,
+                    p_subject=subject,
+                    p_moduel=module,
+                    p_chapter=chapter,
+                    p_topic=topic,
+                    p_unique_id__iexact=deleted_point,
+                ).delete()
+            for spec in specs:
+                content = spec.spec_content
+                if module in content.keys():
+                    if chapter in content[module]['content'].keys():
+                        if topic in content[module]['content'][chapter]['content'].keys():
+                            if deleted_point in content[module]['content'][chapter]['content'][topic]['content'].keys():
+                                del content[module]['content'][chapter]['content'][topic]['content'][deleted_point]
+                spec.save()
+                json_content = json.dumps(spec.spec_content, indent=4)
+                crud_obj = SpecificationCRUD()
+                crud_obj.Update(
+                        spec.spec_level,
+                        spec.spec_subject,
+                        spec.spec_board,
+                        spec.spec_name,
+                        json_content
+                    )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully BINNED the point: {deleted_point}',
+                    extra_tags='alert-warning specpoint'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'chapter': chapter,
+            'topic': topic,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:superuser_specpoint',
+                **kwargs
+            )
+
+

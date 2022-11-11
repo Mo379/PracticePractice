@@ -116,7 +116,7 @@ def divide(value, arg):
 
 
 @register.filter(name='ToMarkdown')
-def ToMarkdown(content, point):
+def ToMarkdown(content, number):
     # setup output
     html = ""
     # kw items in content
@@ -127,7 +127,7 @@ def ToMarkdown(content, point):
     # numbered items in hidden and description
     # hidden has only one numbered element containing two children
     point_title = hidden['0']['point_title']
-    html += markdown.markdown("### " + str(point.p_number) + ': ' +point_title)
+    html += markdown.markdown("### " + str(number) + ': ' +point_title)
     hidden_content = hidden['0']['content']
     # the content element is numbered
     for item in range(len(hidden_content)):

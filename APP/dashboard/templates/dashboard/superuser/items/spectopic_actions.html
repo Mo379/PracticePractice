@@ -1,0 +1,89 @@
+<div class="modal fade" id="RenameChapterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Rename Chapter</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="list user px-3 py-3"  action="{%url 'content:_renamechapter'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
+		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input 
+			type='text' 
+			name='new_name' 
+			placeholder='Rename Chapter'
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="CrateTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create New Topic</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="list user px-3 py-3"  action="{%url 'content:_createtopic'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
+		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input 
+			type='text' 
+			name='new_topic' 
+			placeholder='New Topic'
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create New Topic</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="DeleteTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Topic</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="list user px-3 py-3"  action="{%url 'content:_deletetopic'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
+		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input 
+			type='text' 
+			name='delete_topic' 
+			placeholder='Absolute Name of topic'
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete Topic</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
