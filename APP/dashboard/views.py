@@ -67,7 +67,7 @@ class SuperuserContentManagementView(
         return context
 
 
-class SuperuserSpecificationsView(
+class SuperUserTaskAssignmentView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
@@ -75,21 +75,122 @@ class SuperuserSpecificationsView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = "dashboard/superuser/specifications.html"
+    template_name = "dashboard/superuser/taskassignment.html"
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("specifications", reverse("dashboard:superuser_specifications"))
+                ("Editing Tasks", reverse("dashboard:superuser_taskassignment"))
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'superuser/specifications'
+        context['sidebar_active'] = 'superuser/taskassignment'
         #
-        Notes = Specification.objects.values(
+        return context
+
+
+class IndexView(
+            LoginRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = ''
+
+
+    template_name = "dashboard/general/index.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("dashboard:index"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/index'
+        return context
+
+
+class MarketPlaceView(
+            LoginRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = ''
+
+    template_name = "dashboard/general/marketplace.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("MarketPlace", reverse("dashboard:marketplace"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/marketplace'
+        return context
+
+
+class MyCoursesView(
+            LoginRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = ''
+
+    template_name = "dashboard/general/mycourses.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("MyCourses", reverse("dashboard:mycourses"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/mycourses'
+        return context
+
+
+# Admin views
+class MySpecificationsView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/general/specifications.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:specifications"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/specifications'
+        #
+        Notes = Specification.objects.filter(
+                    user=self.request.user
+                ).values(
                     'spec_level',
                     'spec_subject',
                     'spec_board',
@@ -122,7 +223,7 @@ class SuperuserSpecificationsView(
         return context
 
 
-class SuperUserTaskAssignmentView(
+class SpecModuelHandlerView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
@@ -130,45 +231,20 @@ class SuperUserTaskAssignmentView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = "dashboard/superuser/taskassignment.html"
+    template_name = "dashboard/general/specmoduelhandler.html"
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("Editing Tasks", reverse("dashboard:superuser_taskassignment"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'superuser/taskassignment'
-        #
-        return context
-
-
-class SuperuserSpecModuelHandlerView(
-            LoginRequiredMixin,
-            SuperuserRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/superuser/specmoduelhandler.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("specifications", reverse("dashboard:specifications")),
                 ("designer", '')
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'superuser/specifications'
+        context['sidebar_active'] = 'dashboard/specifications'
         # get kwargs
         level = self.kwargs['level']
         subject = self.kwargs['subject']
@@ -207,14 +283,14 @@ class SuperuserSpecModuelHandlerView(
             )
         # return result
         context['spec'] = spec
-        context['sample_obj'] = moduels_objs[0]
+        context['sample_obj'] = moduels_objs[0] if len(moduels_objs) > 0 else None
         context['moduels'] = moduels_objs_final
         context['specification_moduels'] = final_spec_objs
         context['spec_active'] = spec.spec_health
         return context
 
 
-class SuperuserSpecChapterHandlerView(
+class SpecChapterHandlerView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
@@ -222,20 +298,20 @@ class SuperuserSpecChapterHandlerView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = "dashboard/superuser/specchapterhandler.html"
+    template_name = "dashboard/general/specchapterhandler.html"
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("specifications", reverse("dashboard:specifications")),
                 ("designer", '')
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'superuser/specifications'
+        context['sidebar_active'] = 'dashboard/specifications'
         #
         level = self.kwargs['level']
         subject = self.kwargs['subject']
@@ -280,7 +356,7 @@ class SuperuserSpecChapterHandlerView(
         return context
 
 
-class SuperuserSpecTopicHandlerView(
+class SpecTopicHandlerView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
@@ -288,20 +364,20 @@ class SuperuserSpecTopicHandlerView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = "dashboard/superuser/spectopichandler.html"
+    template_name = "dashboard/general/spectopichandler.html"
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("specifications", reverse("dashboard:specifications")),
                 ("designer", '')
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'superuser/specifications'
+        context['sidebar_active'] = 'dashboard/specifications'
         #
         level = self.kwargs['level']
         subject = self.kwargs['subject']
@@ -350,7 +426,7 @@ class SuperuserSpecTopicHandlerView(
         return context
 
 
-class SuperuserSpecPointHandlerView(
+class SpecPointHandlerView(
             LoginRequiredMixin,
             SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
@@ -358,20 +434,20 @@ class SuperuserSpecPointHandlerView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = "dashboard/superuser/specpointhandler.html"
+    template_name = "dashboard/general/specpointhandler.html"
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("specifications", reverse("dashboard:superuser_specifications")),
+                ("specifications", reverse("dashboard:specifications")),
                 ("designer", '')
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'superuser/specifications'
+        context['sidebar_active'] = 'dashboard/specifications'
         #
         level = self.kwargs['level']
         subject = self.kwargs['subject']
@@ -427,32 +503,6 @@ class SuperuserSpecPointHandlerView(
 
 
 # Create your views here.
-class IndexView(
-            LoginRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = ''
-
-
-    template_name = "dashboard/index.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("Home", reverse("dashboard:index"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'dashboard/index'
-        return context
-
-
-# Admin views
 class AdminTrafficView(
             LoginRequiredMixin,
             GroupRequiredMixin,

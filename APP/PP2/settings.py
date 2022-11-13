@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 ]
 AUTH_USER_MODEL = 'user.User'
 SITE_URL = decouple_config('Site_domain')
+CDN_URL = decouple_config('CDN_URL')
 
 
 

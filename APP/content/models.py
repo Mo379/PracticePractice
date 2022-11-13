@@ -109,6 +109,7 @@ class EditingTask(models.Model):
 
 
 class Specification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, default='', null=True)
     spec_level = models.CharField(max_length=50, default='', null=True)
     spec_subject = models.CharField(max_length=50, default='', null=True)
     spec_board = models.CharField(max_length=50, default='', null=True)

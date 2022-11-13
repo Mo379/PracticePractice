@@ -1,4 +1,5 @@
 import os
+from django.conf import settings
 from django import template
 from content.util.GeneralUtil import TagGenerator
 import markdown
@@ -116,7 +117,7 @@ def divide(value, arg):
 
 
 @register.filter(name='ToMarkdown')
-def ToMarkdown(content, number):
+def ToMarkdown(content, point):
     # setup output
     html = ""
     # kw items in content
@@ -127,7 +128,8 @@ def ToMarkdown(content, number):
     # numbered items in hidden and description
     # hidden has only one numbered element containing two children
     point_title = hidden['0']['point_title']
-    html += markdown.markdown("### " + str(number) + ': ' +point_title)
+    #html += markdown.markdown("### " + str(number) + ': ' +point_title)
+    html += markdown.markdown("### " + point_title)
     hidden_content = hidden['0']['content']
     # the content element is numbered
     for item in range(len(hidden_content)):
@@ -166,6 +168,7 @@ def ToMarkdown(content, number):
                 point_dir = point.p_directory.split('/universal/')[1]
                 file_path = os.path.join(point_dir,'files',img_name)
                 context = {
+                        'CDN': settings.CDN_URL,
                         'img_info': img_info,
                         'file_path': file_path,
                     }

@@ -213,12 +213,15 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
                     status = 1
                     break
             if status == 0:
-                spec = Specification.objects.get(
-                        spec_level=subject['p_level'],
-                        spec_subject=subject['p_subject'],
-                        spec_board='Universal',
-                        spec_name='Universal',
-                    )
+                try:
+                    spec = Specification.objects.get(
+                            spec_level=subject['p_level'],
+                            spec_subject=subject['p_subject'],
+                            spec_board='Universal',
+                            spec_name='Universal',
+                        )
+                except:
+                    continue
                 content = spec.spec_content
             content = order_full_spec_content(content)
             #
@@ -654,7 +657,7 @@ def _inheritfromspec(request):
             'name': name,
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -705,7 +708,7 @@ def _ordermoduels(request):
             'name': name,
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -752,7 +755,7 @@ def _orderchapters(request):
             'module': moduel,
         }
         return redirect(
-                'dashboard:superuser_specchapter',
+                'dashboard:specchapter',
                 **kwargs
             )
 
@@ -801,7 +804,7 @@ def _ordertopics(request):
             'chapter': chapter,
         }
         return redirect(
-                'dashboard:superuser_spectopic',
+                'dashboard:spectopic',
                 **kwargs
             )
 
@@ -853,7 +856,7 @@ def _orderpoints(request):
             'topic': topic,
         }
         return redirect(
-                'dashboard:superuser_specpoint',
+                'dashboard:specpoint',
                 **kwargs
             )
 
@@ -909,6 +912,14 @@ def _createspec(request):
                 short_link = f"Z_{level}/A_{subject}/B_{board}"
                 create_status = crud_obj.Create(short_link, name)
                 sync_status = sync_obj.sync(short_link)
+                spec = Specification.objects.get(
+                        spec_level=level,
+                        spec_subject=subject,
+                        spec_board=board,
+                        spec_name=name,
+                        )
+                spec.user = request.user
+                spec.save()
                 messages.add_message(
                         request,
                         messages.INFO,
@@ -931,7 +942,7 @@ def _createspec(request):
                 )
         #
         return redirect(
-                'dashboard:superuser_specifications',
+                'dashboard:specifications',
             )
 
 
@@ -976,7 +987,7 @@ def _deletespec(request):
                 )
         #
         return redirect(
-                'dashboard:superuser_specifications',
+                'dashboard:specifications',
             )
 
 
@@ -1046,7 +1057,7 @@ def _renamespec(request):
             'name': new_name,
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -1084,7 +1095,7 @@ def _createmoduel(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -1150,7 +1161,7 @@ def _deletemoduel(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specmoduel',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -1219,7 +1230,7 @@ def _renamemodule(request):
             'name': name,
         }
         return redirect(
-                'dashboard:superuser_specchapter',
+                'dashboard:specchapter',
                 **kwargs
             )
 
@@ -1259,7 +1270,7 @@ def _createchapter(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specchapter',
+                'dashboard:specchapter',
                 **kwargs
             )
 
@@ -1334,7 +1345,7 @@ def _deletechapter(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specchapter',
+                'dashboard:specchapter',
                 **kwargs
             )
 
@@ -1407,7 +1418,7 @@ def _renamechapter(request):
             'name': name,
         }
         return redirect(
-                'dashboard:superuser_spectopic',
+                'dashboard:spectopic',
                 **kwargs
             )
 
@@ -1449,7 +1460,7 @@ def _createtopic(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_spectopic',
+                'dashboard:spectopic',
                 **kwargs
             )
 
@@ -1529,7 +1540,7 @@ def _deletetopic(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_spectopic',
+                'dashboard:spectopic',
                 **kwargs
             )
 
@@ -1606,7 +1617,7 @@ def _renametopic(request):
             'name': name,
         }
         return redirect(
-                'dashboard:superuser_specpoint',
+                'dashboard:specpoint',
                 **kwargs
             )
 
@@ -1666,7 +1677,7 @@ def _createpoint(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specpoint',
+                'dashboard:specpoint',
                 **kwargs
             )
 
@@ -1759,7 +1770,7 @@ def _deletepoint(request):
             'name': name
         }
         return redirect(
-                'dashboard:superuser_specpoint',
+                'dashboard:specpoint',
                 **kwargs
             )
 

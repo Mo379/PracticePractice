@@ -7,6 +7,33 @@ app_name = 'dashboard'
 urlpatterns = [
     # general
     path('', views.IndexView.as_view(), name='index'),
+    path('marketplace', views.MarketPlaceView.as_view(), name='marketplace'),
+    path('mycourses', views.MyCoursesView.as_view(), name='mycourses'),
+    path(
+        'specifications',
+        views.MySpecificationsView.as_view(),
+        name='specifications'
+    ),
+    path(
+        'specmodule/<level>/<subject>/<board>/<name>',
+        views.SpecModuelHandlerView.as_view(),
+        name='specmoduel'
+    ),
+    path(
+        'specchapter/<level>/<subject>/<board>/<name>/<module>',
+        views.SpecChapterHandlerView.as_view(),
+        name='specchapter'
+    ),
+    path(
+        'spectopic/<level>/<subject>/<board>/<name>/<module>/<chapter>',
+        views.SpecTopicHandlerView.as_view(),
+        name='spectopic'
+    ),
+    path(
+        'specpoint/<level>/<subject>/<board>/<name>/<module>/<chapter>/<topic>',
+        views.SpecPointHandlerView.as_view(),
+        name='specpoint'
+    ),
     # Superuser
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
     path(
@@ -15,34 +42,9 @@ urlpatterns = [
         name='superuser_contentmanagement'
     ),
     path(
-        'specifications',
-        views.SuperuserSpecificationsView.as_view(),
-        name='superuser_specifications'
-    ),
-    path(
         'taskassignment',
         views.SuperUserTaskAssignmentView.as_view(),
         name='superuser_taskassignment'
-    ),
-    path(
-        'specmodule/<level>/<subject>/<board>/<name>',
-        views.SuperuserSpecModuelHandlerView.as_view(),
-        name='superuser_specmoduel'
-    ),
-    path(
-        'specchapter/<level>/<subject>/<board>/<name>/<module>',
-        views.SuperuserSpecChapterHandlerView.as_view(),
-        name='superuser_specchapter'
-    ),
-    path(
-        'spectopic/<level>/<subject>/<board>/<name>/<module>/<chapter>',
-        views.SuperuserSpecTopicHandlerView.as_view(),
-        name='superuser_spectopic'
-    ),
-    path(
-        'specpoint/<level>/<subject>/<board>/<name>/<module>/<chapter>/<topic>',
-        views.SuperuserSpecPointHandlerView.as_view(),
-        name='superuser_specpoint'
     ),
     # admin
     path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),
