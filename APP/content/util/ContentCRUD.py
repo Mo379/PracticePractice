@@ -7,6 +7,9 @@ from decouple import config as decouple_config
 from django.shortcuts import get_object_or_404
 from content.models import Question, Point, Specification
 from content.util.GeneralUtil import TagGenerator
+from django.conf import settings
+from collections import defaultdict
+from io import BytesIO
 
 
 def filter_drag_drop_selection(global_objects, selected_options, item_name):
@@ -84,8 +87,8 @@ class QuestionCRUD():
 
     # init
     def __init__(self):
-        self.data_dir = decouple_config('data_dir')
-        self.content_dir = decouple_config('content_dir')
+        self.data_dir = decouple_config('CND_data_dir')
+        self.content_dir = decouple_config('CND_content_dir')
 
     # check link pattern
     def _check_short_link(self, short_link):
@@ -125,21 +128,27 @@ class QuestionCRUD():
         files_dir = os.path.join(new_dir, 'files')
         file_name = os.path.join(new_dir, fname)
         # setting up the dummy data
-        with open(
-                    os.path.join(self.data_dir, 'templates/question.json'), "r"
-                ) as jsonFile:
-            file = jsonFile.read()
+        q_template_link = 'templates/question.json'
+        f = BytesIO()
+        settings.AWS_S3_C.download_fileobj(
+                settings.AWS_BUCKET_NAME, q_template_link, f
+            )
+        file = f.getvalue()
+        #
         template_data = json.loads(file)
         template_data['link'] = file_name
         template_data['object_unique_id'] = {'object_unique_id': tag}
         # Creating and writing to object
         try:
-            os.makedirs(new_dir)
-            os.makedirs(files_dir)
-            with open(file_name, 'a') as f:
-                json.dump(template_data, f)
-                f.close()
-        except Exception:
+            f = BytesIO()
+            f.write(json.dumps(template_data).encode())
+            f.seek(0)
+            response = settings.AWS_S3_C.upload_fileobj(
+                    f,
+                    settings.AWS_BUCKET_NAME,
+                    file_name
+                )
+        except Exception as e:
             return 0
         else:
             return 1
@@ -151,10 +160,12 @@ class QuestionCRUD():
         """
         q_object = get_object_or_404(Question, q_unique_id=q_unique_id)
         try:
-            f = open(q_object.q_link, "r")
-            content = f.read()
-            f.close()
-        except Exception:
+            f = BytesIO()
+            settings.AWS_S3_C.download_fileobj(
+                    settings.AWS_BUCKET_NAME, q_object.q_link, f
+                )
+            content = f.getvalue()
+        except Exception as e:
             return 0
         else:
             return content
@@ -166,8 +177,14 @@ class QuestionCRUD():
         """
         q_object = get_object_or_404(Question, q_unique_id=q_unique_id)
         try:
-            with open(q_object.q_link, 'w') as f:
-                f.write(content)
+            f = BytesIO()
+            f.write(json.dumps(content).encode())
+            f.seek(0)
+            response = settings.AWS_S3_C.upload_fileobj(
+                    f,
+                    settings.AWS_BUCKET_NAME,
+                    q_object.q_link
+                )
         except Exception as e:
             return 0
         else:

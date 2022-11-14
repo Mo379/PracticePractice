@@ -2,12 +2,19 @@ import os
 import json
 from decouple import config as decouple_config
 from content.models import Question, Point, Video, Specification
+from django.conf import settings
+from collections import defaultdict
+from io import BytesIO
+
+
+
+
 
 
 # models with smart features
 class QuestionSync():
     # init
-    def __init__(self, content_dir=decouple_config('content_dir')):
+    def __init__(self, content_dir=decouple_config('CND_content_dir')):
         self.content_dir = content_dir
 
     # sync
@@ -16,14 +23,37 @@ class QuestionSync():
         Synchronises all of the questions in the files data into the database
         """
         # getting all the question files
-        structure = {}
-        for root, dirs, files in \
-                os.walk(os.path.join(self.content_dir, subdir), topdown=False):
-            for file in files:
-                if('type_question' in file):
-                    files = [s for s in files if "type_question" in s]
-                    structure[root] = files
-                    continue
+        structure = defaultdict(list)
+        response = settings.AWS_S3_C.list_objects_v2(
+            Bucket=settings.AWS_BUCKET_NAME,
+            Prefix=self.content_dir,
+        )
+        while True:
+            if "NextContinuationToken" in response:
+                token = response["NextContinuationToken"]
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if 'type_question' in file and '/bin/' not in directory:
+                        structure[directory].append(file)
+                    else:
+                        pass
+                response = settings.AWS_S3_C.list_objects_v2(
+                    Bucket=settings.AWS_BUCKET_NAME,
+                    Prefix=self.content_dir,
+                    ContinuationToken=token
+                )
+            else:
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if 'type_question' in file and '/bin/' not in directory:
+                        structure[directory].append(file)
+                    else:
+                        pass
+                break
         # getting all the question information
         for ddir, question in structure.items():
             # getting source information from name
@@ -40,8 +70,9 @@ class QuestionSync():
             q_unique_id = ddir.split('/')[-1]
             # getting json file data
             q_link = ddir + '/' + question[0]
-            with open(q_link, 'r') as file:
-                content = file.read()
+            f = BytesIO()
+            settings.AWS_S3_C.download_fileobj(settings.AWS_BUCKET_NAME, q_link, f)
+            content = f.getvalue()
             data = json.loads(content)
             # extracting info from json file data
             q_content = data
@@ -81,10 +112,9 @@ class QuestionSync():
         return 1
 
 
-# Point sync
 class PointSync():
     # Init
-    def __init__(self, content_dir=decouple_config('content_dir')):
+    def __init__(self, content_dir=decouple_config('CND_content_dir')):
         self.content_dir = content_dir
 
     # sync
@@ -93,14 +123,37 @@ class PointSync():
         Synchronises all of the points in the files data into the database
         """
         # getting all the question files
-        structure = {}
-        for root, dirs, files in \
-                os.walk(os.path.join(self.content_dir, subdir), topdown=False):
-            for file in files:
-                if('type_point' in file):
-                    files = [s for s in files if "type_point" in s]
-                    structure[root] = files
-                    continue
+        structure = defaultdict(list)
+        response = settings.AWS_S3_C.list_objects_v2(
+            Bucket=settings.AWS_BUCKET_NAME,
+            Prefix=self.content_dir,
+        )
+        while True:
+            if "NextContinuationToken" in response:
+                token = response["NextContinuationToken"]
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if 'type_point' in file and '/bin/' not in directory:
+                        structure[directory].append(file)
+                    else:
+                        pass
+                response = settings.AWS_S3_C.list_objects_v2(
+                    Bucket=settings.AWS_BUCKET_NAME,
+                    Prefix=self.content_dir,
+                    ContinuationToken=token
+                )
+            else:
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if 'type_point' in file and '/bin/' not in directory:
+                        structure[directory].append(file)
+                    else:
+                        pass
+                break
         # getting all the question information
         for ddir, point in structure.items():
             # getting source information from name
@@ -116,8 +169,11 @@ class PointSync():
             p_unique_id = point[0].split('tag_')[1].split('.')[0]
             # getting json file data
             p_link = ddir + '/' + point[0]
-            with open(p_link, 'r') as file:
-                content = file.read()
+            f = BytesIO()
+            settings.AWS_S3_C.download_fileobj(
+                    settings.AWS_BUCKET_NAME, p_link, f
+                )
+            content = f.getvalue()
             data = json.loads(content)
             # extracting info from json file data
             p_content = data
@@ -143,7 +199,7 @@ class PointSync():
 # Video Sync
 class VideoSync():
     # init
-    def __init__(self, content_dir=decouple_config('content_dir')):
+    def __init__(self, content_dir=decouple_config('CND_content_dir')):
         self.content_dir = content_dir
 
     # sync
@@ -153,20 +209,44 @@ class VideoSync():
         into the database
         """
         # getting all the points files
-        structure = {}
-        for root, dirs, files in \
-            os.walk(os.path.join(self.content_dir, subdir), topdown=False):
-            for file in files:
-                if('type_point' in file):
-                    files = [s for s in files if "type_point" in s]
-                    structure[root] = files
-                    continue
+        structure = defaultdict(list)
+        response = settings.AWS_S3_C.list_objects_v2(
+            Bucket=settings.AWS_BUCKET_NAME,
+            Prefix=self.content_dir,
+        )
+        while True:
+            if "NextContinuationToken" in response:
+                token = response["NextContinuationToken"]
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if 'type_point' in file and '/bin/' not in directory:
+                        structure[directory].append(file)
+                    else:
+                        pass
+                response = settings.AWS_S3_C.list_objects_v2(
+                    Bucket=settings.AWS_BUCKET_NAME,
+                    Prefix=self.content_dir,
+                    ContinuationToken=token
+                )
+            else:
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if 'type_point' in file and '/bin/' not in directory:
+                        structure[directory].append(file)
+                    else:
+                        pass
+                break
         # getting all the points information
         for ddir, point in structure.items():
             p_unique_id = point[0].split('tag_')[1].split('.')[0]
             p_link = ddir + '/' + point[0]
-            with open(p_link, 'r') as file:
-                content = file.read()
+            f = BytesIO()
+            settings.AWS_S3_C.download_fileobj(settings.AWS_BUCKET_NAME, p_link, f)
+            content = f.getvalue()
             data = json.loads(content)
             point_content = data['details']['hidden']['0']['content']
             for pos, item in point_content.items():
@@ -196,7 +276,7 @@ class VideoSync():
 # Specification
 class SpecificationSync():
     # init
-    def __init__(self, content_dir=decouple_config('specifications_dir')):
+    def __init__(self, content_dir=decouple_config('CND_specifications_dir')):
         self.content_dir = content_dir
 
     # Sync
@@ -205,13 +285,37 @@ class SpecificationSync():
         Synchronises all of the specs in the files data into the database
         """
         # getting all the question files
-        structure = {}
-        for root, dirs, files in \
-                os.walk(os.path.join(self.content_dir, subdir), topdown=False):
-            for file in files:
-                if('.json' in file):
-                    files = [s for s in files if ".json" in s]
-                    structure[root] = files
+        structure = defaultdict(list)
+        response = settings.AWS_S3_C.list_objects_v2(
+            Bucket=settings.AWS_BUCKET_NAME,
+            Prefix=self.content_dir,
+        )
+        while True:
+            if "NextContinuationToken" in response:
+                token = response["NextContinuationToken"]
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if('.json' in file):
+                        structure[directory].append(file)
+                    else:
+                        pass
+                response = settings.AWS_S3_C.list_objects_v2(
+                    Bucket=settings.AWS_BUCKET_NAME,
+                    Prefix=self.content_dir,
+                    ContinuationToken=token
+                )
+            else:
+                for item in response['Contents']:
+                    parts = item['Key'].split('/')
+                    directory = ('/').join(parts[:-1])
+                    file = parts[-1]
+                    if('.json' in file):
+                        structure[directory].append(file)
+                    else:
+                        pass
+                break
         # getting all the question information
         for ddir, specs in structure.items():
             for spec in specs:
@@ -227,8 +331,9 @@ class SpecificationSync():
                 spec_name = spec.split('.')[0]
                 # getting json file data
                 spec_link = ddir + '/' + spec
-                with open(spec_link, 'r') as file:
-                    content = file.read()
+                f = BytesIO()
+                settings.AWS_S3_C.download_fileobj(settings.AWS_BUCKET_NAME, spec_link, f)
+                content = f.getvalue()
                 try:
                     data = json.loads(content)
                 except Exception:

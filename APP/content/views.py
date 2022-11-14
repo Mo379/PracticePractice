@@ -31,6 +31,12 @@ from django.forms import model_to_dict
 from content.models import *
 from content.forms import MDEditorModleForm
 from decouple import config as decouple_config
+from content.tasks import (
+        QuestionSyncTask,
+        PointSyncTask,
+        VideoSyncTask,
+        SpecificationSyncTask,
+    )
 # Create your views here.
 
 
@@ -440,8 +446,7 @@ def _media(request):
 
 def _syncnotes(request):
     try:
-        sync_obj = PointSync()
-        sync_obj.sync()
+        PointSyncTask.delay()
     except Exception as e:
         messages.add_message(
                 request,
@@ -461,8 +466,7 @@ def _syncnotes(request):
 
 def _syncquestions(request):
     try:
-        sync_obj = QuestionSync()
-        sync_obj.sync()
+        QuestionSyncTask.delay()
     except Exception as e:
         messages.add_message(
                 request,
@@ -474,7 +478,7 @@ def _syncquestions(request):
         messages.add_message(
                 request,
                 messages.INFO,
-                'Successfully synced questions',
+                'Successfully started the sync process',
                 extra_tags='alert-success syncquestions_form'
             )
     return redirect('dashboard:superuser_contentmanagement')
@@ -482,8 +486,7 @@ def _syncquestions(request):
 
 def _syncspecifications(request):
     try:
-        sync_obj = SpecificationSync()
-        sync_obj.sync()
+        SpecificationSyncTask.delay()
     except Exception as e:
         messages.add_message(
                 request,
@@ -550,8 +553,7 @@ def _syncspecquestions(request):
 
 def _syncvideos(request):
     try:
-        sync_obj = VideoSync()
-        sync_obj.sync()
+        VideoSyncTask.delay()
     except Exception as e:
         messages.add_message(
                 request,

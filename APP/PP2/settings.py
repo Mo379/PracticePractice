@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 from decouple import config as decouple_config
 from decouple import Csv
+import boto3
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,11 +30,29 @@ DEBUG = decouple_config('django_debug_state', cast=bool)
 if DEBUG == False:
     PREPEND_WWW = True
 ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
+# CND and S3 vars
 CSRF_TRUSTED_ORIGINS = decouple_config('CSRF_TRUSTED_ORIGINS', cast=Csv())
+AWS_username = decouple_config('aws_data_user_name')
+AWS_access = decouple_config('aws_data_access_key_id')
+AWS_secret = decouple_config('aws_data_secret_access_key')
+AWS_region = decouple_config('aws_data_region')
+
+# S3 Objects
+AWS_BUCKET_NAME = decouple_config('aws_data_bucket')
+AWS_S3_C = boto3.client(
+        's3',
+        aws_access_key_id=AWS_access,
+        aws_secret_access_key=AWS_secret
+    )
+AWS_S3_R = boto3.resource(
+        's3',
+        aws_access_key_id=AWS_access,
+        aws_secret_access_key=AWS_secret
+    )
+AWS_BUCKET_OBJECT = AWS_S3_R.Bucket(name=AWS_BUCKET_NAME)
 
 
 # Application definition
-
 INSTALLED_APPS = [
     # Third party
     'djstripe',
@@ -287,3 +306,6 @@ MDEDITOR_CONFIGS = {
 
 
 
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
