@@ -22,7 +22,7 @@ Specifications
 				Delete Specification
 			</a>
 		  </div>
-		</div><br>
+		</div><br><br>
 		{%include 'dashboard/general/items/specspec_actions.html'%}
 		{%definevar 'specification' as alert_loc%}
 		{%include 'base/alert.html'%}
@@ -49,13 +49,13 @@ Specifications
 						href='{%url 'dashboard:specmoduel' level subject board spec.spec_name%}'
 						target='blank'
 						class="btn 
-							{%if spec.spec_health%}
+							{%if spec.spec_completion%}
 							btn-primary
 							{%else%}
 							btn-danger
 							{%endif%}
 						">
-							{%if spec.spec_health%}
+							{%if spec.spec_completion%}
 							<i class="bi bi-check-circle"></i>
 							{%else%}
 							<i class="bi bi bi-x-circle"></i>

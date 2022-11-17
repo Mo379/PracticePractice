@@ -55,6 +55,7 @@ def insert_new_spec_order(ordered_items, content, item_name):
             content[item]['active'] = False
     return content
 
+
 def order_full_spec_content(content):
     def sort_spec_dict_by_position(dictionary):
         ordered_content = collections.OrderedDict(

@@ -21,11 +21,13 @@ distlib==0.3.4
 dj-stripe==2.6.1
 Django==4.0.1
 django-braces==1.15.0
+django-dbbackup==4.0.2
 django-mathjax==0.0.8
 django-mdeditor==0.1.20
 django-multiselectfield==0.1.12
 django-paypal==2.0
 django-smtp-ssl==1.0
+django-storages==1.13.1
 django-utils-six==2.0
 django-view-breadcrumbs==2.2.7
 docutils==0.16

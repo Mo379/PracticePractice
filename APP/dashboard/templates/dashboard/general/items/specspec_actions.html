@@ -8,13 +8,29 @@
         </button>
       </div>
       <div class="modal-body">
+	        Alpha Numeric Only
 		<form class="list user px-3 py-3"  action="{%url 'content:_createspec'%}" method="POST" role="form">
 			{%csrf_token%}
 			<input 
 				type='text' 
-				name='specification_information' 
-				placeholder='Create Spec'
+				name='spec_level' 
+				placeholder='Spec Level'
 			/>
+			<input 
+				type='text' 
+				name='spec_subject' 
+				placeholder='Spec Subject'
+			/><br>
+			<input 
+				type='text' 
+				name='spec_board' 
+				placeholder='Spec Board'
+			/>
+			<input 
+				type='text' 
+				name='spec_name' 
+				placeholder='Spec Name'
+			/><br><br>
 			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
 		</form>
       </div>
@@ -36,9 +52,24 @@
 			{%csrf_token%}
 			<input 
 				type='text' 
-				name='specification_information' 
-				placeholder='Delete Spec'
+				name='spec_level' 
+				placeholder='Spec Level'
 			/>
+			<input 
+				type='text' 
+				name='spec_subject' 
+				placeholder='Spec Subject'
+			/><br>
+			<input 
+				type='text' 
+				name='spec_board' 
+				placeholder='Spec Board'
+			/>
+			<input 
+				type='text' 
+				name='spec_name' 
+				placeholder='Spec Name'
+			/><br><br>
 			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete </button>
 		</form>
       </div>

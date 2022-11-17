@@ -19,5 +19,17 @@ style='color:white;'
 		     {%endif%}
 		>Traffic</span>
 	</a>
+	<a class="nav-link" href="{%url 'dashboard:admin_taskassignment'%}">
+		<i class="bi bi-pencil-square" 
+		     {%if sidebar_active == 'admin/taskassignment'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'admin/taskassignment'%}
+		     style='color:white;'
+		     {%endif%}
+		>Task Assignment</span>
+	</a>
 </li>
 <hr class="sidebar-divider">

@@ -13,8 +13,8 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import (Point, Video, Specification, SpecificationSubscription)
-from content.util.ContentCRUD import filter_drag_drop_selection
+from content.models import (Point, Specification, CourseSubscription)
+from content.util.GeneralUtil import filter_drag_drop_selection
 
 
 # Superuser views
@@ -39,56 +39,6 @@ class SuperuserMonitorView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'superuser/monitor'
-        return context
-
-
-class SuperuserContentManagementView(
-            LoginRequiredMixin,
-            SuperuserRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/superuser/contentmanagement.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("traffic", reverse("dashboard:admin_traffic"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'superuser/contentmanagement'
-        context['bad_videos'] = Video.objects.filter(v_health=False)
-        return context
-
-
-class SuperUserTaskAssignmentView(
-            LoginRequiredMixin,
-            SuperuserRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/superuser/taskassignment.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("Editing Tasks", reverse("dashboard:superuser_taskassignment"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'superuser/taskassignment'
-        #
         return context
 
 
@@ -189,7 +139,8 @@ class MySpecificationsView(
         context['sidebar_active'] = 'dashboard/specifications'
         #
         Notes = Specification.objects.filter(
-                    user=self.request.user
+                    user=self.request.user,
+                    deleted=False
                 ).values(
                     'spec_level',
                     'spec_subject',
@@ -252,11 +203,12 @@ class SpecModuelHandlerView(
         name = self.kwargs['name']
         # get spec from db
         spec = Specification.objects.get(
+                user=self.request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
                 spec_name=name
-                )
+            )
         # get moduels from db
         moduels = Point.objects.values(
                     'p_level',
@@ -267,8 +219,10 @@ class SpecModuelHandlerView(
                     'p_subject',
                     'p_moduel',
                 ).filter(
+                        user=self.request.user,
                         p_level=level,
                         p_subject=subject,
+                        deleted=False,
                 )
         # reformat moduels
         moduels_objs = [obj for obj in moduels]
@@ -286,7 +240,7 @@ class SpecModuelHandlerView(
         context['sample_obj'] = moduels_objs[0] if len(moduels_objs) > 0 else None
         context['moduels'] = moduels_objs_final
         context['specification_moduels'] = final_spec_objs
-        context['spec_active'] = spec.spec_health
+        context['spec_completion'] = spec.spec_completion
         return context
 
 
@@ -319,6 +273,7 @@ class SpecChapterHandlerView(
         name = self.kwargs['name']
         moduel = self.kwargs['module']
         spec = Specification.objects.get(
+                user=self.request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
@@ -335,9 +290,11 @@ class SpecChapterHandlerView(
                     'p_moduel',
                     'p_chapter',
                 ).filter(
+                        user=self.request.user,
                         p_level=level,
                         p_subject=subject,
                         p_moduel=moduel,
+                        deleted=False,
                 )
         chapter_objs = [obj for obj in chapters]
         moduel_content = spec.spec_content[moduel]['content']
@@ -349,7 +306,7 @@ class SpecChapterHandlerView(
                 chapter_objs, dict2, 'p_chapter'
             )
         context['spec'] = spec
-        context['sample_obj'] = chapter_objs[0]
+        context['sample_obj'] = chapter_objs[0] if len(chapter_objs) > 0 else None
         context['chapters'] = chapter_objs_final
         context['specification_chapters'] = final_spec_objs
         # return result
@@ -386,10 +343,12 @@ class SpecTopicHandlerView(
         moduel = self.kwargs['module']
         chapter = self.kwargs['chapter']
         spec = Specification.objects.get(
+                user=self.request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
                 spec_name=name,
+                deleted=False
                 )
         topics = Point.objects.values(
                     'p_level',
@@ -404,10 +363,12 @@ class SpecTopicHandlerView(
                     'p_chapter',
                     'p_topic',
                 ).filter(
+                        user=self.request.user,
                         p_level=level,
                         p_subject=subject,
                         p_moduel=moduel,
                         p_chapter=chapter,
+                        deleted=False
                 )
         topics_objs = [obj for obj in topics]
         chapter_content = spec.spec_content[moduel]['content'][chapter]['content']
@@ -419,7 +380,7 @@ class SpecTopicHandlerView(
                 topics_objs, dict2, 'p_topic'
             )
         context['spec'] = spec
-        context['sample_obj'] = topics_objs[0]
+        context['sample_obj'] = topics_objs[0] if len(topics_objs) > 0 else None
         context['topics'] = topic_objs_final
         context['specification_topics'] = final_spec_objs
         # return result
@@ -457,10 +418,12 @@ class SpecPointHandlerView(
         chapter = self.kwargs['chapter']
         topic = self.kwargs['topic']
         spec = Specification.objects.get(
+                user=self.request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
                 spec_name=name,
+                deleted=False
                 )
         points = Point.objects.values(
                     'p_level',
@@ -479,11 +442,13 @@ class SpecPointHandlerView(
                     'p_topic',
                     'p_number',
                 ).filter(
+                        user=self.request.user,
                         p_level=level,
                         p_subject=subject,
                         p_moduel=moduel,
                         p_chapter=chapter,
                         p_topic=topic,
+                        deleted=False
                 )
         point_objs = [obj for obj in points]
         chapter_content = spec.spec_content[moduel]['content'][chapter]['content'][topic]['content']
@@ -495,7 +460,7 @@ class SpecPointHandlerView(
                 point_objs, dict2, 'p_unique_id'
             )
         context['spec'] = spec
-        context['sample_obj'] = point_objs[0]
+        context['sample_obj'] = point_objs[0] if len(point_objs) > 0 else None
         context['points'] = point_objs_final
         context['specification_points'] = final_spec_objs
         # return result
@@ -525,6 +490,31 @@ class AdminTrafficView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'admin/traffic'
+        return context
+
+
+class AdminTaskAssignmentView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/admin/taskassignment.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("Editing Tasks", reverse("dashboard:admin_taskassignment"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'admin/taskassignment'
+        #
         return context
 
 
@@ -571,44 +561,11 @@ class StudentContentManagementView(
                 ("dashboard", reverse("dashboard:index")),
                 ("content management", reverse("dashboard:student_contentmanagement"))
                 ]
-
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'student/contentmanagement'
-        user_subscriptions = SpecificationSubscription.objects.values('specification').filter(user=self.request.user)
+        user_subscriptions = CourseSubscription.objects.values('course').filter(user=self.request.user)
         context['subscriptions'] = [obj['specification'] for obj in user_subscriptions]
-        #
-        Notes = Specification.objects.values(
-                    'spec_level',
-                    'spec_subject',
-                    'spec_board',
-                    'spec_name',
-                    'id',
-                ).distinct().order_by(
-                    'spec_level',
-                    'spec_subject',
-                    'spec_board',
-                    'spec_name',
-                ).filter(spec_health=True)
-        Notes_objs = [obj for obj in Notes]
-        df = pd.DataFrame(Notes_objs)
-        dic = {}
-        for le, s, m, c, idd in zip(
-                list(df['spec_level']),
-                list(df['spec_subject']),
-                list(df['spec_board']),
-                list(df['spec_name']),
-                list(df['id']),
-                ):
-            if le not in dic:
-                dic[le] = {}
-            if s not in dic[le]:
-                dic[le][s] = {}
-            if m not in dic[le][s]:
-                dic[le][s][m] = []
-            spec = Specification.objects.get(pk=idd)
-            dic[le][s][m].append(Specification.objects.get(pk=idd))
-        context['specifications'] = dic
         return context
 
 

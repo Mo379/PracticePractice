@@ -38,6 +38,7 @@ AWS_secret = decouple_config('aws_data_secret_access_key')
 AWS_region = decouple_config('aws_data_region')
 
 # S3 Objects
+AWS_DB_BACKUP_BUCKET_NAME = decouple_config('aws_db_backup_bucket')
 AWS_BUCKET_NAME = decouple_config('aws_data_bucket')
 AWS_S3_C = boto3.client(
         's3',
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
     'view_breadcrumbs',
     'multiselectfield',
     'mdeditor',
+    'dbbackup',
     # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
@@ -78,9 +80,17 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'user.User'
 SITE_URL = decouple_config('Site_domain')
 CDN_URL = decouple_config('CDN_URL')
+# DB backup
+DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DBBACKUP_STORAGE_OPTIONS = {
+    'access_key': AWS_access,
+    'secret_key': AWS_secret,
+    'bucket_name': AWS_DB_BACKUP_BUCKET_NAME,
+    'default_acl': 'private',
+}
 
 
-
+#
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -130,6 +140,19 @@ DATABASES = {
         'HOST': decouple_config('DB_HOST'),
         'PORT': decouple_config('DB_PORT', cast=int),
     }
+}
+DBBACKUP_CONNECTORS = {
+    'default': {
+        'ENGINE': decouple_config('DB_ENGINE'),
+        'NAME': decouple_config('DB_NAME'),
+        'USER': decouple_config('DB_USER'),
+        'PASSWORD': decouple_config('DB_PASSWORD'),
+        'HOST': decouple_config('DB_HOST'),
+        'PORT': decouple_config('DB_PORT', cast=int),
+    }
+}
+DBBACKUP_CONNECTOR_MAPPING = {
+    'transaction_hooks.backends.postgis': 'dbbackup.db.postgresql.PgDumpGisConnector',
 }
 
 

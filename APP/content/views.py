@@ -1,42 +1,19 @@
-import os
-import json
-import requests
-import collections
-import shutil
 import pandas as pd
 from collections import OrderedDict
-from django.http import HttpResponseRedirect, FileResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.contrib import messages
 from django.views import generic
-from content.models import Video
-from content.util.ContentSync import (
-        QuestionSync,
-        PointSync,
-        VideoSync,
-        SpecificationSync
-        )
-from content.util.ContentCRUD import (
+from content.util.GeneralUtil import (
+        TagGenerator,
         insert_new_spec_order,
         order_full_spec_content,
-        QuestionCRUD,
-        PointCRUD,
-        SpecificationCRUD
     )
-from content.util.GeneralUtil import TagGenerator
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
 from content.forms import MDEditorModleForm
-from decouple import config as decouple_config
-from content.tasks import (
-        QuestionSyncTask,
-        PointSyncTask,
-        VideoSyncTask,
-        SpecificationSyncTask,
-    )
 # Create your views here.
 
 
@@ -432,178 +409,6 @@ class PaperView(BaseBreadcrumbMixin, generic.ListView):
         return context
 
 
-def _media(request):
-    path = request.GET.get('path', None)
-    content_dir = decouple_config('content_dir')
-    file_loc = os.path.join(content_dir, path)
-    try:
-        fsock = open(file_loc, "rb")
-    except Exception as e:
-        return None
-    else:
-        return FileResponse(fsock)
-
-
-def _syncnotes(request):
-    try:
-        PointSyncTask.delay()
-    except Exception as e:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Failed to sync notes.'+str(e),
-                extra_tags='alert-danger syncnotes_form'
-            )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully synced notes',
-                extra_tags='alert-success syncnotes_form'
-            )
-    return redirect('dashboard:superuser_contentmanagement')
-
-
-def _syncquestions(request):
-    try:
-        QuestionSyncTask.delay()
-    except Exception as e:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Failed to sync questions.'+str(e),
-                extra_tags='alert-danger syncquestions_form'
-            )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully started the sync process',
-                extra_tags='alert-success syncquestions_form'
-            )
-    return redirect('dashboard:superuser_contentmanagement')
-
-
-def _syncspecifications(request):
-    try:
-        SpecificationSyncTask.delay()
-    except Exception as e:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Failed to sync specifications.'+str(e),
-                extra_tags='alert-danger syncspecifications_form'
-            )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully synced specifications',
-                extra_tags='alert-success syncspecifications_form'
-            )
-    return redirect('dashboard:superuser_contentmanagement')
-
-
-def _syncspecquestions(request):
-    specs = Specification.objects.all()
-    for spec in specs:
-        for m_name, moduel in spec.spec_content.items():
-            for c_name, chapter in moduel['content'].items():
-                questions = chapter['questions']
-                keys = questions.keys()
-                for i in range(5):
-                    i = i+1
-                    if i not in keys:
-                        questions[i] = []
-                    n_questions = len(questions[i])
-                    if n_questions < 5:
-                        n_diff = 5 - n_questions
-                        new_questions = Question.objects.filter(
-                                q_level=spec.spec_level,
-                                q_subject=spec.spec_subject,
-                                q_moduel=m_name,
-                                q_chapter=c_name,
-                                q_difficulty=i
-                            ).exclude(
-                                    q_unique_id__in=questions[i]
-                                )[:n_diff]
-                        for new_q in new_questions:
-                            questions[i].append(new_q.q_unique_id)
-                    else:
-                        questions[i] = questions[i][0:5]
-                chapter['questions'] = questions
-        spec.save()
-        json_content = json.dumps(spec.spec_content, indent=4)
-        crud_obj = SpecificationCRUD()
-        crud_obj.Update(
-                spec.spec_level,
-                spec.spec_subject,
-                spec.spec_board,
-                spec.spec_name,
-                json_content
-            )
-    messages.add_message(
-            request,
-            messages.INFO,
-            'Successfully synced specification questions',
-            extra_tags='alert-success syncspecquestions_form'
-        )
-    return redirect('dashboard:superuser_contentmanagement')
-
-
-def _syncvideos(request):
-    try:
-        VideoSyncTask.delay()
-    except Exception as e:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Failed to sync Videos.'+str(e),
-                extra_tags='alert-danger syncvideos_form'
-            )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully synced videos',
-                extra_tags='alert-success syncvideos_form'
-            )
-    return redirect('dashboard:superuser_contentmanagement')
-
-
-def _checkvideohealth(request):
-    try:
-        videos = Video.objects.all()
-        for video in videos:
-            video_url = video.v_link
-            print(video_url)
-            if 'embed' in video_url or 'watch?v=' in video_url:
-                video_url = video_url.replace('embed/', 'watch?v=')
-                r = requests.get(video_url)
-                if "Video unavailable" in r.text:
-                    video.v_health = False
-                else:
-                    video.v_health = True
-            else:
-                video.v_health = False
-            video.save()
-    except Exception as e:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Failed to check video health.'+str(e),
-                extra_tags='alert-danger videohealth_form'
-            )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully checked all videos',
-                extra_tags='alert-success videohealth_form'
-            )
-    return redirect('dashboard:superuser_contentmanagement')
-
-
 def _inheritfromspec(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -634,9 +439,6 @@ def _inheritfromspec(request):
             content = parent_spec.spec_content
             child_spec.spec_content = content
             child_spec.save()
-            crud_obj = SpecificationCRUD()
-            json_content = json.dumps(content, indent=4)
-            crud_obj.Update(level, subject, board, name, json_content)
             # Update the values
             messages.add_message(
                     request,
@@ -677,6 +479,7 @@ def _ordermoduels(request):
             completed = False
         # Get objects
         spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
@@ -687,14 +490,11 @@ def _ordermoduels(request):
         content = new_information
         # Update the values
         if completed:
-            spec.spec_health = True
+            spec.spec_completion = True
         else:
-            spec.spec_health = False
+            spec.spec_completion = False
         spec.spec_content = content
         spec.save()
-        json_content = json.dumps(spec.spec_content, indent=4)
-        crud_obj = SpecificationCRUD()
-        crud_obj.Update(level, subject, board, name, json_content)
         messages.add_message(
                 request,
                 messages.INFO,
@@ -739,9 +539,6 @@ def _orderchapters(request):
         content[moduel]['content'] = new_information
         spec.spec_content = content
         spec.save()
-        json_content = json.dumps(spec.spec_content, indent=4)
-        crud_obj = SpecificationCRUD()
-        crud_obj.Update(level, subject, board, name, json_content)
         messages.add_message(
                 request,
                 messages.INFO,
@@ -787,9 +584,6 @@ def _ordertopics(request):
         content[moduel]['content'][chapter]['content'] = new_information
         spec.spec_content = content
         spec.save()
-        json_content = json.dumps(spec.spec_content, indent=4)
-        crud_obj = SpecificationCRUD()
-        crud_obj.Update(level, subject, board, name, json_content)
         messages.add_message(
                 request,
                 messages.INFO,
@@ -838,9 +632,6 @@ def _orderpoints(request):
         content = order_full_spec_content(content)
         spec.spec_content = content
         spec.save()
-        json_content = json.dumps(spec.spec_content, indent=4)
-        crud_obj = SpecificationCRUD()
-        crud_obj.Update(level, subject, board, name, json_content)
         messages.add_message(
                 request,
                 messages.INFO,
@@ -863,84 +654,55 @@ def _orderpoints(request):
             )
 
 
-def _specificationsubscription(request, level, subject, board, name):
-    if request.method == 'GET':
-        spec = Specification.objects.get(
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name
-            )
-        new_spec_region = level+subject
-        #
-        current_subscriptions = SpecificationSubscription.objects.filter(user=request.user)
-        for cs in current_subscriptions:
-            old_spec = cs.specification
-            spec_region = old_spec.spec_level+old_spec.spec_subject
-            if new_spec_region == spec_region:
-                cs.delete()
-        SpecificationSubscription.objects.create(user=request.user, specification=spec)
-        #
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Specification Subscriptions Updated!',
-                extra_tags='alert-success specsubscriptions'
-            )
-        #
-        return redirect(
-                'dashboard:student_contentmanagement',
-            )
-
-
 def _createspec(request):
     if request.method == 'POST':
-        spec_name = request.POST['specification_information']
-        spec_desc = spec_name.split(' ')
-        if len(spec_desc) == 4:
-            level = spec_desc[0]
-            subject = spec_desc[1]
-            board = spec_desc[2]
-            name = spec_desc[3]
-            spec = Specification.objects.filter(
-                    spec_level=level,
-                    spec_subject=subject,
-                    spec_board=board,
-                    spec_name=name,
+        spec_level = request.POST['spec_level']
+        spec_subject = request.POST['spec_subject']
+        spec_board = request.POST['spec_board']
+        spec_name = request.POST['spec_name']
+        #
+        if spec_level.isalnum() and spec_subject.isalnum() and \
+                spec_board.isalnum() and spec_name.isalnum():
+            try:
+                specs = Specification.objects.filter(
+                        user=request.user,
+                        spec_level=spec_level,
+                        spec_subject=spec_subject,
+                        spec_board=spec_board,
+                        spec_name=spec_name,
                     )
-            if len(spec) == 0:
-                crud_obj = SpecificationCRUD()
-                sync_obj = SpecificationSync()
-                short_link = f"Z_{level}/A_{subject}/B_{board}"
-                create_status = crud_obj.Create(short_link, name)
-                sync_status = sync_obj.sync(short_link)
-                spec = Specification.objects.get(
-                        spec_level=level,
-                        spec_subject=subject,
-                        spec_board=board,
-                        spec_name=name,
+                if len(specs) == 0:
+                    Specification.objects.create(
+                            user=request.user,
+                            spec_level=spec_level,
+                            spec_subject=spec_subject,
+                            spec_board=spec_board,
+                            spec_name=spec_name,
                         )
-                spec.user = request.user
-                spec.save()
+                else:
+                    spec = specs[0]
+                    spec.deleted = False
+                    spec.save()
+            except Exception:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Specification Was Created',
+                        'Something went wrong could not create spec',
                         extra_tags='alert-success specification'
                     )
             else:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                        extra_tags='alert-danger specification'
+                        'Specification Was Created',
+                        extra_tags='alert-success specification'
                     )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wront, check that the input is correct. (level, subject, board, name)',
-                    extra_tags='alert-danger specification'
+                    'Input can only be alphanumeric!',
+                    extra_tags='alert-warning specification'
                 )
         #
         return redirect(
@@ -950,42 +712,43 @@ def _createspec(request):
 
 def _deletespec(request):
     if request.method == 'POST':
-        spec_name = request.POST['specification_information']
-        spec_desc = spec_name.split(' ')
-        if len(spec_desc) == 4:
-            level = spec_desc[0]
-            subject = spec_desc[1]
-            board = spec_desc[2]
-            name = spec_desc[3]
-            spec = Specification.objects.filter(
-                    spec_level=level,
-                    spec_subject=subject,
-                    spec_board=board,
-                    spec_name=name,
+        spec_level = request.POST['spec_level']
+        spec_subject = request.POST['spec_subject']
+        spec_board = request.POST['spec_board']
+        spec_name = request.POST['spec_name']
+        #
+        if spec_level.isalnum() and spec_subject.isalnum() and \
+                spec_board.isalnum() and spec_name.isalnum():
+            try:
+                spec = Specification.objects.get(
+                        user=request.user,
+                        spec_level=spec_level,
+                        spec_subject=spec_subject,
+                        spec_board=spec_board,
+                        spec_name=spec_name,
                     )
-            if len(spec) == 1:
-                spec_this = spec[0]
-                crud_obj = SpecificationCRUD()
-                delete_status = crud_obj.Delete(level, subject, board, name)
+                spec.deleted = True
+                spec.save()
+            except Exception:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Specification Was Deleted',
-                        extra_tags='alert-warning specification'
+                        'Something went wrong could not delete spec',
+                        extra_tags='alert-success specification'
                     )
             else:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                        extra_tags='alert-danger specification'
+                        'Specification was binned but not permanently deleted.',
+                        extra_tags='alert-success specification'
                     )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wront, check that the input is correct. (level, subject, board, name)',
-                    extra_tags='alert-danger specification'
+                    'Input can only be alphanumeric!',
+                    extra_tags='alert-warning specification'
                 )
         #
         return redirect(
@@ -1000,57 +763,48 @@ def _renamespec(request):
         board = request.POST['board']
         name = request.POST['name']
         new_name = request.POST['new_name']
-        spec = Specification.objects.filter(
+        #
+        specs = Specification.objects.filter(
+                user=request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
                 spec_name=name,
-                )
-        if len(spec) == 1:
-            spec_this = spec[0]
-            crud_obj = SpecificationCRUD()
-            sync_obj = SpecificationSync()
-            short_link = f"Z_{level}/A_{subject}/B_{board}"
-            create_status = crud_obj.Create(short_link, new_name)
-            sync_status = sync_obj.sync(short_link)
-            if create_status == 1 and sync_status == 1:
-                try:
-                    new_spec = Specification.objects.get(
-                            spec_level=level,
-                            spec_subject=subject,
-                            spec_board=board,
-                            spec_name=new_name,
-                            )
-                    new_spec.spec_content = spec_this.spec_content
-                    new_spec.save()
-                except Exception as e:
-                    messages.add_message(
-                            request,
-                            messages.INFO,
-                            'Something is wrong: ' + str(e),
-                            extra_tags='alert-success specification'
-                        )
-                else:
-                    crud_obj.Delete(level, subject, board, name)
-                    messages.add_message(
-                            request,
-                            messages.INFO,
-                            'Specification Was Renamed',
-                            extra_tags='alert-success specification'
-                        )
+            )
+        if new_name.isalnum():
+            if len(specs) == 1:
+                spec = specs[0]
+                spec.spec_name = new_name
+                spec.save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Specification Was Renamed',
+                        extra_tags='alert-success specmoduel'
+                    )
             else:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Something went wrong, cannot rename the spec.',
-                        extra_tags='alert-danger specification'
+                        'Something went wrong, spec isnt unique.',
+                        extra_tags='alert-warning specmoduel'
                     )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                    extra_tags='alert-danger specification'
+                    'Input can only be alphaneumeric.',
+                    extra_tags='alert-warning specmoduel'
+                )
+            kwargs = {
+                'level': level,
+                'subject': subject,
+                'board': board,
+                'name': name,
+            }
+            return redirect(
+                    'dashboard:specmoduel',
+                    **kwargs
                 )
         kwargs = {
             'level': level,
@@ -1071,12 +825,29 @@ def _createmoduel(request):
         board = request.POST['board']
         name = request.POST['name']
         new_module = request.POST['new_module']
-        short_link = f"Z_{level}/A_{subject}/B_{new_module}/C_chapter/D_topic"
-        crud_obj = PointCRUD()
-        sync_obj = PointSync()
-        create_status = crud_obj.Create(short_link)
-        if create_status == 1:
-            sync_status = sync_obj.sync(short_link)
+        Template = ContentTemplate.objects.get(
+                name='Point'
+            )
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=new_module,
+            )
+        if len(points) == 0:
+            my_point = Point()
+            my_point.user = request.user
+            my_point.p_level = level
+            my_point.p_subject = subject
+            my_point.p_moduel = new_module
+            my_point.p_chapter = 'new_chapter'
+            my_point.p_topic = 'new_topic'
+            my_point.p_number = 1
+            my_point.p_content = Template.content
+            my_point.p_unique_id = TagGenerator()
+            my_point.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
@@ -1087,8 +858,8 @@ def _createmoduel(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                    extra_tags='alert-danger specmoduel'
+                    'Module Already exists, check your binned modules.',
+                    extra_tags='alert-success specmoduel'
                 )
         kwargs = {
             'level': level,
@@ -1109,51 +880,39 @@ def _deletemoduel(request):
         board = request.POST['board']
         name = request.POST['name']
         deleted_moduel = request.POST['delete_moduel']
-        #
-        short_link = f"Z_{level}/A_{subject}/B_{deleted_moduel}"
-        sync_obj = PointSync()
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        bin_link = os.path.join(
-                sync_obj.content_dir, 'bin', level, subject, deleted_moduel + '_' +str(TagGenerator())
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=deleted_moduel,
             )
-        specs = Specification.objects.filter(
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
-                spec_subject=subject
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
             )
-        try:
-            shutil.move(full_link, bin_link)
-        except Exception as e:
+        if len(points) > 0:
+            points.update(deleted=True)
+            content = spec.spec_content
+            if deleted_moduel in content.keys():
+                content[deleted_moduel]['active'] = False
+                content[deleted_moduel]['position'] = -1
+                spec.spec_content = content
+                spec.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Could not delete: {deleted_moduel}, Something is wrong \
-                            with the real delete operation.' + str(e),
+                    f'Module {deleted_moduel} was binned but not permanently deleted.',
                     extra_tags='alert-warning specmoduel'
                 )
         else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel__iexact=deleted_moduel,
-                ).delete()
-            for spec in specs:
-                content = spec.spec_content
-                if deleted_moduel in content.keys():
-                    del content[deleted_moduel]
-                spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully BINNED the moduel: {deleted_moduel}',
+                    'Something is wrong, please check that the input is correct.',
                     extra_tags='alert-warning specmoduel'
                 )
         kwargs = {
@@ -1176,53 +935,50 @@ def _renamemodule(request):
         board = request.POST['board']
         name = request.POST['name']
         new_name = request.POST['new_name']
-        specs = Specification.objects.filter(
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module
+            )
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
                 spec_subject=subject,
-                )
-        sync_obj = PointSync()
-        short_link = f"Z_{level}/A_{subject}/B_{module}"
-        short_link_new = f"Z_{level}/A_{subject}/B_{new_name}"
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        new_link = os.path.join(sync_obj.content_dir, short_link_new)
-        try:
-            shutil.move(full_link, new_link)
-        except Exception as e:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    f'Could not rename: {module}, Something is wrong \
-                            with the renaming/move operation.' + str(e),
-                    extra_tags='alert-warning specmoduel'
-                )
-        else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=module
-                ).delete()
-            sync_status = sync_obj.sync(short_link_new)
-            for spec in specs:
-                content = spec.spec_content.copy()
-                if module in content.keys():
-                    content[new_name] = content.pop(module)
+                spec_board=board,
+                spec_name=name,
+            )
+        if len(points) > 0:
+            points.update(p_moduel=new_name)
+            # change spec info
+            content = spec.spec_content.copy()
+            if module in content.keys():
+                content[new_name] = content.pop(module)
                 spec.spec_content = content
                 spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully Renamed the moduel: {module} -> {new_name}, \
-                            and updated specifictions',
-                    extra_tags='alert-warning specmoduel'
+                    f'Successfully Renamed the moduel: {module} -> {new_name}',
+                    extra_tags='alert-warning specchapter'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that the input is correct.',
+                    extra_tags='alert-warning specchapter'
+            )
+            kwargs = {
+                'level': level,
+                'subject': subject,
+                'module': module,
+                'board': board,
+                'name': name,
+            }
+            return redirect(
+                    'dashboard:specchapter',
+                    **kwargs
                 )
         kwargs = {
             'level': level,
@@ -1245,24 +1001,42 @@ def _createchapter(request):
         board = request.POST['board']
         name = request.POST['name']
         new_chapter = request.POST['new_chapter']
-        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{new_chapter}/D_topic"
-        crud_obj = PointCRUD()
-        sync_obj = PointSync()
-        create_status = crud_obj.Create(short_link)
-        if create_status == 1:
-            sync_status = sync_obj.sync(short_link)
+        Template = ContentTemplate.objects.get(
+                name='Point'
+            )
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=new_chapter,
+            )
+        if len(points) == 0:
+            my_point = Point()
+            my_point.user = request.user
+            my_point.p_level = level
+            my_point.p_subject = subject
+            my_point.p_moduel = module
+            my_point.p_chapter = new_chapter
+            my_point.p_topic = 'new_topic'
+            my_point.p_number = 1
+            my_point.p_content = Template.content
+            my_point.p_unique_id = TagGenerator()
+            my_point.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
                     'Successfully created a new chapter',
-                    extra_tags='alert-success specchapter'
+                    extra_tags='alert-success specmoduel'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong, check that the chapter is unique. (level, subject, moduel, chapter, board, name)',
-                    extra_tags='alert-danger specchapter'
+                    'Chapter Already exists, check your binned chapters.',
+                    extra_tags='alert-warning specchapter'
                 )
         kwargs = {
             'level': level,
@@ -1286,57 +1060,41 @@ def _deletechapter(request):
         name = request.POST['name']
         deleted_chapter = request.POST['delete_chapter']
         #
-        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{deleted_chapter}"
-        sync_obj = PointSync()
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        bin_link = os.path.join(
-                sync_obj.content_dir,
-                'bin',
-                level,
-                subject,
-                module,
-                deleted_chapter + '_' + str(TagGenerator())
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=deleted_chapter,
             )
-        specs = Specification.objects.filter(
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
-                spec_subject=subject
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
             )
-        try:
-            shutil.move(full_link, bin_link)
-        except Exception as e:
+        if len(points) > 0:
+            points.update(deleted=True)
+            content = spec.spec_content
+            if module in content.keys():
+                if deleted_chapter in content[module]['content'].keys():
+                    content[module]['content'][deleted_chapter]['active'] = False
+                    content[module]['content'][deleted_chapter]['position'] = -1
+                    spec.spec_content = content
+                    spec.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Could not delete: {deleted_chapter}, Something is wrong \
-                            with the real delete operation.' + str(e),
+                    f'chapter {deleted_chapter} was binned but not permanently deleted.',
                     extra_tags='alert-warning specchapter'
                 )
         else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=module,
-                    p_chapter__iexact=deleted_chapter,
-                ).delete()
-            for spec in specs:
-                content = spec.spec_content
-                if module in content.keys():
-                    if deleted_chapter in content[module]['content'].keys():
-                        del content[module]['content'][deleted_chapter]
-                spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully BINNED the chapter: {deleted_chapter}',
+                    'Something is wrong, please check that the input is correct.',
                     extra_tags='alert-warning specchapter'
                 )
         kwargs = {
@@ -1361,55 +1119,54 @@ def _renamechapter(request):
         board = request.POST['board']
         name = request.POST['name']
         new_name = request.POST['new_name']
-        specs = Specification.objects.filter(
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=chapter,
+            )
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
                 spec_subject=subject,
-                )
-        sync_obj = PointSync()
-        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}"
-        short_link_new = f"Z_{level}/A_{subject}/B_{module}/C_{new_name}"
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        new_link = os.path.join(sync_obj.content_dir, short_link_new)
-        try:
-            shutil.move(full_link, new_link)
-        except Exception as e:
+                spec_board=board,
+                spec_name=name,
+            )
+        if len(points) > 0:
+            points.update(p_chapter=new_name)
+            # change spec info
+            content = spec.spec_content.copy()
+            if module in content.keys():
+                if chapter in content[module]['content'].keys():
+                    content[module]['content'][new_name] = content[module]['content'].pop(chapter)
+                    spec.spec_content = content
+                    spec.save()
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Could not rename: {chapter}, Something is wrong \
-                            with the renaming/move operation.' + str(e),
+                    f'Successfully Renamed the chapter: {chapter} -> {new_name}',
                     extra_tags='alert-warning spectopic'
                 )
         else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=module,
-                    p_chapter=chapter
-                ).delete()
-            sync_status = sync_obj.sync(short_link_new)
-            for spec in specs:
-                content = spec.spec_content.copy()
-                if module in content.keys():
-                    if chapter in content[module]['content'].keys():
-                        content[module]['content'][new_name] = content[module]['content'].pop(chapter)
-                spec.spec_content = content
-                spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully Renamed the chapter: {chapter} -> {new_name}, \
-                            and updated specifictions',
+                    'Something is wrong, please check that the input is correct.',
                     extra_tags='alert-warning spectopic'
+            )
+            kwargs = {
+                'level': level,
+                'subject': subject,
+                'module': module,
+                'chapter': chapter,
+                'board': board,
+                'name': name,
+            }
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
                 )
         kwargs = {
             'level': level,
@@ -1434,24 +1191,44 @@ def _createtopic(request):
         chapter = request.POST['chapter']
         name = request.POST['name']
         new_topic = request.POST['new_topic']
-        short_link = f"Z_{level}/A_{subject}/B_{moduel}/C_{chapter}/D_{new_topic}"
-        crud_obj = PointCRUD()
-        sync_obj = PointSync()
-        create_status = crud_obj.Create(short_link)
-        if create_status == 1:
-            sync_status = sync_obj.sync(short_link)
+        #
+        Template = ContentTemplate.objects.get(
+                name='Point'
+            )
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=moduel,
+                p_chapter=chapter,
+                p_topic=new_topic,
+            )
+        if len(points) == 0:
+            my_point = Point()
+            my_point.user = request.user
+            my_point.p_level = level
+            my_point.p_subject = subject
+            my_point.p_moduel = moduel
+            my_point.p_chapter = chapter
+            my_point.p_topic = new_topic
+            my_point.p_number = 1
+            my_point.p_content = Template.content
+            my_point.p_unique_id = TagGenerator()
+            my_point.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Successfully created a new moduel',
-                    extra_tags='alert-success specmoduel'
+                    'Successfully created a new topic',
+                    extra_tags='alert-success spectopic'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                    extra_tags='alert-danger specmoduel'
+                    'Topic Already exists, check your binned topic.',
+                    extra_tags='alert-warning spectopic'
                 )
         kwargs = {
             'level': level,
@@ -1477,60 +1254,44 @@ def _deletetopic(request):
         name = request.POST['name']
         deleted_topic = request.POST['delete_topic']
         #
-        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{deleted_topic}"
-        sync_obj = PointSync()
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        bin_link = os.path.join(
-                sync_obj.content_dir,
-                'bin',
-                level,
-                subject,
-                module,
-                chapter,
-                deleted_topic+ '_' + str(TagGenerator())
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=chapter,
+                p_topic=deleted_topic,
             )
-        specs = Specification.objects.filter(
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
-                spec_subject=subject
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
             )
-        try:
-            shutil.move(full_link, bin_link)
-        except Exception as e:
+        if len(points) > 0:
+            points.update(deleted=True)
+            content = spec.spec_content
+            content = spec.spec_content
+            if module in content.keys():
+                if chapter in content[module]['content'].keys():
+                    if deleted_topic in content[module]['content'][chapter]['content'].keys():
+                        content[module]['content'][chapter]['content'][deleted_topic]['active'] = False
+                        content[module]['content'][chapter]['content'][deleted_topic]['position'] = -1
+                        spec.spec_content = content
+                        spec.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Could not delete: {deleted_topic}, Something is wrong \
-                            with the real delete operation.' + str(e),
-                    extra_tags='alert-warning specchapter'
+                    f'Topic {deleted_topic} was binned but not permanently deleted.',
+                    extra_tags='alert-warning spectopic'
                 )
         else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=module,
-                    p_chapter=chapter,
-                    p_topic__iexact=deleted_topic,
-                ).delete()
-            for spec in specs:
-                content = spec.spec_content
-                if module in content.keys():
-                    if chapter in content[module]['content'].keys():
-                        if deleted_topic in content[module]['content'][chapter]['content'].keys():
-                            del content[module]['content'][chapter]['content'][deleted_topic]
-                spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully BINNED the topic: {deleted_topic}',
+                    'Something is wrong, please check that the input is correct.',
                     extra_tags='alert-warning spectopic'
                 )
         kwargs = {
@@ -1557,57 +1318,57 @@ def _renametopic(request):
         board = request.POST['board']
         name = request.POST['name']
         new_name = request.POST['new_name']
-        specs = Specification.objects.filter(
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=chapter,
+                p_topic=topic,
+            )
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
                 spec_subject=subject,
-                )
-        sync_obj = PointSync()
-        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{topic}"
-        short_link_new = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{new_name}"
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        new_link = os.path.join(sync_obj.content_dir, short_link_new)
-        try:
-            shutil.move(full_link, new_link)
-        except Exception as e:
+                spec_board=board,
+                spec_name=name,
+            )
+        if len(points) > 0:
+            points.update(p_topic=new_name)
+            # change spec info
+            content = spec.spec_content.copy()
+            if module in content.keys():
+                if chapter in content[module]['content'].keys():
+                    if topic in content[module]['content'][chapter]['content'].keys():
+                        content[module]['content'][chapter]['content'][new_name] = content[module]['content'][chapter]['content'].pop(topic)
+                        spec.spec_content = content
+                        spec.save()
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Could not rename: {topic}, Something is wrong \
-                            with the renaming/move operation.' + str(e),
+                    f'Successfully Renamed the chapter: {topic} -> {new_name}',
                     extra_tags='alert-warning specpoint'
                 )
         else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=module,
-                    p_chapter=chapter,
-                    p_topic=topic,
-                ).delete()
-            sync_status = sync_obj.sync(short_link_new)
-            for spec in specs:
-                content = spec.spec_content.copy()
-                if module in content.keys():
-                    if chapter in content[module]['content'].keys():
-                        if topic in content[module]['content'][chapter]['content'].keys():
-                            content[module]['content'][chapter]['content'][new_name] = content[module]['content'][chapter]['content'].pop(topic)
-                spec.spec_content = content
-                spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully Renamed the topic: {topic} -> {new_name}, \
-                            and updated specifictions',
+                    'Something is wrong, please check that the input is correct.',
                     extra_tags='alert-warning specpoint'
+            )
+            kwargs = {
+                'level': level,
+                'subject': subject,
+                'module': module,
+                'chapter': chapter,
+                'topic': topic,
+                'board': board,
+                'name': name,
+            }
+            return redirect(
+                    'dashboard:specpoint',
+                    **kwargs
                 )
         kwargs = {
             'level': level,
@@ -1634,41 +1395,41 @@ def _createpoint(request):
         topic = request.POST['topic']
         name = request.POST['name']
         new_point = request.POST['new_point']
-        short_link = f"Z_{level}/A_{subject}/B_{moduel}/C_{chapter}/D_{topic}"
-        crud_obj = PointCRUD()
-        sync_obj = PointSync()
-        create_status = crud_obj.Create(short_link)
-        if create_status == 1:
-            sync_status = sync_obj.sync(short_link)
-            topic_points = Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=moduel,
-                    p_chapter=chapter,
-                    p_topic=topic,
-                ).order_by('p_number')
-            new = topic_points[len(topic_points)-1]
-            new.p_content['details']['hidden']['0']['point_title'] = new_point
-            new.save()
-            json_content = json.dumps(new.p_content, indent=4)
-            crud_obj = PointCRUD()
-            crud_obj.Update(
-                    new.p_unique_id,
-                    json_content
-                )
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Successfully created a new point',
-                    extra_tags='alert-success specpoint'
-                )
+        #
+        Template = ContentTemplate.objects.get(
+                name='Point'
+            )
+        Template.content['details']['hidden']['0']['point_title'] = new_point
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=moduel,
+                p_chapter=chapter,
+                p_topic=topic,
+            )
+        my_point = Point()
+        if len(points) == 0:
+            my_point.p_number = 1
         else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something went wrong, check that the spec is unique. (level, subject, board, name)',
-                    extra_tags='alert-danger specpoint'
-                )
+            my_point.p_number = len(points) + 1
+        my_point.user = request.user
+        my_point.p_level = level
+        my_point.p_subject = subject
+        my_point.p_moduel = moduel
+        my_point.p_chapter = chapter
+        my_point.p_topic = topic
+        my_point.p_content = Template.content
+        my_point.p_unique_id = TagGenerator()
+        my_point.save()
+        #
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Successfully created a new point',
+                extra_tags='alert-success specpoint'
+            )
         kwargs = {
             'level': level,
             'subject': subject,
@@ -1695,72 +1456,46 @@ def _deletepoint(request):
         name = request.POST['name']
         deleted_point = request.POST['delete_point']
         #
-        point_obj = Point.objects.get(
+        points = Point.objects.filter(
+                user=request.user,
                 p_level=level,
                 p_subject=subject,
                 p_moduel=module,
                 p_chapter=chapter,
                 p_topic=topic,
-                p_unique_id=deleted_point
+                p_unique_id=deleted_point,
             )
-        short_link = f"Z_{level}/A_{subject}/B_{module}/C_{chapter}/D_{topic}/N_{point_obj.p_number}"
-        sync_obj = PointSync()
-        full_link = os.path.join(sync_obj.content_dir, short_link)
-        bin_link = os.path.join(
-                sync_obj.content_dir,
-                'bin',
-                level,
-                subject,
-                module,
-                chapter,
-                topic,
-                deleted_point
-            )
-        specs = Specification.objects.filter(
+        spec = Specification.objects.get(
+                user=request.user,
                 spec_level=level,
-                spec_subject=subject
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
             )
-        try:
-            shutil.move(full_link, bin_link)
-        except Exception as e:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    f'Could not delete: {deleted_point}, Something is wrong \
-                            with the real delete operation.' + str(e),
-                    extra_tags='alert-warning specpoint'
-                )
-        else:
-            Point.objects.filter(
-                    p_level=level,
-                    p_subject=subject,
-                    p_moduel=module,
-                    p_chapter=chapter,
-                    p_topic=topic,
-                    p_unique_id__iexact=deleted_point,
-                ).delete()
-            for spec in specs:
-                content = spec.spec_content
-                if module in content.keys():
+        if len(points) > 0:
+            points.update(deleted=True)
+            content = spec.spec_content
+            if module in content.keys():
                     if chapter in content[module]['content'].keys():
                         if topic in content[module]['content'][chapter]['content'].keys():
                             if deleted_point in content[module]['content'][chapter]['content'][topic]['content'].keys():
-                                del content[module]['content'][chapter]['content'][topic]['content'][deleted_point]
-                spec.save()
-                json_content = json.dumps(spec.spec_content, indent=4)
-                crud_obj = SpecificationCRUD()
-                crud_obj.Update(
-                        spec.spec_level,
-                        spec.spec_subject,
-                        spec.spec_board,
-                        spec.spec_name,
-                        json_content
-                    )
+                                content[module]['content'][chapter]['content'][topic]['content'][deleted_point]['active'] = False
+                                content[module]['content'][chapter]['content'][topic]['content'][deleted_point]['position'] = -1
+                                spec.spec_content = content
+                                spec.save()
+            #
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully BINNED the point: {deleted_point}',
-                    extra_tags='alert-warning specpoint'
+                    f'Point {deleted_point} was binned but not permanently deleted.',
+                    extra_tags='alert-warning spectopic'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that the input is correct.',
+                    extra_tags='alert-warning spectopic'
                 )
         kwargs = {
             'level': level,
@@ -1775,5 +1510,3 @@ def _deletepoint(request):
                 'dashboard:specpoint',
                 **kwargs
             )
-
-

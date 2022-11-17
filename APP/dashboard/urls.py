@@ -36,18 +36,13 @@ urlpatterns = [
     ),
     # Superuser
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
-    path(
-        'contentmanagement',
-        views.SuperuserContentManagementView.as_view(),
-        name='superuser_contentmanagement'
-    ),
-    path(
-        'taskassignment',
-        views.SuperUserTaskAssignmentView.as_view(),
-        name='superuser_taskassignment'
-    ),
     # admin
     path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),
+    path(
+        'taskassignment',
+        views.AdminTaskAssignmentView.as_view(),
+        name='admin_taskassignment'
+    ),
     # student
     path('student-performance', views.StudentPerformanceView.as_view(), name='student_performance'),
     path(
