@@ -29,13 +29,10 @@ ADD ./extras/includes/requirements.txt /var/www/html
 #Groups, Permissions and Ownership
 WORKDIR /var/www/html 
 RUN mkdir logs
-RUN mkdir -p /pp2/content
 RUN chmod 775 /var/www/html/PP2 
 RUN chmod 775 /var/www/html/logs 
-RUN chmod 775 -R /pp2/content
 RUN chown :www-data /var/www/html/PP2
 RUN chown :www-data /var/www/html/logs
-RUN chown -R :www-data /pp2/content
 #requirements
 RUN pip install --upgrade pip
 RUN pip install -r /var/www/html/requirements.txt 
