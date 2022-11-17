@@ -6,8 +6,6 @@ services:
     environment:
       POSTGRES_USER: django_db_user
       POSTGRES_PASSWORD: Password123
-    volumes:
-      - ./extras/data/postress_data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     networks: 
@@ -20,8 +18,6 @@ services:
     container_name: container_pp2
     networks: 
       - PP2_network 
-    volumes:
-      - ./extras/data/content/:/pp2/content/:rw
     ports:
       - '8005:80'
     extra_hosts:
