@@ -79,6 +79,7 @@ INSTALLED_APPS = [
 ]
 AUTH_USER_MODEL = 'user.User'
 SITE_URL = decouple_config('Site_domain')
+SITE_ID = 1
 CDN_URL = decouple_config('CDN_URL')
 # DB backup
 DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
