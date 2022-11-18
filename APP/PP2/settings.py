@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'dashboard.apps.dashboardConfig',
     'management.apps.ManagementConfig',
     # native
+    'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
