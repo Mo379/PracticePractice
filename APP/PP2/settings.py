@@ -328,9 +328,6 @@ MDEDITOR_CONFIGS = {
 }
 
 
-
-
-
 # Celery settings
-CELERY_BROKER_URL = "redis://PP2RDS:6379"
-CELERY_RESULT_BACKEND = "redis://PP2RDS:6379"
+CELERY_BROKER_URL = decouple_config('Celery_Broker')
+CELERY_RESULT_BACKEND = decouple_config('Celery_Result')

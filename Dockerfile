@@ -27,6 +27,7 @@ ADD ./extras/includes/APP_apache.conf /etc/apache2/sites-available/000-default.c
 ADD ./extras/includes/requirements.txt /var/www/html 
 #Groups, Permissions and Ownership
 WORKDIR /var/www/html 
+RUN rm -r logs
 RUN mkdir logs
 RUN chmod 775 /var/www/html/PP2 
 RUN chmod 775 /var/www/html/logs 
