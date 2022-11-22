@@ -7,31 +7,6 @@ Moduel Selection and ordering
 {%block content%}
 {%definevar context.spec as spec %}
 {%definevar context.sample_obj as sample %}
-<!-- Begin Page Content -->
-<div class="container-fluid">
-	<!-- Page Heading -->
-	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}
-	</h1>
-	<div class="dropdown" style='display:inline-block;'>
-	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		  Actions
-	  </button>
-	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#InheritModal">
-			Inherit
-		</a>
-		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameModal">
-			Rename Specification
-		</a>
-		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateModuelModal">
-			Create New Module
-		</a>
-		<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteModuleModal">
-			Delete Module
-		</a>
-	  </div>
-	</div>
-</div><br>
 {%include 'dashboard/general/items/specmoduel_actions.html'%}
 {%definevar 'specmoduel' as alert_loc%}
 {%include 'base/alert.html'%}
@@ -39,51 +14,90 @@ Moduel Selection and ordering
 
 
 
+<div class="mb-4">
+	<div class="card-body">
+		<div class="card shadow mb-4">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Modules for: {{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}
+				</h5>
+					
+				<div class="dropdown no-arrow">
+					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+						aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-header">Specification Actions:</div>
+						<a type="button" class="dropdown-item" href='{%url "dashboard:specificationoutline" spec.id%}'>
+							View outline
+						</a>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#InheritModal">
+							Inherit
+						</a>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameModal">
+							Rename Specification
+						</a>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateModuelModal">
+							Create New Module
+						</a>
+						<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteModuleModal">
+							Delete Module
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="card-body">
+				<div class='spec_organiser_container shadow' style='text-align:center;margin-left:50px;'>
+					<ol class='list' id='right'>
+						{%for obj in context.moduels%}
+						<li class='child shadow' value='{{obj.p_moduel}}'>
+							<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
+							<span class='handle mr-1 ml-1'style='font-size:25px;'>
+								+
+							</span>
+							<a style='text-decoration:none'>
+							{{obj.p_moduel|field_name_to_label}}
+							</a>
+						</li >
+						{%endfor%}
+					</ol>
 
-<div class='spec_organiser_container' >
-	<ol class='list' id='right'>
-		{%for obj in context.moduels%}
-		<li class='child' value='{{obj.p_moduel}}'>
-			<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
-			<span class='handle mr-1 ml-1'style='font-size:25px;'>
-				+
-			</span>
-			<a style='text-decoration:none'>
-			{{obj.p_moduel|field_name_to_label}}
-			</a>
-		</li >
-		{%endfor%}
-	</ol>
-
-	<form class="list user px-3 py-3"  action="{%url 'content:_ordermoduels'%}" method="POST" role="form">
-		{%csrf_token%}
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<br>
-		<input type="checkbox" name="completed" value="1" 
-		{%if context.spec_completion%}
-		checked
-		{%endif%}
-		>
-		<label for="completed">Completed ? </label><br>
-		<ol class = 'list' id='left' style='height:1000px;'>
-			{%for obj in context.specification_moduels%}
-			<li class='child' value='{{obj.p_moduel}}'>
-				<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
-				<span class='handle mr-1 ml-1'style='font-size:25px;'>
-					+
-				</span>
-			<a href='{%url 'dashboard:specchapter' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel%}' target='_blank'>
-			{{obj.p_moduel|field_name_to_label}}
-			</a>
-			</li>
-			{%endfor%}
-		</ol>
-	</form>
+					<form class="list user px-3 py-3"  action="{%url 'content:_ordermoduels'%}" method="POST" role="form">
+						{%csrf_token%}
+						<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
+						<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+						<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+						<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+						<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+						<br>
+						<input type="checkbox" name="completed" value="1" 
+						{%if context.spec_completion%}
+						checked
+						{%endif%}
+						>
+						<label for="completed">Completed ? </label><br>
+						<ol class = 'list' id='left' style='height:1000px;'>
+							{%for obj in context.specification_moduels%}
+							<li class='child shadow' value='{{obj.p_moduel}}'>
+								<input type='hidden' name='ordered_items[]' value='{{obj.p_moduel}}'/>
+								<span class='handle mr-1 ml-1'style='font-size:25px;'>
+									+
+								</span>
+							<a href='{%url 'dashboard:specchapter' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel%}' target='_blank'>
+							{{obj.p_moduel|field_name_to_label}}
+							</a>
+							</li>
+							{%endfor%}
+						</ol>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
 <script>
 dragula([document.getElementById('left'), document.getElementById('right')], {
   moves: function (el, container, handle) {

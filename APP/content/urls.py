@@ -47,6 +47,16 @@ urlpatterns = [
         name='_orderpoints'
     ),
     path(
+        'content/_createcourse/',
+        views._createcourse,
+        name='_createcourse'
+    ),
+    path(
+        'content/_updatecoursesummary/',
+        views._updatecoursesummary,
+        name='_updatecoursesummary'
+    ),
+    path(
         'content/_createspec/',
         views._createspec,
         name='_createspec'

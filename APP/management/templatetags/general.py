@@ -2,11 +2,19 @@ import os
 from django.conf import settings
 from django import template
 from content.util.GeneralUtil import TagGenerator
+from content.models import Point
 import markdown
 from django.template import Context, Template, loader
 
 register = template.Library()
 
+
+@register.filter(name='p_unique_to_title')
+def p_unique_to_title(p_unique_id):
+    """Splits a string into a list using key"""
+    point = Point.objects.get(p_unique_id=p_unique_id)
+    title = point.p_content['details']['hidden']['0']['point_title']
+    return title
 
 @register.filter(name='split')
 def split(value, key):

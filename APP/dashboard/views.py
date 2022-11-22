@@ -13,8 +13,12 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import (Point, Specification, CourseSubscription)
-from content.util.GeneralUtil import filter_drag_drop_selection
+from content.models import (Point, Specification, Course)
+from content.util.GeneralUtil import (
+        filter_drag_drop_selection,
+        order_full_spec_content,
+        order_live_spec_content
+    )
 
 
 # Superuser views
@@ -111,7 +115,20 @@ class MyCoursesView(
 
     def get_queryset(self):
         context = {}
+        specs = Specification.objects.filter(
+                    user=self.request.user,
+                    spec_completion=True,
+                    deleted=False
+                )
+        courses = Course.objects.filter(
+                    user=self.request.user,
+                    deleted=False
+                ).order_by(
+                        '-course_created_at'
+                    )
         context['sidebar_active'] = 'dashboard/mycourses'
+        context['specs'] = specs
+        context['courses'] = courses
         return context
 
 
@@ -156,6 +173,7 @@ class MySpecificationsView(
         Notes_objs = [obj for obj in Notes]
         df = pd.DataFrame(Notes_objs)
         dic = {}
+        raw_specs = []
         for le, s, m, c, idd in zip(
                 list(df['spec_level']),
                 list(df['spec_subject']),
@@ -169,8 +187,45 @@ class MySpecificationsView(
                 dic[le][s] = {}
             if m not in dic[le][s]:
                 dic[le][s][m] = []
-            dic[le][s][m].append(Specification.objects.get(pk=idd))
+            spec = Specification.objects.get(pk=idd)
+            dic[le][s][m].append(spec)
+            raw_specs.append(spec)
         context['specifications'] = dic
+        context['raw_specs'] = raw_specs
+        return context
+
+
+class SpecificationOutlineView(
+            LoginRequiredMixin,
+            SuperuserRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = "dashboard/general/specificationoutline.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("specifications", reverse("dashboard:specifications")),
+                ("outline", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/general/specificationoutline.html'
+        spec_id = self.kwargs['spec_id']
+        #
+        spec = Specification.objects.get(
+                    user=self.request.user,
+                    pk=spec_id
+                )
+        content = order_live_spec_content(spec.spec_content)
+        context['spec'] = spec
+        context['ordered_content'] = content
         return context
 
 
@@ -209,6 +264,12 @@ class SpecModuelHandlerView(
                 spec_board=board,
                 spec_name=name
             )
+        # Get neighbor specs
+        neighbor_specs = Specification.objects.filter(
+                user=self.request.user,
+                spec_level=level,
+                spec_subject=subject,
+            )
         # get moduels from db
         moduels = Point.objects.values(
                     'p_level',
@@ -238,9 +299,11 @@ class SpecModuelHandlerView(
         # return result
         context['spec'] = spec
         context['sample_obj'] = moduels_objs[0] if len(moduels_objs) > 0 else None
+        context['all_moduels'] = moduels_objs
         context['moduels'] = moduels_objs_final
         context['specification_moduels'] = final_spec_objs
         context['spec_completion'] = spec.spec_completion
+        context['neighbor_specs'] = neighbor_specs
         return context
 
 
@@ -307,6 +370,7 @@ class SpecChapterHandlerView(
             )
         context['spec'] = spec
         context['sample_obj'] = chapter_objs[0] if len(chapter_objs) > 0 else None
+        context['all_chapters'] = chapter_objs
         context['chapters'] = chapter_objs_final
         context['specification_chapters'] = final_spec_objs
         # return result
@@ -381,6 +445,7 @@ class SpecTopicHandlerView(
             )
         context['spec'] = spec
         context['sample_obj'] = topics_objs[0] if len(topics_objs) > 0 else None
+        context['all_topics'] = topics_objs
         context['topics'] = topic_objs_final
         context['specification_topics'] = final_spec_objs
         # return result
@@ -462,6 +527,7 @@ class SpecPointHandlerView(
         context['spec'] = spec
         context['sample_obj'] = point_objs[0] if len(point_objs) > 0 else None
         context['points'] = point_objs_final
+        context['all_points'] = point_objs
         context['specification_points'] = final_spec_objs
         # return result
         return context

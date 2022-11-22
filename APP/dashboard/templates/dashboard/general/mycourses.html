@@ -1,14 +1,77 @@
 {% extends 'dashboard/base.html'%}
 {%load static%}
+{%load general%}
+
 {%block page_name%}
-Blank
+Courses
 {%endblock%}
+
 {%block content%}
-	<!-- Begin Page Content -->
-	<div class="container-fluid">
+{%include 'dashboard/general/items/courses_actions.html'%}
+{%definevar 'course' as alert_loc%}
+{%include 'base/alert.html'%}
 
-		<!-- Page Heading -->
-		<h1 class="h3 mb-4 text-gray-800">Blank Page</h1>
-
+<div class="mb-4">
+	<div class="card-body">
+		<div class="card shadow mb-1">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Courses
+				</h5>
+					
+				<div class="dropdown no-arrow">
+					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+						aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-header">Course Actions:</div>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateCourseModal">
+							Create New Course
+						</a>
+						<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteCourseModal">
+							Delete Course
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="card-body">
+				{%for course in context.courses%}
+				<div class="col-lg-9 mb-4">
+					<div class="card-body">
+						<div class="card shadow mb-4">
+							<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+								<h6 class="m-0 font-weight-bold text-primary">
+									{{course.course_name}}
+								</h6>
+								<div class="dropdown no-arrow">
+									<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+										data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<i class="fas fa-ellipsis-v fa-sm fa-fw text-priary-400"></i>
+									</a>
+									<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+										aria-labelledby="dropdownMenuLink">
+										<div class="dropdown-header">Course Actions:</div>
+										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#RenameCourseModal_{{course.id}}">Update Name</a>
+										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#UpdateSummaryModal_{{course.id}}">Update Summary</a>
+										<a class="dropdown-item text-primary" href="#" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Publish new version</a>
+									</div>
+									{%include 'dashboard/general/items/mycourse_actions.html'%}
+								</div>
+							</div>
+							<div class="card-body">
+								<h5> Latest Specification: {{course.specification}}</h5>
+								<h5> Summary: {{course.course_summary}}</h5>
+								<h5> Publication: {{course.course_publication}}</h5>
+								<h5> Deleted: {{course.deleted}}</h5>
+							</div>
+						</div>
+					</div>
+				</div>
+				{%endfor%}
+			</div>
+		</div>
 	</div>
+</div>
 {%endblock%}

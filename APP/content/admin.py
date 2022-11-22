@@ -10,6 +10,7 @@ from content.models import (
         Specification,
         ContentTemplate,
         Course,
+        CourseVersion,
         CourseSubscription,
         ExampleModel
         )
@@ -34,5 +35,6 @@ admin.site.register(EditingTask)
 admin.site.register(Specification)
 admin.site.register(ContentTemplate)
 admin.site.register(Course)
+admin.site.register(CourseVersion)
 admin.site.register(CourseSubscription)
 admin.site.register(ExampleModel, ExampleModelAdmin)

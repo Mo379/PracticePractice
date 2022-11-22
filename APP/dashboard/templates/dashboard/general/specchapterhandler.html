@@ -7,70 +7,93 @@ Chapter Selection and ordering
 {%block content%}
 {%definevar context.spec as spec %}
 {%definevar context.sample_obj as sample%}
-{{context.sample_obj.p_moduel}}
 <!-- Begin Page Content -->
-<div class="container-fluid">
-	<!-- Page Heading -->
-	<h1 class="h3 mb-4 text-gray-800">{{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}}: {{context.sample_obj.p_moduel}}</h1>
-	<div class="dropdown" style='display:inline-block;'>
-	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		  Actions
-	  </button>
-	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameModuleModal">
-			Rename Module
-		</a>
-		<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateChapterModal">
-			Create New Chapter
-		</a>
-		<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteChapterModal">
-			Delete Chapter
-		</a>
-	  </div>
-	</div>
-</div><br>
 {%include 'dashboard/general/items/specchapter_actions.html'%}
 {%definevar 'specchapter' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
 
-<div class='spec_organiser_container' >
-	<ol class='list'id='right'>
-		{%for obj in context.chapters%}
-		<li class='child' value='{{obj.p_moduel}}'>
-			<input type='hidden' name='ordered_items[]' value='{{obj.p_chapter}}'/>
-			<span class='handle mr-1 ml-1'style='font-size:25px;'>
-				+
-			</span>
-			<a style='text-decoration:none'>
-			{{obj.p_chapter|field_name_to_label}}
-			</a>
-		</li>
-		{%endfor%}
-	</ol>
-	<form class="list user px-3 py-3"  action="{%url 'content:_orderchapters'%}" method="POST" role="form">
-		{%csrf_token%}
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input type='hidden' name='moduel' value='{{context.sample_obj.p_moduel}}'/>
-		<br>
-		<ol class = 'list' id='left' style='height:1000px;'>
-			{%for obj in context.specification_chapters%}
-			<li class='child' value='{{obj.p_moduel}}'>
-				<input type='hidden' name='ordered_items[]' value='{{obj.p_chapter}}'/>
-				<span class='handle mr-1 ml-1'style='font-size:25px;'>
-					+
-				</span>
-			<a href='{%url 'dashboard:spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter%}' target='_blank'>
-			{{obj.p_chapter|field_name_to_label}}
-			</a>
-			</li>
-			{%endfor%}
-		</ol>
-	</form>
+
+
+
+<div class="mb-4">
+	<div class="card-body">
+		<div class="card shadow mb-1">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Chapters for: {{spec.spec_level}} -
+					{{spec.spec_subject}} -
+					{{spec.spec_board}} - 
+					{{spec.spec_name}} -
+					{{context.sample_obj.p_moduel|field_name_to_label}}
+				</h5>
+					
+				<div class="dropdown no-arrow">
+					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+						aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-header">Module Actions:</div>
+						<a type="button" class="dropdown-item" href='{%url "dashboard:specificationoutline" spec.id%}'>
+							View outline
+						</a>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameModuleModal">
+							Rename Module
+						</a>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateChapterModal">
+							Create New Chapter
+						</a>
+						<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteChapterModal">
+							Delete Chapter
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="card-body">
+				<div class='spec_organiser_container shadow' style='text-align:center;'>
+					<ol class='list'id='right'>
+						{%for obj in context.chapters%}
+						<li class='child shadow' value='{{obj.p_moduel}}'>
+							<input type='hidden' name='ordered_items[]' value='{{obj.p_chapter}}'/>
+							<span class='handle mr-1 ml-1'style='font-size:25px;'>
+								+
+							</span>
+							<a style='text-decoration:none'>
+							{{obj.p_chapter|field_name_to_label}}
+							</a>
+						</li>
+						{%endfor%}
+					</ol>
+					<form class="list user px-3 py-3"  action="{%url 'content:_orderchapters'%}" method="POST" role="form">
+						{%csrf_token%}
+						<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
+						<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+						<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+						<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+						<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+						<input type='hidden' name='moduel' value='{{context.sample_obj.p_moduel}}'/>
+						<br>
+						<ol class = 'list' id='left' style='height:1000px;'>
+							{%for obj in context.specification_chapters%}
+							<li class='child shadow' value='{{obj.p_moduel}}'>
+								<input type='hidden' name='ordered_items[]' value='{{obj.p_chapter}}'/>
+								<span class='handle mr-1 ml-1'style='font-size:25px;'>
+									+
+								</span>
+							<a href='{%url 'dashboard:spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter%}' target='_blank'>
+							{{obj.p_chapter|field_name_to_label}}
+							</a>
+							</li>
+							{%endfor%}
+						</ol>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
 </div>
 <script>
 dragula([document.getElementById('left'), document.getElementById('right')], {

@@ -15,6 +15,11 @@ urlpatterns = [
         name='specifications'
     ),
     path(
+        'specificationoutline/<spec_id>',
+        views.SpecificationOutlineView.as_view(),
+        name='specificationoutline'
+    ),
+    path(
         'specmodule/<level>/<subject>/<board>/<name>',
         views.SpecModuelHandlerView.as_view(),
         name='specmoduel'

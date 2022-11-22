@@ -1,3 +1,4 @@
+{%load general%}
 <div class="modal fade" id="RenameChapterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -20,6 +21,7 @@
 			type='text' 
 			name='new_name' 
 			placeholder='Rename Chapter'
+		       value='{{sample.p_chapter}}'
 		/>
 		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
 	</form>
@@ -76,12 +78,16 @@
 		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='delete_topic' 
-			placeholder='Absolute Name of topic'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete Topic</button>
+
+		<label for="Topics">Choose a Topic:</label>
+		<select name="delete_topic" id="Topics" class='mb-3'>
+		  {%for topic in context.all_topics%}
+		  <option value="{{topic.p_topic}}">
+			{{topic.p_topic|field_name_to_label}}
+		  </option>
+		  {%endfor%}
+		</select> <br>
+		<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete Topic</button>
 	</form>
       </div>
     </div>

@@ -415,43 +415,35 @@ def _inheritfromspec(request):
         subject = request.POST['subject']
         board = request.POST['board']
         name = request.POST['name']
-        inheritance_parent = request.POST['inheritance_parent'].split(' ')
+        parent_id = request.POST['parent_spec_id']
+        child_id = request.POST['child_spec_id']
         # Get objects
-        child_spec = Specification.objects.get(
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name
-            )
-        parent_spec = Specification.objects.filter(
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=inheritance_parent[0],
-                spec_name=inheritance_parent[1],
-            )
-        if parent_spec:
+        try:
             parent_spec = Specification.objects.get(
-                    spec_level=level,
-                    spec_subject=subject,
-                    spec_board=inheritance_parent[0],
-                    spec_name=inheritance_parent[1],
+                    user=request.user,
+                    pk=parent_id
+                )
+            child_spec = Specification.objects.get(
+                    user=request.user,
+                    pk=child_id
                 )
             content = parent_spec.spec_content
             child_spec.spec_content = content
             child_spec.save()
             # Update the values
+        except Exception:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Successful Inheritance',
-                    extra_tags='alert-success specmoduel'
+                    'Something went wrong, check that the parent input is correct.',
+                    extra_tags='alert-danger specmoduel'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wront, check that the parent input is correct.',
-                    extra_tags='alert-danger specmoduel'
+                    'Successful Inheritance',
+                    extra_tags='alert-success specmoduel'
                 )
         #
         kwargs = {
@@ -654,6 +646,89 @@ def _orderpoints(request):
             )
 
 
+def _createcourse(request):
+    if request.method == 'POST':
+        course_name = request.POST['course_name']
+        spec_id = request.POST['spec_id']
+        specs = Specification.objects.filter(
+                pk=spec_id
+            )
+        #
+        if len(specs) == 1:
+            try:
+                Course.objects.create(
+                            user=request.user,
+                            course_name=course_name,
+                            specification=specs[0]
+                        )
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not create spec',
+                        extra_tags='alert-success course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course was created.',
+                        extra_tags='alert-success course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Input can only be alphanumeric!',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
+def _updatecoursesummary(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        course_summary = request.POST['course_summary']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                course = courses[0]
+                course.course_summary = course_summary
+                course.save()
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not update course.',
+                        extra_tags='alert-success course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course was successfully updated.',
+                        extra_tags='alert-success course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Input can only be alphanumeric!',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
 def _createspec(request):
     if request.method == 'POST':
         spec_level = request.POST['spec_level']
@@ -712,43 +787,28 @@ def _createspec(request):
 
 def _deletespec(request):
     if request.method == 'POST':
-        spec_level = request.POST['spec_level']
-        spec_subject = request.POST['spec_subject']
-        spec_board = request.POST['spec_board']
-        spec_name = request.POST['spec_name']
+        spec_id = request.POST['spec_id']
         #
-        if spec_level.isalnum() and spec_subject.isalnum() and \
-                spec_board.isalnum() and spec_name.isalnum():
-            try:
-                spec = Specification.objects.get(
-                        user=request.user,
-                        spec_level=spec_level,
-                        spec_subject=spec_subject,
-                        spec_board=spec_board,
-                        spec_name=spec_name,
-                    )
-                spec.deleted = True
-                spec.save()
-            except Exception:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong could not delete spec',
-                        extra_tags='alert-success specification'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Specification was binned but not permanently deleted.',
-                        extra_tags='alert-success specification'
-                    )
+        try:
+            spec = Specification.objects.get(
+                    user=request.user,
+                    pk=spec_id
+                )
+            spec.deleted = True
+            spec.save()
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong could not delete spec',
+                    extra_tags='alert-success specification'
+                )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Input can only be alphanumeric!',
-                    extra_tags='alert-warning specification'
+                    'Specification was binned but not permanently deleted.',
+                    extra_tags='alert-success specification'
                 )
         #
         return redirect(
@@ -884,7 +944,7 @@ def _deletemoduel(request):
                 user=request.user,
                 p_level=level,
                 p_subject=subject,
-                p_moduel=deleted_moduel,
+                p_moduel__iexact=deleted_moduel,
             )
         spec = Specification.objects.get(
                 user=request.user,
@@ -1029,7 +1089,7 @@ def _createchapter(request):
                     request,
                     messages.INFO,
                     'Successfully created a new chapter',
-                    extra_tags='alert-success specmoduel'
+                    extra_tags='alert-success specchapter'
                 )
         else:
             messages.add_message(
@@ -1260,7 +1320,7 @@ def _deletetopic(request):
                 p_subject=subject,
                 p_moduel=module,
                 p_chapter=chapter,
-                p_topic=deleted_topic,
+                p_topic__iexact=deleted_topic,
             )
         spec = Specification.objects.get(
                 user=request.user,
@@ -1488,14 +1548,14 @@ def _deletepoint(request):
                     request,
                     messages.INFO,
                     f'Point {deleted_point} was binned but not permanently deleted.',
-                    extra_tags='alert-warning spectopic'
+                    extra_tags='alert-warning point'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
                     'Something is wrong, please check that the input is correct.',
-                    extra_tags='alert-warning spectopic'
+                    extra_tags='alert-warning point'
                 )
         kwargs = {
             'level': level,

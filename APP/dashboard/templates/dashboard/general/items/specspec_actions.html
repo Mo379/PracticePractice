@@ -50,27 +50,19 @@
       <div class="modal-body">
 		<form class="list user px-3 py-3"  action="{%url 'content:_deletespec'%}" method="POST" role="form">
 			{%csrf_token%}
-			<input 
-				type='text' 
-				name='spec_level' 
-				placeholder='Spec Level'
-			/>
-			<input 
-				type='text' 
-				name='spec_subject' 
-				placeholder='Spec Subject'
-			/><br>
-			<input 
-				type='text' 
-				name='spec_board' 
-				placeholder='Spec Board'
-			/>
-			<input 
-				type='text' 
-				name='spec_name' 
-				placeholder='Spec Name'
-			/><br><br>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete </button>
+			<label for="Specifications">Choose a Specification:</label>
+
+			<select name="spec_id" id="Specifications">
+			  {%for spec in context.raw_specs%}
+			  <option value="{{spec.id}}">
+				{{spec.spec_level}} -
+				{{spec.spec_subject}} -
+				{{spec.spec_board}} -
+				{{spec.spec_name}}
+			  </option>
+			  {%endfor%}
+			</select>
+			<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete </button>
 		</form>
       </div>
     </div>

@@ -147,6 +147,7 @@ class ContentTemplate(models.Model):
 
 
 class Course(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, null=True)
     specification = models.ForeignKey(
             Specification,
             on_delete=models.CASCADE,
@@ -155,12 +156,36 @@ class Course(models.Model):
             null=True
         )
     course_name = models.CharField(max_length=150, default='', null=True)
-    course_content = models.JSONField(default=OrderedDict, null=True)
+    course_summary = models.TextField(max_length=1000, default='', null=True)
     course_publication = models.BooleanField(default=False, null=True)
+    course_created_at = models.DateTimeField(auto_now_add=True)
+    course_created_at.editable=True
+    course_updated_at = models.DateTimeField(auto_now=True)
+    course_updated_at.editable=True
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.course_name
+
+
+class CourseVersion(models.Model):
+    course = models.ForeignKey(
+            Course,
+            on_delete=models.CASCADE,
+            db_index=True,
+            default='',
+            null=True
+        )
+    version_number = models.PositiveSmallIntegerField(null=True)
+    version_name = models.CharField(max_length=150, default='', null=True)
+    version_content = models.JSONField(default=OrderedDict, null=True)
+    version_publication = models.BooleanField(default=False, null=True)
+    version_note = models.CharField(max_length=255, default='', null=True)
+    version_publication = models.BooleanField(default=False, null=True)
+    deleted = models.BooleanField(default=False, null=True)
+
+    def __str__(self):
+        return self.version_name
 
 
 class CourseSubscription(models.Model):
@@ -168,8 +193,8 @@ class CourseSubscription(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, db_index=True)
 
     def __str__(self):
-        return self.user.username+'-' + self.course.specification.spec_subject + \
-                '-' + self.specification.spec_name
+        return self.user.username + '-' + self.course.specification.spec_subject + \
+                '-' + self.course.specification.spec_name
 
 
 class UserPaper(models.Model):

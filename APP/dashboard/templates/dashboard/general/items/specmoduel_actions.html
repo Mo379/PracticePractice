@@ -1,3 +1,4 @@
+{%load general %}
 <div class="modal fade" id="InheritModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -14,11 +15,20 @@
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='inheritance_parent' 
-			placeholder='Inherit from ?'
-		/>
+		<label for="Specifications">Choose a Specification:</label>
+
+		<select name="parent_spec_id" id="Specifications">
+		  {%for n_spec in context.neighbor_specs%}
+		  <option value="{{n_spec.id}}">
+			{{n_spec.spec_level}} -
+			{{n_spec.spec_subject}} -
+			{{n_spec.spec_board}} -
+			{{n_spec.spec_name}}
+		  </option>
+		  {%endfor%}
+		</select>
+		<input type='hidden' name='child_spec_id' value='{{spec.id}}'/>
+		<br>
 		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Inherit </button>
 	</form>
       </div>
@@ -46,6 +56,7 @@
 			type='text' 
 			name='new_name' 
 			placeholder='Rename specification'
+		       value='{{spec.spec_name}}'
 		/>
 		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
 	</form>
@@ -98,12 +109,16 @@
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='delete_moduel' 
-			placeholder='Absolute Name of Moduel'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete Moduel</button>
+
+		<label for="Modules">Choose a Module:</label>
+		<select name="delete_moduel" id="Modules" class='mb-3'>
+		  {%for mod in context.all_moduels%}
+		  <option value="{{mod.p_moduel}}">
+			{{mod.p_moduel|field_name_to_label}}
+		  </option>
+		  {%endfor%}
+		</select>
+		<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete Moduel</button>
 	</form>
       </div>
     </div>

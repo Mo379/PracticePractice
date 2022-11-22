@@ -79,3 +79,29 @@ def order_full_spec_content(content):
             ordered_chapters[key_2]['content'] = ordered_topics
         ordered_moduels[key_1]['content'] = ordered_chapters
     return ordered_moduels
+
+
+def order_live_spec_content(content):
+    def sort_spec_dict_by_position(dictionary):
+        items = [item for item in dictionary.items() if item[1]['active'] == True]
+        ordered_content = collections.OrderedDict(
+                sorted(
+                    items,
+                    key=lambda item: item[1]['position']
+                )
+            )
+        return ordered_content
+    ordered_moduels = sort_spec_dict_by_position(content)
+    for key_1, value_1 in ordered_moduels.items():
+        chapter_content = value_1['content']
+        ordered_chapters = sort_spec_dict_by_position(chapter_content)
+        for key_2, value_2 in ordered_chapters.items():
+            topic_content = value_2['content']
+            ordered_topics = sort_spec_dict_by_position(topic_content)
+            for key_3, value_3 in ordered_topics.items():
+                point_content = value_3['content']
+                ordered_points = sort_spec_dict_by_position(point_content)
+                ordered_topics[key_3]['content'] = ordered_points
+            ordered_chapters[key_2]['content'] = ordered_topics
+        ordered_moduels[key_1]['content'] = ordered_chapters
+    return ordered_moduels
