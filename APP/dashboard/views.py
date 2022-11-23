@@ -13,7 +13,7 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import (Point, Specification, Course)
+from content.models import (Point, Specification, Course, CourseVersion)
 from content.util.GeneralUtil import (
         filter_drag_drop_selection,
         order_full_spec_content,
@@ -126,9 +126,18 @@ class MyCoursesView(
                 ).order_by(
                         '-course_created_at'
                     )
+        versions = collections.defaultdict(list)
+        for course in courses:
+            courseversions = CourseVersion.objects.filter(course=course).order_by(
+                        '-version_number'
+                    )
+            for version in courseversions:
+                versions[course.id].append(version)
+
         context['sidebar_active'] = 'dashboard/mycourses'
         context['specs'] = specs
         context['courses'] = courses
+        context['course_versions'] = versions
         return context
 
 

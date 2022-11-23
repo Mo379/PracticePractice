@@ -2,23 +2,29 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Create New Course</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Rename Course</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-		<form class="list user px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_renamecourse'%}" method="POST" role="form">
 			{%csrf_token%}
 			<label for="new_name">Give a New Course Name</label>
 			<input 
 				type='text' 
 				name='new_name' 
+			        class='form-control'
 				placeholder='Rename Course'
 				value='{{course.course_name}}'
 			/>
+			<input 
+				type='hidden' 
+				name='course_id' 
+				value='{{course.id}}'
+			/>
 			<br><br>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
 		</form>
       </div>
     </div>
@@ -42,7 +48,7 @@
           <div class="form-group">
 	    <input type='hidden' name='course_id' value='{{course.id}}'/>
             <label for="message-text" class="col-form-label">Course Summary:</label>
-	    <textarea class="form-control mb-2" id="message-text" name='course_summary' rows='25'>{{course.course_summary}}</textarea>
+	    <textarea class="form-control mb-2" id="message-text" name='course_summary' rows='15'>{{course.course_summary}}</textarea>
 	    <button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
           </div>
         </form>
@@ -53,21 +59,87 @@
 
 
 
-<div class="modal fade" id="PublishVersion_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="PublishVersionModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Create New Course</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Create a new course Version</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-		<form class="list user px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_createversion'%}" method="POST" role="form">
 			{%csrf_token%}
-			<label for="">Give a New Course Name</label>
+			<input 
+				type='hidden' 
+				name='course_id' 
+				value='{{course.id}}'
+			/>
+			<label for="version_name">Choose a version name:</label>
+			<input 
+				type='text' 
+				name='version_name' 
+			        class='form-control mb-3'
+			        id='version_name'
+				placeholder='Version Name'
+			        value='New Update'
+			/>
+			<label for="version_note">Give a version Note:</label>
+	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the initial course verion.</textarea>
 			<br><br>
 			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="PublishCourseModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Publish course</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="px-3 py-3"  action="{%url 'content:_publishcourse'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input 
+				type='hidden' 
+				name='course_id' 
+				value='{{course.id}}'
+			/>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Publish Now!</button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="UnPublishCourseModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">UnPublish course</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="px-3 py-3"  action="{%url 'content:_unpublishcourse'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input 
+				type='hidden' 
+				name='course_id' 
+				value='{{course.id}}'
+			/>
+			<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> UnPublish Now!</button>
 		</form>
       </div>
     </div>

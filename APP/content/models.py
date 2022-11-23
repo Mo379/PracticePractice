@@ -159,9 +159,7 @@ class Course(models.Model):
     course_summary = models.TextField(max_length=1000, default='', null=True)
     course_publication = models.BooleanField(default=False, null=True)
     course_created_at = models.DateTimeField(auto_now_add=True)
-    course_created_at.editable=True
     course_updated_at = models.DateTimeField(auto_now=True)
-    course_updated_at.editable=True
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):
@@ -182,6 +180,8 @@ class CourseVersion(models.Model):
     version_publication = models.BooleanField(default=False, null=True)
     version_note = models.CharField(max_length=255, default='', null=True)
     version_publication = models.BooleanField(default=False, null=True)
+    version_created_at = models.DateTimeField(auto_now_add=True)
+    version_updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):

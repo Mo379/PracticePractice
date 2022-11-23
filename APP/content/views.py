@@ -650,23 +650,32 @@ def _createcourse(request):
     if request.method == 'POST':
         course_name = request.POST['course_name']
         spec_id = request.POST['spec_id']
+        version_name = request.POST['version_name']
+        version_note = request.POST['version_note']
         specs = Specification.objects.filter(
                 pk=spec_id
             )
         #
         if len(specs) == 1:
             try:
-                Course.objects.create(
+                new_course = Course.objects.create(
                             user=request.user,
                             course_name=course_name,
                             specification=specs[0]
+                        )
+                CourseVersion.objects.create(
+                            course=new_course,
+                            version_number=1,
+                            version_name=version_name,
+                            version_content=specs[0].spec_content,
+                            version_note=version_note,
                         )
             except Exception:
                 messages.add_message(
                         request,
                         messages.INFO,
                         'Something went wrong could not create spec',
-                        extra_tags='alert-success course'
+                        extra_tags='alert-warning course'
                     )
             else:
                 messages.add_message(
@@ -680,6 +689,87 @@ def _createcourse(request):
                     request,
                     messages.INFO,
                     'Input can only be alphanumeric!',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
+def _deletecourse(request):
+    if request.method == 'POST':
+        course_id = request.POST['Course_id']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                course = courses[0]
+                course.deleted = True
+                course.save()
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not delete course',
+                        extra_tags='alert-warning course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course was binned but not permanently deleted.',
+                        extra_tags='alert-warning course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, cannot find course.',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
+def _renamecourse(request):
+    if request.method == 'POST':
+        course_name = request.POST['new_name']
+        course_id = request.POST['course_id']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                course = courses[0]
+                course.course_name = course_name
+                course.save()
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not update course.',
+                        extra_tags='alert-warning course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course was successfully updated.',
+                        extra_tags='alert-success course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, could not update course.',
                     extra_tags='alert-warning course'
                 )
         #
@@ -707,7 +797,7 @@ def _updatecoursesummary(request):
                         request,
                         messages.INFO,
                         'Something went wrong could not update course.',
-                        extra_tags='alert-success course'
+                        extra_tags='alert-warning course'
                     )
             else:
                 messages.add_message(
@@ -721,6 +811,138 @@ def _updatecoursesummary(request):
                     request,
                     messages.INFO,
                     'Input can only be alphanumeric!',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
+def _createversion(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        version_name = request.POST['version_name']
+        version_note = request.POST['version_note']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                versions = CourseVersion.objects.filter(
+                            course=courses[0]
+                        ).order_by(
+                                    '-version_number'
+                                )
+                latest_version = versions[0]
+                CourseVersion.objects.create(
+                            course=courses[0],
+                            version_number=latest_version.version_number + 1,
+                            version_name=version_name,
+                            version_content=courses[0].specification.spec_content,
+                            version_note=version_note,
+                        )
+            except Exception as e :
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not create course version.' +str(e),
+                        extra_tags='alert-warning course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course version was successfully created.',
+                        extra_tags='alert-success course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, could not find course.',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
+def _publishcourse(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                course = courses[0]
+                course.course_publication = True
+                course.save()
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not publish course.',
+                        extra_tags='alert-warning course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course was successfully published, it can now be found in the CoursePlace.',
+                        extra_tags='alert-success course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, could not find course',
+                    extra_tags='alert-warning course'
+                )
+        #
+        return redirect(
+                'dashboard:mycourses',
+            )
+
+
+def _unpublishcourse(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                course = courses[0]
+                course.course_publication = False
+                course.save()
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not unpublish course.',
+                        extra_tags='alert-warning course'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your course was successfully unpublished, it will no longer be found in the CoursePlace.',
+                        extra_tags='alert-success course'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, could not find course',
                     extra_tags='alert-warning course'
                 )
         #
@@ -763,7 +985,7 @@ def _createspec(request):
                         request,
                         messages.INFO,
                         'Something went wrong could not create spec',
-                        extra_tags='alert-success specification'
+                        extra_tags='alert-warning specification'
                     )
             else:
                 messages.add_message(
@@ -801,7 +1023,7 @@ def _deletespec(request):
                     request,
                     messages.INFO,
                     'Something went wrong could not delete spec',
-                    extra_tags='alert-success specification'
+                    extra_tags='alert-warning specification'
                 )
         else:
             messages.add_message(

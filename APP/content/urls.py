@@ -52,9 +52,34 @@ urlpatterns = [
         name='_createcourse'
     ),
     path(
+        'content/_deletecourse/',
+        views._deletecourse,
+        name='_deletecourse'
+    ),
+    path(
+        'content/_renamecourse/',
+        views._renamecourse,
+        name='_renamecourse'
+    ),
+    path(
         'content/_updatecoursesummary/',
         views._updatecoursesummary,
         name='_updatecoursesummary'
+    ),
+    path(
+        'content/_createversion/',
+        views._createversion,
+        name='_createversion'
+    ),
+    path(
+        'content/_publishcourse/',
+        views._publishcourse,
+        name='_publishcourse'
+    ),
+    path(
+        'content/_unpublishcourse/',
+        views._unpublishcourse,
+        name='_unpublishcourse'
     ),
     path(
         'content/_createspec/',

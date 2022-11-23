@@ -8,20 +8,10 @@
         </button>
       </div>
       <div class="modal-body">
-	        Alphanumeric Only
-		<form class="list user px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
 			{%csrf_token%}
-			<label for="course_name">Choose a course name:</label>
-			<input 
-				type='text' 
-				name='course_name' 
-			        id='course_name'
-				placeholder='Course Name'
-			/>
-			<br><br>
 			<label for="Specifications">Choose a Completed Specification:</label>
-
-			<select name="spec_id" id="Specifications">
+			<select name="spec_id" id="Specifications" class='form-control mb-3'>
 			  {%for spec in context.specs%}
 			  <option value="{{spec.id}}">
 				{{spec.spec_level}} -
@@ -31,8 +21,29 @@
 			  </option>
 			  {%endfor%}
 			</select>
+
+			<label for="course_name">Choose a course name:</label>
+			<input 
+				type='text' 
+				name='course_name' 
+			        class='form-control mb-3'
+			        id='course_name'
+				placeholder='Course Name'
+			/>
+			<label for="version_name">Choose a version name:</label>
+			<input 
+				type='text' 
+				name='version_name' 
+			        class='form-control mb-3'
+			        id='version_name'
+				placeholder='Version Name'
+			        value='Initial'
+			/>
+			<label for="version_note">Give a version Note:</label>
+	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the initial course verion.</textarea>
+
 			<br><br>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Delete </button>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
 		</form>
       </div>
     </div>
@@ -53,20 +64,11 @@
         </button>
       </div>
       <div class="modal-body">
-	        Alphanumeric Only
-		<form class="list user px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_deletecourse'%}" method="POST" role="form">
 			{%csrf_token%}
-			<label for="Courses">Choose a ourse :</label>
-			<input 
-				type='text' 
-				name='course_name' 
-			        id='course_name'
-				placeholder='Course Name'
-			/>
-			<br><br>
 			<label for="Courses">Choose a Course:</label>
 
-			<select name="Course_id" id="Courses">
+			<select name="Course_id" id="Courses" class='form-control'>
 			  {%for course in context.courses%}
 			  <option value="{{course.id}}">
 				{{course.course_name}}
@@ -74,7 +76,7 @@
 			  {%endfor%}
 			</select>
 			<br><br>
-			<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Create </button>
+			<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete </button>
 		</form>
       </div>
     </div>

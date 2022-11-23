@@ -43,7 +43,7 @@ Courses
 						<div class="card shadow mb-4">
 							<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 								<h6 class="m-0 font-weight-bold text-primary">
-									{{course.course_name}}
+									{{course.course_name|field_name_to_label}}
 								</h6>
 								<div class="dropdown no-arrow">
 									<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
@@ -55,7 +55,9 @@ Courses
 										<div class="dropdown-header">Course Actions:</div>
 										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#RenameCourseModal_{{course.id}}">Update Name</a>
 										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#UpdateSummaryModal_{{course.id}}">Update Summary</a>
-										<a class="dropdown-item text-primary" href="#" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Publish new version</a>
+										<a class="dropdown-item text-primary" href="#" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a>
+										<a class="dropdown-item text-success" href="#" data-toggle="modal" data-target="#PublishCourseModal_{{course.id}}">Publish this course</a>
+										<a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#UnPublishCourseModal_{{course.id}}">UnPublish this course</a>
 									</div>
 									{%include 'dashboard/general/items/mycourse_actions.html'%}
 								</div>
@@ -63,8 +65,17 @@ Courses
 							<div class="card-body">
 								<h5> Latest Specification: {{course.specification}}</h5>
 								<h5> Summary: {{course.course_summary}}</h5>
-								<h5> Publication: {{course.course_publication}}</h5>
+								<h5> Published: {{course.course_publication}}</h5>
 								<h5> Deleted: {{course.deleted}}</h5>
+								<h5> Created: {{course.course_created_at}}</h5>
+								<h5> Last Change: {{course.course_updated_at}}</h5>
+								<div>
+									<h5>Versions:</h5>
+									{%for version in context.course_versions|index:course.id%}
+									<h6 class='ml-4'>- {{version.version_name}} - {{version.version_created_at}}</h6>
+									{%endfor%}
+
+								</div>
 							</div>
 						</div>
 					</div>
