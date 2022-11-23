@@ -1,5 +1,6 @@
 #Practice practice container                                                    
 docker compose up -d                                                            
+docker exec -i container_pp2 bash -c 'python3 manage.py collectstatic --noinput'         
 docker exec -i container_pp2 bash -c 'python3 manage.py makemigrations'         
 docker exec -i container_pp2 bash -c 'python3 manage.py migrate'                
 docker exec -i container_pp2 bash -c 'python3 -m celery -A PP2 worker -l info -D'
