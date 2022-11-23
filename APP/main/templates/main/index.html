@@ -104,7 +104,7 @@ PracticePractice has thousands of practice questions along with detailed notes, 
 
 
 
-{%if user.is_member == False%}
+{%if user.is_member == False or user.is_authenticated == False%}
 <div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
 	<div class=''>
 		<img class="img-fluid" style='float:right;margin:auto;width:400px;'src="{% static 'base/svg/undraw_savings_re_eq4w.svg' %}" /><br>
