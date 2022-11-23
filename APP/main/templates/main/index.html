@@ -1,4 +1,5 @@
 {% extends 'base/base.html'%}
+{%load static%}
 
 {%block page_name%}
 	Home
@@ -15,5 +16,125 @@ PracticePractice has thousands of practice questions along with detailed notes, 
 {%endblock%}
 
 {%block content%}
-	{{context}}
+<style>
+.landing_wrapper{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-areas: 'left right';
+}
+</style>
+
+
+<div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
+	<div class='ml-4'>
+		<img class="img-fluid" style='float:right;margin:auto;width:300px;'src="{% static 'base/svg/undraw_welcoming_re_x0qo.svg' %}" /><br>
+	</div>
+
+	<div class=''>
+		<p class='h3 mt-4 font-weight-bold'>Welcome to </p><p class='h1 mb-4 text-primary font-weight-bold text-fluid'>Practice Practice</p>
+		<p class='h6 text-secondary font-weight-bold'>This is a dedicated platform for your academic <br> needs...from univeristy professors to secondary school students! everyone is accounted for :)</p>
+	</div>
+
+</div>
+<hr class='sidebar-divider' style='border-width:2px;'>
+
+
+
+<div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
+	<div class=''>
+		<img class="img-fluid" style='float:left;margin:auto;width:300px;'src="{% static 'base/svg/undraw_education_f8ru.svg' %}" /><br>
+	</div>
+
+	<div class=''>
+		<p class='h1 mt-4 text-primary font-weight-bold'>Real Courses</p>
+		<p class='h6 mb-4 text-secondary font-weight-bold'>Our experts focus on creating real academic courses of the highest quality, based directly on rigorous qualifications that you can obtain from official institutions. Our courses range from highschool to univeristy level, and our expanding library accomodates for as many international qualifications as possible. Come see our courseplace and <strong class='text-primary'>find the course for you!</strong></p>
+		<a href="{%url 'dashboard:marketplace'%}" class="btn btn-primary btn-user">
+			<i class="bi bi-shop" 
+			     style='color:white;'
+			   />
+			CoursePlace
+		</a>
+	</div>
+
+</div>
+<hr class='sidebar-divider' style='border-width:2px;'>
+
+
+
+<div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
+	<div class='ml-4'>
+		<p class='h1 mb-4 mt-4 text-primary font-weight-bold'>Zettlekazten</p>
+		<p class='h6 text-secondary font-weight-bold'>Our courses are created using a system based on the Zettlekazten principle, maximising your learning through a fundemental and easy to follow step by step approach to teaching.</p>
+	</div>
+	<div class=''>
+		<img  class="img-fluid" style='float:left;margin:auto;width:400px;'src="{% static 'base/svg/undraw_road_to_knowledge_m8s0.svg' %}" /><br>
+	</div>
+
+</div>
+<hr class='sidebar-divider' style='border-width:2px;'>
+
+
+
+
+<div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
+	<div class='ml-4'>
+		<p class='h1 mb-4 mt-4 text-primary font-weight-bold'>MultiMedia</p>
+		<p class='h6 text-secondary font-weight-bold'>All of our courses are MultiMedia; we believe that the best way to learn is not just by watching videos, but by an interactive and diverse approach, that's why we create each course with the ability to <strong class='text-success'>read it, write for it, watch it, play and to explore it.</strong> We use Artificial Intelligence to assess your written work and check your understanding of the subject.</p>
+	</div>
+
+	<div class=''>
+		<img class="img-fluid" style='float:right;margin:auto;width:400px;'src="{% static 'base/svg/undraw_online_media_re_r9qv.svg' %}" /><br>
+	</div>
+</div>
+<hr class='sidebar-divider' style='border-width:2px;'>
+
+
+
+<div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
+	<div class=''>
+		<img class="img-fluid" style='margin:auto;width:400px;'src="{% static 'base/svg/undraw_charts_re_5qe9.svg' %}" /><br>
+	</div>
+	<div class='ml-4'>
+		<p class='h1 mb-4 mt-4 text-primary font-weight-bold'>Tracking System</p>
+		<p class='h6 text-secondary font-weight-bold'>Imagine you knew exactly which topics you're weakest at, PracticePractice has the tools to tell you your statistical performance per topic, allowing you to make well informed decisions as to what you need to spend your time on, this is done for EVERY COURSE.</p>
+	</div>
+
+</div>
+<hr class='sidebar-divider' style='border-width:2px;'>
+
+
+
+{%if user.is_member == False%}
+<div style='width:90%;margin:auto;' class='landing_wrapper mb-3'>
+	<div class=''>
+		<img class="img-fluid" style='float:right;margin:auto;width:400px;'src="{% static 'base/svg/undraw_savings_re_eq4w.svg' %}" /><br>
+	</div>
+	<div class='ml-4'>
+		<p class='h1 mb-4 mt-4 text-primary font-weight-bold'>Save on all academic costs</p>
+		<p class='h6 text-secondary font-weight-bold'>PracticePractice is actually <strong class='text-success'>affordable ;)</strong>, and you can get started for free, but you need an account first (no payment details required).</p>
+		<br>
+		{%if user.is_authenticated == False%}
+		<a href="{%url 'user:register'%}" class="btn btn-primary btn-user">
+			<i class="bi bi-plus-circle-dotted" 
+			     style='color:white;'
+			   />
+			Sign Up
+		</a>
+		{%endif%}
+		<a href="{%url 'user:join'%}" class="btn btn-success btn-user">
+			<i class="bi bi-person-plus" 
+			     style='color:white;'
+			   />
+			Get a MemberShip
+		</a>
+	</div>
+
+</div>
+<hr class='sidebar-divider' style='border-width:2px;'>
+{%endif%}
+
+
+
+
+
 {%endblock%}
