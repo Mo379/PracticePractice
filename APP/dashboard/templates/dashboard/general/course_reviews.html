@@ -1,0 +1,14 @@
+{% extends 'dashboard/base.html'%}
+{%load static%}
+{%load general%}
+
+{%block page_name%}
+Reviews
+{%endblock%}
+
+{%block content%}
+{%definevar 'coursereview' as alert_loc%}
+{%include 'base/alert.html'%}
+
+
+{%endblock%}

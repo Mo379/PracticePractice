@@ -57,14 +57,9 @@ urlpatterns = [
         name='_deletecourse'
     ),
     path(
-        'content/_renamecourse/',
-        views._renamecourse,
-        name='_renamecourse'
-    ),
-    path(
-        'content/_updatecoursesummary/',
-        views._updatecoursesummary,
-        name='_updatecoursesummary'
+        'content/_updatecourseinformation/',
+        views._updatecourseinformation,
+        name='_updatecourseinformation'
     ),
     path(
         'content/_createversion/',
@@ -80,6 +75,11 @@ urlpatterns = [
         'content/_unpublishcourse/',
         views._unpublishcourse,
         name='_unpublishcourse'
+    ),
+    path(
+        'content/_course_subscribe/',
+        views._course_subscribe,
+        name='_course_subscribe'
     ),
     path(
         'content/_createspec/',

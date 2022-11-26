@@ -1,61 +1,237 @@
-<div class="modal fade" id="RenameCourseModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{%load general%}
+<div class="modal fade" id="CourseInformationModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Rename Course</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Update Course Information</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-		<form class="px-3 py-3"  action="{%url 'content:_renamecourse'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_updatecourseinformation'%}" method="POST" role="form">
 			{%csrf_token%}
-			<label for="new_name">Give a New Course Name</label>
+			<input 
+				type='hidden' 
+				name='course_id' 
+				value='{{course.id}}'
+			/>
+
+
+			<label for="new_name">Give a New Course Name: </label>
 			<input 
 				type='text' 
 				name='new_name' 
 			        class='form-control'
 				placeholder='Rename Course'
 				value='{{course.course_name}}'
-			/>
+			/><br>
+
+
+			<label for="estimated_time">Give an estimated course completion time: </label>
 			<input 
-				type='hidden' 
-				name='course_id' 
-				value='{{course.id}}'
-			/>
+				type='text' 
+				name='estimated_time' 
+			        class='form-control'
+				placeholder='Estimated course completion time'
+				value='{{course.course_estimated_time}}'
+			/><br> 
+
+
+			<label for="course_level">Select a Course Level:</label>
+			<select name="course_level" id="course_level" class='form-control'>
+			  <option value="Beginner"
+				  {%if course.course_level == 'Beginner'%}
+				  selected
+				  {%endif%}
+			  >
+			  	Beginner
+			  </option>
+			  <option value="Intermediate"
+				  {%if course.course_level == 'Intermediate'%}
+				  selected
+				  {%endif%}
+			  >
+			  	Intermediate
+			  </option>
+			  <option value="Advanced"
+				  {%if course.course_level == 'Advanced'%}
+				  selected
+				  {%endif%}
+			  >
+			  	Advanced
+			  </option>
+			</select><br> 
+
+
+			<label for="course_language">Select a Course Language:</label>
+			<select name="course_language" id="course_language" class='form-control'>
+			  <option value="English"
+				  {%if course.course_language == 'English'%}
+				  selected
+				  {%endif%}
+			  >
+			  	English
+			  </option>
+			</select><br> 
+
+			<label for="new_skill_input">General skills in this course: </label>
+			<div class="input-group mb-3">
+			  <input id="new_skill_input" type="text" class="form-control" placeholder="add an item..." aria-label="Add an item" aria-describedby="basic-addon2">
+			  <div class="input-group-append">
+			    <button class="btn btn-outline-info" id="add_skill_button" type="button">Add</button>
+			  </div>
+			</div>
+
+			<div class="col-12">
+				<ol class='list_group' id='skill_list'>
+					{%for idd, skill in course.course_skills.items %}
+					<li class='list-group-item'>
+						<input type='hidden' name='ordered_items_skills[]' value='{{skill}}'/>
+						<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+							<i class="bi bi-trash-fill"></i>
+						</a>
+						<a style='text-decoration:none;'>
+							{{skill|field_name_to_label}}
+						</a>
+					</li >
+					{%endfor%}
+				</ol>
+			</div><br>
+
+
+			<label for="new_objective_input">Course learning objectives:</label>
+			<div class="input-group mb-3">
+			  <textarea id="new_objective_input" type="text" class="form-control" placeholder="add an item..." aria-label="Add an item" aria-describedby="basic-addon2"></textarea>
+			  <div class="input-group-append">
+			    <button class="btn btn-outline-info" id="add_objective_button" type="button">Add</button>
+			  </div>
+			</div>
+
+			<div class="col-12">
+				<ol class='list_group' id='objectives_list'>
+					{%for idd, objective in course.course_learning_objectives.items %}
+					<li class='list-group-item'>
+						<input type='hidden' name='ordered_items_objectives[]' value='{{objective}}'/>
+						<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+							<i class="bi bi-trash-fill"></i>
+						</a>
+						<a style='text-decoration:none;'>
+							{{objective}}
+						</a>
+					</li >
+					{%endfor%}
+				</ol>
+			</div><br>
+
+			<label for="message-text" class="col-form-label">Course Summary:</label>
+			<textarea class="form-control mb-2" id="message-text" name='course_summary' rows='15'>{{course.course_summary}}</textarea>
 			<br><br>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Update </button>
 		</form>
       </div>
     </div>
   </div>
 </div>
+<script>
+var skill_button = document.getElementById("add_skill_button");
+var skill_ul = document.getElementById("skill_list");
+
+skill_button.addEventListener("click", function() {
+  var skill_input = document.getElementById("new_skill_input");
+  var skill_list_li = document.createElement("li");
+  skill_list_li.classList.add("list-group-item");
+
+  var child_input = document.createElement("input");
+  child_input.value = skill_input.value
+  child_input.type = 'hidden'
+  child_input.name = 'ordered_items_skills[]'
+  skill_list_li.appendChild(child_input);
+
+  var icon = document.createElement("i");
+  icon.classList.add("bi"); 
+  icon.classList.add("bi-trash-fill"); 
+  var child_del_button = document.createElement("a");
+  child_del_button.type = 'button'
+  child_del_button.style.cssText= 'font-size:12px;';
+  child_del_button.classList.add("btn"); 
+  child_del_button.classList.add("btn-danger"); 
+  child_del_button.classList.add("deletable_btn"); 
+  child_del_button.classList.add("mr-1"); 
+  child_del_button.classList.add("ml-1"); 
+  child_del_button.appendChild(icon);
+  skill_list_li.appendChild(child_del_button);
+
+  var child_text = document.createElement("a");
+  child_text.appendChild(document.createTextNode(skill_input.value));
+  skill_list_li.appendChild(child_text);
+
+  skill_ul.appendChild(skill_list_li);
+  skill_input.value = ''
+  const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+  }
+})
 
 
 
-<div class="modal fade" id="UpdateSummaryModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Update Course Summary</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<form class="user px-3 py-3"  action="{%url 'content:_updatecoursesummary'%}" method="POST" role="form">
-		{%csrf_token%}
-          <div class="form-group">
-	    <input type='hidden' name='course_id' value='{{course.id}}'/>
-            <label for="message-text" class="col-form-label">Course Summary:</label>
-	    <textarea class="form-control mb-2" id="message-text" name='course_summary' rows='15'>{{course.course_summary}}</textarea>
-	    <button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div> 
+var objective_button = document.getElementById("add_objective_button");
+var objective_ul = document.getElementById("objectives_list");
+
+objective_button.addEventListener("click", function() {
+  var objective_input = document.getElementById("new_objective_input");
+  var objective_list_li = document.createElement("li");
+  objective_list_li.classList.add("list-group-item");
+
+  var child_input = document.createElement("input");
+  child_input.value = objective_input.value
+  child_input.type = 'hidden'
+  child_input.name = 'ordered_items_objectives[]'
+  objective_list_li.appendChild(child_input);
+
+  var icon = document.createElement("i");
+  icon.classList.add("bi"); 
+  icon.classList.add("bi-trash-fill"); 
+  var child_del_button = document.createElement("a");
+  child_del_button.type = 'button'
+  child_del_button.style.cssText= 'font-size:12px;';
+  child_del_button.classList.add("btn"); 
+  child_del_button.classList.add("btn-danger"); 
+  child_del_button.classList.add("deletable_btn"); 
+  child_del_button.classList.add("mr-1"); 
+  child_del_button.classList.add("ml-1"); 
+  child_del_button.appendChild(icon);
+  objective_list_li.appendChild(child_del_button);
+
+  var child_text = document.createElement("a");
+  child_text.appendChild(document.createTextNode(objective_input.value));
+  objective_list_li.appendChild(child_text);
+
+  objective_ul.appendChild(objective_list_li);
+  objective_input.value = ''
+  const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+  }
+})
+
+
+const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+}
+
+
+
+</script>
+
 
 
 

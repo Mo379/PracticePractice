@@ -157,9 +157,16 @@ class Course(models.Model):
         )
     course_name = models.CharField(max_length=150, default='', null=True)
     course_summary = models.TextField(max_length=1000, default='', null=True)
-    course_publication = models.BooleanField(default=False, null=True)
+    course_skills = models.JSONField(default=OrderedDict, null=True)
+    course_learning_objectives = models.JSONField(default=OrderedDict, null=True)
+    course_contributors = models.JSONField(default=OrderedDict, null=True)
+    course_language = models.CharField(max_length=150, default='', null=True)
+    course_level = models.CharField(max_length=150, default='', null=True)
+    course_estimated_time = models.CharField(max_length=150, default='', null=True)
+    #
     course_created_at = models.DateTimeField(auto_now_add=True)
     course_updated_at = models.DateTimeField(auto_now=True)
+    course_publication = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):
@@ -186,6 +193,18 @@ class CourseVersion(models.Model):
 
     def __str__(self):
         return self.version_name
+
+
+class CourseReview(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, db_index=True)
+    review_stars = models.PositiveSmallIntegerField(null=True)
+    review_text = models.CharField(max_length=255, default='', null=True)
+    review_created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username + '-' + self.course.specification.spec_subject + \
+                '-' + self.course.specification.spec_name
 
 
 class CourseSubscription(models.Model):

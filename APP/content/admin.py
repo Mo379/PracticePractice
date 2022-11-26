@@ -11,6 +11,7 @@ from content.models import (
         ContentTemplate,
         Course,
         CourseVersion,
+        CourseReview,
         CourseSubscription,
         ExampleModel
         )
@@ -36,5 +37,6 @@ admin.site.register(Specification)
 admin.site.register(ContentTemplate)
 admin.site.register(Course)
 admin.site.register(CourseVersion)
+admin.site.register(CourseReview)
 admin.site.register(CourseSubscription)
 admin.site.register(ExampleModel, ExampleModelAdmin)

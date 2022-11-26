@@ -13,7 +13,14 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
-from content.models import (Point, Specification, Course, CourseVersion)
+from content.models import (
+        Point,
+        Specification,
+        Course,
+        CourseVersion,
+        CourseSubscription,
+        CourseReview
+    )
 from content.util.GeneralUtil import (
         filter_drag_drop_selection,
         order_full_spec_content,
@@ -92,6 +99,83 @@ class MarketPlaceView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'dashboard/marketplace'
+        courses = Course.objects.all(
+                #course_publication=True,
+                #deleted=False
+                )
+        context['courses'] = courses
+        return context
+
+
+class MarketCourseView(
+            LoginRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = ''
+
+    template_name = "dashboard/general/marketcourse.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("MarketPlace", reverse("dashboard:marketplace")),
+                ("Course", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/marketcourse'
+        course_id = self.kwargs['course_id']
+        course = Course.objects.get(pk=course_id)
+        versions = CourseVersion.objects.filter(course=course).order_by(
+                    '-version_number'
+                )
+        subscription_status = CourseSubscription.objects.filter(
+                user=self.request.user,
+                course=course
+            ).exists()
+        content = order_live_spec_content(versions[0].version_content)
+        context['course'] = course
+        context['versions'] = versions
+        context['ordered_content'] = content
+        context['course_subscription_status'] = subscription_status
+        return context
+
+
+class CourseReviewsView(
+            LoginRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = ''
+
+    template_name = "dashboard/general/course_reviews.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("MarketPlace", reverse("dashboard:marketplace")),
+                ("Course", reverse("dashboard:marketcourse", kwargs={'course_id':self.kwargs['course_id']})),
+                ("Reviews", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'dashboard/coursereviews'
+        course_id = self.kwargs['course_id']
+        course = Course.objects.get(pk=course_id)
+        reviews = CourseReview.objects.filter(course=course).order_by(
+                    '-review_created_at'
+                )
+        context['course'] = course
+        context['reviews'] = reviews
         return context
 
 

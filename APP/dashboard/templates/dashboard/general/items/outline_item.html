@@ -1,0 +1,58 @@
+{%load general%}
+{%for module in content%}
+<div class="accordion mb-1" id="Module_{{module}}">
+  <div class="card">
+	  <div class="card-header" id="heading-{{module}}" style='background:#000000;color:white;'>
+      <h2 class="mb-0">
+	        <button class="btn btn-block text-left" style='color:white;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
+		<i class="bi bi-arrow-bar-right"></i> Module {{forloop.counter}} - {{module|field_name_to_label}}
+	</button>
+      </h2>
+    </div>
+
+    <div id="collapse-{{module}}" class="collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
+      <div class="card-body" style='padding:10px;'>
+	        {%for chapter in content|index:module|index:'content'%}
+		<div class="accordion mb-1" id="Chapter_{{chapter}}">
+		  <div class="card">
+			  <div class="card-header" id="heading-{{chapter}}" style='background:#000000;color:white;'>
+		      <h2 class="mb-0">
+			      <button class="btn btn-block text-left" style='color:white;' type="button" data-toggle="collapse" data-target="#collapse-{{chapter}}" aria-expanded="true" aria-controls="chapter-{{chapter}}">
+				      <i class="bi bi-arrow-bar-right"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}
+			</button>
+		      </h2>
+		    </div>
+
+		    <div id="collapse-{{chapter}}" class="collapse" aria-labelledby="heading-{{chapter}}" data-parent="#Chapter_{{chapter}}">
+		      <div class="card-body" style='padding:10px;'>
+			       {%for topic in content|index:module|index:'content'|index:chapter|index:'content'%}
+			       <div class="accordion mb-1" id="Topic_{{topic}}">
+				  <div class="card">
+					  <div class="card-header" id="heading_{{topic}}" style='background:#000000;color:white;'>
+				      <h2 class="mb-0">
+					      <button class="btn btn-block text-left" style='color:white;' type="button" data-toggle="collapse" data-target="#collapse-{{topic}}" aria-expanded="true" aria-controls="topic-{{topic}}">
+						<i class="bi bi-arrow-bar-right"></i> Topic {{forloop.counter}} - {{topic|field_name_to_label}}
+					</button>
+				      </h2>
+				    </div>
+
+				    <div id="collapse-{{topic}}" class="collapse" aria-labelledby="heading-{{topic}}" data-parent="#Topic_{{topic}}">
+				      <div class="card-body" style='padding:10px;'>
+					    {%for point in content|index:module|index:'content'|index:chapter|index:'content'|index:topic|index:'content'%}
+					    <span class='font-weight-bold ml-5'><i class="bi bi-arrow-bar-right"></i> Point {{forloop.counter}} - {{point|p_unique_to_title}} </span><br>
+					    {%endfor%}
+				      </div>
+				    </div>
+				  </div>
+				</div>
+				{%endfor%}
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		{%endfor%}
+      </div>
+    </div>
+  </div>
+</div>
+{%endfor%}

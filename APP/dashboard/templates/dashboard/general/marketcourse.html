@@ -1,0 +1,105 @@
+{% extends 'dashboard/base.html'%}
+{%load static%}
+{%load general%}
+
+{%block page_name%}
+Course Page
+{%endblock%}
+
+{%block content%}
+{%definevar 'marketcourse' as alert_loc%}
+{%include 'base/alert.html'%}
+
+<style>
+.courseplace_wrapper{
+	width:95%;
+	margin:auto;
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-gap: 10px;
+}
+.my_course_card{
+}
+.my_course_card:hover{
+	transform: scale(1.01, 1.01);
+	transition: transform 0.3s ease-in-out;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  	transition: box-shadow 0.3s ease-in-out;
+	border: 1px solid black;
+}
+</style>
+{%definevar context.course as course%}
+
+
+<div class="my_course_card card" style="width: 20em;height: auto; margin: 5px;float:right;position:absolute: top:1em;right: 1em;">
+	<img class="card-img-top" src="{%static "base/img/Maths.jpg"%}" alt="Card image cap">
+	<div class="card-body">
+		<div class="" style='color:black;'>
+			<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
+			</div>
+			<hr class="sidebar-divider mb-3">
+			{%if context.course_subscription_status == False%}
+			<form class="px-3 py-3"  action="{%url 'content:_course_subscribe'%}" method="POST" role="form">
+				{%csrf_token%}
+				<input name='course_id' value='{{course.id}}' type='hidden'>
+				<button type= 'submit' class='btn btn-danger mb-2' > Subscribe Now</button>
+			</form>
+			{%else%}
+			<a type= 'button' class='btn btn-success mb-2' href='#'>Study</a>
+			<a type= 'button' class='btn btn-success mb-2' href='#'>Give a review</a>
+			{%endif%}
+		</div>
+	</div>
+</div>
+<div style='min-height: 100vh;'>
+	<div style='background:#212121;border-radius: 15px 15px 0px 0px'>
+		<div style='color: white;max-width: 40em;padding: 10px;'>
+			<h1 class='font-weight-bold'><i class="bi bi-book"></i> {{course.course_name}}</h1>
+			<p> {{course.course_summary}}</p>
+			{%definevar context.versions|index:0 as latest_version%}
+			<div class="" style=''><strong><i class="bi bi-clock-fill"></i> Estimated Time:</strong> {{course.course_estimated_time}}</div>
+			<div class="" style=''><strong><i class="bi bi-bar-chart-line"></i> Level:</strong> {{course.course_level}}</div>
+			<div> <i class="bi bi-translate"></i> <strong>Language:</strong> {{course.course_language}}</div>
+			<div> <i class="bi bi-hammer"></i> <strong>Created by:</strong> 
+				{{course.user.first_name}}
+				{{course.user.last_name}}
+				{%for contributor in course.course_contributors%}
+				{{contributor}}
+				{%endfor%}
+			</div>
+			<div> <i class="bi bi-clock-history"></i> <strong>Last Update:</strong> {{latest_version.version_updated_at|date:"M d, Y"}}</div>
+		</div>
+	</div>
+
+
+	<div style=''>
+		<div style='color: black;'>
+			<div class="" style=''>
+				<div style='max-width: 40em;border:1px solid black; padding:15px;' class='mt-3 mb-3'>
+					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-bullseye"></i> Course Learning Objectives </h1>
+					<div class='mt-2' style='display:grid;grid-template-columns: 1fr 1fr;grid-gap:10px;'>
+						{%for idd,objective in course.course_learning_objectives.items%}
+						<p class='mr-5'><i class="bi bi-check2-circle text-info mr-2"></i> {{objective}}</p>
+						{%endfor%}
+					</div>
+					<div style='color:black;font-size: 12px;' class='mb-1'>
+						<strong><i class="bi bi-lightning-fill"></i> Skills You'll gain:</strong>
+						{%for idd, skill in course.course_skills.items%}
+						<span class='mb-1' style='display:inline-block;background: silver;color:black;padding:3px;border-radius:5px;'>{{skill}}</span>
+						{%endfor%}
+					</div>
+				</div>
+
+
+				<div style='margin:auto; border:1px solid black; padding:15px;' class='mb-3'>
+					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-journal-text"></i> Course Outline </h1>
+					<div class='mt-2' style=''>
+						{%definevar context.ordered_content as content_ss%}
+						{%include 'dashboard/general/items/outline_item.html'%}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{%endblock%}

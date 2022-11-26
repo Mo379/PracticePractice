@@ -737,10 +737,16 @@ def _deletecourse(request):
             )
 
 
-def _renamecourse(request):
+def _updatecourseinformation(request):
     if request.method == 'POST':
-        course_name = request.POST['new_name']
         course_id = request.POST['course_id']
+        course_name = request.POST['new_name']
+        course_skills = request.POST.getlist('ordered_items_skills[]')
+        course_objectives = request.POST.getlist('ordered_items_objectives[]')
+        course_summary = request.POST['course_summary']
+        course_level = request.POST['course_level']
+        course_language = request.POST['course_language']
+        course_estimated_time = request.POST['estimated_time']
         courses = Course.objects.filter(
                 user=request.user,
                 pk=course_id
@@ -750,6 +756,13 @@ def _renamecourse(request):
             try:
                 course = courses[0]
                 course.course_name = course_name
+                course.course_summary = course_summary
+                course.course_level = course_level
+                course.course_language = course_language
+                course.course_estimated_time = course_estimated_time
+                #
+                course.course_skills = {idd: skill for idd, skill in enumerate(course_skills)}
+                course.course_learning_objectives = {idd: skill for idd, skill in enumerate(course_objectives)}
                 course.save()
             except Exception:
                 messages.add_message(
@@ -770,47 +783,6 @@ def _renamecourse(request):
                     request,
                     messages.INFO,
                     'Something went wrong, could not update course.',
-                    extra_tags='alert-warning course'
-                )
-        #
-        return redirect(
-                'dashboard:mycourses',
-            )
-
-
-def _updatecoursesummary(request):
-    if request.method == 'POST':
-        course_id = request.POST['course_id']
-        course_summary = request.POST['course_summary']
-        courses = Course.objects.filter(
-                user=request.user,
-                pk=course_id
-            )
-        #
-        if len(courses) == 1:
-            try:
-                course = courses[0]
-                course.course_summary = course_summary
-                course.save()
-            except Exception:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong could not update course.',
-                        extra_tags='alert-warning course'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Your course was successfully updated.',
-                        extra_tags='alert-success course'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Input can only be alphanumeric!',
                     extra_tags='alert-warning course'
                 )
         #
@@ -948,6 +920,48 @@ def _unpublishcourse(request):
         #
         return redirect(
                 'dashboard:mycourses',
+            )
+
+
+def _course_subscribe(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        courses = Course.objects.filter(
+                user=request.user,
+                pk=course_id
+            )
+        #
+        if len(courses) == 1:
+            try:
+                course = courses[0]
+                CourseSubscription.objects.get_or_create(
+                        user=request.user,
+                        course=course
+                    )
+            except Exception:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong could not create subscription.',
+                        extra_tags='alert-warning marketcourse'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Your subscription to this course was successfully created.',
+                        extra_tags='alert-success marketcourse'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, could not find course',
+                    extra_tags='alert-warning marketcourse'
+                )
+        #
+        return redirect(
+                'dashboard:marketcourse', course_id=course_id
             )
 
 

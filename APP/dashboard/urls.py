@@ -8,6 +8,8 @@ urlpatterns = [
     # general
     path('', views.IndexView.as_view(), name='index'),
     path('marketplace', views.MarketPlaceView.as_view(), name='marketplace'),
+    path('marketcourse/<course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
+    path('coursereviews/<course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
     path('mycourses', views.MyCoursesView.as_view(), name='mycourses'),
     path(
         'specifications',

@@ -53,8 +53,7 @@ Courses
 									<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
 										aria-labelledby="dropdownMenuLink">
 										<div class="dropdown-header">Course Actions:</div>
-										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#RenameCourseModal_{{course.id}}">Update Name</a>
-										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#UpdateSummaryModal_{{course.id}}">Update Summary</a>
+										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course Information</a>
 										<a class="dropdown-item text-primary" href="#" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a>
 										<a class="dropdown-item text-success" href="#" data-toggle="modal" data-target="#PublishCourseModal_{{course.id}}">Publish this course</a>
 										<a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#UnPublishCourseModal_{{course.id}}">UnPublish this course</a>
@@ -63,8 +62,25 @@ Courses
 								</div>
 							</div>
 							<div class="card-body">
+								<img class="card-img-top" src="{%static "base/img/Maths.jpg"%}" alt="Card image cap">
 								<h5> Latest Specification: {{course.specification}}</h5>
 								<h5> Summary: {{course.course_summary}}</h5>
+								<div>
+									<h5>Skills to gain:</h5>
+									{%for idd, skill in course.course_skills.items%}
+									<h6 class='ml-4'>- {{skill}}</h6>
+									{%endfor%}
+
+								</div>
+								<div>
+									<h5>Objectives:</h5>
+									{%for idd, objective in course.course_learning_objectives.items%}
+									<h6 class='ml-4'>- {{objective}}</h6>
+									{%endfor%}
+
+								</div>
+								<h5> Estimated Time: {{course.course_estimated_time}}</h5>
+								<h5> Level: {{course.course_level}}</h5>
 								<h5> Published: {{course.course_publication}}</h5>
 								<h5> Deleted: {{course.deleted}}</h5>
 								<h5> Created: {{course.course_created_at}}</h5>
