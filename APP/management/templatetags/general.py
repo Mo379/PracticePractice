@@ -173,7 +173,7 @@ def ToMarkdown(content, point):
             img_info = img_element['img_info']
             img_name = img_element['img_name']
             if img_name and img_info:
-                point_dir = point.p_directory.split('/universal/')[1]
+                point_dir = point.p_directory.split('universal/')[1]
                 file_path = os.path.join(point_dir,'files',img_name)
                 context = {
                         'CDN': settings.CDN_URL,
@@ -204,7 +204,7 @@ def ToMarkdownQuestion(content, question):
         item = str(item)
         q_part = question_parts[item]
         q_part_name = q_part['q_part']
-        q_part_content= q_part['content']
+        q_part_content = q_part['content']
         q_part_mark = q_part['q_part_mark']
         for content_item in range(len(q_part_content)):
             content_item = str(content_item)
@@ -220,9 +220,10 @@ def ToMarkdownQuestion(content, question):
                 img_info = img_element['img_info']
                 img_name = img_element['img_name']
                 if img_name:
-                    question_dir = question.q_dir.split('/universal/')[1]
+                    question_dir = question.q_dir.split('universal/')[1]
                     file_path = os.path.join(question_dir,'files',img_name)
                     context = {
+                            'CDN': settings.CDN_URL,
                             'img_info': img_info,
                             'file_path': file_path,
                         }

@@ -59,7 +59,7 @@
 <div class="container col-9 text-justify" style='padding:5px;border:1px solid black;'>
 	{%if context.previous != None%}
 	<a class="" 
-		href="{% url 'content:notearticle' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name context.sampl_object.p_moduel context.previous%}" 
+		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.previous%}" 
 		style='color:black;border-bottom: 1px solid black;'>
 		<i class="bi bi-arrow-bar-left"></i> {{context.previous|field_name_to_label}}
 	</a>
@@ -72,7 +72,7 @@
 	{%endif%}
 	{%if context.next != None%}
 	<a class="ml-3" 
-		href="{% url 'content:notearticle' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name context.sampl_object.p_moduel context.next%}" 
+		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.next%}" 
 		style='color:black;border-bottom: 1px solid black;'>
 		<i class="bi bi-arrow-bar-right"></i>{{context.next|field_name_to_label}}
 	</a>
@@ -85,7 +85,7 @@
 	{%endif%}
 	<br>
 	<a class="" 
-	   href="{% url 'content:question' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name sample.p_moduel sample.p_chapter%}" 
+	   href="{% url 'content:question' context.course.id sample.p_moduel sample.p_chapter%}" 
 		style='color:black;border-bottom: 1px solid black;'>
 		<i class="bi bi-star-fill"></i> Practice Questions
 	</a>
@@ -126,7 +126,7 @@
 <div class="container col-9 text-justify" style='padding:5px;border:1px solid black;'>
 	{%if context.previous != None%}
 	<a class="" 
-		href="{% url 'content:notearticle' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name context.sampl_object.p_moduel context.previous%}" 
+		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.previous%}" 
 		style='color:black;border-bottom: 1px solid black;'>
 		<i class="bi bi-arrow-bar-left"></i> {{context.previous|field_name_to_label}}
 	</a>
@@ -139,7 +139,7 @@
 	{%endif%}
 	{%if context.next != None%}
 	<a class="ml-3" 
-		href="{% url 'content:notearticle' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name context.sampl_object.p_moduel context.next%}" 
+		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.next%}" 
 		style='color:black;border-bottom: 1px solid black;'>
 		<i class="bi bi-arrow-bar-right"></i>{{context.next|field_name_to_label}}
 	</a>

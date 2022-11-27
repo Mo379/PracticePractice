@@ -210,6 +210,7 @@ class CourseReview(models.Model):
 class CourseSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, db_index=True)
+    subscription_created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.user.username + '-' + self.course.specification.spec_subject + \

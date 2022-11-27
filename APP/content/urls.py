@@ -6,20 +6,17 @@ from content import views
 app_name = 'content'
 urlpatterns = [
     path('content', views.ContentView.as_view(), name='content'),
-    path('content/questions', views.QuestionsView.as_view(), name='questions'),
     path(
-        'content/question/<level>/<subject>/<board>/<specification>/<module>/<chapter>/',
+        'content/question/<course_id>/<module>/<chapter>/',
         views.QuestionView.as_view(),
         name='question'
         ),
-    path('content/notes', views.NotesView.as_view(), name='notes'),
+    path('content/notes/<course_id>', views.NotesView.as_view(), name='notes'),
     path(
-        'content/note-article/<level>/<subject>/<board>/<specification>/<module>/<chapter>/',
+        'content/note-article/<course_id>/<module>/<chapter>/',
         views.NoteArticleView.as_view(),
         name='notearticle'
     ),
-    path('content/papers', views.PapersView.as_view(), name='papers'),
-    path('content/paper/<subject>/<board>/<board_moduel>/<exam_year>/<exam_month>/', views.PaperView.as_view(), name='paper'),
     #
     path(
         'content/_inheritfromspec',

@@ -36,9 +36,6 @@ RUN chown :www-data /var/www/html/logs
 #requirements
 RUN pip install --upgrade pip
 RUN pip install -r /var/www/html/requirements.txt 
-RUN python3 manage.py makemigrations
-RUN python3 manage.py migrate
-RUN python3 manage.py dbrestore
 #expose and run
 EXPOSE 80 3500
 CMD ["apache2ctl", "-D", "FOREGROUND"]

@@ -1,5 +1,6 @@
 {% extends 'base/base.html'%}
 {%load static%}
+{%load general%}
 
 {%block page_name%}
 	Content
@@ -16,43 +17,53 @@ Find the revision notes, questions and past papers you want, all in one place!
 {%endblock%}
 
 {%block content%}
+<style>
+.courseplace_wrapper{
+	width:95%;
+	margin:auto;
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-gap: 10px;
+}
+.my_course_card{
+}
+.my_course_card:hover{
+	transform: scale(1.01, 1.01);
+	transition: transform 0.3s ease-in-out;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  	transition: box-shadow 0.3s ease-in-out;
+	border: 1px solid black;
+}
+</style>
 
-
-
-
-
-	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
-	  <img class="card-img-top" src="{%static 'base/img/Home.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
-	  <div class="card-body">
-	    <h5 class="card-title">Notes</h5>
-	    <h5 class="card-title">Universal Specification</h5>
-	    <p class="card-text">This includes all of the notes we have for all subjects and specifications.</p>
-	    <a href="{%url 'content:notes'%}" class="btn btn-primary">Study</a>
-	  </div>
+<div class='courseplace_wrapper'style='width:95%;margin:auto;'>
+	{%for course_subscription in context.courses%}
+	{%definevar course_subscription.course as course%}
+	<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
+		<img class="card-img-top" src="{%static "base/img/Maths.jpg"%}" alt="Card image cap">
+		<div class="card-body">
+			<div class="h6 font-weight-bold" style='color:black;'>{{course.course_name}}</div>
+			<div class="card-text mb-3" >{{course.course_summary}}</div>
+			<div style='color:black;font-size: 12px;' class='mb-1'>
+				<strong>Skills You'll gain:</strong>
+				{%for idd, skill in course.course_skills.items%}
+				<span class='mb-1' style='display:inline-block;background: silver;color:black;padding:3px;border-radius:5px;'>{{skill}}</span>
+				{%endfor%}
+			</div>
+			<div class="" style='color:black;font-size: 12px;'><strong>Estimated Time:</strong> {{course.course_estimated_time}}</div>
+			<div class="" style='color:black;font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
+			<div class="" style='color:black;font-size: 12px;'><strong>English:</strong> {{course.course_language}}</div>
+			<div class="" style='color:black;font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href="{%url 'dashboard:coursereviews' course.id%}">reviews</a>) {{context.total_learners}} learners
 	</div>
-
-
-
-	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
-	  <img class="card-img-top" src="{%static 'base/img/maths.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
-	  <div class="card-body">
-	    <h5 class="card-title">Practice Questions</h5>
-	    <h5 class="card-title">Universal Question Bank</h5>
-	    <p class="card-text">Questions split by topic and difficulty, to target your weakest points.</p>
-	    <a href="{% url 'content:questions'%}" class="btn btn-primary">Practice</a>
-	  </div>
+			<div class="" style='color:black;'>
+				<hr class="sidebar-divider mb-3">
+				<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:notes' course.id%}"> Continue</a>
+			</div>
+		</div>
 	</div>
+	{%endfor%}
+</div>
 
-
-	<div class="card text-center w-75 mb-5" style='margin:auto;border:2px solid black;'>
-	  <img class="card-img-top" src="{%static 'base/img/Physics.jpg'%}" alt="Card image cap" style="height:150px;object-fit:cover;">
-	  <div class="card-body">
-	    <h5 class="card-title">Papers</h5>
-	    <h5 class="card-title">Past Papers</h5>
-	    <p class="card-text">Relevant Past Papers from the most popular exam boards.</p>
-	    <a href="{% url 'content:papers'%}" class="btn btn-primary">Practice</a>
-	  </div>
-	</div>
 {%endblock%}
 
 

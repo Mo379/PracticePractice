@@ -29,130 +29,15 @@ class ContentView(BaseBreadcrumbMixin, generic.ListView):
 
     def get_queryset(self):
         """Return all of the required hub information"""
-        return 'content_content'
-
-
-class QuestionsView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/questions.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("content", reverse("content:content")),
-                ("questions", reverse("content:questions"))
-                ]
-
-    def get_queryset(self):
         context = {}
-        subjects = Question.objects.values(
-                    'q_level',
-                    'q_subject',
-                ).distinct().order_by(
-                    'q_level',
-                    'q_subject',
-                )
-        subjects = [obj for obj in subjects]
-        spec_subscriptions = SpecificationSubscription.objects.filter(
+        course_subscriptions = CourseSubscription.objects.filter(
                 user=self.request.user
-            ) if self.request.user.is_authenticated else ''
+            ).order_by('-subscription_created_at') if self.request.user.is_authenticated else False
+        if course_subscriptions:
+            context['courses'] = course_subscriptions
+        else:
+            context['courses'] = False
         #
-        Note_objs = []
-        spec_names = {}
-        for subject in subjects:
-            # optain the subscribed spec or the unviersal spec
-            subject_loc = subject['q_level']+subject['q_subject']
-            status = 0
-            for user_spec in spec_subscriptions:
-                spec = user_spec.specification
-                spec_loc = spec.spec_level+spec.spec_subject
-                if spec_loc == subject_loc:
-                    content = spec.spec_content
-                    status = 1
-                    break
-            if status == 0:
-                spec = Specification.objects.get(
-                        spec_level=subject['q_level'],
-                        spec_subject=subject['q_subject'],
-                        spec_board='Universal',
-                        spec_name='Universal',
-                    )
-                content = spec.spec_content
-            content = order_full_spec_content(content)
-            #
-            for key, value in content.items():
-                if value['active'] == True:
-                    for k, v in value['content'].items():
-                        if v['active'] == True:
-                                Note_objs.append({
-                                        'p_level': subject['q_level'],
-                                        'p_subject': subject['q_subject'],
-                                        'p_moduel': key,
-                                        'p_chapter': k,
-                                    })
-                                spec_names[subject['q_subject']] = [spec.spec_board,spec.spec_name]
-        df = pd.DataFrame(Note_objs)
-        dic = OrderedDict()
-        for le, s, m, c in zip(
-                list(df['p_level']),
-                list(df['p_subject']),
-                list(df['p_moduel']),
-                list(df['p_chapter']),
-                ):
-            if le not in dic:
-                dic[le] = OrderedDict()
-            if s not in dic[le]:
-                dic[le][s] = OrderedDict()
-            if m not in dic[le][s]:
-                dic[le][s][m] = []
-            dic[le][s][m].append(c)
-        context['spec'] = spec
-        context['spec_names'] = spec_names
-        context['questions'] = dic
-        return context
-
-
-class QuestionView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/question.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("content", reverse("content:content")),
-                ("questions", reverse("content:questions")),
-                ("question", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        level = self.kwargs['level']
-        subject = self.kwargs['subject']
-        board = self.kwargs['board']
-        specification = self.kwargs['specification']
-        module = self.kwargs['module']
-        chapter = self.kwargs['chapter']
-        context['title'] = chapter
-        #
-        spec = Specification.objects.get(
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=specification
-            )
-        chapter_qs = spec.spec_content[module]['content'][chapter]['questions']
-        dic = OrderedDict()
-        question = None
-        for difficulty in range(5):
-            difficulty += 1
-            d = str(difficulty)
-            if len(chapter_qs[d]) >0:
-                for question in chapter_qs[d]:
-                    if d not in dic:
-                        dic[d] = []
-                    dic[d].append(Question.objects.get(q_unique_id=question))
-        context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
-        context['questions'] = dic if question else None
         return context
 
 
@@ -164,61 +49,36 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
     def crumbs(self):
         return [
                 ("content", reverse("content:content")),
-                ("notes", reverse("content:notes")),
+                ("notes", ''),
                 ]
 
     def get_queryset(self):
         """Return all of the required hub information"""
         context = {}
-        subjects = Point.objects.values(
-                    'p_level',
-                    'p_subject',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                )
-        subjects = [obj for obj in subjects]
-        spec_subscriptions = SpecificationSubscription.objects.filter(
-                user=self.request.user
-            ) if self.request.user.is_authenticated else ''
-        #
+        course_id = self.kwargs['course_id']
         Note_objs = []
         spec_names = {}
-        for subject in subjects:
-            # optain the subscribed spec or the unviersal spec
-            subject_loc = subject['p_level']+subject['p_subject']
-            status = 0
-            for user_spec in spec_subscriptions:
-                spec = user_spec.specification
-                spec_loc = spec.spec_level+spec.spec_subject
-                if spec_loc == subject_loc:
-                    content = spec.spec_content
-                    status = 1
-                    break
-            if status == 0:
-                try:
-                    spec = Specification.objects.get(
-                            spec_level=subject['p_level'],
-                            spec_subject=subject['p_subject'],
-                            spec_board='Universal',
-                            spec_name='Universal',
-                        )
-                except:
-                    continue
-                content = spec.spec_content
-            content = order_full_spec_content(content)
-            #
-            for key, value in content.items():
-                if value['active'] == True:
-                    for k, v in value['content'].items():
-                        if v['active'] == True:
-                            Note_objs.append({
-                                    'p_level': subject['p_level'],
-                                    'p_subject': subject['p_subject'],
-                                    'p_moduel': key,
-                                    'p_chapter': k,
-                                })
-                            spec_names[subject['p_subject']] = [spec.spec_board,spec.spec_name]
+        # optain the subscribed spec or the unviersal spec
+        course = Course.objects.get(
+                    pk=course_id
+                )
+        source_spec = course.specification
+        content = CourseVersion.objects.filter(
+                course=course
+            ).order_by('-version_number')[0].version_content
+        content = order_full_spec_content(content)
+        #
+        for key, value in content.items():
+            if value['active'] == True:
+                for k, v in value['content'].items():
+                    if v['active'] == True:
+                        Note_objs.append({
+                                'p_level': source_spec.spec_level,
+                                'p_subject': source_spec.spec_subject,
+                                'p_moduel': key,
+                                'p_chapter': k,
+                            })
+                        spec_names[source_spec.spec_subject] = [source_spec.spec_board,source_spec.spec_name]
         df = pd.DataFrame(Note_objs)
         dic = OrderedDict()
         for le, s, m, c in zip(
@@ -236,6 +96,7 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
             dic[le][s][m].append(c)
         context['notes'] = dic
         context['spec_names'] = spec_names
+        context['course'] = course
         return context
 
 
@@ -248,7 +109,7 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
     def crumbs(self):
         return [
                 ("content", reverse("content:content")),
-                ("notes", reverse("content:notes")),
+                ("notes", reverse("content:notes", kwargs={'course_id':self.kwargs['course_id']})),
                 ("article", ''),
                 ]
 
@@ -256,22 +117,21 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         """Return all of the required hub information"""
         context = {}
         # Get details of page
-        level = self.kwargs['level']
-        subject = self.kwargs['subject']
-        board = self.kwargs['board']
-        spec_name = self.kwargs['specification']
+        course_id = self.kwargs['course_id']
         module = self.kwargs['module']
         chapter = self.kwargs['chapter']
         context['title'] = chapter
         #
-        spec = Specification.objects.get(
-                    spec_level=level,
-                    spec_subject=subject,
-                    spec_board=board,
-                    spec_name=spec_name
+        course = Course.objects.get(
+                    pk=course_id
                 )
-        content = spec.spec_content
+        source_spec = course.specification
+        content = CourseVersion.objects.filter(
+                course=course
+            ).order_by('-version_number')[0].version_content
+        #
         content = order_full_spec_content(content)
+        #
         chapter_info = content[module]['content'][chapter]
         keys = [
                 k for k, v in
@@ -308,7 +168,8 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         #
         context['sampl_object'] = Point.objects.get(pk=p_id)
         context['article'] = dic
-        context['spec'] = spec
+        context['spec'] = source_spec
+        context['course'] = course
         context['next'] = next_link
         context['previous'] = previous_link
         editor_form = MDEditorModleForm()
@@ -316,96 +177,54 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         return context
 
 
-class PapersView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/papers.html'
+class QuestionView(BaseBreadcrumbMixin, generic.ListView):
+    template_name = 'content/question.html'
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("content", reverse("content:content")),
-                ("papers", reverse("content:papers")),
-                ]
+                ("Notes", reverse(
+                        "content:notearticle",
+                        kwargs={
+                            "course_id": self.kwargs['course_id'],
+                            "module": self.kwargs['module'],
+                            "chapter": self.kwargs['chapter'],
+                        }
+                    )
+                ),
+                ("question", '')
+            ]
 
     def get_queryset(self):
         context = {}
-        Notes = Question.objects.values(
-                    'q_subject',
-                    'q_board',
-                    'q_board_moduel',
-                    'q_exam_year',
-                    'q_exam_month',
-                    'q_is_exam',
-                ).distinct().order_by(
-                    'q_subject',
-                    'q_board',
-                    'q_board_moduel',
-                    'q_exam_year',
-                    'q_exam_month',
-                ).filter(q_is_exam=1)
-        Notes_objs = [obj for obj in Notes]
-        df = pd.DataFrame(Notes_objs)
-        dic = {}
-        for su, b, mod, y, mon in zip(
-                list(df['q_subject']),
-                list(df['q_board']),
-                list(df['q_board_moduel']),
-                list(df['q_exam_year']),
-                list(df['q_exam_month']),
-                ):
-            if su not in dic:
-                dic[su] = {}
-            if b not in dic[su]:
-                dic[su][b] = {}
-            if mod not in dic[su][b]:
-                dic[su][b][mod] = {}
-            if y not in dic[su][b][mod]:
-                dic[su][b][mod][y] = {}
-            if mon not in dic[su][b][mod][y]:
-                dic[su][b][mod][y][mon] = []
-            dic[su][b][mod][y][mon].append('Paper')
-        context['papers'] = dic
-        return context
-
-
-
-
-class PaperView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/paper.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("content", reverse("content:content")),
-                ("papers", reverse("content:papers")),
-                ("paper", ''),
-                ]
-
-    def get_queryset(self):
-        context = {}
-        subject = self.kwargs['subject']
-        board = self.kwargs['board']
-        board_module = self.kwargs['board_moduel']
-        exam_year = self.kwargs['exam_year']
-        exam_month = self.kwargs['exam_month']
-        context['title'] = 'paper title'
-        article_objects = Question.objects.filter(
-                    q_subject=subject,
-                    q_board=board,
-                    q_board_moduel=board_module,
-                    q_exam_year=exam_year,
-                    q_exam_month=exam_month,
-                ).order_by('q_exam_num')
-        article_questions = [model_to_dict(obj) for obj in article_objects]
-        df = pd.DataFrame(article_questions)
+        course_id = self.kwargs['course_id']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        context['title'] = chapter
+        #
+        course = Course.objects.get(
+                    pk=course_id
+                )
+        content = CourseVersion.objects.filter(
+                course=course
+            ).order_by('-version_number')[0].version_content
+        #
+        content = order_full_spec_content(content)
+        chapter_qs = content[module]['content'][chapter]['questions']
         dic = OrderedDict()
-        for exam_num, p_id in zip(list(df['q_exam_num']), list(df['id'])):
-            if exam_num not in dic:
-                dic[exam_num] = []
-            dic[exam_num].append(Question.objects.get(pk=p_id))
-        context['sampl_object'] = Question.objects.get(pk=p_id)
-        context['questions'] = dic
+        question = None
+        for difficulty in range(5):
+            difficulty += 1
+            d = str(difficulty)
+            if len(chapter_qs[d]) > 0:
+                for question in chapter_qs[d]:
+                    if d not in dic:
+                        dic[d] = []
+                    dic[d].append(Question.objects.get(q_unique_id=question))
+        context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
+        context['questions'] = dic if question else None
         return context
 
 

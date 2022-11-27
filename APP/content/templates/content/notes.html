@@ -96,7 +96,7 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 								<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
 								    {%for D in information|index:A|index:B|index:C%}
 								    <a class="prog-nav-item nav-item nav-link mr-1 mb-1" 
-								       href="{% url 'content:notearticle' A B context.spec_names|index:B|index:0 context.spec_names|index:B|index:1 C D%}" 
+								       href="{% url 'content:notearticle' context.course.id C D%}" 
 									style='border: 1px solid black;' target='_blank'>{{D|field_name_to_label}}
 					<div class="progress" style='height:10px;'>
 					  <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
