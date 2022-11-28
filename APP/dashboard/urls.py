@@ -44,12 +44,6 @@ urlpatterns = [
     # Superuser
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
     # admin
-    path('traffic', views.AdminTrafficView.as_view(), name='admin_traffic'),
-    path(
-        'taskassignment',
-        views.AdminTaskAssignmentView.as_view(),
-        name='admin_taskassignment'
-    ),
     # student
     path('student-performance', views.StudentPerformanceView.as_view(), name='student_performance'),
     path(
@@ -57,14 +51,6 @@ urlpatterns = [
         views.StudentContentManagementView.as_view(),
         name='student_contentmanagement'
     ),
-    # teacher
-    path('teacher-classes', views.TeacherClassesView.as_view(), name='teacher_classes'),
-    # private tutor
-    path('tutor-classes', views.TutorClassesView.as_view(), name='tutor_classes'),
-    # school
-    path('school-management', views.SchoolManagementView.as_view(), name='school_management'),
-    # tuition center
-    path('center-management', views.CenterManagementView.as_view(), name='center_management'),
     # editor
     path('editor-tasks', views.EditorTasksView.as_view(), name='editor_tasks'),
     path('mytasks', views.EditorMyTasksView.as_view(), name='editor_mytasks'),

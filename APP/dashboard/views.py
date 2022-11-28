@@ -101,12 +101,9 @@ class MarketPlaceView(
 
 
 class MarketCourseView(
-            LoginRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
-    login_url = 'user:login'
-    redirect_field_name = ''
 
     template_name = "dashboard/general/marketcourse.html"
     context_object_name = 'context'
@@ -130,7 +127,7 @@ class MarketCourseView(
         subscription_status = CourseSubscription.objects.filter(
                 user=self.request.user,
                 course=course
-            ).exists()
+            ).exists() if self.request.user.is_authenticated else False
         content = order_live_spec_content(versions[0].version_content)
         context['course'] = course
         context['versions'] = versions
@@ -221,7 +218,6 @@ class MyCoursesView(
 # Admin views
 class MySpecificationsView(
             LoginRequiredMixin,
-            SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -257,25 +253,27 @@ class MySpecificationsView(
                     'spec_name',
                 )
         Notes_objs = [obj for obj in Notes]
+        print(Notes_objs)
         df = pd.DataFrame(Notes_objs)
         dic = {}
         raw_specs = []
-        for le, s, m, c, idd in zip(
-                list(df['spec_level']),
-                list(df['spec_subject']),
-                list(df['spec_board']),
-                list(df['spec_name']),
-                list(df['id']),
-                ):
-            if le not in dic:
-                dic[le] = {}
-            if s not in dic[le]:
-                dic[le][s] = {}
-            if m not in dic[le][s]:
-                dic[le][s][m] = []
-            spec = Specification.objects.get(pk=idd)
-            dic[le][s][m].append(spec)
-            raw_specs.append(spec)
+        if len(Notes_objs) > 0:
+            for le, s, m, c, idd in zip(
+                    list(df['spec_level']),
+                    list(df['spec_subject']),
+                    list(df['spec_board']),
+                    list(df['spec_name']),
+                    list(df['id']),
+                    ):
+                if le not in dic:
+                    dic[le] = {}
+                if s not in dic[le]:
+                    dic[le][s] = {}
+                if m not in dic[le][s]:
+                    dic[le][s][m] = []
+                spec = Specification.objects.get(pk=idd)
+                dic[le][s][m].append(spec)
+                raw_specs.append(spec)
         context['specifications'] = dic
         context['raw_specs'] = raw_specs
         return context
@@ -283,7 +281,6 @@ class MySpecificationsView(
 
 class SpecificationOutlineView(
             LoginRequiredMixin,
-            SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -317,7 +314,6 @@ class SpecificationOutlineView(
 
 class SpecModuelHandlerView(
             LoginRequiredMixin,
-            SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -395,7 +391,6 @@ class SpecModuelHandlerView(
 
 class SpecChapterHandlerView(
             LoginRequiredMixin,
-            SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -465,7 +460,6 @@ class SpecChapterHandlerView(
 
 class SpecTopicHandlerView(
             LoginRequiredMixin,
-            SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -540,7 +534,6 @@ class SpecTopicHandlerView(
 
 class SpecPointHandlerView(
             LoginRequiredMixin,
-            SuperuserRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -620,56 +613,6 @@ class SpecPointHandlerView(
 
 
 # Create your views here.
-class AdminTrafficView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"Admin"
-    template_name = "dashboard/admin/traffic.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("traffic", reverse("dashboard:admin_traffic"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'admin/traffic'
-        return context
-
-
-class AdminTaskAssignmentView(
-            LoginRequiredMixin,
-            SuperuserRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/admin/taskassignment.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("Editing Tasks", reverse("dashboard:admin_taskassignment"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'admin/taskassignment'
-        #
-        return context
-
-
 class StudentPerformanceView(
             LoginRequiredMixin,
             GroupRequiredMixin,
@@ -716,108 +659,8 @@ class StudentContentManagementView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'student/contentmanagement'
-        user_subscriptions = CourseSubscription.objects.values('course').filter(user=self.request.user)
-        context['subscriptions'] = [obj['specification'] for obj in user_subscriptions]
-        return context
-
-
-class TeacherClassesView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u'Teacher'
-    template_name = "dashboard/teacher/classes.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("classes", reverse("dashboard:teacher_classes"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'teacher/classes'
-        return context
-
-
-class TutorClassesView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"PrivateTutor"
-    template_name = "dashboard/tutor/classes.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("classes", reverse("dashboard:tutor_classes"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'tutor/classes'
-        return context
-
-
-class SchoolManagementView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"School"
-    template_name = "dashboard/school/management.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("management", reverse("dashboard:school_management"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'school/management'
-        return context
-
-
-class CenterManagementView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"TuitionCenter"
-    template_name = "dashboard/center/management.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("management", reverse("dashboard:center_management"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'center/management'
+        user_subscriptions = CourseSubscription.objects.filter(user=self.request.user)
+        context['subscriptions'] = [obj.course for obj in user_subscriptions]
         return context
 
 

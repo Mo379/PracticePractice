@@ -771,7 +771,6 @@ def _course_subscribe(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
         courses = Course.objects.filter(
-                user=request.user,
                 pk=course_id
             )
         #
@@ -793,7 +792,7 @@ def _course_subscribe(request):
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Your subscription to this course was successfully created.',
+                        'You have subscribed to this course, goodluck with your studies!',
                         extra_tags='alert-success marketcourse'
                     )
         else:

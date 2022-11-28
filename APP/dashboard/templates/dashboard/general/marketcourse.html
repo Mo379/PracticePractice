@@ -38,11 +38,13 @@ Course Page
 			<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
 			</div>
 			<hr class="sidebar-divider mb-3">
-			{%if context.course_subscription_status == False%}
+			{%if user.is_authenticated == False%}
+			<a type= 'button' class='btn btn-secondary mb-2' href='{%url 'content:content'%}'>Signup to entroll</a>
+			{%elif context.course_subscription_status == False%}
 			<form class="px-3 py-3"  action="{%url 'content:_course_subscribe'%}" method="POST" role="form">
 				{%csrf_token%}
 				<input name='course_id' value='{{course.id}}' type='hidden'>
-				<button type= 'submit' class='btn btn-danger mb-2' > Subscribe Now</button>
+				<button type= 'submit' class='btn btn-info mb-2' > Entroll Now</button>
 			</form>
 			{%else%}
 			<a type= 'button' class='btn btn-success mb-2' href='{%url 'content:content'%}'>Study</a>

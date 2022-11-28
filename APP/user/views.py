@@ -53,6 +53,8 @@ from djstripe.models import (
         Session
     )
 import markdown
+from django.db.models import Q
+
 
 
 @webhooks.handler("payment_intent.succeeded")
@@ -80,21 +82,6 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         context = {}
         user = User.objects.get(pk=self.request.user.id)
-        # update context: Add groups details forms and obejcts
-        for group in user.groups.all():
-            group = str(group)
-            group_model = settings.GROUP_MODEL_MAP[group][0]
-            group_extra_detail_form = settings.GROUP_MODEL_MAP[group][1]
-            model = apps.get_model(app_label='user', model_name=group_model)
-            # ignore error stating variable isn't used
-            group_model_object = model.objects.get(user=user)
-            # safe eval usage because it's no dependant on user input ;).
-            form = eval(
-                    group_extra_detail_form+'(instance=group_model_object)'
-                )
-            context[group_extra_detail_form] = form
-            context['group_object_'+group_model] = group_model_object
-            
         #
         accountdetailsform = AccountDetailsForm(instance=user)
         context['AccountDetailsForm'] = accountdetailsform
@@ -882,15 +869,17 @@ def _accountdetails(request):
             # username check
             username = form.cleaned_data['username']
             # check user name is new and unique
-            username_match = User.objects.filter(username__iexact=username).exists()
+            taken_username_check = User.objects.filter(
+                    ~Q(pk=request.user.id),
+                    username__iexact=username
+                ).exists()
             if (
-                username_match and
-                username.lower() == request.user.username.lower()
+                taken_username_check
             ):
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Username already exists or is the same.',
+                        'Username already exists, please chose a different one.',
                         extra_tags='alert-warning user_profile'
                     )
             else:
@@ -1105,22 +1094,9 @@ def _create_checkout_session(request):
         price_id = json.loads(request.body)['price_id']
         if Price.objects.filter(id=price_id).exists():
             # See if subscription exists or not
-            # check if the user group allows for this susbscription
-            price_object = Price.objects.get(id=price_id)
-            product_name = price_object.product.name
-            groups = request.user.groups.all()
-            correct_group = False
-            for group in groups:
-                if str(group) == 'TuitionCenter' or str(group) == 'School':
-                    group = 'Organisation'
-                if str(group) == 'PrivateTutor' or str(group) == 'Teacher':
-                    group = 'Educator'
-                if str(group) == str(product_name):
-                    correct_group = True
-            #
             if Subscription.objects.filter(
                         customer=request.user.id, status='active'
-                    ).exists() == False and correct_group == True:
+                    ).exists() == False:
                 # Set Stripe API key
                 stripe.api_key = settings.STRIPE_SECRET_KEY
                 # Create Stripe Checkout session
