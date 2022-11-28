@@ -14,10 +14,21 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
 from content.forms import MDEditorModleForm
+from braces.views import (
+        LoginRequiredMixin,
+        GroupRequiredMixin,
+        SuperuserRequiredMixin,
+    )
 # Create your views here.
 
 
-class ContentView(BaseBreadcrumbMixin, generic.ListView):
+class ContentView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
     template_name = 'content/content.html'
     context_object_name = 'context'
 
@@ -36,12 +47,18 @@ class ContentView(BaseBreadcrumbMixin, generic.ListView):
         if course_subscriptions:
             context['courses'] = course_subscriptions
         else:
-            context['courses'] = False
+            context['courses'] = []
         #
         return context
 
 
-class NotesView(BaseBreadcrumbMixin, generic.ListView):
+class NotesView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
     template_name = 'content/notes.html'
     context_object_name = 'context'
 
@@ -101,9 +118,13 @@ class NotesView(BaseBreadcrumbMixin, generic.ListView):
 
 
 
-class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/note.html'
-    context_object_name = 'context'
+class NoteArticleView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
 
     @cached_property
     def crumbs(self):
@@ -177,9 +198,13 @@ class NoteArticleView(BaseBreadcrumbMixin, generic.ListView):
         return context
 
 
-class QuestionView(BaseBreadcrumbMixin, generic.ListView):
-    template_name = 'content/question.html'
-    context_object_name = 'context'
+class QuestionView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
 
     @cached_property
     def crumbs(self):

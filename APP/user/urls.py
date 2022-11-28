@@ -61,20 +61,6 @@ urlpatterns = [
     path('_appearance', views._logoutUser, name='_appearance'),
     # actions - detail forms
     path('_accountdetails', views._accountdetails, name='_accountdetails'),
-    path('_admindetails', views._admindetails, name='_admindetails'),
-    path('_studentdetails', views._studentdetails, name='_studentdetails'),
-    path(
-        '_organisationdetails',
-        views._organisationdetails,
-        name='_organisationdetails'
-    ),
-    path('_educatordetails', views._educatordetails, name='_educatordetails'),
-    path('_editordetails', views._editordetails, name='_editordetails'),
-    path(
-        '_affiliatedetails',
-        views._affiliatedetails,
-        name='_affiliatedetails'
-    ),
     path(
         '_themechange',
         views._themechange,

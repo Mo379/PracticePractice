@@ -17,13 +17,7 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 from django.contrib.auth.models import Group
 from datetime import datetime
 from user.models import (
-        User,
-        Admin,
-        Student,
-        Educator,
-        Organisation,
-        Editor,
-        Affiliate
+        User
     )
 from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
@@ -42,12 +36,6 @@ from user.forms import (
         AppearanceChoiceForm,
         LanguageChoiceForm,
         AccountDetailsForm,
-        OrganisationDetailsForm,
-        EducatorDetailsForm,
-        AdminDetailsForm,
-        StudentDetailsForm,
-        EditorDetailsForm,
-        AffiliateDetailsForm,
     )
 
 
@@ -459,21 +447,10 @@ def _registerUser(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            utype = form.cleaned_data['usertype']
             password = form.cleaned_data['password']
             # Hash password
             user.set_password(password)
-            settings.GROUP_MODEL_MAP[utype][0]
             user.save()
-            # link customer object to user object
-            group_model = apps.get_model(
-                    app_label='user',
-                    model_name=settings.GROUP_MODEL_MAP[utype][0]
-                )
-            group_model.objects.create(user=user)
-            # Give group
-            AssociatedGroup = Group.objects.get(name=utype)  # Get group
-            AssociatedGroup.user_set.add(user)
             # Email
             to_email = user.email
             mail_subject = 'Account activation.'
@@ -931,205 +908,6 @@ def _accountdetails(request):
                     request,
                     messages.INFO,
                     'Something is wrong, please check that all inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _admindetails(request):
-    if request.method == 'POST':
-        admin, was_created = Admin.objects.get_or_create(user=request.user)
-        form = AdminDetailsForm(request.POST, instance=admin)
-        if form.is_valid():
-            form.save()
-            request.user.group_details_complete = True
-            request.user.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your account (Admin) details were sucessfully updated!',
-                    extra_tags='alert-success user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _studentdetails(request):
-    if request.method == 'POST':
-        student, was_created = Student.objects.get_or_create(user=request.user)
-        form = StudentDetailsForm(request.POST, instance=student)
-        if form.is_valid():
-            form.save()
-            request.user.group_details_complete = True
-            request.user.verification_status= True
-            request.user.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your account (Student) details were sucessfully updated!',
-                    extra_tags='alert-success user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _educatordetails(request):
-    if request.method == 'POST':
-        educator, was_created = Educator.objects.get_or_create(user=request.user)
-        form = EducatorDetailsForm(request.POST, instance=educator)
-        if form.is_valid():
-            form.save()
-            request.user.group_details_complete = True
-            request.user.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your account (Educator) details were sucessfully updated!',
-                    extra_tags='alert-success user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _organisationdetails(request):
-    if request.method == "POST":
-        organisation = Organisation.objects.get(user=request.user)
-        form = OrganisationDetailsForm(
-                request.POST or None,
-                request.FILES,
-                instance=organisation
-            )
-        if form.is_valid():
-            form.save()
-            request.user.group_details_complete = True
-            request.user.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your account (Organisation) details were sucessfully updated!',
-                    extra_tags='alert-success user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _editordetails(request):
-    if request.method == 'POST':
-        editor, was_created = Editor.objects.get_or_create(user=request.user)
-        form = EditorDetailsForm(request.POST, request.FILES, instance=editor)
-        if form.is_valid():
-            form.save()
-            request.user.group_details_complete = True
-            request.user.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your account (Editor) details were sucessfully updated!',
-                    extra_tags='alert-success user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all ' +
-                    'inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _affiliatedetails(request):
-    if request.method == 'POST':
-        affiliate, was_created = Affiliate.objects.get_or_create(user=request.user)
-        form = AffiliateDetailsForm(request.POST, request.FILES, instance=affiliate)
-        if form.is_valid():
-            form.save()
-            request.user.group_details_complete = True
-            request.user.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your account (Affiliate) details were sucessfully updated!',
-                    extra_tags='alert-success user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all ' +
-                    'inputs are valid.'+str(form.errors),
                     extra_tags='alert-danger user_profile'
                 )
     else:

@@ -4,13 +4,7 @@ from django.conf import settings
 from django import forms
 from django.db.models.fields import BLANK_CHOICE_DASH
 from user.models import (
-        User,
-        Admin,
-        Student,
-        Educator,
-        Organisation,
-        Editor,
-        Affiliate
+        User
     )
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
@@ -111,20 +105,6 @@ class ForgotPasswordForm(forms.Form):
 
 
 class RegistrationForm(forms.ModelForm):
-    CHOICES = [(g, g) for g in settings.VALID_GROUPS]
-    usertype = forms.ChoiceField(
-            choices=BLANK_CHOICE_DASH+CHOICES,
-            label='Please select a string',
-            required=True,
-            widget=forms.Select(attrs={
-                    'class': "form-select",
-                    'style': "width:100%;padding:10px;\
-                            border-radius:10rem 5rem 5rem 10rem;",
-                    'placeholder': "Username/Email",
-                    'type': "text"
-                    }
-                )
-        )
     password_conf = forms.CharField(
             max_length=200,
             widget=forms.TextInput(attrs={
@@ -614,159 +594,5 @@ class AccountDetailsForm(forms.ModelForm):
                     'alphanumeric and the following (_.,) characters'
                 )
             )
-
-
-class AdminDetailsForm(forms.ModelForm):
-    class Meta:
-        model = Admin
-        fields = ['roles', 'specialised_subjects']
-        labels = {
-                'roles': 'The Administrator Role:',
-                'Subjects': 'The specialised subjects:'
-            }
-        widgets = {
-                'roles': forms.Select(
-                        attrs={
-                            'class': "form-select mb-3",
-                            'style': "width:100%;padding:10px;\
-                                    border-radius:10rem 5rem 5rem 10rem;",
-                            'placeholder': "Administrator Role",
-                            'type': "text"
-                            },
-                        choices=BLANK_CHOICE_DASH+model.CHOICES_ROLES,
-                    ),
-                "specialised_subjects": forms.CheckboxSelectMultiple(attrs={
-                            'class': "",
-                            'placeholder': "Subjects",
-                            'type': "checkbox",
-                        }
-                    )
-            }
-
-    def clean_roles(self):
-        if self.instance.roles != '':
-            return self.instance.roles
-
-    def clean_specialised_subjects(self):
-        if self.instance.specialised_subjects != []:
-            return self.instance.specialised_subjects
-
-class StudentDetailsForm(forms.ModelForm):
-    class Meta:
-        model = Student
-        fields = ['studied_subjects']
-        labels = {
-                'studied_subjects': 'The subejcts you are studying:',
-            }
-        widgets = {
-                "subjects": forms.CheckboxSelectMultiple(attrs={
-                            'class': "",
-                            'placeholder': "Subjects",
-                            'type': "checkbox",
-                        }
-                    )
-            }
-
-
-class EducatorDetailsForm(forms.ModelForm):
-    class Meta:
-        model = Educator
-        fields = ['taught_subjects']
-        labels = {
-                'taught_subjects': 'The subejcts you are teaching:',
-            }
-        widgets = {
-                "taught_subjects": forms.CheckboxSelectMultiple(attrs={
-                            'class': "",
-                            'placeholder': "Subjects",
-                            'type': "checkbox",
-                        }
-                    ),
-            }
-
-
-class EditorDetailsForm(forms.ModelForm):
-    class Meta:
-        model = Editor
-        fields = ['writing_subjects', 'certification', 'example_work']
-        labels = {
-                'writing_subjects': 'The subejcts you are proficcent in:',
-                'certification': 'Certificate of Education (Deploma), and/or CV:',
-                'example_work': 'Example of work for the taught subjects:',
-            }
-        widgets = {
-                "writing_subjects": forms.CheckboxSelectMultiple(attrs={
-                            'class': "",
-                            'placeholder': "Subjects",
-                            'type': "checkbox",
-                        }
-                    ),
-                'certification': forms.FileInput(),
-                'example_work': forms.FileInput(),
-            }
-
-
-class AffiliateDetailsForm(forms.ModelForm):
-    class Meta:
-        model = Affiliate
-        fields = ['platform_url']
-        labels = {
-                'platform_url': 'The URL of your primary platform:',
-            }
-        widgets = {
-                'platform_url': forms.TextInput(attrs={
-                        'class': "form-control form-control-user",
-                        'placeholder': "URL",
-                        'type': "text"
-                        }
-                    )
-            }
-
-
-class OrganisationDetailsForm(forms.ModelForm):
-    class Meta:
-        model = Organisation
-        fields = ['logo_upload', 'name', 'phone_number', 'incorporation_date', 'url', 'location']
-        labels = {
-                'logo_upload': "Upload your organisation's logo:",
-                'name': 'Organisation Name',
-                'phone_number': 'Phone Number',
-                'incorporation_date': 'Incorporation Date',
-                'url': 'Organisation URL',
-                'location': 'Organisation Physical Location. (Building number, road, town, city, postcode, country)',
-            }
-        widgets = {
-            'logo_upload': forms.FileInput(),
-            "name": forms.TextInput(attrs={
-                        'class': "form-control",
-                        'placeholder': "Organisation's Name",
-                        'type': "text",
-                    }
-                ),
-            "phone_number": forms.TextInput(attrs={
-                        'class': "form-control",
-                        'placeholder': "Organisation's Phone Number",
-                        'type': "text",
-                    }
-                ),
-            "incorporation_date": forms.TextInput(attrs={
-                        'class': "form-control",
-                        'placeholder': "Organisation's Incorporation Date",
-                        'type': "text",
-                    }
-                ),
-            "url": forms.TextInput(attrs={
-                        'class': "form-control",
-                        'placeholder': "Organisation's URL",
-                        'type': "text",
-                    }
-                ),
-            "location": forms.Textarea(attrs={
-                        'class': "form-control",
-                        'placeholder': "Organisation's Physical Location.",
-                        'type': "textarea",
-                    }
-                )
-            }
 
 

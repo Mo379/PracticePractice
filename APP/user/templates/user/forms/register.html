@@ -5,11 +5,6 @@
 	{%definevar 'registration_form' as alert_loc%}
 	{%include 'base/alert.html'%}
 	<div class="form-group">
-	    {{ form.usertype.errors }}
-	    <label for="{{ form.usertype.id_for_label }}">User Type</label><br>
-	    {{ form.usertype}}
-	</div>
-	<div class="form-group">
 	    {{ form.username.errors }}
 	    <label for="{{ form.username.id_for_label }}">UserName</label><br>
 	    {{ form.username }}

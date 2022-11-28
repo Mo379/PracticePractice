@@ -203,35 +203,6 @@ STATIC_ROOT = 'staticfiles/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Groups settings
-VALID_GROUPS = [
-        "Student",
-        "Teacher",
-        "PrivateTutor",
-        "School",
-        "TuitionCenter",
-        "Editor",
-        "Affiliate",
-        "Admin",
-    ]
-GROUP_MODEL_MAP = {
-        "Student": ['Student', 'StudentDetailsForm'],
-        "Teacher": ['Educator', 'EducatorDetailsForm'],
-        "PrivateTutor": ['Educator', 'EducatorDetailsForm'],
-        "School": ['Organisation', 'OrganisationDetailsForm'],
-        "TuitionCenter": ['Organisation', 'OrganisationDetailsForm'],
-        "Editor": ['Editor', 'EditorDetailsForm'],
-        "Affiliate": ['Affiliate', 'AffiliateDetailsForm'],
-        "Admin": ['Admin', 'AdminDetailsForm'],
-    }
-# Valid Subjects
-VALID_SUBJECTS = [
-        'Mathematics',
-        'Physics',
-        'Chemistry',
-        'Biology',
-        'Other',
-    ]
 # Google API settings
 GOOGLE_API_KEY = 'None'
 # SMTP settings

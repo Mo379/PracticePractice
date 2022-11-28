@@ -54,13 +54,9 @@ class SuperuserMonitorView(
 
 
 class IndexView(
-            LoginRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
-    login_url = 'user:login'
-    redirect_field_name = ''
-
 
     template_name = "dashboard/general/index.html"
     context_object_name = 'context'
@@ -79,12 +75,9 @@ class IndexView(
 
 
 class MarketPlaceView(
-            LoginRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
-    login_url = 'user:login'
-    redirect_field_name = ''
 
     template_name = "dashboard/general/marketplace.html"
     context_object_name = 'context'

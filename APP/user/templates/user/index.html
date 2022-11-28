@@ -30,31 +30,6 @@
 		{%definevar context.AccountDetailsForm as form%}
 		{%include 'user/forms/profile_details_account.html'%}
 	{%endif%}
-	{%if context.AdminDetailsForm %}
-		{%definevar context.AdminDetailsForm as form%}
-		{%include 'user/forms/profile_details_admin.html'%}
-	{%endif%}
-	{%if context.StudentDetailsForm %}
-		{%definevar context.StudentDetailsForm as form%}
-		{%include 'user/forms/profile_details_student.html'%}
-	{%endif%}
-	{%if context.EducatorDetailsForm %}
-		{%definevar context.EducatorDetailsForm as form%}
-		{%include 'user/forms/profile_details_educator.html'%}
-	{%endif%}
-	{%if context.OrganisationDetailsForm %}
-		{%definevar context.OrganisationDetailsForm  as form%}
-		{%definevar context.group_object_Organisation as organisation%}
-		{%include 'user/forms/profile_details_organisation.html'%}
-	{%endif%}
-	{%if context.EditorDetailsForm %}
-		{%definevar context.EditorDetailsForm as form%}
-		{%include 'user/forms/profile_details_editor.html'%}
-	{%endif%}
-	{%if context.AffiliateDetailsForm %}
-		{%definevar context.AffiliateDetailsForm as form%}
-		{%include 'user/forms/profile_details_affiliate.html'%}
-	{%endif%}
         </div>
     </div>
 </div>
