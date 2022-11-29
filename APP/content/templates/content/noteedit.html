@@ -1,0 +1,93 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+{% load mathjax %}
+
+{%block page_name%}
+	Notes
+{%endblock%}
+
+{%block title%}
+{{context.title|field_name_to_label}} - {{context.sampl_object.p_level|field_name_to_label}} {{context.sampl_object.p_subject|field_name_to_label}} {{context.sampl_object.p_moduel|field_name_to_label}} Revision
+{%endblock%}
+
+{%block meta%}
+<meta name="description" content="
+{{context.title|field_name_to_label}} {{context.sampl_object.p_level|field_name_to_label}} {{context.sampl_object.p_subject|field_name_to_label}} revision, looking at {{context.sampl_object.p_moduel|field_name_to_label}}, including definitions, examples, formulara, practice questions and worked solutions, all in one place!
+">
+{%if context.spec.spec_board != 'Universal'%}
+<meta name="robots" content="noindex">
+{%endif%}
+{%endblock%}
+
+{%block content%}
+{% mathjax_scripts %}
+<style>
+.MathJax{
+	margin-left:5px;
+	margin-right:5px;
+	overflow-x: scroll;
+	overflow-x: scroll;
+	border-bottom: 1px solid green;
+}
+.MathJax_Display {
+	overflow-x: scroll;
+	border-right: 2px solid green;
+	border-bottom: None;
+}
+.MathJax_Display .MathJax{
+	border-bottom: None;
+}
+.math{
+	overflow-x: scroll;
+	max-width: 100%;
+}
+.point_div h6 {
+	border-left: 2px solid green;
+	border-top: 1px dashed green;
+	padding-left: 3px;
+}
+</style>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
+
+
+{%definevar context.spec as spec%}
+{%definevar context.sampl_object as sample%}
+
+
+
+
+<div class="container col-9 text-justify" style='border-left:1px solid black;'>
+
+
+
+	<h1 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+		{{context.title|field_name_to_label}}
+	</h1>
+	{%for topic in context.article%}
+	<h2 id='topic_{{topic}}'>
+		{{topic|field_name_to_label}}
+	</h2>
+	<div class='ml-1' style='border-left: 1px solid grey;'>
+        {%for point in context.article|index:topic%}
+	<div id='point_{{point.id}}'class='point_div ml-1 mb-2' style='border-left: 2px dashed silver; padding-left:5px;'>
+		    {{point.p_content|ToMarkdown:point|safe}}
+	    </div>
+        {%endfor%}
+	</div>
+	<div style='border-bottom: 1px dashed silver;'></div>
+	{%endfor%}
+</div>
+
+
+
+
+{%endblock%}
+	<form method = "post" action = "./" style='display:none;'>
+            {% csrf_token %}
+            {{ context.editor_form.media }}
+            {{ context.editor_form.as_p }}
+            <p> <input type = "submit" value = "post"> </ p>
+        </form>

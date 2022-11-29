@@ -1,6 +1,7 @@
 import os
 from django.conf import settings
 from django import template
+from django.urls import reverse
 from content.util.GeneralUtil import TagGenerator
 from content.models import Point
 import markdown
@@ -57,7 +58,6 @@ def field_name_to_label(value):
 def paper_year(value):
     value = str('20')+str(value)
     return value
-
 
 
 @register.filter(name='paper_month')
@@ -137,7 +137,8 @@ def ToMarkdown(content, point):
     # hidden has only one numbered element containing two children
     point_title = hidden['0']['point_title']
     #html += markdown.markdown("### " + str(number) + ': ' +point_title)
-    html += markdown.markdown("### " + point_title)
+    url = reverse('content:editorpoint', kwargs={'point_id': point.id})
+    html += markdown.markdown("### " + point_title + f"<a href='{url}'> <i class='bi bi-pencil-square ml-4'></i></a>")
     hidden_content = hidden['0']['content']
     # the content element is numbered
     for item in range(len(hidden_content)):

@@ -17,6 +17,21 @@ urlpatterns = [
         views.NoteArticleView.as_view(),
         name='notearticle'
     ),
+    path(
+        'content/noteedit/<spec_id>/<module>/<chapter>/',
+        views.NoteEditView.as_view(),
+        name='noteedit'
+    ),
+    path(
+        'content/questionedit/<spec_id>/<module>/<chapter>/',
+        views.QuestionEditView.as_view(),
+        name='questionedit'
+        ),
+    path(
+        'content/editorpoint/<point_id>',
+        views.EditorPointView.as_view(),
+        name='editorpoint'
+    ),
     #
     path(
         'content/_inheritfromspec',

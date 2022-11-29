@@ -85,6 +85,9 @@ Chapter Selection and ordering
 							<a href='{%url 'dashboard:spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter%}' target='_blank'>
 							{{obj.p_chapter|field_name_to_label}}
 							</a>
+							<a href='{%url 'content:noteedit' spec.id obj.p_moduel obj.p_chapter%}' target='_blank' style='text-decoration:none;color:white;font-size:20px;float:right;' class='ml-1 mr-2 mt-1'>
+							<i class="bi bi-pencil-square"></i>
+							</a>
 							</li>
 							{%endfor%}
 						</ol>

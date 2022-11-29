@@ -92,6 +92,9 @@ Point Selection and ordering
 								{{obj.p_unique_id}}-
 								{{obj.p_content.details.hidden.0.point_title}}
 								</a>
+								<a href='{%url 'content:noteedit' spec.id obj.p_moduel obj.p_chapter%}#point_{{obj.id}}' target='_blank' style='text-decoration:none;color:white;font-size:20px;float:right;' class='ml-1 mr-2 mt-1'>
+								<i class="bi bi-pencil-square"></i>
+								</a>
 							</li >
 							{%endfor%}
 						</ol>

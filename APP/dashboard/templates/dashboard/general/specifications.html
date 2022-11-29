@@ -47,7 +47,7 @@ Specifications
 					    <h5 class="card-title">{{board}}</h5>
 						    {%for spec in specs|index:level|index:subject|index:board%}
 							<a 
-							href='{%url 'dashboard:specmoduel' level subject board spec.spec_name%}'
+							href='{%url 'dashboard:specmoduel' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name%}'
 							target='blank'
 							class="btn 
 								{%if spec.spec_completion%}

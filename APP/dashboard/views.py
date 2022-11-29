@@ -253,7 +253,6 @@ class MySpecificationsView(
                     'spec_name',
                 )
         Notes_objs = [obj for obj in Notes]
-        print(Notes_objs)
         df = pd.DataFrame(Notes_objs)
         dic = {}
         raw_specs = []
@@ -570,6 +569,7 @@ class SpecPointHandlerView(
                 deleted=False
                 )
         points = Point.objects.values(
+                    'id',
                     'p_level',
                     'p_subject',
                     'p_moduel',

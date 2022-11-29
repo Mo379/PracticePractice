@@ -125,6 +125,8 @@ class NoteArticleView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
+    template_name = 'content/note.html'
+    context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
@@ -205,6 +207,8 @@ class QuestionView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
+    template_name = 'content/question.html'
+    context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
@@ -250,6 +254,161 @@ class QuestionView(
                     dic[d].append(Question.objects.get(q_unique_id=question))
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
         context['questions'] = dic if question else None
+        return context
+
+
+class NoteEditView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/noteedit.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        # Get details of page
+        spec_id = self.kwargs['spec_id']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        context['title'] = chapter
+        #
+        source_spec = Specification.objects.get(pk=spec_id)
+        #
+        content = order_full_spec_content(source_spec.spec_content)
+        #
+        chapter_info = content[module]['content'][chapter]
+        keys = [
+                k for k, v in
+                content[module]['content'].items() if v['position'] >= 0
+            ]
+        previous_chapter = chapter_info['position'] - 1 \
+                if chapter_info['position'] > 0 else None
+        next_chapter = chapter_info['position'] + 1 \
+                if len(keys) > chapter_info['position'] + 1 else None
+        #
+        previous_link = keys[previous_chapter] if type(previous_chapter) == int else None
+        next_link = keys[next_chapter] if type(next_chapter) == int else None
+        #
+        chapter_content = chapter_info['content']
+        filtered_chapter_content = OrderedDict({
+                key: val
+                for key, val in chapter_content.items()
+                if val['active'] == True
+            })
+        article_objects = []
+        for topic, topic_info in filtered_chapter_content.items():
+            for point_unique, info in topic_info['content'].items():
+                if info['active'] == True:
+                    obj = Point.objects.get(p_unique_id=point_unique)
+                    article_objects.append(obj)
+        #
+        article_points = [model_to_dict(obj) for obj in article_objects]
+        df = pd.DataFrame(article_points)
+        dic = {}
+        for topic, p_id in zip(list(df['p_topic']), list(df['id'])):
+            if topic not in dic:
+                dic[topic] = []
+            dic[topic].append(Point.objects.get(pk=p_id))
+        #
+        context['sampl_object'] = Point.objects.get(pk=p_id)
+        context['article'] = dic
+        context['spec'] = source_spec
+        context['next'] = next_link
+        context['previous'] = previous_link
+        editor_form = MDEditorModleForm()
+        context['editor_form'] = editor_form
+        return context
+
+
+class QuestionEditView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
+                ("Notes", reverse(
+                        "content:notearticle",
+                        kwargs={
+                            "course_id": self.kwargs['course_id'],
+                            "module": self.kwargs['module'],
+                            "chapter": self.kwargs['chapter'],
+                        }
+                    )
+                ),
+                ("question", '')
+            ]
+
+    def get_queryset(self):
+        context = {}
+        course_id = self.kwargs['course_id']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        context['title'] = chapter
+        #
+        course = Course.objects.get(
+                    pk=course_id
+                )
+        content = CourseVersion.objects.filter(
+                course=course
+            ).order_by('-version_number')[0].version_content
+        #
+        content = order_full_spec_content(content)
+        chapter_qs = content[module]['content'][chapter]['questions']
+        dic = OrderedDict()
+        question = None
+        for difficulty in range(5):
+            difficulty += 1
+            d = str(difficulty)
+            if len(chapter_qs[d]) > 0:
+                for question in chapter_qs[d]:
+                    if d not in dic:
+                        dic[d] = []
+                    dic[d].append(Question.objects.get(q_unique_id=question))
+        context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
+        context['questions'] = dic if question else None
+        return context
+
+
+class EditorPointView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/noteedit.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        # Get details of page
+        point_id = self.kwargs['point_id']
+        point = Point.objects.get(pk=point_id)
+        #
+        editor_form = MDEditorModleForm()
+        context['point'] = point
+        context['editor_form'] = editor_form
         return context
 
 

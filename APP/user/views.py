@@ -438,6 +438,8 @@ def _registerUser(request):
             # Hash password
             user.set_password(password)
             user.save()
+            AssociatedGroup = Group.objects.get(name='Student')  # Get group
+            AssociatedGroup.user_set.add(user)
             # Email
             to_email = user.email
             mail_subject = 'Account activation.'
