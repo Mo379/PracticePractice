@@ -1,7 +1,6 @@
 {% extends 'base/base.html'%}
 {%load general %}
 {%load static %}
-{% load mathjax %}
 
 {%block page_name%}
 	Questions
@@ -18,14 +17,17 @@
 {%endblock%}
 
 {%block content%}
-{% mathjax_scripts %}
+{%include 'content/mathjax.html'%}
 <style>
-.MathJax{
+.MJX-TEX{
 	margin-left:5px;
 	margin-right:5px;
 }
-.MathJax_Display{
+.MathJax{
 	overflow-x: scroll;
+	border-right: 2px solid green;
+	border-bottom: None;
+	margin-right: 5px;
 }
 </style>
 

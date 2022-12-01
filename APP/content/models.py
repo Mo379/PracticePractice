@@ -2,6 +2,8 @@ from django.utils import timezone
 from collections import OrderedDict
 from django.db import models
 from user.models import User
+
+from django.db import models
 from mdeditor.fields import MDTextField
 
 
@@ -69,6 +71,7 @@ class Point(models.Model):
     p_topic = models.CharField(max_length=255,default='',null=True)
     p_number = models.IntegerField(default=-1,null=True)
     p_content = models.JSONField(default=dict,null=True)
+    p_MDcontent = MDTextField(default='', null=True)
     p_directory = models.CharField(max_length=255,default='',null=True)
     p_unique_id = models.CharField(max_length=11, db_index=True,default='',null=True,unique=True)
     deleted = models.BooleanField(default=False, null=True)
@@ -141,6 +144,7 @@ class Keyword(models.Model):
 class ContentTemplate(models.Model):
     name = models.CharField(max_length=50, default='', null=True)
     content = models.JSONField(default=OrderedDict, null=True)
+    MDcontent = MDTextField(default='', null=True)
 
     def __str__(self):
         return self.name
@@ -228,9 +232,4 @@ class UserPaper(models.Model):
         return self.pap_subject
 
 
-class ExampleModel(models.Model):
-    name = models.CharField(max_length=10)
-    content = MDTextField()
 
-    def __str__(self):
-        return self.name

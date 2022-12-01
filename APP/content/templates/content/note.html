@@ -1,7 +1,6 @@
 {% extends 'base/base.html'%}
 {%load general %}
 {%load static %}
-{% load mathjax %}
 
 {%block page_name%}
 	Notes
@@ -21,26 +20,19 @@
 {%endblock%}
 
 {%block content%}
-{% mathjax_scripts %}
+{%include 'content/mathjax.html'%}
 <style>
-.MathJax{
+.MJX-TEX{
 	margin-left:5px;
 	margin-right:5px;
 	overflow-x: scroll;
 	overflow-x: scroll;
-	border-bottom: 1px solid green;
 }
-.MathJax_Display {
+.MathJax{
 	overflow-x: scroll;
 	border-right: 2px solid green;
 	border-bottom: None;
-}
-.MathJax_Display .MathJax{
-	border-bottom: None;
-}
-.math{
-	overflow-x: scroll;
-	max-width: 100%;
+	margin-right: 5px;
 }
 .point_div h6 {
 	border-left: 2px solid green;
@@ -161,9 +153,3 @@
 	</div>
 </div>
 {%endblock%}
-	<form method = "post" action = "./" style='display:none;'>
-            {% csrf_token %}
-            {{ context.editor_form.media }}
-            {{ context.editor_form.as_p }}
-            <p> <input type = "submit" value = "post"> </ p>
-        </form>

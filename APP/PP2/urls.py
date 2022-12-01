@@ -39,7 +39,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
-    path("robots.txt", robots_txt)
+    path("robots.txt", robots_txt),
+
 ]
 
 handler404 = NotFoundView.as_view()

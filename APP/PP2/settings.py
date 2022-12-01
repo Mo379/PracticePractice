@@ -57,7 +57,6 @@ AWS_BUCKET_OBJECT = AWS_S3_R.Bucket(name=AWS_BUCKET_NAME)
 INSTALLED_APPS = [
     # Third party
     'djstripe',
-    'django_mathjax',
     'view_breadcrumbs',
     'multiselectfield',
     'mdeditor',
@@ -246,17 +245,6 @@ PAYPAL_CLIENT_ID = decouple_config('Paypal_test_client_id')
 PAYPAL_CLIENT_SECRET = decouple_config('Paypal_test_client_secret')
 PAYPAL_WEBHOOK_ID = decouple_config('Paypal_test_webhook_id')
 
-# Mathjax settings
-MATHJAX_ENABLED = True
-MATHJAX_CONFIG_DATA = {
-      "tex2jax": {
-        "inlineMath": [
-                ['$', '$'],
-                ['\\(', '\\)']
-            ]
-      }
-    }
-
 # Breadcrumb settings
 BREADCRUMBS_TEMPLATE = "base/breadcrumbs.html"
 BREADCRUMBS_HOME_LABEL = "Home"
@@ -266,22 +254,21 @@ BREADCRUMBS_HOME_LABEL = "Home"
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 MEDIA_URL = '/media/'
+
+# configuration
 MDEDITOR_CONFIGS = {
     'default': {
         'width': '100%',  # Custom edit box width
         'height': 600,  # Custom edit box height
         'toolbar': [
-            "undo", "redo", "|",
-            "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "|",
-            "h1", "h2", "h3", "h5", "h6", "|",
-            "list-ul", "list-ol", "hr", "|",
-            "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime",
-            "emoji", "html-entities", "pagebreak", "goto-line", "|",
-            "help",
+            "bold", "italic", "quote", "uppercase", "lowercase", "|",
+            "list-ul", "list-ol", "|",
+            "link", "reference-link", "image", "code", "preformatted-text",
+            "code-block", "table", "|",
             "||", "preview", "watch", "fullscreen"
         ],  # custom edit box toolbar
         'upload_image_formats': ["jpg", "jpeg", "gif", "png", "bmp", "webp"],   # image upload format type
-        'image_folder': 'editor',  # image save the folder name
+        'image_folder': 'media',  # image save the folder name
         'theme': 'default',  # edit box theme, dark / default
         'preview_theme': 'default',  # Preview area theme, dark / default
         'editor_theme': 'default',  # edit area theme, pastel-on-dark / default
@@ -297,6 +284,8 @@ MDEDITOR_CONFIGS = {
         'language': 'en'  # zh / en / es
     }
 }
+
+
 
 
 # Celery settings

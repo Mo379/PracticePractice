@@ -13,17 +13,7 @@ from content.models import (
         CourseVersion,
         CourseReview,
         CourseSubscription,
-        ExampleModel
         )
-
-# Register your models here.
-from mdeditor.widgets import MDEditorWidget
-
-
-class ExampleModelAdmin (admin.ModelAdmin):
-    formfield_overrides = {
-        models.TextField: {'widget': MDEditorWidget}
-    }
 
 
 # Register your models here.
@@ -39,4 +29,3 @@ admin.site.register(Course)
 admin.site.register(CourseVersion)
 admin.site.register(CourseReview)
 admin.site.register(CourseSubscription)
-admin.site.register(ExampleModel, ExampleModelAdmin)

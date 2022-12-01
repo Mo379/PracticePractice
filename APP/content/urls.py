@@ -28,7 +28,7 @@ urlpatterns = [
         name='questionedit'
         ),
     path(
-        'content/editorpoint/<point_id>',
+        'content/editorpoint/<spec_id>/<point_id>',
         views.EditorPointView.as_view(),
         name='editorpoint'
     ),
@@ -163,4 +163,14 @@ urlpatterns = [
         views._deletepoint,
         name='_deletepoint'
     ),
+    path(
+        'content/_savepointedit/',
+        views._savepointedit,
+        name='_savepointedit'
+    ),
+    # path(
+        # 'content/_savequestionedit/',
+        # views._savequestionedit,
+        # name='_savequestionedit'
+    # ),
 ]

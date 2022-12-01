@@ -1,7 +1,9 @@
 import pandas as pd
+import yaml
 from collections import OrderedDict
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.utils.functional import cached_property
 from django.contrib import messages
 from django.views import generic
@@ -9,6 +11,7 @@ from content.util.GeneralUtil import (
         TagGenerator,
         insert_new_spec_order,
         order_full_spec_content,
+        TranslatePointContent,
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
@@ -195,8 +198,6 @@ class NoteArticleView(
         context['course'] = course
         context['next'] = next_link
         context['previous'] = previous_link
-        editor_form = MDEditorModleForm()
-        context['editor_form'] = editor_form
         return context
 
 
@@ -324,8 +325,6 @@ class NoteEditView(
         context['spec'] = source_spec
         context['next'] = next_link
         context['previous'] = previous_link
-        editor_form = MDEditorModleForm()
-        context['editor_form'] = editor_form
         return context
 
 
@@ -391,7 +390,7 @@ class EditorPointView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = 'content/noteedit.html'
+    template_name = 'content/pointeditor.html'
     context_object_name = 'context'
 
     @cached_property
@@ -403,10 +402,15 @@ class EditorPointView(
         """Return all of the required hub information"""
         context = {}
         # Get details of page
+        spec_id = self.kwargs['spec_id']
         point_id = self.kwargs['point_id']
+        spec = Specification.objects.get(pk=spec_id)
         point = Point.objects.get(pk=point_id)
+        translated_content = TranslatePointContent(point.p_content)
+        point.p_MDcontent = translated_content
         #
-        editor_form = MDEditorModleForm()
+        editor_form = MDEditorModleForm(instance=point)
+        context['spec'] = spec
         context['point'] = point
         context['editor_form'] = editor_form
         return context
@@ -1808,3 +1812,133 @@ def _deletepoint(request):
                 'dashboard:specpoint',
                 **kwargs
             )
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        board = request.POST['board']
+        name = request.POST['name']
+        deleted_point = request.POST['delete_point']
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module,
+                p_chapter=chapter,
+                p_topic=topic,
+                p_unique_id=deleted_point,
+            )
+        spec = Specification.objects.get(
+                user=request.user,
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
+            )
+        if len(points) > 0:
+            points.update(deleted=True)
+            content = spec.spec_content
+            if module in content.keys():
+                    if chapter in content[module]['content'].keys():
+                        if topic in content[module]['content'][chapter]['content'].keys():
+                            if deleted_point in content[module]['content'][chapter]['content'][topic]['content'].keys():
+                                content[module]['content'][chapter]['content'][topic]['content'][deleted_point]['active'] = False
+                                content[module]['content'][chapter]['content'][topic]['content'][deleted_point]['position'] = -1
+                                spec.spec_content = content
+                                spec.save()
+            #
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Point {deleted_point} was binned but not permanently deleted.',
+                    extra_tags='alert-warning point'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that the input is correct.',
+                    extra_tags='alert-warning point'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'chapter': chapter,
+            'topic': topic,
+            'board': board,
+            'name': name
+        }
+        return redirect(
+                'dashboard:specpoint',
+                **kwargs
+            )
+
+
+
+def _savepointedit(request):
+    if request.method == 'POST':
+        point_id = request.POST['point_id']
+        point = Point.objects.filter(user=request.user, pk=point_id)
+        if len(point) == 1:
+            form = MDEditorModleForm(request.POST, instance=point[0])
+            if form.is_valid():
+                form.save()
+                content = form.cleaned_data['p_MDcontent'].split('```')
+                hidden = content[1].split('yaml')[1]
+                description = '```'.join(content[2:])
+                #
+                hidden_details = yaml.load(hidden.replace('\t', '  '))['hidden_details']
+                title = hidden_details['point_title']
+                vids = [(k.split('_')[1], i['video_title'], i['video_link']) for k, i in hidden_details.items() if 'vid' in k]
+                vids_content = {str(int(k)-1): {'vid':{"vid_title": i,"vid_link": j}} for k,i,j in vids}
+                #
+                description_text = description.split('\n')
+                description_content = {}
+                for idd, v in enumerate(description_text):
+                    description_content[idd] = {}
+                    if '!(' in v:
+                        first_list = v.split('(')[1].split(')')
+                        second_list = first_list[1].split('[')[1].split(']')
+                        description_content[idd]['img'] = {}
+                        description_content[idd]['img']['img_info'] = first_list[0]
+                        description_content[idd]['img']['img_name'] = second_list[0]
+                    else:
+                        description_content[idd]['text'] = v
+                #
+                point[0].p_content['details']['hidden']['0']['point_title'] = title
+                point[0].p_content['details']['hidden']['0']['content'] = vids_content
+                point[0].p_content['details']['description'] = description_content
+                point[0].save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Saved !',
+                        extra_tags='alert-success editorpoint'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something is wrong, please check that all inputs are valid.',
+                        extra_tags='alert-danger editorpoint'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, cannot find information.',
+                    extra_tags='alert-danger editorpoint'
+                )
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger home'
+            )
+        return redirect('main:index')

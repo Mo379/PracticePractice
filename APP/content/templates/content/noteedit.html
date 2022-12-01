@@ -1,7 +1,6 @@
 {% extends 'base/base.html'%}
 {%load general %}
 {%load static %}
-{% load mathjax %}
 
 {%block page_name%}
 	Notes
@@ -21,26 +20,19 @@
 {%endblock%}
 
 {%block content%}
-{% mathjax_scripts %}
+{%include 'content/mathjax.html'%}
 <style>
-.MathJax{
+.MJX-TEX{
 	margin-left:5px;
 	margin-right:5px;
 	overflow-x: scroll;
 	overflow-x: scroll;
-	border-bottom: 1px solid green;
 }
-.MathJax_Display {
+.MathJax{
 	overflow-x: scroll;
 	border-right: 2px solid green;
 	border-bottom: None;
-}
-.MathJax_Display .MathJax{
-	border-bottom: None;
-}
-.math{
-	overflow-x: scroll;
-	max-width: 100%;
+	margin-right: 5px;
 }
 .point_div h6 {
 	border-left: 2px solid green;
@@ -51,6 +43,42 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
+<link href="{%static 'mdeditor/css/editormd.css'%}" type="text/css" media="all" rel="stylesheet">
+<style>
+.markdown-body table {
+	margin: auto;
+}
+.admonition {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.admonition.note { /* csslint allow: adjoining-classes */
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+.admonition.warning { /* csslint allow: adjoining-classes */
+    color: #c09853;
+    background-color: #fcf8e3;
+    border-color: #fbeed5;
+}
+
+.admonition.danger { /* csslint allow: adjoining-classes */
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.admonition-title {
+    font-weight: bold;
+    text-align: left;
+}
+</style>
 
 
 {%definevar context.spec as spec%}
@@ -72,7 +100,8 @@
 	</h2>
 	<div class='ml-1' style='border-left: 1px solid grey;'>
         {%for point in context.article|index:topic%}
-	<div id='point_{{point.id}}'class='point_div ml-1 mb-2' style='border-left: 2px dashed silver; padding-left:5px;'>
+	<div id='point_{{point.id}}'class='markdown-body point_div ml-1 mb-2' style='border-left: 2px dashed silver; padding-left:5px;'>
+		<a href='{%url 'content:editorpoint' spec.id point.id%}#point'> <i class='bi bi-pencil-square ml-4'></i></a>
 		    {{point.p_content|ToMarkdown:point|safe}}
 	    </div>
         {%endfor%}

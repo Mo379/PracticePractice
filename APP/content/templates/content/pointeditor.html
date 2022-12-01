@@ -1,0 +1,62 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+
+{%block page_name%}
+Point editor
+{%endblock%}
+
+{%block title%}
+Editor
+{%endblock%}
+
+
+{%block content%}
+{%definevar 'editorpoint' as alert_loc%}
+{%include 'base/alert.html'%}
+
+
+<style>
+.admonition {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.admonition.note { /* csslint allow: adjoining-classes */
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+.admonition.warning { /* csslint allow: adjoining-classes */
+    color: #c09853;
+    background-color: #fcf8e3;
+    border-color: #fbeed5;
+}
+
+.admonition.danger { /* csslint allow: adjoining-classes */
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.admonition-title {
+    font-weight: bold;
+    text-align: left;
+}
+</style>
+
+<form class="user px-3 py-3"  action="{%url 'content:_savepointedit'%}" 
+	method="POST" role="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type='hidden' name='point_id' value={{context.point.id}}>
+    {{ context.editor_form.media }}
+    {{ context.editor_form.p_MDcontent}}
+    <button class="btn btn-primary" type="submit">Save changes</button>
+    <a class="btn btn-info" href='{%url 'content:noteedit' context.spec.id context.point.p_moduel context.point.p_chapter%}#point_{{context.point.id}}' target='_blank'>View</a>
+</form>
+
+{%endblock%}

@@ -137,8 +137,7 @@ def ToMarkdown(content, point):
     # hidden has only one numbered element containing two children
     point_title = hidden['0']['point_title']
     #html += markdown.markdown("### " + str(number) + ': ' +point_title)
-    url = reverse('content:editorpoint', kwargs={'point_id': point.id})
-    html += markdown.markdown("### " + point_title + f"<a href='{url}'> <i class='bi bi-pencil-square ml-4'></i></a>")
+    html += markdown.markdown("### " + point_title)
     hidden_content = hidden['0']['content']
     # the content element is numbered
     for item in range(len(hidden_content)):
@@ -167,7 +166,7 @@ def ToMarkdown(content, point):
         if 'text' in description[item]:
             text = description[item]['text']
             text = text.replace('\\', '\\\\')
-            html += markdown.markdown(text)
+            html += text
         # the image element is made of two parts, info and file name
         if 'img' in description[item]:
             img_element = description[item]['img']
@@ -185,7 +184,7 @@ def ToMarkdown(content, point):
                 content = template.render(context)
                 html += content
     # convert markdown to html for display
-    return html
+    return markdown.markdown(html, extensions=['tables','admonition'])
 
 
 
