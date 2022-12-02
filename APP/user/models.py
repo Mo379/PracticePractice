@@ -15,7 +15,7 @@ class User(AbstractUser):
     is_member = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    icon_id = models.CharField(max_length=30, default='', null=True)
+    profile_pic_ext = models.CharField(max_length=10, default='', null=True)
     profile_upload = models.FileField(
             upload_to='uploads/profile_picture',
             blank=True

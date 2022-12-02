@@ -49,6 +49,10 @@ Editor
 }
 </style>
 
+<script>
+var object_id = "{{context.point.id}}";
+var object_type = "Point";
+</script>
 <form class="user px-3 py-3"  action="{%url 'content:_savepointedit'%}" 
 	method="POST" role="form" enctype="multipart/form-data">
     {% csrf_token %}

@@ -1900,9 +1900,9 @@ def _savepointedit(request):
                 description_content = {}
                 for idd, v in enumerate(description_text):
                     description_content[idd] = {}
-                    if '!(' in v:
-                        first_list = v.split('(')[1].split(')')
-                        second_list = first_list[1].split('[')[1].split(']')
+                    if '![' in v:
+                        first_list = v.split('[')[1].split(']')
+                        second_list = first_list[1].split('(')[1].split(')')
                         description_content[idd]['img'] = {}
                         description_content[idd]['img']['img_info'] = first_list[0]
                         description_content[idd]['img']['img_name'] = second_list[0]

@@ -173,8 +173,8 @@ def ToMarkdown(content, point):
             img_info = img_element['img_info']
             img_name = img_element['img_name']
             if img_name and img_info:
-                point_dir = point.p_directory.split('universal/')[1]
-                file_path = os.path.join(point_dir,'files',img_name)
+                point_dir = point.p_files_directory
+                file_path = os.path.join(point_dir, img_name)
                 context = {
                         'CDN': settings.CDN_URL,
                         'img_info': img_info,

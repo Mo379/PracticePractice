@@ -135,8 +135,9 @@ def TranslatePointContent(content):
             if idd2 == 'img':
                 info = value2['img_info']
                 name = value2['img_name']
-                out_desc += f"!({info})[{name}]" + '\n'
+                out_desc += f"![{info}]({name})" + '\n'
     return out + out_desc
+
 
 
 

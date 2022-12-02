@@ -8,6 +8,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .configs import MDConfig
+from io import BytesIO
+from content.models import Question, Point
 
 # TODO 此处获取default配置，当用户设置了其他配置时，此处无效，需要进一步完善
 MDEDITOR_CONFIGS = MDConfig('default')
@@ -22,8 +24,8 @@ class UploadView(generic.View):
 
     def post(self, request, *args, **kwargs):
         upload_image = request.FILES.get("editormd-image-file", None)
-        media_root = settings.MEDIA_ROOT
-
+        object_id = request.POST['my_object_id']
+        object_type = request.POST['my_object_type']
         # image none check
         if not upload_image:
             return JsonResponse({
@@ -31,7 +33,6 @@ class UploadView(generic.View):
                 'message': "Failed to find an image.",
                 'url': ""
             })
-
         # image format check
         file_name_list = upload_image.name.split('.')
         file_extension = file_name_list.pop(-1)
@@ -43,29 +44,34 @@ class UploadView(generic.View):
                     MDEDITOR_CONFIGS['upload_image_formats']),
                 'url': ""
             })
-
-        # image floder check
-        file_path = os.path.join(media_root, MDEDITOR_CONFIGS['image_folder'])
-        if not os.path.exists(file_path):
-            try:
-                os.makedirs(file_path)
-            except Exception as err:
-                return JsonResponse({
-                    'success': 0,
-                    'message': "上传失败：%s" % str(err),
-                    'url': ""
-                })
-
         # save image
-        file_full_name = '%s_%s.%s' % (file_name,
-                                       '{0:%Y%m%d%H%M%S%f}'.format(datetime.datetime.now()),
-                                       file_extension)
-        with open(os.path.join(file_path, file_full_name), 'wb+') as file:
+        try:
+            f = BytesIO()
             for chunk in upload_image.chunks():
-                file.write(chunk)
-
-        return JsonResponse({'success': 1,
-                             'message': "上传成功！",
-                             'url': os.path.join(settings.MEDIA_URL,
-                                                 MDEDITOR_CONFIGS['image_folder'],
-                                                 file_full_name)})
+                f.write(chunk)
+            f.seek(0)
+            #get object location
+            if object_type == 'Point':
+                obj = Point.objects.get(pk=object_id)
+                file_key = f'{obj.p_files_directory}/{file_name}.{file_extension}'
+            elif object_type == 'Question':
+                obj = Question.objects.get(pk=object_id)
+                file_key = f'{obj.q_files_directory}/{file_name}.{file_extension}'
+            settings.AWS_S3_C.upload_fileobj(
+                    f,
+                    settings.AWS_BUCKET_NAME,
+                    file_key,
+                    ExtraArgs={'ACL': 'public-read'}
+                )
+        except Exception as e:
+            return JsonResponse({
+                'success': 0,
+                'message': 'Something went wrong cannot upload image.'+str(e),
+                'url': ""
+            })
+        else:
+            # image floder check
+            return JsonResponse({'success': 1,
+                                 'message': "Success !",
+                                 'url': f"{file_name}.{file_extension}"
+                                 })

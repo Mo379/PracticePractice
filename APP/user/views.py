@@ -1,3 +1,4 @@
+import os
 import re
 import json
 from django.conf import settings
@@ -54,6 +55,10 @@ from djstripe.models import (
     )
 import markdown
 from django.db.models import Q
+from mdeditor.configs import MDConfig
+from io import BytesIO
+
+MDEDITOR_CONFIGS = MDConfig('default')
 
 
 
@@ -88,6 +93,13 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         # checking if billing information exists
         context['user_member_bool'] = Subscription.objects.filter(customer=user.id, status='active').exists()
         context['user_billing_bool'] = PaymentMethod.objects.filter(customer=user.id).exists()
+        context['profile_picture_url'] = os.path.join(
+                settings.CDN_URL,
+                'users',
+                str(user.id),
+                'profile',
+                'profile_picture'
+            ) + f'.{str(user.profile_pic_ext)}'
         return context
 
 
@@ -870,6 +882,42 @@ def _accountdetails(request):
             # make sure username is not the same
             # username check
             username = form.cleaned_data['username']
+            upload_image = form.cleaned_data['profile_upload']
+            # Upload image
+            file_name_list = upload_image.name.split('.')
+            file_extension = file_name_list.pop(-1)
+            request.user.profile_pic_ext = file_extension
+            request.user.save()
+            if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
+                        extra_tags='alert-warning user_profile'
+                    )
+            else:
+                # save image
+                try:
+                    f = BytesIO()
+                    for chunk in upload_image.chunks():
+                        f.write(chunk)
+                    f.seek(0)
+                    # get object location
+                    file_key = f'users/{request.user.id}/profile/profile_picture.{file_extension}'
+                    settings.AWS_S3_C.upload_fileobj(
+                            f,
+                            settings.AWS_BUCKET_NAME,
+                            file_key,
+                            ExtraArgs={'ACL': 'public-read'}
+                        )
+                    request.user.profile_upload.delete()
+                except Exception as e:
+                    messages.add_message(
+                            request,
+                            messages.INFO,
+                            'Could not store your profile image.',
+                            extra_tags='alert-warning user_profile'
+                        )
             # check user name is new and unique
             taken_username_check = User.objects.filter(
                     ~Q(pk=request.user.id),
