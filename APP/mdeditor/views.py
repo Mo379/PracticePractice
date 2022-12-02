@@ -28,7 +28,7 @@ class UploadView(generic.View):
         if not upload_image:
             return JsonResponse({
                 'success': 0,
-                'message': "未获取到要上传的图片",
+                'message': "Failed to find an image.",
                 'url': ""
             })
 
@@ -39,7 +39,7 @@ class UploadView(generic.View):
         if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
             return JsonResponse({
                 'success': 0,
-                'message': "上传图片格式错误，允许上传图片格式为：%s" % ','.join(
+                'message': "Invalid format detected, image has got to be：%s" % ','.join(
                     MDEDITOR_CONFIGS['upload_image_formats']),
                 'url': ""
             })

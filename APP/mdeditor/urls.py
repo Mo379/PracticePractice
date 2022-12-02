@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
-import django
+from django.urls import path
+from content import views
 
 from .views import UploadView
 
-if django.VERSION[0] > 1:
-    from django.urls import re_path as url_func
-else:
-    from django.conf.urls import url as url_func
-
-
+app_name = 'mdeditor'
 urlpatterns = [
-    url_func(r'^uploads/$', UploadView.as_view(), name='uploads'),
+    path(
+        'uploads/',
+        UploadView.as_view(),
+        name='uploads'
+    ),
 ]

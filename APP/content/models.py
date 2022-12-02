@@ -34,8 +34,7 @@ class Question(models.Model):
     q_difficulty = models.IntegerField(default=0, null=True)
     q_total_marks = models.IntegerField(default=0, null=True)
     q_content = models.JSONField(default=dict, null=True)
-    q_dir = models.CharField(max_length=255, default='', null=True)
-    q_link = models.CharField(max_length=255, default='', null=True)
+    q_files_directory = models.CharField(max_length=255, default='', null=True)
     q_unique_id = models.CharField(
             max_length=11, db_index=True, default='', null=True, unique=True
         )
@@ -72,7 +71,7 @@ class Point(models.Model):
     p_number = models.IntegerField(default=-1,null=True)
     p_content = models.JSONField(default=dict,null=True)
     p_MDcontent = MDTextField(default='', null=True)
-    p_directory = models.CharField(max_length=255,default='',null=True)
+    p_files_directory = models.CharField(max_length=255,default='',null=True)
     p_unique_id = models.CharField(max_length=11, db_index=True,default='',null=True,unique=True)
     deleted = models.BooleanField(default=False, null=True)
 
