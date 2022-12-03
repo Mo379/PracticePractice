@@ -5,7 +5,11 @@
 <div class="card-header">Profile Picture</div>
 <div class="card-body text-center">
     <!-- Profile picture image-->
-    <img class="img-account-profile rounded-circle mb-2" src="{{context.profile_picture_url}}" alt="">
+    {%if user.profile_pic_status%}
+    <img class="img-account-profile rounded-circle mb-2" src="{{context.profile_picture_url}}" alt="" style='width:150px;height:150px'>
+    {%else%}
+    <img class="img-account-profile rounded-circle mb-2" src="{% static 'base/svg/undraw_pic_profile_re_7g2h.svg'%}" alt="">
+    {%endif%}
 </div>
 </div>
 

@@ -32,7 +32,11 @@ CoursePlace
 <div class='courseplace_wrapper'style='width:95%;margin:auto;'>
 	{%for course in context.courses%}
 	<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
-		<img class="card-img-top" src="{%static "base/img/Maths.jpg"%}" alt="Card image cap">
+		{%if course.course_pic_status%}
+		<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+		{%else%}
+		<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
+		{%endif%}
 		<div class="card-body">
 			<div class="h6 font-weight-bold" style='color:black;'>{{course.course_name}}</div>
 			<div class="card-text mb-3" >{{course.course_summary}}</div>
@@ -45,6 +49,7 @@ CoursePlace
 			<div class="" style='color:black;font-size: 12px;'><strong>Estimated Time:</strong> {{course.course_estimated_time}}</div>
 			<div class="" style='color:black;font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
 			<div class="" style='color:black;font-size: 12px;'><strong>English:</strong> {{course.course_language}}</div>
+			<div class="" style='color:black;font-size: 12px;'><strong>Question Bank Only:</strong> {{course.course_question_bank_only}}</div>
 			<div class="" style='color:black;font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
 </div>
 			<div class="" style='color:black;'>

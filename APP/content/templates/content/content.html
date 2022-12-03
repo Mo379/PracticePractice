@@ -40,7 +40,11 @@ Find the revision notes, questions and past papers you want, all in one place!
 	{%for course_subscription in context.courses%}
 	{%definevar course_subscription.course as course%}
 	<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
-		<img class="card-img-top" src="{%static "base/img/Maths.jpg"%}" alt="Card image cap">
+		{%if course.course_pic_status%}
+		<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+		{%else%}
+		<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
+		{%endif%}
 		<div class="card-body">
 			<div class="h6 font-weight-bold" style='color:black;'>{{course.course_name}}</div>
 			<div class="card-text mb-3" >{{course.course_summary}}</div>

@@ -1,5 +1,6 @@
 import pandas as pd
 import yaml
+from django.conf import settings
 from collections import OrderedDict
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -22,6 +23,10 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from mdeditor.configs import MDConfig
+from io import BytesIO
+
+MDEDITOR_CONFIGS = MDConfig('default')
 # Create your views here.
 
 
@@ -52,6 +57,7 @@ class ContentView(
         else:
             context['courses'] = []
         #
+        context['CDN_URL'] = settings.CDN_URL
         return context
 
 
@@ -748,6 +754,12 @@ def _updatecourseinformation(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
         course_name = request.POST['new_name']
+        course_upload_image = request.FILES.get("course_thmbnail", None)
+        course_question_bank_only = request.POST.get('question_bank_only')
+        if course_question_bank_only == 'on':
+           course_question_bank_only = True
+        else:
+           course_question_bank_only = False
         course_skills = request.POST.getlist('ordered_items_skills[]')
         course_objectives = request.POST.getlist('ordered_items_objectives[]')
         course_summary = request.POST['course_summary']
@@ -767,15 +779,54 @@ def _updatecourseinformation(request):
                 course.course_level = course_level
                 course.course_language = course_language
                 course.course_estimated_time = course_estimated_time
+                course.course_question_bank_only = course_question_bank_only
                 #
                 course.course_skills = {idd: skill for idd, skill in enumerate(course_skills)}
                 course.course_learning_objectives = {idd: skill for idd, skill in enumerate(course_objectives)}
+                #
+                # Upload image
+                if course_upload_image:
+                    file_name_list = course_upload_image.name.split('.')
+                    file_extension = file_name_list.pop(-1)
+                    full_name = '.'.join(file_name_list) + '.' + file_extension
+                    course.course_pic_ext = full_name
+                    request.user.save()
+                    if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
+                        messages.add_message(
+                                request,
+                                messages.INFO,
+                                'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
+                                extra_tags='alert-warning course'
+                            )
+                    else:
+                        # save image
+                        try:
+                            f = BytesIO()
+                            for chunk in course_upload_image.chunks():
+                                f.write(chunk)
+                            f.seek(0)
+                            # get object location
+                            file_key = f'users/{request.user.id}/courses/{course.id}/course_thumbnail_{full_name}'
+                            settings.AWS_S3_C.upload_fileobj(
+                                    f,
+                                    settings.AWS_BUCKET_NAME,
+                                    file_key,
+                                    ExtraArgs={'ACL': 'public-read'}
+                                )
+                            course.course_pic_status = True
+                        except Exception as e:
+                            messages.add_message(
+                                    request,
+                                    messages.INFO,
+                                    'Could not store your profile image.',
+                                    extra_tags='alert-warning course'
+                                )
                 course.save()
-            except Exception:
+            except Exception as e:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Something went wrong could not update course.',
+                        'Something went wrong could not update course.' + str(e),
                         extra_tags='alert-warning course'
                     )
             else:

@@ -99,7 +99,7 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
                 str(user.id),
                 'profile',
                 'profile_picture'
-            ) + f'.{str(user.profile_pic_ext)}'
+            ) + f'_{str(user.profile_pic_ext)}'
         return context
 
 
@@ -884,40 +884,43 @@ def _accountdetails(request):
             username = form.cleaned_data['username']
             upload_image = form.cleaned_data['profile_upload']
             # Upload image
-            file_name_list = upload_image.name.split('.')
-            file_extension = file_name_list.pop(-1)
-            request.user.profile_pic_ext = file_extension
-            request.user.save()
-            if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
-                        extra_tags='alert-warning user_profile'
-                    )
-            else:
-                # save image
-                try:
-                    f = BytesIO()
-                    for chunk in upload_image.chunks():
-                        f.write(chunk)
-                    f.seek(0)
-                    # get object location
-                    file_key = f'users/{request.user.id}/profile/profile_picture.{file_extension}'
-                    settings.AWS_S3_C.upload_fileobj(
-                            f,
-                            settings.AWS_BUCKET_NAME,
-                            file_key,
-                            ExtraArgs={'ACL': 'public-read'}
-                        )
-                    request.user.profile_upload.delete()
-                except Exception as e:
+            if upload_image:
+                file_name_list = upload_image.name.split('.')
+                file_extension = file_name_list.pop(-1)
+                full_name = '.'.join(file_name_list) + '.' + file_extension
+                request.user.profile_pic_ext = full_name
+                request.user.profile_pic_status = True
+                request.user.save()
+                if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
                     messages.add_message(
                             request,
                             messages.INFO,
-                            'Could not store your profile image.',
+                            'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
                             extra_tags='alert-warning user_profile'
                         )
+                else:
+                    # save image
+                    try:
+                        f = BytesIO()
+                        for chunk in upload_image.chunks():
+                            f.write(chunk)
+                        f.seek(0)
+                        # get object location
+                        file_key = f'users/{request.user.id}/profile/profile_picture_{full_name}'
+                        settings.AWS_S3_C.upload_fileobj(
+                                f,
+                                settings.AWS_BUCKET_NAME,
+                                file_key,
+                                ExtraArgs={'ACL': 'public-read'}
+                            )
+                        request.user.profile_upload.delete()
+                    except Exception as e:
+                        messages.add_message(
+                                request,
+                                messages.INFO,
+                                'Could not store your profile image.',
+                                extra_tags='alert-warning user_profile'
+                            )
             # check user name is new and unique
             taken_username_check = User.objects.filter(
                     ~Q(pk=request.user.id),

@@ -165,11 +165,14 @@ class Course(models.Model):
     course_contributors = models.JSONField(default=OrderedDict, null=True)
     course_language = models.CharField(max_length=150, default='', null=True)
     course_level = models.CharField(max_length=150, default='', null=True)
+    course_question_bank_only = models.BooleanField(default=False, null=True)
     course_estimated_time = models.CharField(max_length=150, default='', null=True)
     #
     course_created_at = models.DateTimeField(auto_now_add=True)
     course_updated_at = models.DateTimeField(auto_now=True)
     course_publication = models.BooleanField(default=False, null=True)
+    course_pic_ext = models.CharField(max_length=150, default='', null=True)
+    course_pic_status = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):

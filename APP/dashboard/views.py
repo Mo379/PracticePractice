@@ -1,5 +1,6 @@
 import collections
 import pandas as pd
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -97,6 +98,7 @@ class MarketPlaceView(
                 #deleted=False
                 )
         context['courses'] = courses
+        context['CDN_URL'] = settings.CDN_URL
         return context
 
 
@@ -133,6 +135,7 @@ class MarketCourseView(
         context['versions'] = versions
         context['ordered_content'] = content
         context['course_subscription_status'] = subscription_status
+        context['CDN_URL'] = settings.CDN_URL
         return context
 
 
@@ -212,6 +215,7 @@ class MyCoursesView(
         context['specs'] = specs
         context['courses'] = courses
         context['course_versions'] = versions
+        context['CDN_URL'] = settings.CDN_URL
         return context
 
 

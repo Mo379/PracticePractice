@@ -9,8 +9,11 @@
         </button>
       </div>
       <div class="modal-body">
-		<form class="px-3 py-3"  action="{%url 'content:_updatecourseinformation'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_updatecourseinformation'%}" 
+			    method="POST" role="form" enctype="multipart/form-data">
 			{%csrf_token%}
+
+
 			<input 
 				type='hidden' 
 				name='course_id' 
@@ -27,6 +30,17 @@
 				value='{{course.course_name}}'
 			/><br>
 
+			<label class="form-label" for="customFile">Give a course thumbnail.</label>
+			<input type="file" id="customFile" name='course_thmbnail' /><br><br>
+
+			<div class="custom-control custom-switch mt-2 mb-2">
+				<input type="checkbox" class="custom-control-input" id="customSwitches" name='question_bank_only' 
+					{%if course.course_question_bank_only%}
+					checked
+					{%endif%}
+				>
+				<label class="custom-control-label" for="customSwitches">Make course a question bank only</label>
+			</div><br>
 
 			<label for="estimated_time">Give an estimated course completion time: </label>
 			<input 

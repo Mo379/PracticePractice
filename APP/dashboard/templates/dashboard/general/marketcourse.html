@@ -32,7 +32,11 @@ Course Page
 
 
 <div class="my_course_card card" style="width: 20em;height: auto; margin: 5px;float:right;position:absolute: top:1em;right: 1em;">
-	<img class="card-img-top" src="{%static "base/img/Maths.jpg"%}" alt="Card image cap">
+	{%if course.course_pic_status%}
+	<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+	{%else%}
+	<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
+	{%endif%}
 	<div class="card-body">
 		<div class="" style='color:black;'>
 			<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
