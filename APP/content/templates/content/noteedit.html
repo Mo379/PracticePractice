@@ -93,6 +93,7 @@
 
 	<h1 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
 		{{context.title|field_name_to_label}}
+		<a href='{%url 'content:questionedit' spec.id sample.p_moduel sample.p_chapter%}'><i class="bi bi-question-square"></i></a>
 	</h1>
 	{%for topic in context.article%}
 	<h2 id='topic_{{topic}}'>

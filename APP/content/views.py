@@ -341,38 +341,24 @@ class QuestionEditView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
+    template_name = 'content/questionedit.html'
+    context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
-                ("content", reverse("content:content")),
-                ("Notes", reverse(
-                        "content:notearticle",
-                        kwargs={
-                            "course_id": self.kwargs['course_id'],
-                            "module": self.kwargs['module'],
-                            "chapter": self.kwargs['chapter'],
-                        }
-                    )
-                ),
-                ("question", '')
             ]
 
     def get_queryset(self):
         context = {}
-        course_id = self.kwargs['course_id']
+        spec_id = self.kwargs['spec_id']
         module = self.kwargs['module']
         chapter = self.kwargs['chapter']
         context['title'] = chapter
         #
-        course = Course.objects.get(
-                    pk=course_id
-                )
-        content = CourseVersion.objects.filter(
-                course=course
-            ).order_by('-version_number')[0].version_content
+        spec = Specification.objects.get(pk=spec_id)
         #
-        content = order_full_spec_content(content)
+        content = order_full_spec_content(spec.spec_content)
         chapter_qs = content[module]['content'][chapter]['questions']
         dic = OrderedDict()
         question = None
@@ -386,6 +372,7 @@ class QuestionEditView(
                     dic[d].append(Question.objects.get(q_unique_id=question))
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
         context['questions'] = dic if question else None
+        context['spec'] = spec
         return context
 
 

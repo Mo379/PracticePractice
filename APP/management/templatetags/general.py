@@ -220,8 +220,8 @@ def ToMarkdownQuestion(content, question):
                 img_info = img_element['img_info']
                 img_name = img_element['img_name']
                 if img_name:
-                    question_dir = question.q_dir.split('universal/')[1]
-                    file_path = os.path.join(question_dir,'files',img_name)
+                    question_dir = question.q_files_directory
+                    file_path = os.path.join(question_dir, img_name)
                     context = {
                             'CDN': settings.CDN_URL,
                             'img_info': img_info,
