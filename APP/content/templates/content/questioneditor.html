@@ -1,0 +1,20 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+
+{%block page_name%}
+Question editor
+{%endblock%}
+
+{%block title%}
+Editor
+{%endblock%}
+
+
+{%block content%}
+{%definevar 'editorquestion' as alert_loc%}
+{%include 'base/alert.html'%}
+
+
+
+{%endblock%}

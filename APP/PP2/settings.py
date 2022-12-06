@@ -59,8 +59,6 @@ INSTALLED_APPS = [
     'djstripe',
     'view_breadcrumbs',
     'multiselectfield',
-    'mdeditor',
-    'dbbackup',
     # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
@@ -254,36 +252,6 @@ BREADCRUMBS_HOME_LABEL = "Home"
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 MEDIA_URL = '/media/'
-
-# configuration
-MDEDITOR_CONFIGS = {
-    'default': {
-        'width': '100%',  # Custom edit box width
-        'height': 600,  # Custom edit box height
-        'toolbar': [
-            "bold", "italic", "quote", "uppercase", "lowercase", "|",
-            "list-ul", "list-ol", "|",
-            "link", "reference-link", "image", "code", "preformatted-text",
-            "code-block", "table", "|",
-            "||", "preview", "watch", "fullscreen"
-        ],  # custom edit box toolbar
-        'upload_image_formats': ["jpg", "jpeg", "gif", "png", "bmp", "webp"],   # image upload format type
-        'image_folder': 'media',  # image save the folder name
-        'theme': 'default',  # edit box theme, dark / default
-        'preview_theme': 'default',  # Preview area theme, dark / default
-        'editor_theme': 'default',  # edit area theme, pastel-on-dark / default
-        'toolbar_autofixed': True,  # Whether the toolbar capitals
-        'search_replace': True,  # Whether to open the search for replacement
-        'emoji': True,  # whether to open the expression function
-        'tex': True,  # whether to open the tex chart function
-        'flow_chart': True,  # whether to open the flow chart function
-        'sequence': True,  # Whether to open the sequence diagram function
-        'watch': True,  # Live preview
-        'lineWrapping': True,  # lineWrapping
-        'lineNumbers': True,  # lineNumbers
-        'language': 'en'  # zh / en / es
-    }
-}
 
 
 

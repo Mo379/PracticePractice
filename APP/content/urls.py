@@ -32,6 +32,11 @@ urlpatterns = [
         views.EditorPointView.as_view(),
         name='editorpoint'
     ),
+    path(
+        'content/editorquestion/<spec_id>/<question_id>',
+        views.EditorQuestionView.as_view(),
+        name='editorquestion'
+    ),
     #
     path(
         'content/_inheritfromspec',
@@ -168,9 +173,9 @@ urlpatterns = [
         views._savepointedit,
         name='_savepointedit'
     ),
-    # path(
-        # 'content/_savequestionedit/',
-        # views._savequestionedit,
-        # name='_savequestionedit'
-    # ),
+    path(
+        'content/_savequestionedit/',
+        views._savequestionedit,
+        name='_savequestionedit'
+    ),
 ]
