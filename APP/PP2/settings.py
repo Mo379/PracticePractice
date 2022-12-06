@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'djstripe',
     'view_breadcrumbs',
     'multiselectfield',
+    'dbbackup',
     # user added
     'main.apps.MainConfig',
     'user.apps.UserConfig',
@@ -252,6 +253,7 @@ BREADCRUMBS_HOME_LABEL = "Home"
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 MEDIA_URL = '/media/'
+IMAGE_FILE_FORMAT = ['png', 'jpg', 'jpeg', 'webp']
 
 
 
