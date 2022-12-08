@@ -44,8 +44,6 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-lib/
-lib64/
 sdist/
 var/
 *.egg-info/
