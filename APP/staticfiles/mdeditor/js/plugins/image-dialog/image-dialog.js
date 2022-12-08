@@ -59,9 +59,8 @@
                                         "<label>" + imageLang.alt + "</label>" +
                                         "<input type=\"text\" value=\"" + selection + "\" data-alt />" +
                                         "<br/>" +
-                                        "<label>" + imageLang.link + "</label>" +
-                                        "<input type=\"text\" value=\"http://\" data-link />" +
-                                        "<br/>" +
+			    		"<input type=\"hidden\" value=\""+ object_id +"\" name='my_object_id'/>"+
+			    		"<input type=\"hidden\" value=\""+ object_type+"\" name='my_object_type'/>"+
                                     ( (settings.imageUpload) ? "</form>" : "</div>");
 
                 //var imageFooterHTML = "<button class=\"" + classPrefix + "btn " + classPrefix + "image-manager-btn\" style=\"float:left;\">" + imageLang.managerButton + "</button>";
@@ -93,13 +92,13 @@
 
 							var altAttr = (alt !== "") ? " \"" + alt + "\"" : "";
 
-                            if (link === "" || link === "http://")
+                            if (link === "" || link === "http://" || link === null)
                             {
-                                cm.replaceSelection("![" + alt + "](" + url + altAttr + ")");
+                                cm.replaceSelection("![" + alt + "](" + url + ")" );
                             }
                             else
                             {
-                                cm.replaceSelection("[![" + alt + "](" + url + altAttr + ")](" + link + altAttr + ")");
+                                cm.replaceSelection("![" + alt + "](" + url + ")" );
                             }
 
                             if (alt === "") {

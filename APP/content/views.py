@@ -13,11 +13,12 @@ from content.util.GeneralUtil import (
         insert_new_spec_order,
         order_full_spec_content,
         TranslatePointContent,
+        TranslateQuestionContent,
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
-from content.forms import MDEditorModleForm
+from content.forms import MDEditorModleForm, MDEditorQuestionModleForm
 from braces.views import (
         LoginRequiredMixin,
         GroupRequiredMixin,
@@ -409,6 +410,7 @@ class EditorPointView(
         return context
 
 
+
 class EditorQuestionView(
         LoginRequiredMixin,
         BaseBreadcrumbMixin,
@@ -433,8 +435,13 @@ class EditorQuestionView(
         spec = Specification.objects.get(pk=spec_id)
         question = Question.objects.get(pk=question_id)
         #
+        translated_content = TranslateQuestionContent(question.q_content)
+        question.q_MDcontent = translated_content
+        #
+        editor_form = MDEditorQuestionModleForm(instance=question)
         context['spec'] = spec
         context['question'] = question
+        context['editor_form'] = editor_form
         return context
 
 

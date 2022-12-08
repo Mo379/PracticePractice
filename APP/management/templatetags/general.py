@@ -211,7 +211,7 @@ def ToMarkdownQuestion(content, question):
             # each item has a single child either text or img
             # the text element is direct access
             if 'text' in q_part_content[content_item]:
-                text = q_part_content[content_item]['text']['text']['text']
+                text = q_part_content[content_item]['text']
                 text = text.replace('\\', '\\\\')
                 html += markdown.markdown(text)
             # the image element is made of two parts, info and file name

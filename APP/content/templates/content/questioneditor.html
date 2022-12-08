@@ -14,7 +14,60 @@ Editor
 {%block content%}
 {%definevar 'editorquestion' as alert_loc%}
 {%include 'base/alert.html'%}
+<style>
+.admonition {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: left;
+}
 
+.admonition.note { /* csslint allow: adjoining-classes */
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+.admonition.warning { /* csslint allow: adjoining-classes */
+    color: #c09853;
+    background-color: #fcf8e3;
+    border-color: #fbeed5;
+}
+
+.admonition.danger { /* csslint allow: adjoining-classes */
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.admonition-title {
+    font-weight: bold;
+    text-align: left;
+}
+</style>
+
+
+
+<div style='border:1px solid black;'>
+{{context.question.q_content|ToMarkdownQuestion:context.question|safe}}
+</div>
+
+
+
+<script>
+var object_id = "{{context.question.id}}";
+var object_type = "Question";
+</script>
+<form class="user px-3 py-3"  action="{%url 'content:_savequestionedit'%}" 
+	method="POST" role="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type='hidden' name='point_id' value={{context.question.id}}>
+    {{ context.editor_form.media }}
+    {{ context.editor_form.q_MDcontent}}
+    <button class="btn btn-primary" type="submit">Save changes</button>
+    <a class="btn btn-info" href='{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}' target='_blank'>View</a>
+</form>
 
 
 {%endblock%}

@@ -59,6 +59,6 @@ class MDEditorWidget(forms.Textarea):
             },
             js=(
                 "mdeditor/js/jquery.min.js",
-                "mdeditor/js/editormd.js",
+                "mdeditor/js/editormd.min.js",
             ))
     media = property(_get_media)
