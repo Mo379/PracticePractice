@@ -55,9 +55,10 @@ from djstripe.models import (
     )
 import markdown
 from django.db.models import Q
+from mdeditor.configs import MDConfig
 from io import BytesIO
 
-IMAGE_FILE_FORMAT = settings.IMAGE_FILE_FORMAT
+MDEDITOR_CONFIGS = MDConfig('default')
 
 
 
@@ -890,11 +891,11 @@ def _accountdetails(request):
                 request.user.profile_pic_ext = full_name
                 request.user.profile_pic_status = True
                 request.user.save()
-                if file_extension not in IMAGE_FILE_FORMAT:
+                if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
                     messages.add_message(
                             request,
                             messages.INFO,
-                            'Filetype is not allowed, please user: ' + str(','.join(IMAGE_FILE_FORMAT)),
+                            'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
                             extra_tags='alert-warning user_profile'
                         )
                 else:

@@ -32,7 +32,7 @@ urlpatterns = [
         views.EditorPointView.as_view(),
         name='editorpoint'
     ),
-    path(
+        path(
         'content/editorquestion/<spec_id>/<question_id>',
         views.EditorQuestionView.as_view(),
         name='editorquestion'

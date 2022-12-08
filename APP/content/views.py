@@ -12,17 +12,21 @@ from content.util.GeneralUtil import (
         TagGenerator,
         insert_new_spec_order,
         order_full_spec_content,
+        TranslatePointContent,
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
+from content.forms import MDEditorModleForm
 from braces.views import (
         LoginRequiredMixin,
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from mdeditor.configs import MDConfig
 from io import BytesIO
 
+MDEDITOR_CONFIGS = MDConfig('default')
 # Create your views here.
 
 
@@ -395,9 +399,13 @@ class EditorPointView(
         point_id = self.kwargs['point_id']
         spec = Specification.objects.get(pk=spec_id)
         point = Point.objects.get(pk=point_id)
+        translated_content = TranslatePointContent(point.p_content)
+        point.p_MDcontent = translated_content
         #
+        editor_form = MDEditorModleForm(instance=point)
         context['spec'] = spec
         context['point'] = point
+        context['editor_form'] = editor_form
         return context
 
 
@@ -1940,17 +1948,58 @@ def _deletepoint(request):
 
 def _savepointedit(request):
     if request.method == 'POST':
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger home'
-            )
-        return redirect('main:index')
-def _savequestionedit(request):
-    if request.method == 'POST':
+        point_id = request.POST['point_id']
+        point = Point.objects.filter(user=request.user, pk=point_id)
+        if len(point) == 1:
+            form = MDEditorModleForm(request.POST, instance=point[0])
+            if form.is_valid():
+                form.save()
+                content = form.cleaned_data['p_MDcontent'].split('```')
+                hidden = content[1].split('yaml')[1]
+                description = '```'.join(content[2:])
+                #
+                hidden_details = yaml.load(hidden.replace('\t', '  '))['hidden_details']
+                title = hidden_details['point_title']
+                vids = [(k.split('_')[1], i['video_title'], i['video_link']) for k, i in hidden_details.items() if 'vid' in k]
+                vids_content = {str(int(k)-1): {'vid':{"vid_title": i,"vid_link": j}} for k,i,j in vids}
+                #
+                description_text = description.split('\n')
+                description_content = {}
+                for idd, v in enumerate(description_text):
+                    description_content[idd] = {}
+                    if '![' in v:
+                        first_list = v.split('[')[1].split(']')
+                        second_list = first_list[1].split('(')[1].split(')')
+                        description_content[idd]['img'] = {}
+                        description_content[idd]['img']['img_info'] = first_list[0]
+                        description_content[idd]['img']['img_name'] = second_list[0]
+                    else:
+                        description_content[idd]['text'] = v
+                #
+                point[0].p_content['details']['hidden']['0']['point_title'] = title
+                point[0].p_content['details']['hidden']['0']['content'] = vids_content
+                point[0].p_content['details']['description'] = description_content
+                point[0].save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Saved !',
+                        extra_tags='alert-success editorpoint'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something is wrong, please check that all inputs are valid.',
+                        extra_tags='alert-danger editorpoint'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, cannot find information.',
+                    extra_tags='alert-danger editorpoint'
+                )
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     else:
         messages.add_message(
