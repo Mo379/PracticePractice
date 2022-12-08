@@ -139,6 +139,10 @@ def TranslatePointContent(content):
     return out + out_desc
 
 
+def TranslateQuestionContent(content):
+    return content
+
+
 
 
 

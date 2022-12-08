@@ -2009,3 +2009,42 @@ def _savepointedit(request):
                 extra_tags='alert-danger home'
             )
         return redirect('main:index')
+
+
+def _savequestionedit(request):
+    if request.method == 'POST':
+        question_id = request.POST['point_id']
+        question = Question.objects.filter(user=request.user, pk=question_id)
+        if len(question) == 1:
+            form = MDEditorModleForm(request.POST, instance=question[0])
+            if form.is_valid():
+                form.save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Saved !',
+                        extra_tags='alert-success editorpoint'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something is wrong, please check that all inputs are valid.',
+                        extra_tags='alert-danger editorpoint'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, cannot find information.',
+                    extra_tags='alert-danger editorpoint'
+                )
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger home'
+            )
+        return redirect('main:index')
