@@ -135,12 +135,50 @@ def TranslatePointContent(content):
             if idd2 == 'img':
                 info = value2['img_info']
                 name = value2['img_name']
-                out_desc += f"![{info}]({name})" + '\n'
+                out_desc += f"!({info})[{name}]" + '\n'
     return out + out_desc
 
 
 def TranslateQuestionContent(content):
-    return content
+    output = ''
+    output += '+++ Meta_details:' + '\n'
+    output += 'question_type: ' + str(content['details']['head']['0']['q_type']) + '\n'
+    output += 'question_difficulty: ' + str(content['details']['head']['0']['q_difficulty']) + '\n'
+    output += '\n\n+++ Question:\n'
+    for n in range(len(content['details']['questions'])):
+        part = content['details']['questions'][str(n)]
+        part_name = part['q_part']
+        part_mark = part['q_part_mark']
+        part_content = part['content']
+        output += f'\nPartName_{part_name}'
+        output += f'_PartMark_{part_mark}:\n'
+        for n2 in range(len(part_content)):
+            item = part_content[str(n2)]
+            if 'text' in item:
+                string = item['text'].replace('\n', '')
+                output += f'{string}\n'
+            if 'img' in item:
+                img_name = item['img']['img_name']
+                img_info = item['img']['img_info']
+                output += f'!({img_info})'
+                output += f'[{img_name}]\n'
+    output += '\n\n+++ Answer:' + '\n'
+    for n in range(len(content['details']['answers'])):
+        part = content['details']['answers'][str(n)]
+        part_name = part['q_part']
+        part_content = part['content']
+        output +=f'\nAnswerPart_PartName_{part_name}\n'
+        for n2 in range(len(part_content)):
+            item = part_content[str(n2)]
+            if 'text' in item:
+                string = item['text'].replace('\n', '')
+                output += f'{string}\n'
+            if 'img' in item:
+                img_name = item['img']['img_name']
+                img_info = item['img']['img_info']
+                output += f'!({img_info})'
+                output += f'[{img_name}]\n'
+    return output
 
 
 

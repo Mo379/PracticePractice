@@ -14,6 +14,8 @@ Editor
 {%block content%}
 {%definevar 'editorquestion' as alert_loc%}
 {%include 'base/alert.html'%}
+{%include 'content/mathjax.html'%}
+
 <style>
 .admonition {
     padding: 15px;
@@ -49,9 +51,6 @@ Editor
 
 
 
-<div style='border:1px solid black;'>
-{{context.question.q_content|ToMarkdownQuestion:context.question|safe}}
-</div>
 
 
 
@@ -69,5 +68,8 @@ var object_type = "Question";
     <a class="btn btn-info" href='{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}' target='_blank'>View</a>
 </form>
 
+<div style='border:1px solid black;'>
+{{context.question.q_content|ToMarkdownQuestion:context.question|safe}}
+</div>
 
 {%endblock%}

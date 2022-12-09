@@ -140,6 +140,7 @@ def ToMarkdown(content, point):
     html += markdown.markdown("### " + point_title)
     hidden_content = hidden['0']['content']
     # the content element is numbered
+    video_html = ''
     for item in range(len(hidden_content)):
         # to keep the order of the content
         item = str(item)
@@ -155,9 +156,10 @@ def ToMarkdown(content, point):
                     }
                 template = loader.get_template('content/video_popup.html')
                 content = template.render(context)
-                html += content
+                video_html += content
 
     # the description has many numbered elements
+    content_html = ''
     for item in range(len(description)):
         # to keep the order of the description
         item = str(item)
@@ -166,7 +168,7 @@ def ToMarkdown(content, point):
         if 'text' in description[item]:
             text = description[item]['text']
             text = text.replace('\\', '\\\\')
-            html += text
+            content_html += text
         # the image element is made of two parts, info and file name
         if 'img' in description[item]:
             img_element = description[item]['img']
@@ -182,9 +184,11 @@ def ToMarkdown(content, point):
                     }
                 template = loader.get_template('content/image_main.html')
                 content = template.render(context)
-                html += content
+                content_html += content
     # convert markdown to html for display
-    return markdown.markdown(html, extensions=['tables','admonition'])
+    html = markdown.markdown(html, extensions=['tables','admonition'])
+    content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
+    return html + video_html + content_html
 
 
 
@@ -206,6 +210,9 @@ def ToMarkdownQuestion(content, question):
         q_part_name = q_part['q_part']
         q_part_content = q_part['content']
         q_part_mark = q_part['q_part_mark']
+        #
+        if q_part_name != 'head':
+            html += markdown.markdown("##### " + f'{q_part_name})')
         for content_item in range(len(q_part_content)):
             content_item = str(content_item)
             # each item has a single child either text or img
@@ -230,6 +237,8 @@ def ToMarkdownQuestion(content, question):
                     template = loader.get_template('content/image_question.html')
                     content = template.render(context)
                     html += content
+        if q_part_name != 'head':
+            html += f'<p style="text-align:right;"> [{q_part_mark}] </p>';
     # convert markdown to html for display
     return html
 

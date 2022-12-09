@@ -3281,7 +3281,7 @@
             
             var title = (selection === "") ? "" : " \""+selection+"\"";
 
-            cm.replaceSelection("![" + selection + "]("+title+")");
+            cm.replaceSelection("!(" + selection + ")["+title+"]");
 
             if (selection === "") {
                 cm.setCursor(cursor.line, cursor.ch + 4);

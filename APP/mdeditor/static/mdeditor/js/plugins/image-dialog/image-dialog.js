@@ -94,11 +94,11 @@
 
                             if (link === "" || link === "http://" || link === null)
                             {
-                                cm.replaceSelection("![" + alt + "](" + url + ")" );
+                                cm.replaceSelection("!(" + alt + ")[" + url + "]" );
                             }
                             else
                             {
-                                cm.replaceSelection("![" + alt + "](" + url + ")" );
+                                cm.replaceSelection("!(" + alt + ")[" + url + "]" );
                             }
 
                             if (alt === "") {
