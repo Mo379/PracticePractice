@@ -8,8 +8,8 @@ urlpatterns = [
     # general
     path('', views.IndexView.as_view(), name='index'),
     path('marketplace', views.MarketPlaceView.as_view(), name='marketplace'),
-    path('marketcourse/<course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
-    path('coursereviews/<course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
+    path('marketcourse/<hashid:course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
+    path('coursereviews/<hashid:course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
     path('mycourses', views.MyCoursesView.as_view(), name='mycourses'),
     path(
         'specifications',
@@ -17,7 +17,7 @@ urlpatterns = [
         name='specifications'
     ),
     path(
-        'specificationoutline/<spec_id>',
+        'specificationoutline/<hashid:spec_id>',
         views.SpecificationOutlineView.as_view(),
         name='specificationoutline'
     ),

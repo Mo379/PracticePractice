@@ -167,7 +167,7 @@ def TranslateQuestionContent(content):
         part = content['details']['answers'][str(n)]
         part_name = part['q_part']
         part_content = part['content']
-        output +=f'\nAnswerPart_PartName_{part_name}\n'
+        output +=f'\nAnswerPart_PartName_{part_name}:\n'
         for n2 in range(len(part_content)):
             item = part_content[str(n2)]
             if 'text' in item:

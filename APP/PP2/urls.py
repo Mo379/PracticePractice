@@ -15,13 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
-from django.urls import path, include
+from django.urls import path, include, register_converter
 from django.conf.urls.static import static
 from django.conf import settings
 from main.views import NotFoundView, ErrorView, robots_txt
 from main.sitemaps import StaticViewSitemap
 from django.views.generic.base import TemplateView
 from content.sitemaps import NotesSitemap, QuestionsSitemap, PapersSitemap
+from PP2.utils import HashIdConverter
+
+
+register_converter(HashIdConverter, "hashid")
 
 sitemaps = {
     'static': StaticViewSitemap,

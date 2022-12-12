@@ -1,0 +1,43 @@
+{%load general %}
+<div id='paperhistory'>
+	<div class="mb-4">
+		<div class="card-body">
+			<div class="card shadow mb-4">
+				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+					<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Tests And Exams
+					</h5>
+				</div>
+			        <div class="card mb-4" id='billing_history'>
+			            <div class="card-body p-0">
+			                <!-- Billing history table-->
+			                <div class="table-responsive table-billing-history">
+			            	<table class="table mb-0">
+			            	    <thead>
+			            		<tr>
+			            		    <th class="border-gray-200" scope="col">Transaction ID</th>
+			            		    <th class="border-gray-200" scope="col">Description</th>
+			            		    <th class="border-gray-200" scope="col">Date</th>
+			            		    <th class="border-gray-200" scope="col">Amount</th>
+			            		    <th class="border-gray-200" scope="col">Charge Status</th>
+			            		</tr>
+			            	    </thead>
+			            	    <tbody>
+			            		<tr>
+			            		    <td><a href='{{charge.receipt_url}}' target='blank'>Value</a></td>
+			            		    <td>Value2</td>
+			            		    <td>Value3</td>
+			            		    <td>Value4</td>
+			            		    <td>
+			            			    <i class="bi bi-check-circle-fill" style='color:green;'></i>
+			            		    </td>
+			            		</tr>
+			            	    </tbody>
+			            	</table>
+			                </div>
+			            </div>
+			        </div>
+			</div>
+		</div>
+	</div>
+</div>

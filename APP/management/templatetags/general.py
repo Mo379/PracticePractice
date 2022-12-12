@@ -242,3 +242,16 @@ def ToMarkdownQuestion(content, question):
     # convert markdown to html for display
     return html
 
+@register.filter(name='DifficultyToLabel')
+def DifficultyToLabel(diff):
+    """ Return the label of the difficulty """
+    diff = int(diff) - 1
+    labels = ['Basic', 'Easy', 'Medium', 'Hard', 'Very Hard']
+    icons = ['<i class="bi bi-snow2"></i>','<i class="bi bi-reception-2"></i>','<i class="bi bi-reception-3"></i>','<i class="bi bi-reception-4"></i>','<i class="bi bi-radioactive"></i>']
+    label = icons[diff] + ' ' + labels[diff]
+    return label
+@register.filter(name='QuestionMarkRange')
+def filter_range(start, end):
+    return range(start, end+1)
+
+

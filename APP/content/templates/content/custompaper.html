@@ -1,0 +1,15 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+
+{%block page_name%}
+	Custom Paper
+{%endblock%}
+
+{%block title%}
+	Custom Paper
+{%endblock%}
+
+{%block content%}
+{{context.paper.pap_info}}
+{%endblock%}

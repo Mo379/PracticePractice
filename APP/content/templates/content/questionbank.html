@@ -1,0 +1,55 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+
+{%block page_name%}
+	QuestionBank
+{%endblock%}
+
+{%block title%}
+	QuestionBank
+{%endblock%}
+
+{%block content%}
+{%definevar context.content as content%}
+<style>
+#qbank_container{
+	display:grid;
+	grid-template-columns: 2fr 1fr;
+	grid-template-areas: 'left right';
+}
+#right_container{
+	grid-area: right;
+}
+#left_container{
+	grid-area: left;
+}
+#first_row{
+	display:grid;
+	grid-template-columns: 1fr 3fr;
+	grid-template-areas: 'left right';
+}
+#summar
+
+.collapsing{
+	transition: 0.1s;
+}
+</style>
+<div id='qbank_container'>
+	<div id ='left_container'>
+		<div id ='first_row'>
+		{%include 'content/items/custompractice.html'%}
+		{%include 'content/items/summarystatistics.html'%}
+		</div>
+
+		<div id ='second_row'>
+		{%include 'content/items/paperhistory.html'%}
+		{%include 'content/items/practicehistory.html'%}
+		</div>
+	</div>
+
+	<div id='right_container'>
+	{%include 'content/items/qchapter_nav.html'%}
+	</div>
+</div>
+{%endblock%}

@@ -7,33 +7,43 @@ app_name = 'content'
 urlpatterns = [
     path('content', views.ContentView.as_view(), name='content'),
     path(
-        'content/question/<course_id>/<module>/<chapter>/',
-        views.QuestionView.as_view(),
-        name='question'
+        'content/questionbank/<hashid:course_id>/',
+        views.QuestionBankView.as_view(),
+        name='questionbank'
         ),
-    path('content/notes/<course_id>', views.NotesView.as_view(), name='notes'),
     path(
-        'content/note-article/<course_id>/<module>/<chapter>/',
+        'content/practice/<hashid:course_id>/<module>/<chapter>/',
+        views.PracticeView.as_view(),
+        name='practice'
+        ),
+    path(
+        'content/custompaper/<hashid:paper_id>/',
+        views.CustomPaperView.as_view(),
+        name='custompaper'
+        ),
+    path('content/notes/<hashid:course_id>', views.NotesView.as_view(), name='notes'),
+    path(
+        'content/note-article/<hashid:course_id>/<module>/<chapter>/',
         views.NoteArticleView.as_view(),
         name='notearticle'
     ),
     path(
-        'content/noteedit/<spec_id>/<module>/<chapter>/',
+        'content/noteedit/<hashid:spec_id>/<module>/<chapter>/',
         views.NoteEditView.as_view(),
         name='noteedit'
     ),
     path(
-        'content/questionedit/<spec_id>/<module>/<chapter>/',
+        'content/questionedit/<hashid:spec_id>/<module>/<chapter>/',
         views.QuestionEditView.as_view(),
         name='questionedit'
         ),
     path(
-        'content/editorpoint/<spec_id>/<point_id>',
+        'content/editorpoint/<hashid:spec_id>/<hashid:point_id>',
         views.EditorPointView.as_view(),
         name='editorpoint'
     ),
         path(
-        'content/editorquestion/<spec_id>/<question_id>',
+        'content/editorquestion/<hashid:spec_id>/<hashid:question_id>',
         views.EditorQuestionView.as_view(),
         name='editorquestion'
     ),

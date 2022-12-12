@@ -100,27 +100,19 @@ class NotesView(
                 for k, v in value['content'].items():
                     if v['active'] == True:
                         Note_objs.append({
-                                'p_level': source_spec.spec_level,
-                                'p_subject': source_spec.spec_subject,
                                 'p_moduel': key,
                                 'p_chapter': k,
                             })
                         spec_names[source_spec.spec_subject] = [source_spec.spec_board,source_spec.spec_name]
         df = pd.DataFrame(Note_objs)
         dic = OrderedDict()
-        for le, s, m, c in zip(
-                list(df['p_level']),
-                list(df['p_subject']),
+        for m, c in zip(
                 list(df['p_moduel']),
                 list(df['p_chapter']),
                 ):
-            if le not in dic:
-                dic[le] = OrderedDict()
-            if s not in dic[le]:
-                dic[le][s] = OrderedDict()
-            if m not in dic[le][s]:
-                dic[le][s][m] = []
-            dic[le][s][m].append(c)
+            if m not in dic:
+                dic[m] = []
+            dic[m].append(c)
         context['notes'] = dic
         context['spec_names'] = spec_names
         context['course'] = course
@@ -208,29 +200,60 @@ class NoteArticleView(
         return context
 
 
-class QuestionView(
+class QuestionBankView(
         LoginRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = 'content/question.html'
+    template_name = 'content/questionbank.html'
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("content", reverse("content:content")),
-                ("Notes", reverse(
-                        "content:notearticle",
-                        kwargs={
-                            "course_id": self.kwargs['course_id'],
-                            "module": self.kwargs['module'],
-                            "chapter": self.kwargs['chapter'],
-                        }
-                    )
-                ),
+                ("question bank", '')
+            ]
+
+    def get_queryset(self):
+        context = {}
+        course_id = self.kwargs['course_id']
+        #
+        course = Course.objects.get(
+                    pk=course_id
+                )
+        content = CourseVersion.objects.filter(
+                course=course
+            ).order_by('-version_number')[0].version_content
+        #
+        question_history = QuestionTrack.objects.filter(
+                user=self.request.user,
+                course=course
+                )
+        #
+        content = order_full_spec_content(content)
+        context['content'] = content
+        context['course'] = course
+        context['questionhistory'] = question_history
+        return context
+
+
+class PracticeView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/practice.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
                 ("question", '')
             ]
 
@@ -262,6 +285,35 @@ class QuestionView(
                     dic[d].append(Question.objects.get(q_unique_id=question))
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
         context['questions'] = dic if question else None
+        context['course'] = course
+        context['module'] = module
+        context['chapter'] = chapter
+        return context
+
+
+class CustomPaperView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/custompaper.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
+                ("custompaper", '')
+            ]
+
+    def get_queryset(self):
+        context = {}
+        paper_id = self.kwargs['paper_id']
+        paper = UserPaper.objects.get(pk=paper_id)
+        #
+        context['paper'] = paper
         return context
 
 
