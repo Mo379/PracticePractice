@@ -188,4 +188,9 @@ urlpatterns = [
         views._savequestionedit,
         name='_savequestionedit'
     ),
+    path(
+        'content/_createcustomtest/',
+        views._createcustomtest,
+        name='_createcustomtest'
+    ),
 ]

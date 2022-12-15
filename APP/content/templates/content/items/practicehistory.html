@@ -15,7 +15,7 @@
 			            	<table class="table mb-0">
 			            	    <thead>
 			            		<tr>
-			            		    <th class="border-gray-200" scope="col">Question ID</th>
+			            		    <th class="border-gray-200" scope="col">Question</th>
 			            		    <th class="border-gray-200" scope="col">Module</th>
 			            		    <th class="border-gray-200" scope="col">Chapter</th>
 			            		    <th class="border-gray-200" scope="col">Difficulty</th>
@@ -26,14 +26,22 @@
 			            	    <tbody>
 						{%for question in context.questionhistory%}
 			            		<tr>
-						    <td><a href='' target='blank'>{{question.id}}</a></td>
-			            		    <td>Value2</td>
-			            		    <td>Value3</td>
-			            		    <td>Value4</td>
-			            		    <td>Value4</td>
+						    <td><a type="button" class="btn btn-info" href="/study/content/notes/xjBpDBZn"> Open</a></td>
+						    <td>{{question.question.q_moduel|field_name_to_label}}</td>
+						    <td>{{question.question.q_chapter|field_name_to_label}}</td>
+						    <td>{{question.question.q_difficulty}}</td>
+						    <td>{{question.track_attempt_number}}</td>
+						    {%if question.question.q_type == 'MultipleChoice'%}
 			            		    <td>
+							    {%if question.track_mark_boolean%}
 			            			    <i class="bi bi-check-circle-fill" style='color:green;'></i>
+							    {%else%}
+							    <i class="bi bi-x-circle-fill" style='color:red;'></i>
+							    {%endif%}
 			            		    </td>
+						    {%else%}
+						    <td>{{question.track_mark}}/{{question.question.q_total_marks}}</td>
+						    {%endif%}
 			            		</tr>
 						{%endfor%}
 			            	    </tbody>

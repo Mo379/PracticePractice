@@ -1,0 +1,643 @@
+{%load general%}
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+class xhttp {
+	open_port() {
+		this.xhttp = new XMLHttpRequest();
+		this.xhttp.open('POST', '/I/point_update', true);
+		this.xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	}
+}
+class view {
+	//loading
+	alert_loading() {
+		swal.fire({
+			text: 'loading...',
+			showConfirmButton: false,
+		});
+	};
+	//Processing
+	alert_processing() {
+		swal.fire({
+			text: 'Processing...',
+			showConfirmButton: false,
+		});
+	};
+	//
+	alert_popup(msg) {
+		swal.fire({
+			text: msg,
+			type: 'success',
+			timer: 900,
+			showConfirmButton: false,
+		});
+	};
+	///popup_info
+	alert_popup_info(msg) {
+		swal.fire({
+			html: msg,
+			type: 'info',
+			showConfirmButton: true,
+		});
+	};
+	//popup info refresh
+	alert_popup_info_fresh(msg) {
+		swal.fire({
+			html: msg,
+			type: 'info',
+			showConfirmButton: true,
+		}).then(function () {
+
+			location.reload();
+		});
+	};
+	//popup with refresh
+	alert_popup_fresh(msg) {
+		swal.fire({
+			text: msg,
+			type: 'success',
+			timer: 1300,
+			showConfirmButton: false,
+		}).then(function () {
+			location.reload();
+		});
+	};
+	//popup with refresh
+	alert_popup_freshome(msg) {
+		swal.fire({
+			text: msg,
+			type: 'success',
+			timer: 1300,
+			showConfirmButton: false,
+		}).then(function () {
+			window.location.href = "//PracticePractice.net";
+		});
+	};
+	//
+	//popup with refresh
+	headder_redirect(link) {
+		swal.fire({
+			text: 'redirecting...',
+			timer: 800,
+			showConfirmButton: false,
+		}).then(function () {
+			window.location.href = link;
+		});
+	};
+	//
+	new_headder_redirect(link) {
+		swal.fire({
+			text: 'redirecting...',
+			timer: 500,
+			showConfirmButton: false,
+		}).then(function () {
+			window.open(link,'_blank');
+		});
+	};
+	//
+	straight_headder_redirect(link) {
+		window.location.href = link;
+	};
+	//
+	alert_warning(msg) {
+		swal.fire({
+			text: msg,
+			type: 'warning',
+			showConfirmButton: true,
+		});
+	};
+	//warning to confirm action
+	alert_warning_orCancel(msg, func) {
+		swal.fire({
+			title: msg,
+			text: "You won't be able to revert this!",
+			type: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Delete it!',
+			cancelButtonText: 'No, cancel!',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.value) {
+				swal.fire({
+					text: msg,
+					type: 'info',
+					timer: 800,
+					showConfirmButton: false
+				})
+				func();
+			} else if (
+				// Read more about handling dismissals
+				result.dismiss === Swal.DismissReason.cancel
+			) {
+
+				swal.fire(
+					'Cancelled',
+					'Nothing was done :)',
+					'info'
+				)
+			}
+		})
+	}
+	//warning to confirm action
+	alert_warning_orCancel_go(msg, func) {
+		swal.fire({
+			title: msg,
+			text: "You won't be able to revert this!",
+			type: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Do it!',
+			cancelButtonText: 'No, cancel!',
+			reverseButtons: true
+		}).then((result) => {
+			if (result.value) {
+				swal.fire({
+					text: msg,
+					type: 'info',
+					timer: 800,
+					showConfirmButton: false
+				})
+				func();
+			} else if (
+				// Read more about handling dismissals
+				result.dismiss === Swal.DismissReason.cancel
+			) {
+
+				swal.fire(
+					'Cancelled',
+					'Nothing was done :)',
+					'info'
+				)
+			}
+		})
+	}
+	alert_error(msg) {
+		swal.fire({
+			text: msg,
+			type: 'error',
+			showConfirmButton: true,
+		});
+	};
+	//display error and return to previous page
+	alert_error_previous_page(msg) {
+		swal.fire({
+			text: msg,
+			type: 'error',
+			showConfirmButton: true,
+		}).then(function () {
+			history.back();
+		})
+	};
+}
+//coommunicates with php and gets a result to be displayed as a view
+class model extends xhttp {}
+class controller extends model{
+	//construct
+	constructor(view) {
+		super();
+		this.view = view;
+
+	}
+	C_make_window_elm(id,value,txt,class_n,parent_indic = null){
+		//
+		if(document.getElementById('disp_'+ id)){
+			var checked = 'checked';
+		}else{
+			var checked = '';
+		}
+		var a = "<div class = 'maker_windw_option "+parent_indic+"' data-value='"+value+"'>";
+		var b = "<input type='checkbox' id='"+id+ "' onclick=controller.C_add_maker_option('"+id+"','"+encodeURI(txt)+"','"+class_n+"','"+parent_indic+"') "+checked+" />";
+		var c = "<p>"+txt+"</p>";
+		var d = "</div>";
+		return a+b+c+d;
+	}
+	//
+	C_make_display_elm(id,value,txt,class_n,parent_indic){
+		if(class_n == 'cq_chapter'){
+			var parent_moduel = 'Parent_'
+		}
+		var a = "<div class ='maker_display_option "+class_n+' '+parent_indic+"' id ='disp_"+id+"' data-value='"+value+"'> ";
+		var b = "<p style='display: inline-block;'>"+txt+"</p>";
+		var c = "<a style='display: inline-block;' onclick =controller.C_remove_display_elm('"+id+"')>X</a>";
+		var d = "</div>";
+		return a+b+c+d;
+	}
+	//
+	C_remove_display_elm(id){
+		var checkbox = document.getElementById(id);
+		var elm = document.getElementById('disp_'+ id);
+		elm.remove();
+		if(checkbox){
+			checkbox.checked = false;
+		}
+		this.C_remove_children(id);
+	}
+	//
+	C_remove_children(id){
+		//
+		var view = this.view;
+		var model = this;
+		//
+		var children = document.getElementsByClassName("Parent_"+id);
+		//
+		if(children.length > 0){
+			while(children[0]) {
+				var value = children[0].getAttribute('data-value');
+				var elm = document.getElementById('disp_'+value);
+				if(elm){
+					elm.remove();
+				}
+				if(children[0]){
+					children[0].remove();
+				}
+				
+			}	
+		}	
+	}
+	//
+	C_maker_catagories(tab,current_tab){
+		//
+		var view = this.view;
+		var model = this;
+		//
+		var tab_elm = document.getElementById(current_tab);
+		var elems = document.getElementsByClassName("maker_tabs");
+		for (var i = 0; i < elems.length; i ++) {
+				elems[i].style.background = 'white';
+				elems[i].style.color = 'black';
+		}
+		tab_elm.style.background = 'black';
+		tab_elm.style.color = 'white';
+		//
+		//
+		if(tab == 'QStatus'){
+			var elem = document.getElementById("top");
+			var html = '';
+			var html = html + this.C_make_window_elm('ALl','All','All','cq_status');
+			var html = html + this.C_make_window_elm('Seen','Seen','Seen','cq_status');
+			var html = html + this.C_make_window_elm('Unseen','Unseen','Unseen','cq_status');
+			var html = html + this.C_make_window_elm('Unanswered','Unanswered','Unanswered','cq_status');
+			var html = html + this.C_make_window_elm('Incorrect','Incorrect','Incorrect','cq_status');
+			var html = html + this.C_make_window_elm('Correct','Correct','Correct','cq_status');
+			elem.innerHTML = html;
+		}if(tab == 'type'){
+			var elem = document.getElementById("top");
+			var html = '';
+			var html = html +  this.C_make_window_elm('type_short','Short','Short','cq_type');
+			var html = html +  this.C_make_window_elm('type_medium','Medium','Medium','cq_type');
+			var html = html +  this.C_make_window_elm('type_long','Long','long','cq_type');
+			var html = html +  this.C_make_window_elm('type_MultipleChoice','MultipleChoice','MultiplceChoice','cq_type');
+			elem.innerHTML = html;
+		}if(tab == 'difficulty'){
+			var elem = document.getElementById("top");
+			var html = '';
+			var html = html +  this.C_make_window_elm('diff_1','1','1','cq_difficulty');
+			var html = html +  this.C_make_window_elm('diff_2','2','2','cq_difficulty');
+			var html = html +  this.C_make_window_elm('diff_3','3','3','cq_difficulty');
+			var html = html +  this.C_make_window_elm('diff_4','4','4','cq_difficulty');
+			var html = html +  this.C_make_window_elm('diff_5','5','5','cq_difficulty');
+			elem.innerHTML = html;
+		}	
+	}
+	//
+	toTitleCase(str) {
+	  return str.replace(
+	    /\w\S*/g,
+	    function(txt) {
+	      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+	    }
+	  );
+	}
+	//
+	C_maker_catagories_moduels(moduels,current_tab){
+		//
+		var view = this.view;
+		var model = this;
+		//
+		var tab_elm = document.getElementById(current_tab);
+		var elems = document.getElementsByClassName("maker_tabs");
+		for (var i = 0; i < elems.length; i ++) {
+				elems[i].style.background = 'white';
+				elems[i].style.color = 'black';
+		}
+		tab_elm.style.background = 'black';
+		tab_elm.style.color = 'white';
+		//moduel => value,display
+		var json = JSON.parse(document.getElementById(moduels).textContent);
+		
+		var elem = document.getElementById("top");
+		//
+		var html = '';
+		var i = 0;
+		var keys = Object.keys(json);
+		for (i =0; i<keys.length; i++) {
+			var value = json[i];
+			var display = this.toTitleCase(json[i].replaceAll('_', " "));
+			var html = html + model.C_make_window_elm(value,value,display,'cq_moduel');
+		}
+		elem.innerHTML = html;
+	}
+	//
+	//
+	//
+	C_maker_catagories_chapters(moduel_var, chapters,current_tab){
+		//
+		var view = this.view;
+		var model = this;
+		//
+		var tab_elm = document.getElementById(current_tab);
+		var elems = document.getElementsByClassName("maker_tabs");
+		for (var i = 0; i < elems.length; i ++) {
+				elems[i].style.background = 'white';
+				elems[i].style.color = 'black';
+		}
+		tab_elm.style.background = 'black';
+		tab_elm.style.color = 'white';
+		//
+		var moduels = document.getElementsByClassName("cq_moduel");
+		if(moduels.length > 0){
+			var arr_mods_json = JSON.parse(model.C_fetch_class_items('cq_moduel'));
+			//
+			var arr_moduels_full = JSON.parse(document.getElementById(moduel_var).textContent);
+			var arr_chapters = JSON.parse(document.getElementById(chapters).textContent);
+			var elem = document.getElementById("top");
+			var html = '';
+			for(var i = 0; i < arr_mods_json.length; i ++) {
+				var selected_moduel = arr_mods_json[i];
+				var chapters = arr_chapters[selected_moduel]
+				var parent_indic = 'Parent_'+selected_moduel;
+				for (var x = 0; x < chapters.length; x++){
+					var c_value = chapters[x]
+					var display = this.toTitleCase(c_value.replaceAll('_', " "));
+					var html = html + model.C_make_window_elm(c_value,c_value,display,"cq_chapter",parent_indic);
+				}
+			}
+			//
+			elem.innerHTML = html
+		}else{
+			var elem = document.getElementById("top");
+			elem.innerHTML = "<a style ='color:red;'>Moduel selection is required for chapters.</a>";
+		}
+	}
+	//
+	C_add_maker_option(checkbox_id,display,class_n,parent_indic){
+		//
+		var view = this.view;
+		var model = this;
+		//
+		var checkbox = document.getElementById(checkbox_id);
+		var value = checkbox.parentElement.getAttribute('data-value');
+		var elem = document.getElementById("bottom");
+		
+		if(checkbox.checked){
+			var html = this.C_make_display_elm(checkbox_id,value,decodeURI(display),class_n,parent_indic);
+			var save = elem.innerHTML;
+			elem.innerHTML = elem.innerHTML + html;
+		}else{
+			var removed_elm = 'disp_'+checkbox_id;
+			var removed_elm = document.getElementById(removed_elm);
+			this.C_remove_children(checkbox_id)
+			removed_elm.remove();
+		}
+		
+		
+	}
+	//
+	C_fetch_class_items(classname){
+		var elements = document.getElementsByClassName(classname);
+		if(elements.length > 0){
+			var arr_mods = new Array();
+			for (var i = 0; i < elements.length; i ++) {
+				arr_mods[i] = elements[i].getAttribute('data-value');
+			}
+			return JSON.stringify(arr_mods);
+		}else{
+			return 0;
+		}
+	}
+	//
+	C_fetch_class_items(classname){
+		var elements = document.getElementsByClassName(classname);
+		if(elements.length > 0){
+			var arr_mods = new Array();
+			for (var i = 0; i < elements.length; i ++) {
+				arr_mods[i] = elements[i].getAttribute('data-value');
+			}
+			return JSON.stringify(arr_mods);
+		}else{
+			return 0;
+		}
+	}
+	//
+	C_get_practice_paper(){
+		//
+		var view = this.view;
+		var model = this;
+		//
+		var q_status = model.C_fetch_class_items('cq_status');
+		var q_type = model.C_fetch_class_items('cq_type');
+		var q_moduel = model.C_fetch_class_items('cq_moduel');
+		var q_chapter = model.C_fetch_class_items('cq_chapter');
+		var q_difficulty = model.C_fetch_class_items('cq_difficulty');
+		//
+		var formdata = new FormData();
+		formdata.append('q_status_array', q_status);
+		formdata.append('q_type_array', q_type);
+		formdata.append('q_moduel_array', q_moduel);
+		formdata.append('q_chapter_array', q_chapter);
+		formdata.append('q_difficulty_array', q_difficulty);
+		var course_id = document.getElementById('course_id').textContent
+		formdata.append('course_id', course_id);
+		//
+		var ajax = new XMLHttpRequest();
+		var csrf_token = document.getElementById('csrf_token').textContent
+		//
+		ajax.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				//
+				if(txt != 0){
+					view.headder_redirect("https://www.practicepractice.net/");
+				}else{
+					view.alert_warning('Something went wrong: cannot create paper, add more options and make sure to allow for pastpapers');
+				}
+				
+			}else{
+				view.alert_warning('Something went wrong: cannot create paper, add more options and make sure to allow for pastpapers');
+			}
+
+		}
+		//
+		var url = document.getElementById('create_test_url').textContent
+		ajax.open("POST", url);
+		ajax.setRequestHeader("X-CSRFToken", csrf_token);
+		ajax.send(formdata);
+		view.alert_loading();
+	}
+}
+view = new view();
+controller = new controller(view);
+</script>
+
+
+<style>
+#wrapper_testmaker{
+	display:grid;
+	max-height: 60vh;
+}
+#main_body{
+	display:grid;
+	grid-template-columns: 2fr 7fr;
+	grid-template-areas: 'scroll_window select_window';
+	max-height: inherit;
+}
+#scroll_window{
+	border-right: 1px solid black;
+}
+#scroll_window ul{
+	list-style-type:none;
+	padding:0px;
+	margin:0px;
+	
+}
+#scroll_window .maker_tabs{
+	padding: 10px;	
+	text-align: center;
+	border: 1px solid silver;
+}
+#scroll_window .maker_tabs:hover{
+	background: black;	
+	color: white;	
+	cursor: pointer;
+	transition: 0.3s;
+}
+#select_window{
+	display:grid;
+	grid-template-rows: 9fr 3fr;
+	overflow: scroll;
+}
+
+#select_window #top{
+	padding: 25px;
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr;
+}
+#select_window #bottom{
+	border-top: 1px solid black;
+}
+.loader {
+	margin: auto;
+	float: right;
+	border: 10px solid white;
+	border-radius: 50%;
+	border-top: 10px solid red;
+	width: 20px;
+	height: 20px;
+	-webkit-animation: spin 2s linear infinite; /* Safari */
+	animation: spin 2s linear infinite;
+}
+.maker_catagories li{
+	width:inherit;
+	line-height:50px;
+	text-align: center;
+	margin:auto;
+	border-bottom: 1px solid grey;
+	cursor:pointer;
+	transition: 0.35s;
+}
+
+.maker_display{
+	grid-area: display;
+	width:inherit;
+	height:100%;
+	display: grid;
+	grid-template-rows: auto auto;
+	margin:auto;
+	border-left: 1px solid grey;
+}
+
+.maker_display_window{
+	width:100%;
+	max-height: 50.5vh;
+	display: grid;
+	grid-template-columns:1fr 1fr ;
+	overflow:hidden; 
+	overflow-y:scroll;
+
+}
+
+.maker_windw_option{
+	padding: 5px;
+	height: auto;
+}
+.maker_windw_option input{
+	width: 20px;
+	height: 20px;
+	margin:0px;
+}
+.maker_windw_option p{
+	width: 85%;
+	line-height: 25px;
+	margin-left: 10px;
+	text-align: left;
+}
+
+.maker_display_selections{
+	max-height: 14.5vh;
+	width:100%;
+	padding-top: 10px;
+	border-top: 1px solid grey;
+	overflow:hidden;
+	overflow-y: scroll;
+}
+
+.maker_display_option{
+	display: inline-block;
+	margin: 5px;
+	padding: 5px;
+	border: 1px solid grey;
+}
+
+.maker_display_option a{
+	color: red;
+	cursor: pointer;
+	padding: 3px;
+	font-size: 16px;
+}.maker_display_option a:hover{
+	color: orange;
+}
+
+
+.maker_floor{
+	border-top: 1px solid grey;
+	grid-area: floor;
+	text-align: center;
+}
+</style>
+
+{{ context.moduels|json_script:"moduels_json_var" }}
+{{ context.chapters|json_script:"chapters_json_var" }}
+<script id="create_test_url" type="text:javascript">{%url 'content:_createcustomtest'%}</script>
+<script id="course_id" type="text:javascript">{{context.course.id|hashid}}</script>
+<script id="csrf_token" type="text:javascript">{{ csrf_token }}</script>
+
+<div id='wrapper_testmaker'>
+	<div id='main_body'>
+		<div id='scroll_window'>
+			<ul>
+				<li class ='maker_tabs' id='QStatus_tab' onclick = controller.C_maker_catagories('QStatus','QStatus_tab')>View Status</li>
+				<li class ='maker_tabs' id='type_tab' onclick = controller.C_maker_catagories('type','type_tab')>Question Types</li>
+				<li class ='maker_tabs' id='moduels_tab' onclick = "controller.C_maker_catagories_moduels('moduels_json_var','moduels_tab')">Moduels</li>
+				<li class ='maker_tabs' id='chapters_tab' onclick = "controller.C_maker_catagories_chapters('moduels_json_var','chapters_json_var','chapters_tab')">Chapters</li>
+				<li class ='maker_tabs' id='difficulty_tab' onclick = controller.C_maker_catagories('difficulty','difficulty_tab')>Difficulty</li>
+			</ul>
+		</div>
+		<div id='select_window'>
+			<div id='top'>
+			</div>
+
+			<div id='bottom'>
+			</div>
+		</div>
+	</div>
+</div>
+

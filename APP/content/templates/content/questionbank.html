@@ -36,6 +36,8 @@
 }
 </style>
 <div id='qbank_container'>
+	{%definevar 'questionbank' as alert_loc%}
+	{%include 'base/alert.html'%}
 	<div id ='left_container'>
 		<div id ='first_row'>
 		{%include 'content/items/custompractice.html'%}

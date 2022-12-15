@@ -6,8 +6,15 @@ from content.util.GeneralUtil import TagGenerator
 from content.models import Point
 import markdown
 from django.template import Context, Template, loader
+from PP2.utils import h_encode
 
 register = template.Library()
+
+
+@register.filter(name='hashid')
+def hashid(id):
+    """Return the 8 value hash id"""
+    return h_encode(id)
 
 
 @register.filter(name='p_unique_to_title')

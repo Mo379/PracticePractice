@@ -1,6 +1,7 @@
 import pandas as pd
 import yaml
 from django.conf import settings
+import collections
 from collections import OrderedDict
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -26,6 +27,7 @@ from braces.views import (
     )
 from mdeditor.configs import MDConfig
 from io import BytesIO
+from PP2.utils import h_decode
 
 MDEDITOR_CONFIGS = MDConfig('default')
 # Create your views here.
@@ -231,10 +233,17 @@ class QuestionBankView(
         question_history = QuestionTrack.objects.filter(
                 user=self.request.user,
                 course=course
-                )
+                ).order_by('-track_creation_time')[:25]
         #
         content = order_full_spec_content(content)
+        moduels = OrderedDict({i: moduel for i, moduel in enumerate(content)})
+        chapters = collections.defaultdict(list)
+        for m_key in moduels:
+            chapter_list = [chapter for i, chapter in enumerate(content[moduels[m_key]]['content'])]
+            chapters[moduels[m_key]] = chapter_list
         context['content'] = content
+        context['moduels'] = moduels
+        context['chapters'] = chapters
         context['course'] = course
         context['questionhistory'] = question_history
         return context
@@ -2181,6 +2190,40 @@ def _savequestionedit(request):
                     extra_tags='alert-danger editorquestion'
                 )
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger home'
+            )
+        return redirect('main:index')
+
+
+def _createcustomtest(request):
+    if request.method == 'POST':
+        def clean(string):
+            string = string.replace('[', '')
+            string = string.replace(']', '')
+            string = string.replace('"', '')
+            string = string.replace(',', ' ')
+            return string.split(' ')
+        course_id = h_decode(clean(request.POST['course_id'])[0])
+        status_array = clean(request.POST['q_status_array'])
+        type_array = clean(request.POST['q_type_array'])
+        moduel_array = clean(request.POST['q_moduel_array'])
+        chapter_array = clean(request.POST['q_chapter_array'])
+        difficulty_array = clean(request.POST['q_difficulty_array'])
+        #
+        course = Course.objects.get(pk=course_id)
+        #
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your custom test has been created !!',
+                extra_tags='alert-success questionbank'
+            )
+        return redirect('content:questionbank', course_id =course_id)
     else:
         messages.add_message(
                 request,
