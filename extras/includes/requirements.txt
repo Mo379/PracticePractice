@@ -4,6 +4,7 @@ async-timeout==4.0.2
 awscli==1.27.8
 backports.zoneinfo==0.2.1
 billiard==3.6.4.0
+black @ git+https://github.com/psf/black@80de2372e4ec385c082c38f365414ac3622a4010
 boto3==1.26.8
 botocore==1.29.8
 celery==5.2.7
@@ -33,6 +34,7 @@ django-view-breadcrumbs==2.2.7
 docutils==0.16
 filelock==3.6.0
 flake8==4.0.1
+hashids==1.3.1
 idna==3.3
 importlib-metadata==4.12.0
 jmespath==1.0.1
@@ -40,9 +42,11 @@ jsonfield==3.1.0
 kombu==5.2.4
 Markdown==3.3.4
 mccabe==0.6.1
+mypy-extensions==0.4.3
 numpy==1.22.0
 packaging==21.3
 pandas==1.5.0
+pathspec==0.10.3
 paypalrestsdk==1.13.1
 pexpect==4.8.0
 platformdirs==2.5.1
@@ -71,7 +75,9 @@ six==1.16.0
 sqlparse==0.4.2
 stripe==4.1.0
 toml==0.10.2
+tomli==2.0.1
 tox==3.24.5
+typing_extensions==4.4.0
 urllib3==1.26.9
 vine==5.0.0
 virtualenv==20.14.0
