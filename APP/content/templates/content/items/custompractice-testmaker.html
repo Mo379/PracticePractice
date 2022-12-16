@@ -440,8 +440,8 @@ class controller extends model{
 		var q_difficulty = model.C_fetch_class_items('cq_difficulty');
 		//
 		var formdata = new FormData();
-		formdata.append('q_status_array', q_status);
-		formdata.append('q_type_array', q_type);
+		//formdata.append('q_status_array', q_status);
+		//formdata.append('q_type_array', q_type);
 		formdata.append('q_moduel_array', q_moduel);
 		formdata.append('q_chapter_array', q_chapter);
 		formdata.append('q_difficulty_array', q_difficulty);
@@ -454,15 +454,16 @@ class controller extends model{
 		ajax.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
 				var txt = this.responseText;
+				var json_arr = JSON.parse(txt)
 				//
-				if(txt != 0){
-					view.headder_redirect("https://www.practicepractice.net/");
+				if(json_arr['res'] == 1){
+					view.headder_redirect("/study/content/customtest/"+json_arr['paper_id']);
 				}else{
-					view.alert_warning('Something went wrong: cannot create paper, add more options and make sure to allow for pastpapers');
+					view.alert_warning('Something went wrong: cannot create paper, add more options');
 				}
 				
 			}else{
-				view.alert_warning('Something went wrong: cannot create paper, add more options and make sure to allow for pastpapers');
+				view.alert_warning('Our servers are having trouble, please try again later.');
 			}
 
 		}
@@ -482,13 +483,13 @@ controller = new controller(view);
 <style>
 #wrapper_testmaker{
 	display:grid;
-	max-height: 60vh;
+	height: 60vh;
 }
 #main_body{
 	display:grid;
 	grid-template-columns: 2fr 7fr;
 	grid-template-areas: 'scroll_window select_window';
-	max-height: inherit;
+	max-height: 60vh;
 }
 #scroll_window{
 	border-right: 1px solid black;
@@ -557,7 +558,7 @@ controller = new controller(view);
 
 .maker_display_window{
 	width:100%;
-	max-height: 50.5vh;
+	max-height: 60vh;
 	display: grid;
 	grid-template-columns:1fr 1fr ;
 	overflow:hidden; 
@@ -624,8 +625,10 @@ controller = new controller(view);
 	<div id='main_body'>
 		<div id='scroll_window'>
 			<ul>
+				<!---
 				<li class ='maker_tabs' id='QStatus_tab' onclick = controller.C_maker_catagories('QStatus','QStatus_tab')>View Status</li>
 				<li class ='maker_tabs' id='type_tab' onclick = controller.C_maker_catagories('type','type_tab')>Question Types</li>
+				-->
 				<li class ='maker_tabs' id='moduels_tab' onclick = "controller.C_maker_catagories_moduels('moduels_json_var','moduels_tab')">Moduels</li>
 				<li class ='maker_tabs' id='chapters_tab' onclick = "controller.C_maker_catagories_chapters('moduels_json_var','chapters_json_var','chapters_tab')">Chapters</li>
 				<li class ='maker_tabs' id='difficulty_tab' onclick = controller.C_maker_catagories('difficulty','difficulty_tab')>Difficulty</li>

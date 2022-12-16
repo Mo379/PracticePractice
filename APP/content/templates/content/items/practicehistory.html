@@ -21,6 +21,7 @@
 			            		    <th class="border-gray-200" scope="col">Difficulty</th>
 			            		    <th class="border-gray-200" scope="col">Attempt Number</th>
 			            		    <th class="border-gray-200" scope="col">Mark</th>
+			            		    <th class="border-gray-200" scope="col">Date</th>
 			            		</tr>
 			            	    </thead>
 			            	    <tbody>
@@ -42,6 +43,7 @@
 						    {%else%}
 						    <td>{{question.track_mark}}/{{question.question.q_total_marks}}</td>
 						    {%endif%}
+						    <td>{{question.track_creation_time|date:'Y-m-d'}}</td>
 			            		</tr>
 						{%endfor%}
 			            	    </tbody>

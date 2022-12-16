@@ -232,6 +232,7 @@ class UserPaper(models.Model):
     pap_creation_time = models.DateTimeField(
         "date created", auto_now_add=True, blank=True
     )
+    pap_completion = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):

@@ -5,7 +5,7 @@
 			<div class="card shadow mb-4">
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 					<h5 class="h4 mb-1 text-primary font-weight-bold">
-					Tests And Exams
+					Custom Tests History
 					</h5>
 				</div>
 			        <div class="card mb-4" id='billing_history'>
@@ -15,23 +15,44 @@
 			            	<table class="table mb-0">
 			            	    <thead>
 			            		<tr>
-			            		    <th class="border-gray-200" scope="col">Transaction ID</th>
+			            		    <th class="border-gray-200" scope="col">Paper</th>
 			            		    <th class="border-gray-200" scope="col">Description</th>
+			            		    <th class="border-gray-200" scope="col">Completed</th>
 			            		    <th class="border-gray-200" scope="col">Date</th>
-			            		    <th class="border-gray-200" scope="col">Amount</th>
-			            		    <th class="border-gray-200" scope="col">Charge Status</th>
 			            		</tr>
 			            	    </thead>
 			            	    <tbody>
+						{%for paper in context.paperhistory%}
 			            		<tr>
-			            		    <td><a href='{{charge.receipt_url}}' target='blank'>Value</a></td>
-			            		    <td>Value2</td>
-			            		    <td>Value3</td>
-			            		    <td>Value4</td>
+							<td><a type="button" class="btn btn-info" href="/study/content/customtest/{{paper.id|hashid}}"> Open</a></td>
+						    <td>
+							<a type="button" class="btn btn-primary" data-toggle="modal" data-target="#customtesthistory_{{paper.id|hashid}}">
+								View
+							</a>
+							<!-- Modal -->
+							<div class="modal fade" id="customtesthistory_{{paper.id|hashid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+							  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+							    <div class="modal-content">
+							      <div class="modal-body" style='padding:0px;'>
+								      Data
+							      </div>
+							      <div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							      </div>
+							    </div>
+							  </div>
+							</div>
+						    </td>
 			            		    <td>
+							    {%if paper.pap_completion%}
 			            			    <i class="bi bi-check-circle-fill" style='color:green;'></i>
+							    {%else%}
+							    <i class="bi bi-x-circle-fill" style='color:red;'></i>
+							    {%endif%}
 			            		    </td>
+						    <td>{{paper.pap_creation_time|date:'Y-m-d'}}</td>
 			            		</tr>
+						{%endfor%}
 			            	    </tbody>
 			            	</table>
 			                </div>

@@ -12,14 +12,14 @@ urlpatterns = [
         name='questionbank'
         ),
     path(
+        'content/customtest/<hashid:paper_id>/',
+        views.CustomTestView.as_view(),
+        name='customtest'
+        ),
+    path(
         'content/practice/<hashid:course_id>/<module>/<chapter>/',
         views.PracticeView.as_view(),
         name='practice'
-        ),
-    path(
-        'content/custompaper/<hashid:paper_id>/',
-        views.CustomPaperView.as_view(),
-        name='custompaper'
         ),
     path('content/notes/<hashid:course_id>', views.NotesView.as_view(), name='notes'),
     path(

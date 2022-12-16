@@ -5,7 +5,7 @@ import collections
 from collections import OrderedDict
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect
 from django.utils.functional import cached_property
 from django.contrib import messages
 from django.views import generic
@@ -27,7 +27,8 @@ from braces.views import (
     )
 from mdeditor.configs import MDConfig
 from io import BytesIO
-from PP2.utils import h_decode
+from PP2.utils import h_encode, h_decode
+
 
 MDEDITOR_CONFIGS = MDConfig('default')
 # Create your views here.
@@ -234,6 +235,10 @@ class QuestionBankView(
                 user=self.request.user,
                 course=course
                 ).order_by('-track_creation_time')[:25]
+        paper_history = UserPaper.objects.filter(
+                user=self.request.user,
+                pap_course=course
+                ).order_by('-pap_creation_time')[:25]
         #
         content = order_full_spec_content(content)
         moduels = OrderedDict({i: moduel for i, moduel in enumerate(content)})
@@ -246,6 +251,7 @@ class QuestionBankView(
         context['chapters'] = chapters
         context['course'] = course
         context['questionhistory'] = question_history
+        context['paperhistory'] = paper_history
         return context
 
 
@@ -300,14 +306,14 @@ class PracticeView(
         return context
 
 
-class CustomPaperView(
+class CustomTestView(
         LoginRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = 'content/custompaper.html'
+    template_name = 'content/customtest.html'
     context_object_name = 'context'
 
     @cached_property
@@ -2209,26 +2215,51 @@ def _createcustomtest(request):
             string = string.replace(',', ' ')
             return string.split(' ')
         course_id = h_decode(clean(request.POST['course_id'])[0])
-        status_array = clean(request.POST['q_status_array'])
-        type_array = clean(request.POST['q_type_array'])
+        #status_array = clean(request.POST['q_status_array'])
+        #type_array = clean(request.POST['q_type_array'])
         moduel_array = clean(request.POST['q_moduel_array'])
         chapter_array = clean(request.POST['q_chapter_array'])
         difficulty_array = clean(request.POST['q_difficulty_array'])
-        #
+        # checking for empty filters
         course = Course.objects.get(pk=course_id)
+        creator = course.user
+        specification = course.specification
+        # question pool
+        question_pool = Question.objects.filter(
+                    user=creator,
+                    q_level=specification.spec_level,
+                    q_subject=specification.spec_subject,
+                )
         #
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Your custom test has been created !!',
-                extra_tags='alert-success questionbank'
-            )
-        return redirect('content:questionbank', course_id =course_id)
+        #if status_array[0] != '0':
+        #    all_tracked_questions = QuestionTrack.objects.filter(
+        #                user=request.user,
+        #                course=course,
+        #            )
+        #if type_array[0] != '0':
+        #    question_pool = question_pool.filter(
+        #            q_type__in=type_array
+        #        )
+        if moduel_array[0] != '0':
+            question_pool = question_pool.filter(
+                    q_moduel__in=moduel_array,
+                )
+        if chapter_array[0] != '0':
+            question_pool = question_pool.filter(
+                    q_chapter__in=chapter_array,
+                )
+        if difficulty_array[0] != '0':
+            question_pool = question_pool.filter(
+                    q_difficulty__in=difficulty_array,
+                )
+        final_selection = question_pool[:10]
+        paper_content = {i: question.id for i, question in enumerate(final_selection)}
+        paper = UserPaper.objects.create(
+                user=request.user,
+                pap_course=course,
+                pap_info=paper_content
+                )
+        #
+        return JsonResponse({'res': 1, 'paper_id': h_encode(paper.id)})
     else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger home'
-            )
-        return redirect('main:index')
+        return JsonResponse({'res': 0})
