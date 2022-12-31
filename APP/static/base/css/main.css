@@ -1,3 +1,4 @@
+/* Whole website: general stylings */
 .PageWallpaper{
     padding: 0;
     margin: 0;
@@ -15,8 +16,20 @@
 .PageWallpaper:hover{
     opacity: 1;
 }
+
+
+
+
+
+
+
+
+
+
+
+/* styling for the wallpaper */
 .subjectmain{
-	font-size:10px;
+    font-size:10px;
     background: white;
     display: inline-block;
     margin-top: 20px;
@@ -142,4 +155,20 @@
 	width: auto;
 	color:white;
 	border-radius: 15px;
+}
+.courseplace_wrapper{
+	width:95%;
+	margin:auto;
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-gap: 10px;
+}
+.my_course_card{
+}
+.my_course_card:hover{
+	transform: scale(1.01, 1.01);
+	transition: transform 0.3s ease-in-out;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  	transition: box-shadow 0.3s ease-in-out;
+	border: 1px solid black;
 }
