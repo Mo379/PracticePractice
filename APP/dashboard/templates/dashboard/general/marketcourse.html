@@ -13,32 +13,6 @@ Course Page
 {%definevar context.course as course%}
 
 
-<div class="my_course_card card" style="width: 20em;height: auto; margin: 5px;float:right;position:absolute: top:1em;right: 1em;">
-	{%if course.course_pic_status%}
-	<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
-	{%else%}
-	<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
-	{%endif%}
-	<div class="card-body">
-		<div class="" style='color:black;'>
-			<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
-			</div>
-			<hr class="sidebar-divider mb-3">
-			{%if user.is_authenticated == False%}
-			<a type= 'button' class='btn btn-secondary mb-2' href='{%url 'content:content'%}'>Signup to entroll</a>
-			{%elif context.course_subscription_status == False%}
-			<form class="px-3 py-3"  action="{%url 'content:_course_subscribe'%}" method="POST" role="form">
-				{%csrf_token%}
-				<input name='course_id' value='{{course.id}}' type='hidden'>
-				<button type= 'submit' class='btn btn-info mb-2' > Entroll Now</button>
-			</form>
-			{%else%}
-			<a type= 'button' class='btn btn-success mb-2' href='{%url 'content:content'%}'>Study</a>
-			<a type= 'button' class='btn btn-success mb-2' href='#'>Give a review</a>
-			{%endif%}
-		</div>
-	</div>
-</div>
 <div style='min-height: 100vh;'>
 	<div style='background:#212121;border-radius: 15px 15px 0px 0px'>
 		<div style='color: white;max-width: 40em;padding: 10px;'>
@@ -62,10 +36,10 @@ Course Page
 
 	<div style=''>
 		<div style='color: black;'>
-			<div class="" style=''>
-				<div style='max-width: 40em;border:1px solid black; padding:15px;' class='mt-3 mb-3'>
+			<div class="marketcourse_middle" id='marketcourse_middle' >
+				<div style='max-width: 40em;border:1px solid black; padding:15px;' class='mt-3 mb-3' id='marketcourse_learningobjective'>
 					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-bullseye"></i> Course Learning Objectives </h1>
-					<div class='mt-2' style='display:grid;grid-template-columns: 1fr 1fr;grid-gap:10px;'>
+					<div class='mt-2' id='marketcourse_middle_objectives' style=''>
 						{%for idd,objective in course.course_learning_objectives.items%}
 						<p class='mr-5'><i class="bi bi-check2-circle text-info mr-2"></i> {{objective}}</p>
 						{%endfor%}
@@ -78,8 +52,35 @@ Course Page
 					</div>
 				</div>
 
+				<div class="my_course_card card mt-3" id='marketcourse_coursecard'>
+					{%if course.course_pic_status%}
+					<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+					{%else%}
+					<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
+					{%endif%}
+					<div class="card-body">
+						<div class="" style='color:black;'>
+							<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
+							</div>
+							<hr class="sidebar-divider mb-3">
+							{%if user.is_authenticated == False%}
+							<a type= 'button' class='btn btn-secondary mb-2' href='{%url 'content:content'%}'>Signup to entroll</a>
+							{%elif context.course_subscription_status == False%}
+							<form class="px-3 py-3"  action="{%url 'content:_course_subscribe'%}" method="POST" role="form">
+								{%csrf_token%}
+								<input name='course_id' value='{{course.id}}' type='hidden'>
+								<button type= 'submit' class='btn btn-info mb-2' > Entroll Now</button>
+							</form>
+							{%else%}
+							<a type= 'button' class='btn btn-success mb-2' href='{%url 'content:content'%}'>Study</a>
+							<a type= 'button' class='btn btn-success mb-2' href='#'>Give a review</a>
+							{%endif%}
+						</div>
+					</div>
+				</div>
 
-				<div style='margin:auto; border:1px solid black; padding:15px;' class='mb-3'>
+
+				<div style='margin:auto; border:1px solid black; padding:15px;' class='mb-3 mt-5' id='marketcourse_courseoutline'>
 					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-journal-text"></i> Course Outline </h1>
 					<div class='mt-2' style=''>
 						{%definevar context.ordered_content as content_ss%}

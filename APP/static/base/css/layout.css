@@ -47,6 +47,35 @@
 	#accordionSidebar_replacement .nav-link{
 		margin: auto;
 	}
+	#mycourse_cardbody{
+		display:grid;
+		grid-template-columns: 1fr;
+	}
+	#marketcourse_middle{
+		display:grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto;
+		grid-template-areas: 
+		' left '
+		'right '
+		' bottom ';
+	}
+	#marketcourse_middle_objectives{
+		display:grid;
+		grid-template-columns: 1fr 1fr;
+	}
+	#spec_organiser_container{
+		display: none;
+	}
+	#spec_organiser_container_notice{
+		display: block;
+	}
+	.editing_form{
+		display:none;
+	}
+	.editing_form_notice{
+		display: block;
+	}
 }
 @media only screen and (min-width: 451px) and (max-width: 1199px){
 	#login_link_nav{
@@ -86,6 +115,36 @@
 	}
 	#accordionSidebar_replacement{
 		display:none;
+	}
+	#mycourse_cardbody{
+		display:grid;
+		grid-template-columns: 1fr;
+	}
+	#marketcourse_middle{
+		display:grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto;
+		grid-template-areas: 
+		' left '
+		'right '
+		' bottom ';
+	}
+	#marketcourse_middle_objectives{
+		display:grid;
+		grid-template-columns: 1fr 1fr;
+		grid-gap:10px;
+	}
+	#spec_organiser_container{
+		display: none;
+	}
+	#spec_organiser_container_notice{
+		display: block;
+	}
+	.editing_form{
+		display:none;
+	}
+	.editing_form_notice{
+		display: block;
 	}
 }
 	
@@ -136,5 +195,34 @@
 	}
 	#courseplace_wrapper{
 		grid-template-columns: 1fr 1fr 1fr;
+	}
+	#mycourse_cardbody{
+		display:grid;
+		grid-template-columns: 1fr 1fr;
+	}
+	#marketcourse_middle{
+		display:grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto auto;
+		grid-template-areas: 
+		' left right '
+		' bottom bottom ';
+	}
+	#marketcourse_middle_objectives{
+		display:grid;
+		grid-template-columns: 1fr 1fr;
+		grid-gap:10px;
+	}
+	#spec_organiser_container{
+		display: block;
+	}
+	#spec_organiser_container_notice{
+		display: none;
+	}
+	.editing_form{
+		display:block;
+	}
+	.editing_form_notice{
+		display:none;
 	}
 }

@@ -21,7 +21,10 @@ Editor
 var object_id = "{{context.question.id}}";
 var object_type = "Question";
 </script>
-<form class="user px-3 py-3"  action="{%url 'content:_savequestionedit'%}" 
+<div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
+	Please Use a desktop on chrome to see the editor, or zoom out.
+</div>
+<form class="user px-3 py-3 editing_form"  action="{%url 'content:_savequestionedit'%}" 
 	method="POST" role="form" enctype="multipart/form-data">
     {% csrf_token %}
     <input type='hidden' name='point_id' value={{context.question.id}}>

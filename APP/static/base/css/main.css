@@ -53,7 +53,12 @@
 	grid-template-columns: 1fr 1fr 1fr;
 	grid-gap: 10px;
 }
+
+/* styling for marketcourse */
 .my_course_card{
+	width: 20em;
+	height: auto;
+	margin: 5px;
 }
 .my_course_card:hover{
 	transform: scale(1.01, 1.01);
@@ -61,6 +66,38 @@
 	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 	transition: box-shadow 0.3s ease-in-out;
 	border: 1px solid black;
+}
+.marketcourse_middle{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: auto auto;
+	grid-template-areas: 
+	' left right '
+	' bottom bottom ';
+}
+#marketcourse_middle_objectives{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap:10px;
+}
+#marketcourse_coursecard{
+	width: 80%;
+	margin: auto;
+	grid-area: right;
+}
+#marketcourse_learningobjective{
+	grid-area: left;
+	min-width: 90%;
+}
+#marketcourse_courseoutline{
+	grid-area: bottom; 
+	width: 90%;
+}
+
+/* style for the mycourses page*/
+.mycourse_cardbody{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
 }
 
 /* for questionbank page */

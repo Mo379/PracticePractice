@@ -49,7 +49,10 @@ Moduel Selection and ordering
 				</div>
 			</div>
 			<div class="card-body">
-				<div class='spec_organiser_container shadow' style='text-align:center;margin-left:50px;'>
+				<div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
+					Please Use a desktop on chrome to make your specification, or zoom out.
+				</div>
+				<div class='spec_organiser_container shadow' id='spec_organiser_container' style='text-align:center;margin-left:50px;'>
 					<ol class='list' id='right'>
 						{%for obj in context.moduels%}
 						<li class='child shadow' value='{{obj.p_moduel}}'>
