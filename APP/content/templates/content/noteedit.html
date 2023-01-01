@@ -21,65 +21,10 @@
 
 {%block content%}
 {%include 'content/mathjax.html'%}
-<style>
-.MJX-TEX{
-	margin-left:5px;
-	margin-right:5px;
-	overflow-x: scroll;
-	overflow-x: scroll;
-}
-.MathJax{
-	overflow-x: scroll;
-	border-right: 2px solid green;
-	border-bottom: None;
-	margin-right: 5px;
-}
-.point_div h6 {
-	border-left: 2px solid green;
-	border-top: 1px dashed green;
-	padding-left: 3px;
-}
-</style>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
 <link href="{%static 'mdeditor/css/editormd.css'%}" type="text/css" media="all" rel="stylesheet">
-<style>
-.markdown-body table {
-	margin: auto;
-}
-.admonition {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    text-align: left;
-}
-
-.admonition.note { /* csslint allow: adjoining-classes */
-    color: #3a87ad;
-    background-color: #d9edf7;
-    border-color: #bce8f1;
-}
-
-.admonition.warning { /* csslint allow: adjoining-classes */
-    color: #c09853;
-    background-color: #fcf8e3;
-    border-color: #fbeed5;
-}
-
-.admonition.danger { /* csslint allow: adjoining-classes */
-    color: #b94a48;
-    background-color: #f2dede;
-    border-color: #eed3d7;
-}
-
-.admonition-title {
-    font-weight: bold;
-    text-align: left;
-}
-</style>
-
 
 {%definevar context.spec as spec%}
 {%definevar context.sampl_object as sample%}

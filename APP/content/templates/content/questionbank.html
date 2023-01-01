@@ -12,29 +12,6 @@
 
 {%block content%}
 {%definevar context.content as content%}
-<style>
-#qbank_container{
-	display:grid;
-	grid-template-columns: 2fr 1fr;
-	grid-template-areas: 'left right';
-}
-#right_container{
-	grid-area: right;
-}
-#left_container{
-	grid-area: left;
-}
-#first_row{
-	display:grid;
-	grid-template-columns: 1fr 3fr;
-	grid-template-areas: 'left right';
-}
-#summar
-
-.collapsing{
-	transition: 0.1s;
-}
-</style>
 <div id='qbank_container'>
 	{%definevar 'questionbank' as alert_loc%}
 	{%include 'base/alert.html'%}

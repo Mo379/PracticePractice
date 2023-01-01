@@ -30,6 +30,9 @@ Home
 {%definevar context.sidebar_active as sidebar_active%}
 {%include 'dashboard/sidebar.html'%}
 {%endblock%}
+{% block listsidebar%}
+{%include 'dashboard/sidebarbar_replacement.html'%}
+{% endblock %}
 {%block content%}
 Content goes here
 {%endblock%}

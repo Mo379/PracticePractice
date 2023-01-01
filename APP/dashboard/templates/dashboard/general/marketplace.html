@@ -10,26 +10,7 @@ CoursePlace
 {%definevar 'courseplace' as alert_loc%}
 {%include 'base/alert.html'%}
 
-<style>
-.courseplace_wrapper{
-	width:95%;
-	margin:auto;
-	display:grid;
-	grid-template-columns: 1fr 1fr 1fr;
-	grid-gap: 10px;
-}
-.my_course_card{
-}
-.my_course_card:hover{
-	transform: scale(1.01, 1.01);
-	transition: transform 0.3s ease-in-out;
-	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  	transition: box-shadow 0.3s ease-in-out;
-	border: 1px solid black;
-}
-</style>
-
-<div class='courseplace_wrapper'style='width:95%;margin:auto;'>
+<div class='courseplace_wrapper' id='courseplace_wrapper' style='width:95%;margin:auto;'>
 	{%for course in context.courses%}
 	<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
 		{%if course.course_pic_status%}
