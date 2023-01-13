@@ -13,6 +13,34 @@ Moduel Selection and ordering
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
 
 
+<div class="mb-4">
+	<div class="card-body">
+		<div class="card shadow mb-4">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Quick Content Editing
+				</h5>
+			</div>
+			<div class="card-body">
+				<div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
+					Please Use a desktop on chrome to make your specification, or zoom out.
+				</div>
+				<div class='spec_organiser_container shadow' id='spec_organiser_container' style='text-align:center;margin-left:50px;'>
+					{%for chapter in context.all_chapters%}
+					<a 
+						href='{%url 'content:noteedit' context.spec.id chapter.p_moduel chapter.p_chapter%}'
+						target='_blank'
+						style='text-decoration:none;color:black;font-size:20px;display:block;'
+						class='ml-1 mr-2 mt-1'
+					>
+					{{chapter.p_moduel}}-{{chapter.p_chapter}}
+					</a><br>
+					{%endfor%}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <div class="mb-4">
 	<div class="card-body">

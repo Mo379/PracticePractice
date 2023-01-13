@@ -356,7 +356,23 @@ class SpecModuelHandlerView(
                 spec_subject=subject,
             )
         # get moduels from db
-        moduels = Point.objects.values(
+        chapters = Point.objects.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_chapter',
+                ).filter(
+                        user=self.request.user,
+                        p_level=level,
+                        p_subject=subject,
+                        deleted=False,
+                )
+        moduels = chapters.values(
                     'p_level',
                     'p_subject',
                     'p_moduel',
@@ -364,13 +380,8 @@ class SpecModuelHandlerView(
                     'p_level',
                     'p_subject',
                     'p_moduel',
-                ).filter(
-                        user=self.request.user,
-                        p_level=level,
-                        p_subject=subject,
-                        deleted=False,
-                )
-        # reformat moduels
+                )        # reformat moduels
+        chapters_objs = [obj for obj in chapters]
         moduels_objs = [obj for obj in moduels]
         spec_content = spec.spec_content
         # get moduels already ordered saved previously
@@ -385,6 +396,7 @@ class SpecModuelHandlerView(
         context['spec'] = spec
         context['sample_obj'] = moduels_objs[0] if len(moduels_objs) > 0 else None
         context['all_moduels'] = moduels_objs
+        context['all_chapters'] = chapters_objs
         context['moduels'] = moduels_objs_final
         context['specification_moduels'] = final_spec_objs
         context['spec_completion'] = spec.spec_completion
