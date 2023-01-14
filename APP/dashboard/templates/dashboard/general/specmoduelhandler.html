@@ -25,22 +25,52 @@ Moduel Selection and ordering
 				<div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 					Please Use a desktop on chrome to make your specification, or zoom out.
 				</div>
-				<div class='spec_organiser_container shadow' id='spec_organiser_container' style='text-align:center;margin-left:50px;'>
-					{%for chapter in context.all_chapters%}
-					<a 
-						href='{%url 'content:noteedit' context.spec.id chapter.p_moduel chapter.p_chapter%}'
-						target='_blank'
-						style='text-decoration:none;color:black;font-size:20px;display:block;'
-						class='ml-1 mr-2 mt-1'
-					>
-					{{chapter.p_moduel}}-{{chapter.p_chapter}}
-					</a><br>
-					{%endfor%}
-				</div>
+				<select class="form-select form-control mb-3" id='edit_chapter_select'>
+				{%for chapter in context.all_chapters%}
+				<option value="{%url 'content:noteedit' context.spec.id chapter.p_moduel chapter.p_chapter%}[sep]{%url 'content:questionedit' context.spec.id chapter.p_moduel chapter.p_chapter%}">
+					{{chapter.p_moduel|field_name_to_label}} - {{chapter.p_chapter|field_name_to_label}}
+					{%if chapter.is_completed_content%}
+					&#x2705;
+					{%else%}
+					&#x2715;
+					{%endif%}
+					{%if chapter.is_completed_questions%}
+					&#x2705;
+					{%else%}
+					&#x2715;
+					{%endif%}
+					</option>
+				{%endfor%}
+				</select>
+				
+				<button id='note_edit_button' type= 'submit' class='btn btn-primary mb-2' style='float-right'>  <i class="bi bi-pencil-square"></i> Edit Content </button>
+				<button id='question_edit_button' type= 'submit' class='btn btn-primary mb-2' style='float-right'>  <i class="bi bi-pencil-square"></i> Edit Questions </button>
 			</div>
 		</div>
 	</div>
 </div>
+<script>
+var note_edit_button= document.getElementById("note_edit_button");
+note_edit_button.addEventListener("click", Redirect_FN_Note);
+var question_edit_button= document.getElementById("question_edit_button");
+question_edit_button.addEventListener("click", Redirect_FN_Question);
+function Redirect_FN_Note() {
+	var select_element = document.getElementById("edit_chapter_select");
+	var urls = select_element.options[ select_element.selectedIndex ].value
+	urls = urls.split('[sep]')
+	var note_edit_url = urls[0]
+	window.open(note_edit_url, '_blank').focus();
+}
+function Redirect_FN_Question() {
+	var select_element = document.getElementById("edit_chapter_select");
+	var urls = select_element.options[ select_element.selectedIndex ].value
+	urls = urls.split('[sep]')
+	var question_edit_url = urls[1]
+	window.open(question_edit_url, '_blank').focus();
+
+}
+
+</script>
 
 <div class="mb-4">
 	<div class="card-body">

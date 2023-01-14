@@ -361,6 +361,8 @@ class SpecModuelHandlerView(
                     'p_subject',
                     'p_moduel',
                     'p_chapter',
+                    'is_completed_content',
+                    'is_completed_questions',
                 ).distinct().order_by(
                     'p_level',
                     'p_subject',
@@ -392,11 +394,27 @@ class SpecModuelHandlerView(
         moduels_objs_final, final_spec_objs = filter_drag_drop_selection(
                 moduels_objs, dict2, 'p_moduel'
             )
+        # Remove hidden moduels from selection
+        dict3 = [
+                [
+                    (str(chapter['position'])+'_'+key1, ordered_moduel)
+                    for key1, chapter in spec_content[ordered_moduel['p_moduel']]['content'].items()
+                ]
+                    for ordered_moduel in final_spec_objs
+            ]
+        total_final_chapterspec_objs = []
+        for dicc in dict3:
+            if len(dicc) > 0:
+                div_chapters = [c for c in chapters.filter(p_moduel=dicc[0][1]['p_moduel'])]
+                chapters_objs_final, final_chapterspec_objs = filter_drag_drop_selection(
+                         div_chapters,[a[0] for a in dicc], 'p_chapter'
+                    )
+                total_final_chapterspec_objs.extend(final_chapterspec_objs)
         # return result
         context['spec'] = spec
         context['sample_obj'] = moduels_objs[0] if len(moduels_objs) > 0 else None
         context['all_moduels'] = moduels_objs
-        context['all_chapters'] = chapters_objs
+        context['all_chapters'] = total_final_chapterspec_objs
         context['moduels'] = moduels_objs_final
         context['specification_moduels'] = final_spec_objs
         context['spec_completion'] = spec.spec_completion

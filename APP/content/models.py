@@ -55,6 +55,8 @@ class Point(models.Model):
     p_unique_id = models.CharField(
         max_length=11, db_index=True, default="", null=True, unique=True
     )
+    is_completed_content = models.BooleanField(default=False, null=True)
+    is_completed_questions = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):

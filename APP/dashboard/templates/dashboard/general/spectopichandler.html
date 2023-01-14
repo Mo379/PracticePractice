@@ -30,6 +30,9 @@ Topic Selection and ordering
 					{{spec.spec_name}} -
 					{{context.sample_obj.p_moduel|field_name_to_label}} -
 					{{context.sample_obj.p_chapter|field_name_to_label}}
+					<a href='{%url 'content:noteedit' context.spec.id context.sample_obj.p_moduel context.sample_obj.p_chapter%}'>
+						<i class="bi bi-pencil-square"></i>
+					</a>
 				</h5>
 					
 				<div class="dropdown no-arrow">
@@ -93,9 +96,6 @@ Topic Selection and ordering
 								</span>
 								<a href='{%url 'dashboard:specpoint' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter obj.p_topic%}' target='_blank'>
 								{{obj.p_topic|field_name_to_label}}
-								</a>
-								<a href='{%url 'content:noteedit' spec.id obj.p_moduel obj.p_chapter%}#topic_{{obj.p_topic}}' target='_blank' style='text-decoration:none;color:white;font-size:20px;float:right;' class='ml-1 mr-2 mt-1'>
-								<i class="bi bi-pencil-square"></i>
 								</a>
 							</li >
 							{%endfor%}
