@@ -94,6 +94,38 @@ class Specification(models.Model):
         )
 
 
+class Collaborator(models.Model):
+    orchistrator = models.ForeignKey(
+        User, on_delete=models.CASCADE, db_index=True, default="", null=True,
+        related_name='orchistrator'
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, db_index=True, default="", null=True
+    )
+    specification = models.ForeignKey(
+        Specification, on_delete=models.CASCADE, db_index=True, default="", null=True
+    )
+    type_choices = [
+        (1, 'Freelancer'),
+        (2, 'Partner'),
+        (3, 'Volenteer'),
+    ]
+    collaborator_type = models.CharField(
+        max_length=1,
+        choices=type_choices,
+        default='Volenteer',
+    )
+    rate_per_point = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    rate_per_question = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    percentage_split = models.IntegerField(default=-1, null=True)
+    initial_invite_acceptance = models.BooleanField(default=False, null=True)
+    condition_acceptance = models.BooleanField(default=False, null=True)
+    active = models.BooleanField(default=False, null=True)
+    deleted = models.BooleanField(default=False, null=True)
+    def __str__(self):
+        return self.user.username+ "-" + str(self.specification)
+
+
 class EditingTask(models.Model):
     specification = models.ForeignKey(
         Specification, on_delete=models.SET_NULL, db_index=True, null=True

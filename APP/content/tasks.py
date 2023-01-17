@@ -1,4 +1,6 @@
 from celery import shared_task
+
+
 @shared_task()
 def _checkvideohealth(video):
     videos = Video.objects.all()

@@ -54,6 +54,11 @@ urlpatterns = [
         name='_inheritfromspec'
     ),
     path(
+        'content/_add_collaborator',
+        views._add_collaborator,
+        name='_add_collaborator'
+    ),
+    path(
         'content/_ordermoduels',
         views._ordermoduels,
         name='_ordermoduels'

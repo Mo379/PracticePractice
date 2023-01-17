@@ -28,6 +28,7 @@ from braces.views import (
 from mdeditor.configs import MDConfig
 from io import BytesIO
 from PP2.utils import h_encode, h_decode
+from notification.tasks import _send_email
 
 
 MDEDITOR_CONFIGS = MDConfig('default')
@@ -558,6 +559,92 @@ def _inheritfromspec(request):
         return redirect(
                 'dashboard:specmoduel',
                 **kwargs
+            )
+
+
+def _add_collaborator(request):
+    if request.method == 'POST':
+        #
+        email = request.POST['Collaborator_email']
+        collaborator_type = request.POST['Collaborator_type']
+        spec_id = h_decode(request.POST['spec_id'])
+        #
+        try:
+            user_collaborator = User.objects.get(
+                    email__iexact=email,
+                    )
+            spec = Specification.objects.get(pk=spec_id)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the email and all other fields are correct and valid.' + str(e),
+                    extra_tags='alert-danger specification'
+                )
+            return redirect(
+                    'dashboard:specifications',
+                )
+        if user_collaborator == spec.user:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'The creator of the specification cannot become a collaborator.',
+                    extra_tags='alert-danger specification'
+                )
+            return redirect(
+                    'dashboard:specifications',
+                )
+        if collaborator_type in ['1', '2', '3']:
+            history_check = Collaborator.objects.filter(
+                    orchistrator=spec.user,
+                    user=user_collaborator,
+                    specification=spec,
+                    deleted=False
+                )
+            if len(history_check) == 0:
+                obj_collaborator = Collaborator(
+                        orchistrator=spec.user,
+                        user=user_collaborator,
+                        specification=spec,
+                        collaborator_type=int(collaborator_type)
+                    )
+                obj_collaborator.save()
+                # mail
+                to_email = user_collaborator.email
+                mail_subject = 'Collaboration invite.'
+                mail_sender = settings.EMAIL_MAIN
+                message = str(
+                    f"You have a new invitation from {spec.user.first_name} " +
+                    f"{spec.user.last_name} to become a collaborator as a " +
+                    f"{Collaborator.type_choices[int(collaborator_type)-1][1]} " +
+                    f"for the following specification: \n ({str(spec)}) \n" +
+                    "If you would like to accept this invitation see this page: \n" +
+                    f"({settings.SITE_URL}/dashboard/specifications)"
+                )
+                _send_email(
+                        mail_subject,
+                        message,
+                        mail_sender,
+                        to_email,
+                    )
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'An invitation has been sent to your collaborator.',
+                        extra_tags='alert-success specification'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'This collaborator already has a role for this specification.',
+                        extra_tags='alert-warning specification'
+                    )
+            return redirect(
+                    'dashboard:specifications',
+                )
+        return redirect(
+                'dashboard:specifications',
             )
 
 

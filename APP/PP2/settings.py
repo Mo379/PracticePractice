@@ -221,6 +221,8 @@ EMAIL_PORT = decouple_config('SES_TLS_PORT', cast=int)
 EMAIL_HOST_USER = decouple_config('SES_SMTP_USER')
 EMAIL_HOST_PASSWORD = decouple_config('SES_PASSWORD')
 EMAIL_USE_TLS = decouple_config('SES_USE_TLS', cast=bool)
+EMAIL_MAIN = decouple_config('SES_EMAIL_main')
+EMAIL_INFO = decouple_config('SES_EMAIL_info')
 
 # Stripe settings
 STRIPE_LIVE_SECRET_KEY = decouple_config('Stripe_live_secret')

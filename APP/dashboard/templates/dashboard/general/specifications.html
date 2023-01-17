@@ -14,7 +14,30 @@ Specifications
 		<div class="card shadow mb-4">
 			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 				<h5 class="h4 mb-1 text-primary font-weight-bold">
-					Specifications
+					Collaboration Manager
+				</h5>
+				<div class="dropdown no-arrow">
+					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+						aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-header">Actions:</div>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#AddCollabModal">
+							Add Collaborator
+						</a>
+					</div>
+				</div>
+					
+			</div>
+			    <div class="card-body">
+			    </div>
+		</div>
+		<div class="card shadow mb-4">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					MySpecifications
 				</h5>
 					
 				<div class="dropdown no-arrow">
@@ -48,7 +71,6 @@ Specifications
 						    {%for spec in specs|index:level|index:subject|index:board%}
 							<a 
 							href='{%url 'dashboard:specmoduel' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name%}'
-							target='blank'
 							class="mb-1 btn 
 								{%if spec.spec_completion%}
 								btn-primary

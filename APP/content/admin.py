@@ -8,6 +8,7 @@ from content.models import (
         Keyword,
         EditingTask,
         Specification,
+        Collaborator,
         ContentTemplate,
         Course,
         CourseVersion,
@@ -24,6 +25,7 @@ admin.site.register(Point)
 admin.site.register(Keyword)
 admin.site.register(EditingTask)
 admin.site.register(Specification)
+admin.site.register(Collaborator)
 admin.site.register(ContentTemplate)
 admin.site.register(Course)
 admin.site.register(CourseVersion)
