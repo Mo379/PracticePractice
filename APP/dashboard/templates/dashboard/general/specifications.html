@@ -14,29 +14,6 @@ Specifications
 		<div class="card shadow mb-4">
 			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 				<h5 class="h4 mb-1 text-primary font-weight-bold">
-					Collaboration Manager
-				</h5>
-				<div class="dropdown no-arrow">
-					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
-					</a>
-					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-						aria-labelledby="dropdownMenuLink">
-						<div class="dropdown-header">Actions:</div>
-						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#AddCollabModal">
-							Add Collaborator
-						</a>
-					</div>
-				</div>
-					
-			</div>
-			    <div class="card-body">
-			    </div>
-		</div>
-		<div class="card shadow mb-4">
-			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-				<h5 class="h4 mb-1 text-primary font-weight-bold">
 					MySpecifications
 				</h5>
 					
@@ -93,6 +70,141 @@ Specifications
 				    </div>
 			    </div>
 			  {%endfor%}
+		</div>
+		<div class="card shadow mb-4">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Collaboration Manager
+				</h5>
+				<div class="dropdown no-arrow">
+					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+						aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-header">Actions:</div>
+						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#AddCollabModal">
+							Add Collaborator
+						</a>
+					</div>
+				</div>
+					
+			</div>
+			    <div class="card-body">
+				<h3 class="h6 mb-1 text-primary font-weight-bold">
+					Your Collaborators 
+				</h3>
+				{%for collaborator in context.MyCollaborations%}
+				{%definevar context.MyCollaborations|index:collaborator as collab_list%}
+					<div class="card mb-4 ml-4">
+						<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+							<h5 class="h6 mb-1 text-secondary font-weight-bold">
+								{{collab_list.0.user.first_name|title}}
+								{{collab_list.0.user.last_name|title}}
+							</h5>
+								
+							<div class="dropdown no-arrow">
+								<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+									data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+								</a>
+								<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+									aria-labelledby="dropdownMenuLink">
+									<div class="dropdown-header">Actions:</div>
+									<a type="button" class="dropdown-item" data-toggle="modal" data-target="#AssignSpecificationModal">
+										Assign specification
+									</a>
+								</div>
+							</div>
+						</div>
+						<div class="modal fade" id="AssignSpecificationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						  <div class="modal-dialog" role="document">
+						    <div class="modal-content">
+						      <div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Add a Collaborator to a specification</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							  <span aria-hidden="true">&times;</span>
+							</button>
+						      </div>
+						      <div class="modal-body">
+								<form class="px-3 py-3"  action="{%url 'content:_assign_collaborator_spec'%}" method="POST" role="form">
+									{%csrf_token%}
+									<input 
+										type='hidden' 
+										name='collaborator_id' 
+										value='{{collab_list.0.user.id|hashid}}'
+									/>
+									<label for="Specifications">Choose a Specification:</label>
+									<select name="spec_id" id="Specifications" class="form-control">
+									  {%for spec in context.raw_specs%}
+									  <option value="{{spec.id|hashid}}">
+										{{spec.spec_level}} -
+										{{spec.spec_subject}} -
+										{{spec.spec_board}} -
+										{{spec.spec_name}}
+									  </option>
+									  {%endfor%}
+									</select><br>
+									<label for="Collaborator_username">Give Collaborator's type:</label>
+									<select name="Collaborator_type" id="collaborator_type_select" class="form-control">
+									  <option value="1">
+										Freelancer
+									  </option>
+									  <option value="2">
+										Partner
+									  </option>
+									  <option value="3">
+										Volenteer
+									  </option>
+									</select><br>
+									<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Assign</button>
+								</form>
+						      </div>
+						    </div>
+						  </div>
+						</div>
+						    <div class="card-body">
+							    <div class='ml-1 mb-3' style='border-left: 1px solid black;padding-left: 5px;'>
+							    {%for collab_item in collab_list%}
+								<a 
+								href='#'
+								class="mb-1 btn btn-primary
+								">
+								{{collab_item.specification}}
+								</a><br>
+							    {%endfor%}
+							    </div>
+						    </div>
+					</div>
+				{%endfor%}
+				<h3 class="h6 mb-1 text-primary font-weight-bold">
+					Your Contributions
+				</h3>
+				{%for contributer in context.MyContributions%}
+				{%definevar context.MyContributions|index:contributer as collab_list%}
+					<div class="card mb-4 ml-4">
+						<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+							<h5 class="h6 mb-1 text-secondary font-weight-bold">
+								{{collab_list.0.orchistrator.first_name|title}}
+								{{collab_list.0.orchistrator.last_name|title}}
+							</h5>
+						</div>
+						    <div class="card-body">
+							    <div class='ml-1 mb-3' style='border-left: 1px solid black;padding-left: 5px;'>
+							    {%for collab_item in collab_list%}
+								<a 
+								href='#'
+								class="mb-1 btn btn-primary
+								">
+								{{collab_item.specification}}
+								</a><br>
+							    {%endfor%}
+							    </div>
+						    </div>
+					</div>
+				{%endfor%}
+			    </div>
 		</div>
 	</div>
 </div>

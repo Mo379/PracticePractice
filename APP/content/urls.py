@@ -59,6 +59,11 @@ urlpatterns = [
         name='_add_collaborator'
     ),
     path(
+        'content/_assign_collaborator_spec',
+        views._assign_collaborator_spec,
+        name='_assign_collaborator_spec'
+    ),
+    path(
         'content/_ordermoduels',
         views._ordermoduels,
         name='_ordermoduels'

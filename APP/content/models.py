@@ -103,7 +103,7 @@ class Collaborator(models.Model):
         User, on_delete=models.CASCADE, db_index=True, default="", null=True
     )
     specification = models.ForeignKey(
-        Specification, on_delete=models.CASCADE, db_index=True, default="", null=True
+        Specification, on_delete=models.CASCADE,db_index=True, default="", null=True
     )
     type_choices = [
         (1, 'Freelancer'),
@@ -122,8 +122,9 @@ class Collaborator(models.Model):
     condition_acceptance = models.BooleanField(default=False, null=True)
     active = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
+
     def __str__(self):
-        return self.user.username+ "-" + str(self.specification)
+        return self.user.username + " helping -> " + self.orchistrator.username
 
 
 class EditingTask(models.Model):

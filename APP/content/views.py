@@ -598,7 +598,6 @@ def _add_collaborator(request):
             history_check = Collaborator.objects.filter(
                     orchistrator=spec.user,
                     user=user_collaborator,
-                    specification=spec,
                     deleted=False
                 )
             if len(history_check) == 0:
@@ -637,7 +636,9 @@ def _add_collaborator(request):
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'This collaborator already has a role for this specification.',
+                        'This collaborator already has already been added, \
+                        to assign them more specifications please do so \
+                        from their personal menu.',
                         extra_tags='alert-warning specification'
                     )
             return redirect(
@@ -646,6 +647,79 @@ def _add_collaborator(request):
         return redirect(
                 'dashboard:specifications',
             )
+
+
+def _assign_collaborator_spec(request):
+    if request.method == 'POST':
+        #
+        collaborator_id = h_decode(request.POST['collaborator_id'])
+        spec_id = h_decode(request.POST['spec_id'])
+        collaborator_type = request.POST['Collaborator_type']
+        # check duplicate spec assignments
+        history_check = Collaborator.objects.filter(
+                orchistrator=request.user,
+                user=collaborator_id,
+                specification=spec_id
+            )
+        if len(history_check) == 0:
+            try:
+                spec = Specification.objects.get(pk=spec_id)
+                print(collaborator_id)
+                user_collaborator = User.objects.get(pk=collaborator_id)
+                collaborator = Collaborator(
+                        orchistrator=request.user,
+                        user=user_collaborator,
+                        specification=spec,
+                        collaborator_type=int(collaborator_type)
+                    )
+                collaborator.save()
+                to_email = user_collaborator.email
+                mail_subject = 'Collaboration invite.'
+                mail_sender = settings.EMAIL_MAIN
+                message = str(
+                    f"You have a new invitation from {spec.user.first_name} " +
+                    f"{spec.user.last_name} to become a collaborator as a " +
+                    f"{Collaborator.type_choices[int(collaborator_type)-1][1]} " +
+                    f"for the following specification: \n ({str(spec)}) \n" +
+                    "If you would like to accept this invitation see this page: \n" +
+                    f"({settings.SITE_URL}/dashboard/specifications)"
+                )
+                _send_email(
+                        mail_subject,
+                        message,
+                        mail_sender,
+                        to_email,
+                    )
+            except Exception as e:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong, cannot assign specification to collaborator.'+str(e),
+                        extra_tags='alert-danger specification'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Successfully assigned your collaborator to your \
+                            selected specification, and notified them.',
+                        extra_tags='alert-success specification'
+                    )
+            #
+            return redirect(
+                    'dashboard:specifications',
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Duplicate specifications for the same collaborator are not allowed.',
+                    extra_tags='alert-warning specification'
+                )
+
+    return redirect(
+            'dashboard:specifications',
+        )
 
 
 def _ordermoduels(request):

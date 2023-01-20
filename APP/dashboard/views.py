@@ -17,6 +17,7 @@ from braces.views import (
 from content.models import (
         Point,
         Specification,
+        Collaborator,
         Course,
         CourseVersion,
         CourseSubscription,
@@ -258,27 +259,58 @@ class MySpecificationsView(
                 )
         Notes_objs = [obj for obj in Notes]
         df = pd.DataFrame(Notes_objs)
-        dic = {}
-        raw_specs = []
-        if len(Notes_objs) > 0:
-            for le, s, m, c, idd in zip(
-                    list(df['spec_level']),
-                    list(df['spec_subject']),
-                    list(df['spec_board']),
-                    list(df['spec_name']),
-                    list(df['id']),
-                    ):
-                if le not in dic:
-                    dic[le] = {}
-                if s not in dic[le]:
-                    dic[le][s] = {}
-                if m not in dic[le][s]:
-                    dic[le][s][m] = []
-                spec = Specification.objects.get(pk=idd)
-                dic[le][s][m].append(spec)
-                raw_specs.append(spec)
-        context['specifications'] = dic
-        context['raw_specs'] = raw_specs
+        def process_specs(df):
+            dic = {}
+            raw_specs = []
+            if len(Notes_objs) > 0:
+                for le, s, m, c, idd in zip(
+                        list(df['spec_level']),
+                        list(df['spec_subject']),
+                        list(df['spec_board']),
+                        list(df['spec_name']),
+                        list(df['id']),
+                        ):
+                    if le not in dic:
+                        dic[le] = {}
+                    if s not in dic[le]:
+                        dic[le][s] = {}
+                    if m not in dic[le][s]:
+                        dic[le][s][m] = []
+                    spec = Specification.objects.get(pk=idd)
+                    dic[le][s][m].append(spec)
+                    raw_specs.append(spec)
+            return dic, raw_specs
+        spec_dic, spec_raw_specs = process_specs(df)
+        #
+        #
+        # got collaboration specs and transform them
+        collaborations = Collaborator.objects.filter(
+                orchistrator=self.request.user, deleted=False
+            )
+        distinct_collaborators = collaborations.distinct('user')
+        final_collabs_dict = {}
+        for collaborator in distinct_collaborators:
+            all_collabs = collaborations.filter(user=collaborator.user)
+            final_collabs_dict[collaborator.user.id] = [obj for obj in all_collabs]
+        #
+        #
+        # get contribution specs and transform them
+        contributions = Collaborator.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        distinct_assists = contributions.distinct('orchistrator')
+        final_contributions_dict = {}
+        for assist in distinct_assists:
+            all_assists = contributions.filter(orchistrator=assist.orchistrator)
+            final_contributions_dict[assist.orchistrator.id] = [obj for obj in all_assists]
+        #
+        #
+        #
+        context['MyCollaborations'] = final_collabs_dict
+        context['MyContributions'] = final_contributions_dict
+        #
+        context['specifications'] = spec_dic
+        context['raw_specs'] = spec_raw_specs
         return context
 
 
