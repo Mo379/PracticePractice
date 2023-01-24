@@ -1250,14 +1250,14 @@ def _course_subscribe(request):
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Something went wrong could not create subscription.',
+                        'Something went wrong could not enroll.',
                         extra_tags='alert-warning marketcourse'
                     )
             else:
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'You have subscribed to this course, goodluck with your studies!',
+                        'You have enrolled to this course, goodluck with your studies!',
                         extra_tags='alert-success marketcourse'
                     )
         else:
@@ -1269,7 +1269,7 @@ def _course_subscribe(request):
                 )
         #
         return redirect(
-                'dashboard:marketcourse', course_id=course_id
+                'dashboard:marketcourse', course_id=int(course_id)
             )
 
 

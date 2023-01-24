@@ -3,28 +3,25 @@
 <ul class="navbar-nav bg-gradient-dark sidebar sidebar_replacement sidebar-dark accordion" id="accordionSidebar_replacement" style='background:rgb(28, 28, 28);background:black;'>
 <!-- Divider -->
 <p style='margin-top:0px;'></p>
-{%include 'dashboard/sidebar/general.html'%}
-<hr class="sidebar-divider">
-
 {%if user.is_superuser%}
 {%include 'dashboard/sidebar/superuser.html'%}
 <hr class="sidebar-divider">
-{%endif%}
 
-{%if user|has_many_groups:'Student'%}
+{%endif%}
+{%include 'dashboard/sidebar/general.html'%}
+<hr class="sidebar-divider">
+
+
 {%include 'dashboard/sidebar/student.html'%}
 <hr class="sidebar-divider">
-{%endif%}
 
-{%if user|has_many_groups:'Editor'%}
-{%include 'dashboard/sidebar/editor.html'%}
-<hr class="sidebar-divider">
-{%endif%}
 
-{%if user|has_many_groups:'Affiliate'%}
-{%include 'dashboard/sidebar/affiliate.html'%}
+{%include 'dashboard/sidebar/writer.html'%}
 <hr class="sidebar-divider">
-{%endif%}
+
+
+{%include 'dashboard/sidebar/earning.html'%}
+<hr class="sidebar-divider">
 
 <!-- Sidebar Toggler (Sidebar) -->
 <div class="text-center d-none d-md-inline" style='color:black'>

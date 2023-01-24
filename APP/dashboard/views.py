@@ -212,7 +212,7 @@ class MyCoursesView(
             for version in courseversions:
                 versions[course.id].append(version)
 
-        context['sidebar_active'] = 'dashboard/mycourses'
+        context['sidebar_active'] = 'writer/mycourses'
         context['specs'] = specs
         context['courses'] = courses
         context['course_versions'] = versions
@@ -240,7 +240,7 @@ class MySpecificationsView(
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'dashboard/specifications'
+        context['sidebar_active'] = 'writer/specifications'
         #
         Notes = Specification.objects.filter(
                     user=self.request.user,
@@ -730,103 +730,26 @@ class StudentContentManagementView(
         return context
 
 
-class EditorTasksView(
+class EarningStatisticsView(
             LoginRequiredMixin,
-            GroupRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    group_required = u"Editor"
-    template_name = "dashboard/editor/tasks.html"
+    template_name = "dashboard/earning/statistics.html"
     context_object_name = 'context'
 
     @cached_property
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("tasks", reverse("dashboard:editor_tasks"))
+                ("statistics", reverse("dashboard:earning_statistics"))
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'editor/tasks'
-        return context
-
-
-class EditorMyTasksView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"Editor"
-    template_name = "dashboard/editor/mytasks.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("mytasks", reverse("dashboard:editor_mytasks"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'editor/mytasks'
-        return context
-
-
-class EditorEditorView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"Editor"
-    template_name = "dashboard/editor/editor.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("editor", reverse("dashboard:editor_editor"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'editor/editor'
-        return context
-
-
-class AffiliateStatisticsView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u'Affiliate'
-    template_name = "dashboard/affiliate/statistics.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("statistics", reverse("dashboard:affiliate_statistics"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'affiliate/statistics'
+        context['sidebar_active'] = 'earning/statistics'
         return context
 
 

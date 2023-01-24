@@ -17,6 +17,12 @@ Find the revision notes, questions and past papers you want, all in one place!
 {%endblock%}
 
 {%block content%}
+<div class="input-group mb-3">
+  <input type="text" class="form-control" placeholder="Search your courses" aria-label="Search Courses" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+    <button class="btn btn-outline-success" type="button">Search</button>
+  </div>
+</div>
 <div class='courseplace_wrapper' id='courseplace_wrapper' style='width:95%;margin:auto;'>
 	{%for course_subscription in context.courses%}
 	{%definevar course_subscription.course as course%}

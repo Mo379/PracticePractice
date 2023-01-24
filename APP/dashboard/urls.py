@@ -51,12 +51,8 @@ urlpatterns = [
         views.StudentContentManagementView.as_view(),
         name='student_contentmanagement'
     ),
-    # editor
-    path('editor-tasks', views.EditorTasksView.as_view(), name='editor_tasks'),
-    path('mytasks', views.EditorMyTasksView.as_view(), name='editor_mytasks'),
-    path('editor', views.EditorEditorView.as_view(), name='editor_editor'),
     # affiliate
-    path('affiliate-statistics', views.AffiliateStatisticsView.as_view(), name='affiliate_statistics'),
+    path('earning-statistics', views.EarningStatisticsView.as_view(), name='earning_statistics'),
     # extra
     path('blank', views.BlankView.as_view(), name='blank'),
     path('404', views.NotFoundView.as_view(), name='404'),
