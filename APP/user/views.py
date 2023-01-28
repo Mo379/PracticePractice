@@ -411,10 +411,10 @@ def _loginUser(request):
                         request,
                         messages.INFO,
                         'Successfull login!',
-                        extra_tags='alert-success user_profile'
+                        extra_tags='alert-success dashboard_index'
                     )
                 # Redirect to a success page.
-                return redirect('user:index')
+                return redirect('dashboard:index')
             else:
                 messages.add_message(
                         request,

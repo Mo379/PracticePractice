@@ -22,6 +22,7 @@ Course Page
 			<div class="" style=''><strong><i class="bi bi-clock-fill"></i> Estimated Time:</strong> {{course.course_estimated_time}}</div>
 			<div class="" style=''><strong><i class="bi bi-bar-chart-line"></i> Level:</strong> {{course.course_level}}</div>
 			<div> <i class="bi bi-translate"></i> <strong>Language:</strong> {{course.course_language}}</div>
+			<div> <i class="bi bi-patch-question"></i> <strong>Question Bank Only:</strong> {{course.course_question_bank_only}}</div>
 			<div> <i class="bi bi-hammer"></i> <strong>Created by:</strong> 
 				{{course.user.first_name}}
 				{{course.user.last_name}}
@@ -83,7 +84,7 @@ Course Page
 				<div style='margin:auto; border:1px solid black; padding:15px;' class='mb-3 mt-5' id='marketcourse_courseoutline'>
 					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-journal-text"></i> Course Outline </h1>
 					<div class='mt-2' style=''>
-						{%definevar context.ordered_content as content_ss%}
+						{%definevar context.ordered_content as content%}
 						{%include 'dashboard/general/items/outline_item.html'%}
 					</div>
 				</div>

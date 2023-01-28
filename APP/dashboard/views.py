@@ -8,7 +8,10 @@ from django.views import generic
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.functional import cached_property
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from view_breadcrumbs import BaseBreadcrumbMixin
+from django.db.models import CharField
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from braces.views import (
         LoginRequiredMixin,
         GroupRequiredMixin,
@@ -30,6 +33,7 @@ from content.util.GeneralUtil import (
     )
 
 
+
 # Superuser views
 class SuperuserMonitorView(
             LoginRequiredMixin,
@@ -46,7 +50,6 @@ class SuperuserMonitorView(
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("traffic", reverse("dashboard:admin_traffic"))
                 ]
 
     def get_queryset(self):
@@ -88,17 +91,35 @@ class MarketPlaceView(
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("MarketPlace", reverse("dashboard:marketplace"))
+                ("MarketPlace", '')
                 ]
 
     def get_queryset(self):
         context = {}
+        current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
         context['sidebar_active'] = 'dashboard/marketplace'
-        courses = Course.objects.all(
-                #course_publication=True,
-                #deleted=False
+        courses = Course.objects.filter(
+                course_publication=True,
+                deleted=False
                 )
-        context['courses'] = courses
+        #
+        if 'search' in self.request.GET:
+            search_query = self.request.GET['search']
+            vector = SearchVector('course_name')
+            query = SearchQuery(search_query)
+            courses = courses.annotate(
+                    rank=SearchRank(vector, query)
+                ).order_by('-rank')
+        p = Paginator(courses, 9)
+        try:
+            context['courses'] = p.page(current_page)
+        except EmptyPage:
+            context['courses'] = p.page(p.num_pages)
+            current_page = p.num_pages
+        context['num_pages'] = p.num_pages
+        context['current_page'] = current_page
+        context['previous_page'] = current_page - 1 if current_page > 1 else None
+        context['next_page'] = current_page + 1 if current_page < p.num_pages else None
         context['CDN_URL'] = settings.CDN_URL
         return context
 
@@ -115,7 +136,7 @@ class MarketCourseView(
     def crumbs(self):
         return [
                 ("dashboard", reverse("dashboard:index")),
-                ("MarketPlace", reverse("dashboard:marketplace")),
+                ("MarketPlace", reverse("dashboard:marketplace", kwargs={'page':1})),
                 ("Course", '')
                 ]
 

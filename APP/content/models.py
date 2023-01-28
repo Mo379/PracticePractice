@@ -227,7 +227,10 @@ class CourseReview(models.Model):
 class CourseSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, db_index=True)
+    archived = models.BooleanField(default=False, null=True)
+    owned = models.BooleanField(default=False, null=True)
     subscription_created_at = models.DateTimeField(auto_now_add=True)
+    subscription_ended_at = models.DateTimeField(null=True, default=None)
 
     def __str__(self):
         return (

@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'django.contrib.postgres'
 ]
 AUTH_USER_MODEL = 'user.User'
 SITE_URL = decouple_config('Site_domain')

@@ -30,6 +30,9 @@
 {%definevar context.sampl_object as sample%}
 
 <div class="container col-9 text-justify" style='padding:5px;border:1px solid black;'>
+	<h1 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+	{{context.sampl_object.p_moduel|field_name_to_label}}
+	</h1>
 	{%if context.previous != None%}
 	<a class="" 
 		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.previous%}" 

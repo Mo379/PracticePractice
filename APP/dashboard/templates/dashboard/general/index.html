@@ -1,11 +1,14 @@
 {% extends 'dashboard/base.html'%}
 {%load static%}
+{%load general%}
 {%block page_name%}
 Home
 {%endblock%}
 {%block content%}
 <!-- Begin Page Content -->
 <div class="container-fluid">
+{%definevar 'dashboard_index' as alert_loc%}
+{%include 'base/alert.html'%}
 
 	<!-- Page Heading -->
 	<div class="d-sm-flex align-items-center justify-content-between mb-4">

@@ -9,6 +9,8 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.utils.functional import cached_property
 from django.contrib import messages
 from django.views import generic
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from content.util.GeneralUtil import (
         TagGenerator,
         insert_new_spec_order,
@@ -54,14 +56,30 @@ class ContentView(
     def get_queryset(self):
         """Return all of the required hub information"""
         context = {}
+        current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
         course_subscriptions = CourseSubscription.objects.filter(
                 user=self.request.user
             ).order_by('-subscription_created_at') if self.request.user.is_authenticated else False
-        if course_subscriptions:
-            context['courses'] = course_subscriptions
-        else:
-            context['courses'] = []
         #
+        courses = [c.course.pk for c in course_subscriptions]
+        courses = Course.objects.filter(pk__in=courses)
+        if 'search' in self.request.GET:
+            search_query = self.request.GET['search']
+            vector = SearchVector('course_name')
+            query = SearchQuery(search_query)
+            courses = courses.annotate(
+                    rank=SearchRank(vector, query)
+                ).order_by('-rank')
+        p = Paginator(courses, 9)
+        try:
+            context['courses'] = p.page(current_page)
+        except EmptyPage:
+            context['courses'] = p.page(p.num_pages)
+            current_page = p.num_pages
+        context['num_pages'] = p.num_pages
+        context['current_page'] = current_page
+        context['previous_page'] = current_page - 1 if current_page > 1 else None
+        context['next_page'] = current_page + 1 if current_page < p.num_pages else None
         context['CDN_URL'] = settings.CDN_URL
         return context
 
