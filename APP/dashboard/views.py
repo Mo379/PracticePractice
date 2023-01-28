@@ -746,8 +746,35 @@ class StudentContentManagementView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'student/contentmanagement'
-        user_subscriptions = CourseSubscription.objects.filter(user=self.request.user)
-        context['subscriptions'] = [obj.course for obj in user_subscriptions]
+        current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
+        course_subscriptions = CourseSubscription.objects.filter(
+                user=self.request.user
+            ).order_by('-subscription_created_at') if self.request.user.is_authenticated else False
+        #
+        courses = [c.course.pk for c in course_subscriptions]
+        courses = Course.objects.filter(pk__in=courses)
+        if 'search' in self.request.GET:
+            search_query = self.request.GET['search']
+            vector = SearchVector('course_name')
+            query = SearchQuery(search_query)
+            courses = courses.annotate(
+                    rank=SearchRank(vector, query)
+                ).order_by('-rank')
+        final_courses = []
+        for course in courses:
+            subscription = course_subscriptions.get(course=course.id)
+            final_courses.append((subscription, course))
+        p = Paginator(final_courses, 9)
+        try:
+            context['courses'] = p.page(current_page)
+        except EmptyPage:
+            context['courses'] = p.page(p.num_pages)
+            current_page = p.num_pages
+        context['num_pages'] = p.num_pages
+        context['current_page'] = current_page
+        context['previous_page'] = current_page - 1 if current_page > 1 else None
+        context['next_page'] = current_page + 1 if current_page < p.num_pages else None
+        context['CDN_URL'] = settings.CDN_URL
         return context
 
 

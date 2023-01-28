@@ -204,4 +204,10 @@ urlpatterns = [
         views._createcustomtest,
         name='_createcustomtest'
     ),
+    # Management actions
+    path(
+        'content/_management_options/',
+        views._management_options,
+        name='_management_options'
+    ),
 ]

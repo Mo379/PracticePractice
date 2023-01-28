@@ -52,6 +52,11 @@ urlpatterns = [
         views.StudentContentManagementView.as_view(),
         name='student_contentmanagement'
     ),
+    path(
+        'student-contentmanagemen/<int:page>',
+        views.StudentContentManagementView.as_view,
+        name='student_contentmanagement'
+    ),
     # affiliate
     path('earning-statistics', views.EarningStatisticsView.as_view(), name='earning_statistics'),
     # extra

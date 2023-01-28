@@ -58,7 +58,8 @@ class ContentView(
         context = {}
         current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
         course_subscriptions = CourseSubscription.objects.filter(
-                user=self.request.user
+                user=self.request.user,
+                visibility=True
             ).order_by('-subscription_created_at') if self.request.user.is_authenticated else False
         #
         courses = [c.course.pk for c in course_subscriptions]
@@ -2442,3 +2443,36 @@ def _createcustomtest(request):
         return JsonResponse({'res': 1, 'paper_id': h_encode(paper.id)})
     else:
         return JsonResponse({'res': 0})
+
+
+def _management_options(request):
+    if request.method == 'POST':
+        subscription_id = h_decode(request.POST['subscription_id'])
+        visibility = True if 'subscription_visibility' in request.POST else None
+        #
+        try:
+            subscription = CourseSubscription.objects.get(pk=subscription_id)
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Cannot find the requested course enrollment.',
+                    extra_tags='alert-danger contentmanagement'
+                )
+            return redirect(
+                    'dashboard:student_contentmanagement',
+                )
+        subscription.visibility = visibility
+        subscription.save()
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your settings were successfully updated.',
+                extra_tags='alert-success contentmanagement'
+            )
+        return redirect(
+                'dashboard:student_contentmanagement',
+            )
+    return redirect(
+            'dashboard:student_contentmanagement',
+        )
