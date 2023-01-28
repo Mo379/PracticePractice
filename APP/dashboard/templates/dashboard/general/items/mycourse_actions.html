@@ -34,12 +34,12 @@
 			<input type="file" id="customFile" name='course_thmbnail' /><br><br>
 
 			<div class="custom-control custom-switch mt-2 mb-2">
-				<input type="checkbox" class="custom-control-input" id="customSwitches" name='question_bank_only' 
+				<input type="checkbox" class="custom-control-input" id="customSwitches_{{course.id|hashid}}" name='question_bank_only' 
 					{%if course.course_question_bank_only%}
 					checked
 					{%endif%}
 				>
-				<label class="custom-control-label" for="customSwitches">Make course a question bank only</label>
+				<label class="custom-control-label" for="customSwitches_{{course.id|hashid}}">Make course a question bank only</label>
 			</div><br>
 
 			<label for="estimated_time">Give an estimated course completion time: </label>

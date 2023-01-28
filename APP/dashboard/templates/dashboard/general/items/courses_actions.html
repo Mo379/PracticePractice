@@ -1,3 +1,4 @@
+{%load general%}
 <div class="modal fade" id="CrateCourseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -70,6 +71,8 @@
 
 			<select name="Course_id" id="Courses" class='form-control'>
 			  {%for course in context.courses%}
+			{%definevar course.0 as courseversions%}
+			{%definevar course.1 as course%}
 			  <option value="{{course.id}}">
 				{{course.course_name}}
 			  </option>

@@ -7,18 +7,6 @@ style='color:white;'
 	Writer
 </div>
 <li class="nav-item">
-	<a class="nav-link" href="{%url 'dashboard:specifications'%}">
-		<i class="bi bi-folder-fill" 
-		     {%if sidebar_active == 'writer/specifications'%}
-		     style='color:white;'
-		     {%endif%}
-		   >
-		</i><span
-		     {%if sidebar_active == 'writer/specifications'%}
-		     style='color:white;'
-		     {%endif%}
-		>MySpecifications</span>
-	</a>
 	<a class="nav-link" href="{%url 'dashboard:mycourses'%}">
 		<i class="bi bi-book" 
 		     {%if sidebar_active == 'writer/mycourses'%}
@@ -30,5 +18,17 @@ style='color:white;'
 		     style='color:white;'
 		     {%endif%}
 		>MyCourses</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:specifications'%}">
+		<i class="bi bi-folder-fill" 
+		     {%if sidebar_active == 'writer/specifications'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'writer/specifications'%}
+		     style='color:white;'
+		     {%endif%}
+		>MySpecifications</span>
 	</a>
 </li>

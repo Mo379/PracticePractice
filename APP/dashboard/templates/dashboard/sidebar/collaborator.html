@@ -1,0 +1,58 @@
+<!-- Heading -->
+<div class="sidebar-heading"
+{%if 'collaborator' in sidebar_active%}
+style='color:white;'
+{%endif%}
+>
+	Collaborations
+</div>
+<li class="nav-item">
+	<a class="nav-link" href="{%url 'dashboard:collab_contribute'%}">
+		<i class="bi bi-pencil-square" 
+		     {%if sidebar_active == 'collaborator/contribute'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'collaborator/contribute'%}
+		     style='color:white;'
+		     {%endif%}
+		>Contribute</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:collab_manage'%}">
+		<i class="bi bi-arrow-left-square" 
+		     {%if sidebar_active == 'collaborator/collaborations'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'collaborator/collaborations'%}
+		     style='color:white;'
+		     {%endif%}
+		>Manage Collaborations</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:collab_review'%}">
+		<i class="bi bi-card-checklist" 
+		     {%if sidebar_active == 'collaborator/review'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'collaborator/review'%}
+		     style='color:white;'
+		     {%endif%}
+		>Review Work</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:collaborators_manage'%}">
+		<i class="bi bi-arrow-right-square" 
+		     {%if sidebar_active == 'collaborator/collaborators'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'collaborator/collaborators'%}
+		     style='color:white;'
+		     {%endif%}
+		>Manage Collaborators</span>
+	</a>
+</li>

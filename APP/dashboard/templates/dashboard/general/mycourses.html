@@ -36,75 +36,73 @@ Courses
 					</div>
 				</div>
 			</div>
-			<div class="card-body mycourse_cardbody" id='mycourse_cardbody'>
-				{%for course in context.courses%}
-				<div class="mb-4">
-					<div class="card-body">
-						<div class="card shadow mb-4">
-							<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-								<h6 class="m-0 font-weight-bold text-primary">
-									{{course.course_name|field_name_to_label}}
-								</h6>
-								<div class="dropdown no-arrow">
-									<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-										data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="fas fa-ellipsis-v fa-sm fa-fw text-priary-400"></i>
-									</a>
-									<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-										aria-labelledby="dropdownMenuLink">
-										<div class="dropdown-header">Course Actions:</div>
-										<a class="dropdown-item" href="#" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course Information</a>
-										<a class="dropdown-item text-primary" href="#" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a>
-										<a class="dropdown-item text-success" href="#" data-toggle="modal" data-target="#PublishCourseModal_{{course.id}}">Publish this course</a>
-										<a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#UnPublishCourseModal_{{course.id}}">UnPublish this course</a>
-									</div>
-									{%include 'dashboard/general/items/mycourse_actions.html'%}
-								</div>
-							</div>
-							<div class="card-body">
-								{%if course.course_pic_status%}
-								<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
-								{%else%}
-								<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
-								{%endif%}
-								<div class='mt-3'>
-									<h5> - Latest Specification: {{course.specification}}</h5>
-									<h5> - Summary: {{course.course_summary}}</h5>
-									<div>
-										<h5>- Skills to gain:</h5>
-										{%for idd, skill in course.course_skills.items%}
-										<h6 class='ml-4'>- {{skill}}</h6>
-										{%endfor%}
+		</div>
+	<form action="{%url 'dashboard:mycourses' page=1%}" method="GET" role="form">
+	<div class="input-group mb-3 mt-3">
+	  <input type="text" name='search' class="form-control" placeholder="Search Courses" aria-label="Search Courses" aria-describedby="basic-addon2">
+	  <div class="input-group-append">
+	    <button class="btn btn-outline-success" type="submit">Search</button>
+	  </div>
+	</div>
+	</form>
 
-									</div>
-									<div>
-										<h5>- Objectives:</h5>
-										{%for idd, objective in course.course_learning_objectives.items%}
-										<h6 class='ml-4'>- {{objective}}</h6>
-										{%endfor%}
-
-									</div>
-									<h5> - Estimated Time: {{course.course_estimated_time}}</h5>
-									<h5> - Level: {{course.course_level}}</h5>
-									<h5> - Question Bank Only: {{course.course_question_bank_only}}</h5>
-									<h5> - Published: {{course.course_publication}}</h5>
-									<h5> - Created: {{course.course_created_at}}</h5>
-									<h5> - Last Change: {{course.course_updated_at}}</h5>
-									<div>
-										<h5>- Versions:</h5>
-										{%for version in context.course_versions|index:course.id%}
-										<h6 class='ml-4'>- {{version.version_name}} - {{version.version_created_at}}</h6>
-										{%endfor%}
-
-									</div>
-								</div>
-							</div>
-						</div>
+	<div class='courseplace_wrapper' id='courseplace_wrapper' style='width:95%;margin:auto;'>
+		{%for course in context.courses%}
+			{%definevar course.0 as courseversions%}
+			{%definevar course.1 as course%}
+		<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
+			{%if course.course_pic_status%}
+			<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+			{%else%}
+			<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
+			{%endif%}
+			<div class="card-body">
+				<div class="h6 font-weight-bold" style='color:black;'>{{course.course_name}}</div>
+				<div class="" style='color:black;font-size: 12px;'><strong>Status:</strong> 
+					{%if course.course_publication%}
+					<a class="text-success">Published</a>
+					{%else%}
+					<a class="text-warning">Unpublished</a>
+					{%endif%}
+				</div>
+				<div class="" style='color:black;font-size: 12px;'><strong>Course Versions:</strong> 
+					<div>
+					{%for version in courseversions%}
+					<span class='ml-2'>- {{version.version_name}}</span><br>
+					{%endfor%}
 					</div>
 				</div>
-				{%endfor%}
+				<div class="" style='color:black;font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>x reviews</a>) {{context.total_learners}} from y learners
+	</div>
+				<div class="" style='color:black;'>
+					<hr class="sidebar-divider mb-3">
+					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course Information</a>
+					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a>
+					<a class="btn btn-success mb-1" data-toggle="modal" data-target="#PublishCourseModal_{{course.id}}">Publish this course</a>
+					<a class="btn btn-danger mb-1" data-toggle="modal" data-target="#UnPublishCourseModal_{{course.id}}">UnPublish this course</a>
+				</div>
 			</div>
 		</div>
+		{%include 'dashboard/general/items/mycourse_actions.html'%}
+		{%endfor%}
 	</div>
-</div>
+	<nav aria-label="Page navigation example"class='mt-3' style="justify-content: center;">
+	  <ul class="pagination" style="justify-content: center;">
+	    <li class="page-item"><a class="page-link" href="{%url 'dashboard:mycourses' page=1%}">First</a></li>
+	    {%if context.previous_page%}
+	    <li class="page-item"><a class="page-link" href="{%url 'dashboard:mycourses' page=context.previous_page%}">Previous</a></li>
+	    {%else%}
+	    <li class="page-item"><a class="page-link text-secondary">Previous</a></li>
+	    {%endif%}
+	    <li class="page-item"><a class='page-link'>{{context.current_page}} out of {{context.num_pages}} </a></li>
+	    {%if context.next_page%}
+	    <li class="page-item"><a class="page-link" href="{%url 'dashboard:mycourses' page=context.next_page%}">Next</a></li>
+	    {%else%}
+	    <li class="page-item"><a class="page-link text-secondary">Next</a></li>
+	    {%endif%}
+	    <li class="page-item"><a class="page-link" href="{%url 'dashboard:mycourses' page=context.num_pages%}">Last</a></li>
+	  </ul>
+	</nav>
+		</div>
+	</div>
 {%endblock%}

@@ -65,27 +65,35 @@ function insertAfter(referenceNode, newNode) {
         </button>
       </div>
       <div class="modal-body">
-	        Alpha Numeric Only
-		<form class="list user px-3 py-3"  action="{%url 'content:_createspec'%}" method="POST" role="form">
+	      	Please use alphanumeric names only, those inputs are only seen by you and your collaborators for organisation purposes.
+		<form class="px-3 py-3"  action="{%url 'content:_createspec'%}" method="POST" role="form">
 			{%csrf_token%}
+			<label for="spec_level">Spcification Level:</label>
 			<input 
 				type='text' 
 				name='spec_level' 
+			        class='form-control mb-3'
 				placeholder='Spec Level'
 			/>
+			<label for="spec_subject">Spcification Subject:</label>
 			<input 
 				type='text' 
 				name='spec_subject' 
+			        class='form-control mb-3'
 				placeholder='Spec Subject'
-			/><br>
+			/>
+			<label for="spec_board">Spcification Board:</label>
 			<input 
 				type='text' 
 				name='spec_board' 
+			        class='form-control mb-3'
 				placeholder='Spec Board'
 			/>
+			<label for="spec_name">Spcification Name:</label>
 			<input 
 				type='text' 
 				name='spec_name' 
+			        class='form-control mb-3'
 				placeholder='Spec Name'
 			/><br><br>
 			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
@@ -105,7 +113,7 @@ function insertAfter(referenceNode, newNode) {
         </button>
       </div>
       <div class="modal-body">
-		<form class="list user px-3 py-3"  action="{%url 'content:_deletespec'%}" method="POST" role="form">
+		<form class="px-3 py-3"  action="{%url 'content:_deletespec'%}" method="POST" role="form">
 			{%csrf_token%}
 			<label for="Specifications">Choose a Specification:</label>
 

@@ -12,6 +12,7 @@ urlpatterns = [
     path('marketcourse/<hashid:course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
     path('coursereviews/<hashid:course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
     path('mycourses', views.MyCoursesView.as_view(), name='mycourses'),
+    path('mycourses/<int:page>', views.MyCoursesView.as_view(), name='mycourses'),
     path(
         'specifications',
         views.MySpecificationsView.as_view(),
@@ -44,7 +45,11 @@ urlpatterns = [
     ),
     # Superuser
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
-    # admin
+    # collaborator
+    path('contribute', views.CollabContributeView.as_view(), name='collab_contribute'),
+    path('manage-collaborations', views.CollabManageView.as_view(), name='collab_manage'),
+    path('review-work', views.CollabReviewView.as_view(), name='collab_review'),
+    path('manage-collaborators', views.CollaboratorsManageView.as_view(), name='collaborators_manage'),
     # student
     path('student-performance', views.StudentPerformanceView.as_view(), name='student_performance'),
     path(

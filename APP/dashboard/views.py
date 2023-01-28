@@ -214,6 +214,9 @@ class MyCoursesView(
 
     def get_queryset(self):
         context = {}
+        context['sidebar_active'] = 'writer/mycourses'
+        current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
+        #
         specs = Specification.objects.filter(
                     user=self.request.user,
                     spec_completion=True,
@@ -225,18 +228,30 @@ class MyCoursesView(
                 ).order_by(
                         '-course_created_at'
                     )
-        versions = collections.defaultdict(list)
+        if 'search' in self.request.GET:
+            search_query = self.request.GET['search']
+            vector = SearchVector('course_name')
+            query = SearchQuery(search_query)
+            courses = courses.annotate(
+                    rank=SearchRank(vector, query)
+                ).order_by('-rank')
+        final_courses = []
         for course in courses:
             courseversions = CourseVersion.objects.filter(course=course).order_by(
                         '-version_number'
                     )
-            for version in courseversions:
-                versions[course.id].append(version)
-
-        context['sidebar_active'] = 'writer/mycourses'
+            final_courses.append((courseversions, course))
+        p = Paginator(final_courses, 9)
+        try:
+            context['courses'] = p.page(current_page)
+        except EmptyPage:
+            context['courses'] = p.page(p.num_pages)
+            current_page = p.num_pages
+        context['num_pages'] = p.num_pages
+        context['current_page'] = current_page
+        context['previous_page'] = current_page - 1 if current_page > 1 else None
+        context['next_page'] = current_page + 1 if current_page < p.num_pages else None
         context['specs'] = specs
-        context['courses'] = courses
-        context['course_versions'] = versions
         context['CDN_URL'] = settings.CDN_URL
         return context
 
@@ -775,6 +790,106 @@ class StudentContentManagementView(
         context['previous_page'] = current_page - 1 if current_page > 1 else None
         context['next_page'] = current_page + 1 if current_page < p.num_pages else None
         context['CDN_URL'] = settings.CDN_URL
+        return context
+
+
+class CollabContributeView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/collaborator/contribute.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("contribute", reverse("dashboard:collab_contribute"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'collaborator/contribute'
+        return context
+
+
+class CollabManageView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/collaborator/manage_collaborations.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("collaborations", reverse("dashboard:collab_manage"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'collaborator/collaborations'
+        return context
+
+
+class CollabReviewView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/collaborator/review_work.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("review", reverse("dashboard:collab_review"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'collaborator/review'
+        return context
+
+
+class CollaboratorsManageView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/collaborator/manage_collaborators.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("review", reverse("dashboard:collaborators_manage"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'collaborator/collaborators'
         return context
 
 
