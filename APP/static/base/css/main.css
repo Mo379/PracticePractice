@@ -389,3 +389,9 @@
 	-moz-user-select: none;
 	user-select: none;
 }
+
+
+/* For the collaborator card */
+.spec_collaboration_span:hover{
+	cursor:pointer;
+}

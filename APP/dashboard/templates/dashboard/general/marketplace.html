@@ -41,8 +41,7 @@ CoursePlace
 			<div class="" style='color:black;font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
 			<div class="" style='color:black;font-size: 12px;'><strong>English:</strong> {{course.course_language}}</div>
 			<div class="" style='color:black;font-size: 12px;'><strong>Question Bank Only:</strong> {{course.course_question_bank_only}}</div>
-			<div class="" style='color:black;font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
-</div>
+			<div class="" style='color:black;font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners</div>
 			<div class="" style='color:black;'>
 				<hr class="sidebar-divider mb-3">
 				<a type= 'button' class='btn btn-info mb-2' href='{%url 'dashboard:marketcourse' course.id%}'> View Course</a>

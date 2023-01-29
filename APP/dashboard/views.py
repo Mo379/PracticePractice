@@ -318,33 +318,6 @@ class MySpecificationsView(
             return dic, raw_specs
         spec_dic, spec_raw_specs = process_specs(df)
         #
-        #
-        # got collaboration specs and transform them
-        collaborations = Collaborator.objects.filter(
-                orchistrator=self.request.user, deleted=False
-            )
-        distinct_collaborators = collaborations.distinct('user')
-        final_collabs_dict = {}
-        for collaborator in distinct_collaborators:
-            all_collabs = collaborations.filter(user=collaborator.user)
-            final_collabs_dict[collaborator.user.id] = [obj for obj in all_collabs]
-        #
-        #
-        # get contribution specs and transform them
-        contributions = Collaborator.objects.filter(
-                user=self.request.user, deleted=False
-            )
-        distinct_assists = contributions.distinct('orchistrator')
-        final_contributions_dict = {}
-        for assist in distinct_assists:
-            all_assists = contributions.filter(orchistrator=assist.orchistrator)
-            final_contributions_dict[assist.orchistrator.id] = [obj for obj in all_assists]
-        #
-        #
-        #
-        context['MyCollaborations'] = final_collabs_dict
-        context['MyContributions'] = final_contributions_dict
-        #
         context['specifications'] = spec_dic
         context['raw_specs'] = spec_raw_specs
         return context
@@ -840,6 +813,31 @@ class CollabManageView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'collaborator/collaborations'
+        # got collaboration specs and transform them
+        collaborations = Collaborator.objects.filter(
+                orchistrator=self.request.user, deleted=False
+            )
+        distinct_collaborators = collaborations.distinct('user')
+        final_collabs_dict = {}
+        for collaborator in distinct_collaborators:
+            all_collabs = collaborations.filter(user=collaborator.user)
+            final_collabs_dict[collaborator.user.id] = [obj for obj in all_collabs]
+        #
+        #
+        # get contribution specs and transform them
+        contributions = Collaborator.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        distinct_assists = contributions.distinct('orchistrator')
+        final_contributions_dict = {}
+        for assist in distinct_assists:
+            all_assists = contributions.filter(orchistrator=assist.orchistrator)
+            final_contributions_dict[assist.orchistrator.id] = [obj for obj in all_assists]
+        #
+        #
+        #
+        context['MyCollaborations'] = final_collabs_dict
+        context['MyContributions'] = final_contributions_dict
         return context
 
 
@@ -890,6 +888,31 @@ class CollaboratorsManageView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'collaborator/collaborators'
+        # got collaboration specs and transform them
+        collaborations = Collaborator.objects.filter(
+                orchistrator=self.request.user, deleted=False
+            )
+        distinct_collaborators = collaborations.distinct('user')
+        raw_specs = Specification.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        final_collabs_dict = {}
+        for collaborator in distinct_collaborators:
+            all_collabs = collaborations.filter(user=collaborator.user)
+            collab_spec = [collab.specification.id for collab in all_collabs]
+            valid_specs = raw_specs.exclude(id__in=collab_spec)
+            #
+            freelance = all_collabs.filter(collaborator_type=1)
+            partner = all_collabs.filter(collaborator_type=2)
+            volenteer = all_collabs.filter(collaborator_type=3)
+            #
+            final_collabs_dict[collaborator.user.id] = (
+                    collaborator.user, freelance, partner, volenteer, valid_specs
+                )
+        #
+        #
+        context['MyCollaborations'] = final_collabs_dict
+        context['raw_specs'] = raw_specs
         return context
 
 

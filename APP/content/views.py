@@ -597,21 +597,21 @@ def _add_collaborator(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong, check that the email and all other fields are correct and valid.' + str(e),
-                    extra_tags='alert-danger specification'
+                    'Something went wrong, check that the email and all other fields are correct and valid.',
+                    extra_tags='alert-danger managecollaborators'
                 )
             return redirect(
-                    'dashboard:specifications',
+                    'dashboard:collaborators_manage',
                 )
         if user_collaborator == spec.user:
             messages.add_message(
                     request,
                     messages.INFO,
                     'The creator of the specification cannot become a collaborator.',
-                    extra_tags='alert-danger specification'
+                    extra_tags='alert-danger managecollaborators'
                 )
             return redirect(
-                    'dashboard:specifications',
+                    'dashboard:collaborators_manage',
                 )
         if collaborator_type in ['1', '2', '3']:
             history_check = Collaborator.objects.filter(
@@ -649,7 +649,7 @@ def _add_collaborator(request):
                         request,
                         messages.INFO,
                         'An invitation has been sent to your collaborator.',
-                        extra_tags='alert-success specification'
+                        extra_tags='alert-success managecollaborators'
                     )
             else:
                 messages.add_message(
@@ -658,13 +658,13 @@ def _add_collaborator(request):
                         'This collaborator already has already been added, \
                         to assign them more specifications please do so \
                         from their personal menu.',
-                        extra_tags='alert-warning specification'
+                        extra_tags='alert-warning managecollaborators'
                     )
             return redirect(
-                    'dashboard:specifications',
+                    'dashboard:collaborators_manage',
                 )
         return redirect(
-                'dashboard:specifications',
+                'dashboard:collaborators_manage',
             )
 
 
@@ -672,7 +672,7 @@ def _assign_collaborator_spec(request):
     if request.method == 'POST':
         #
         collaborator_id = h_decode(request.POST['collaborator_id'])
-        spec_id = h_decode(request.POST['spec_id'])
+        spec_id = h_decode(request.POST['spec_id']) if 'spec_id' in request.POST else None
         collaborator_type = request.POST['Collaborator_type']
         # check duplicate spec assignments
         history_check = Collaborator.objects.filter(
@@ -683,7 +683,6 @@ def _assign_collaborator_spec(request):
         if len(history_check) == 0:
             try:
                 spec = Specification.objects.get(pk=spec_id)
-                print(collaborator_id)
                 user_collaborator = User.objects.get(pk=collaborator_id)
                 collaborator = Collaborator(
                         orchistrator=request.user,
@@ -713,8 +712,8 @@ def _assign_collaborator_spec(request):
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'Something went wrong, cannot assign specification to collaborator.'+str(e),
-                        extra_tags='alert-danger specification'
+                        'Something went wrong, cannot assign specification to collaborator.',
+                        extra_tags='alert-danger managecollaborators'
                     )
             else:
                 messages.add_message(
@@ -722,22 +721,22 @@ def _assign_collaborator_spec(request):
                         messages.INFO,
                         'Successfully assigned your collaborator to your \
                             selected specification, and notified them.',
-                        extra_tags='alert-success specification'
+                        extra_tags='alert-success managecollaborators'
                     )
             #
             return redirect(
-                    'dashboard:specifications',
+                    'dashboard:collaborators_manage',
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
                     'Duplicate specifications for the same collaborator are not allowed.',
-                    extra_tags='alert-warning specification'
+                    extra_tags='alert-warning managecollaborators'
                 )
 
     return redirect(
-            'dashboard:specifications',
+            'dashboard:collaborators_manage',
         )
 
 
