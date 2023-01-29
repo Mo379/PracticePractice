@@ -210,4 +210,15 @@ urlpatterns = [
         views._management_options,
         name='_management_options'
     ),
+    # Collaboration management actions
+    path(
+        'content/_collab_freelancer_conditions/',
+        views._collab_freelancer_conditions,
+        name='_collab_freelancer_conditions'
+    ),
+    path(
+        'content/_collab_partner_conditions/',
+        views._collab_partner_conditions,
+        name='_collab_partner_conditions'
+    ),
 ]

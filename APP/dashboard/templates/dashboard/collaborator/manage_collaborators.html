@@ -82,14 +82,14 @@ Manage Collaborators
 						<span 
 							class='spec_collaboration_span mb-1
 							{%if collab_item.active%}
-							text-success
+							bg-success
 							{%elif collab_item.initial_invite_acceptance%}
-							text-warning
+							bg-warning
 							{%else%}
-							text-danger
+							bg-danger
 							{%endif%}
 							'
-							style='display:inline-block;background: silver;color:black;padding:3px;border-radius:5px;'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
 				     			type='button'
 				     			data-toggle="modal"
 							data-target="#collaboration_view_{{collab_item.id}}"
@@ -104,14 +104,14 @@ Manage Collaborators
 						<span 
 							class='spec_collaboration_span mb-1
 							{%if collab_item.active%}
-							text-success
+							bg-success
 							{%elif collab_item.initial_invite_acceptance%}
-							text-warning
+							bg-warning
 							{%else%}
-							text-danger
+							bg-danger
 							{%endif%}
 							'
-							style='display:inline-block;background: silver;color:black;padding:3px;border-radius:5px;'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
 				     			type='button'
 				     			data-toggle="modal"
 							data-target="#collaboration_view_{{collab_item.id}}"
@@ -126,13 +126,13 @@ Manage Collaborators
 						<span class='
 							spec_collaboration_span mb-1
 							{%if collab_item.active%}
-							text-success
+							bg-success
 							{%elif collab_item.initial_invite_acceptance%}
-							text-warning
+							bg-warning
 							{%else%}
-							text-danger
+							bg-danger
 							{%endif%}
-							' style='display:inline-block;background: silver;color:black;padding:3px;border-radius:5px;'>
+							' style='display:inline-block;padding:3px;border-radius:5px;color:white;'>
 							<a data-toggle="modal" data-target="#collaboration_view_{{collab_item.id}}">
 								{{collab_item.specification}}
 							</a>
@@ -141,9 +141,7 @@ Manage Collaborators
 				    	{%endif%}
 				</div>
 				<hr class="sidebar-divider mb-3">
-				<a type="button" class="dropdown-item" data-toggle="modal" data-target="#AssignSpecificationModal_{{collaboration_user}}">
-					Assign specification
-				</a>
+				<a class="btn btn-info mb-1" data-toggle="modal" data-target="#AssignSpecificationModal_{{collaboration_user}}">Assign specification</a>
 			</div>
 		</div>
 		{%include 'dashboard/collaborator/items/assign_spec_modal.html'%}

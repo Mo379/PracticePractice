@@ -2475,3 +2475,92 @@ def _management_options(request):
     return redirect(
             'dashboard:student_contentmanagement',
         )
+
+
+def _collab_freelancer_conditions(request):
+    if request.method == 'POST':
+        collaboration_id = h_decode(request.POST['collaboration_id'])
+        point_rate = request.POST['Point_rate']
+        question_rate = request.POST['Question_rate']
+        #
+        valid = True
+        try:
+            point_rate = float(point_rate)
+            question_rate = float(question_rate)
+        except Exception:
+            valid = False
+        #
+        if valid is not True:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, cannot find collaboration or incorrect input.',
+                    extra_tags='alert-danger managecollaborators'
+                )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        #
+        try:
+            collaborator = Collaborator.objects.get(pk=collaboration_id)
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, cannot find collaboration or incorrect input.',
+                    extra_tags='alert-danger managecollaborators'
+                )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        collaborator.rate_per_point = point_rate
+        collaborator.rate_per_question = question_rate
+        collaborator.condition_created = True
+        collaborator.save()
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Freelancer conditions have been set.',
+                extra_tags='alert-success managecollaborators'
+            )
+        return redirect(
+                'dashboard:collaborators_manage',
+            )
+    return redirect(
+            'dashboard:collaborators_manage',
+        )
+
+
+def _collab_partner_conditions(request):
+    if request.method == 'POST':
+        collaboration_id = h_decode(request.POST['collaboration_id'])
+        percentage_split = request.POST['Percentage_split']
+        #
+        try:
+            collaborator = Collaborator.objects.get(pk=collaboration_id)
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Cannot find the requested collaboration.',
+                    extra_tags='alert-danger managecollaborators'
+                )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        subscription.visibility = visibility
+        collaborator.save()
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Your settings were successfully updated.',
+                extra_tags='alert-success managecollaborators'
+            )
+        return redirect(
+                'dashboard:collaborators_manage',
+            )
+    return redirect(
+            'dashboard:collaborators_manage',
+        )
+
+

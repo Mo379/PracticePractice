@@ -106,9 +106,9 @@ class Collaborator(models.Model):
         Specification, on_delete=models.CASCADE,db_index=True, default="", null=True
     )
     type_choices = [
-        (1, 'Freelancer'),
-        (2, 'Partner'),
-        (3, 'Volenteer'),
+        ('1', 'Freelancer'),
+        ('2', 'Partner'),
+        ('3', 'Volenteer'),
     ]
     collaborator_type = models.CharField(
         max_length=1,
@@ -119,6 +119,7 @@ class Collaborator(models.Model):
     rate_per_question = models.DecimalField(max_digits=6, decimal_places=2, null=True)
     percentage_split = models.IntegerField(default=-1, null=True)
     initial_invite_acceptance = models.BooleanField(default=False, null=True)
+    condition_created = models.BooleanField(default=False, null=True)
     condition_acceptance = models.BooleanField(default=False, null=True)
     active = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)

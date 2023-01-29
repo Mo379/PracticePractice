@@ -902,9 +902,9 @@ class CollaboratorsManageView(
             collab_spec = [collab.specification.id for collab in all_collabs]
             valid_specs = raw_specs.exclude(id__in=collab_spec)
             #
-            freelance = all_collabs.filter(collaborator_type=1)
-            partner = all_collabs.filter(collaborator_type=2)
-            volenteer = all_collabs.filter(collaborator_type=3)
+            freelance = all_collabs.filter(collaborator_type=1).order_by('specification')
+            partner = all_collabs.filter(collaborator_type=2).order_by('specification')
+            volenteer = all_collabs.filter(collaborator_type=3).order_by('specification')
             #
             final_collabs_dict[collaborator.user.id] = (
                     collaborator.user, freelance, partner, volenteer, valid_specs
