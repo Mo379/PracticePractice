@@ -22,10 +22,16 @@
 			<label class='ml-3' name=''>Condition created:</label>
 			{% if collab_item.condition_created%}
 			<i class="bi bi-check-circle-fill text-success"></i><br>
-			<div class='ml-5'>
-			$ {{collab_item.rate_per_point}} per point.<br>
-			$ {{collab_item.rate_per_question}} per question.
-			</div>
+				{%if collab_item.collaborator_type == '1'%}
+				<div class='ml-5'>
+				$ {{collab_item.rate_per_point}} per point.<br>
+				$ {{collab_item.rate_per_question}} per question.
+				</div>
+				{%elif collab_item.collaborator_type == '2'%}
+				<div class='ml-5'>
+				Course earning percentage split: {{collab_item.percentage_split}} %<br>
+				</div>
+				{%endif%}
 			{%else%}
 			<i class="bi bi-x-circle-fill text-danger"></i>
 			{%endif%}
@@ -51,35 +57,43 @@
 		<hr class="sidebar-divider mb-3">
 		<h5 class="modal-title" id="exampleModalLabel">Conditions:</h5>
 		{%if collab_item.collaborator_type == '1'%}
-		<form class="ml-3 px-3 py-3"  action="{%url 'content:_collab_freelancer_conditions'%}" method="POST" role="form">
-			{%csrf_token%}
-			<input 
-				type='hidden' 
-				name='collaboration_id' 
-				class="form-control"
-				value='{{collab_item.id|hashid}}'
-			/>
-			<label for="Point_rate">Rate per Point ($):</label>
-			<input class="form-control" type="number" min='0' name='Point_rate' step=".01" value='{{collab_item.rate_per_point}}' />
-			<label for="Question_rate" class='mt-2'>Rate per Question ($):</label>
-			<input class="form-control" type="number" min='0' name='Question_rate' step=".01" value='{{collab_item.rate_per_point}}'/>
+			{%if collab_item.condition_created != True%}
+			<form class="ml-3 px-3 py-3"  action="{%url 'content:_collab_freelancer_conditions'%}" method="POST" role="form">
+				{%csrf_token%}
+				<input 
+					type='hidden' 
+					name='collaboration_id' 
+					class="form-control"
+					value='{{collab_item.id|hashid}}'
+				/>
+				<label for="Point_rate">Rate per Point ($):</label>
+				<input class="form-control" type="number" min='0' name='Point_rate' step=".01" value='{{collab_item.rate_per_point}}' />
+				<label for="Question_rate" class='mt-2'>Rate per Question ($):</label>
+				<input class="form-control" type="number" min='0' name='Question_rate' step=".01" value='{{collab_item.rate_per_question}}'/>
 
-			<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Set Conditions</button>
-		</form>
+				<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Set Conditions</button>
+			</form>
+			{%else%}
+			The conditions for this collaboration has been set.
+			{%endif%}
 		{%elif collab_item.collaborator_type == '2'%}
-		<form class="ml-3 px-3 py-3"  action="{%url 'content:_collab_partner_conditions'%}" method="POST" role="form">
-			{%csrf_token%}
-			<input 
-				type='hidden' 
-				name='collaboration_id' 
-				class="form-control"
-				value='{{collab_item.id|hashid}}'
-			/>
-			<label for="Point_rate">Percentage split (%):</label>
-			<input class="form-control" type="number" min='.1' name='Percentage-split' step=".1" max='99.9' />
+			{%if collab_item.condition_created != True%}
+			<form class="ml-3 px-3 py-3"  action="{%url 'content:_collab_partner_conditions'%}" method="POST" role="form">
+				{%csrf_token%}
+				<input 
+					type='hidden' 
+					name='collaboration_id' 
+					class="form-control"
+					value='{{collab_item.id|hashid}}'
+				/>
+				<label for="Point_rate">Percentage split (%):</label>
+				<input class="form-control" type="number" min='1' name='Percentage-split' step="1" max='99' />
 
-			<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Set Conditions</button>
-		</form>
+				<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Set Conditions</button>
+			</form>
+			{%else%}
+			The conditions for this collaboration has been set.
+			{%endif%}
 		{%elif collab_item.collaborator_type == '3'%}
 		<p>No conditions for volenteers</p>
 		</form>

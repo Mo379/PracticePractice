@@ -2534,7 +2534,24 @@ def _collab_freelancer_conditions(request):
 def _collab_partner_conditions(request):
     if request.method == 'POST':
         collaboration_id = h_decode(request.POST['collaboration_id'])
-        percentage_split = request.POST['Percentage_split']
+        percentage_split = request.POST['Percentage-split']
+        #
+        valid = True
+        try:
+            percentage_split = float(percentage_split)
+        except Exception:
+            valid = False
+        #
+        if valid is not True:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, cannot find collaboration or incorrect input.',
+                    extra_tags='alert-danger managecollaborators'
+                )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
         #
         try:
             collaborator = Collaborator.objects.get(pk=collaboration_id)
@@ -2542,18 +2559,19 @@ def _collab_partner_conditions(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Cannot find the requested collaboration.',
+                    'Something went wrong, cannot find collaboration or incorrect input.',
                     extra_tags='alert-danger managecollaborators'
                 )
             return redirect(
                     'dashboard:collaborators_manage',
                 )
-        subscription.visibility = visibility
+        collaborator.percentage_split= percentage_split
+        collaborator.condition_created = True
         collaborator.save()
         messages.add_message(
                 request,
                 messages.INFO,
-                'Your settings were successfully updated.',
+                'Pertner conditions have been set.',
                 extra_tags='alert-success managecollaborators'
             )
         return redirect(
