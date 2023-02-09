@@ -791,56 +791,6 @@ class CollabContributeView(
         return context
 
 
-class CollabManageView(
-            LoginRequiredMixin,
-            GroupRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    group_required = u"Student"
-    template_name = "dashboard/collaborator/manage_collaborations.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("collaborations", reverse("dashboard:collab_manage"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'collaborator/collaborations'
-        # got collaboration specs and transform them
-        collaborations = Collaborator.objects.filter(
-                orchistrator=self.request.user, deleted=False
-            )
-        distinct_collaborators = collaborations.distinct('user')
-        final_collabs_dict = {}
-        for collaborator in distinct_collaborators:
-            all_collabs = collaborations.filter(user=collaborator.user)
-            final_collabs_dict[collaborator.user.id] = [obj for obj in all_collabs]
-        #
-        #
-        # get contribution specs and transform them
-        contributions = Collaborator.objects.filter(
-                user=self.request.user, deleted=False
-            )
-        distinct_assists = contributions.distinct('orchistrator')
-        final_contributions_dict = {}
-        for assist in distinct_assists:
-            all_assists = contributions.filter(orchistrator=assist.orchistrator)
-            final_contributions_dict[assist.orchistrator.id] = [obj for obj in all_assists]
-        #
-        #
-        #
-        context['MyCollaborations'] = final_collabs_dict
-        context['MyContributions'] = final_contributions_dict
-        return context
-
-
 class CollabReviewView(
             LoginRequiredMixin,
             GroupRequiredMixin,
@@ -863,6 +813,56 @@ class CollabReviewView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'collaborator/review'
+        return context
+
+
+class CollabManageView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/collaborator/manage_collaborations.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("collaborations", reverse("dashboard:collab_manage"))
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'collaborator/collaborations'
+        # get contribution specs and transform them
+        contributions = Collaborator.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        distinct_assists = contributions.distinct('orchistrator')
+        raw_specs = Specification.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        final_contributions_dict = {}
+        for assist in distinct_assists:
+            all_assists = contributions.filter(orchistrator=assist.orchistrator)
+            collab_spec = [collab.specification.id for collab in all_assists]
+            valid_specs = raw_specs.exclude(id__in=collab_spec)
+            #
+            freelance = all_assists.filter(collaborator_type=1).order_by('specification')
+            partner = all_assists.filter(collaborator_type=2).order_by('specification')
+            volenteer = all_assists.filter(collaborator_type=3).order_by('specification')
+            #
+            final_contributions_dict[assist.orchistrator.id] = (
+                    assist.orchistrator, freelance, partner, volenteer, valid_specs
+                )
+        #
+        context['domain'] = settings.SITE_URL
+        context['MyContributions'] = final_contributions_dict
+        context['raw_specs'] = raw_specs
         return context
 
 

@@ -221,4 +221,14 @@ urlpatterns = [
         views._collab_partner_conditions,
         name='_collab_partner_conditions'
     ),
+    path(
+        'content/_condition_acceptance/',
+        views._condition_acceptance,
+        name='_condition_acceptance'
+    ),
+    path(
+        'content/_initial_invitation_acceptance/',
+        views._initial_invitation_acceptance,
+        name='_initial_invitation_acceptance'
+    ),
 ]

@@ -6,10 +6,16 @@ from content.util.GeneralUtil import TagGenerator
 from content.models import Point
 import markdown
 from django.template import Context, Template, loader
+from content.models import Contract
 from PP2.utils import h_encode
 
 register = template.Library()
 
+
+@register.filter(name='getcontract')
+def getcontract(collaboration):
+    """Returns the contract for the contribution"""
+    return Contract.objects.get_or_create(collaboration=collaboration)[0]
 
 @register.filter(name='hashid')
 def hashid(id):

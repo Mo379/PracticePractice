@@ -19,18 +19,6 @@ style='color:white;'
 		     {%endif%}
 		>Contribute</span>
 	</a>
-	<a class="nav-link" href="{%url 'dashboard:collab_manage'%}">
-		<i class="bi bi-arrow-left-square" 
-		     {%if sidebar_active == 'collaborator/collaborations'%}
-		     style='color:white;'
-		     {%endif%}
-		   >
-		</i><span
-		     {%if sidebar_active == 'collaborator/collaborations'%}
-		     style='color:white;'
-		     {%endif%}
-		>Manage Collaborations</span>
-	</a>
 	<a class="nav-link" href="{%url 'dashboard:collab_review'%}">
 		<i class="bi bi-card-checklist" 
 		     {%if sidebar_active == 'collaborator/review'%}
@@ -42,6 +30,18 @@ style='color:white;'
 		     style='color:white;'
 		     {%endif%}
 		>Review Work</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:collab_manage'%}">
+		<i class="bi bi-arrow-left-square" 
+		     {%if sidebar_active == 'collaborator/collaborations'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'collaborator/collaborations'%}
+		     style='color:white;'
+		     {%endif%}
+		>Manage Collaborations</span>
 	</a>
 	<a class="nav-link" href="{%url 'dashboard:collaborators_manage'%}">
 		<i class="bi bi-arrow-right-square" 

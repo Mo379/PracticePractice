@@ -128,6 +128,21 @@ class Collaborator(models.Model):
         return self.user.username + " helping -> " + self.orchistrator.username
 
 
+class Contract(models.Model):
+    collaboration = models.ForeignKey(
+        Collaborator, on_delete=models.CASCADE, db_index=True, default="", null=False,
+        related_name='collaboration'
+    )
+    conditions = models.JSONField(default=dict, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    terminated_at = models.DateTimeField(null=True, default=None, blank=True)
+
+    def __str__(self):
+        return self.collaboration.user.username + \
+                " helping -> " + self.collaboration.orchistrator.username
+
+
 class EditingTask(models.Model):
     specification = models.ForeignKey(
         Specification, on_delete=models.SET_NULL, db_index=True, null=True

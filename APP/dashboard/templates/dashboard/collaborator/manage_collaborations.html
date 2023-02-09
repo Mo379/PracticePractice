@@ -5,6 +5,29 @@
 Manage Collaborations
 {%endblock%}
 {%block content%}
+{%for contributer in context.MyContributions%}
+	{%definevar context.MyContributions|index:contributer as collab_list%}
+	{%definevar collab_list.0 as contribution_user%}
+	{%definevar collab_list.1 as freelance_collabs%}
+	{%definevar collab_list.2 as partner_collabs%}
+	{%definevar collab_list.3 as volenteer_collabs%}
+	{%definevar collab_list.4 as valid_specs%}
+	{%if freelance_collabs%}
+	    {%for collab_item in freelance_collabs%}
+	    {%include 'dashboard/collaborator/items/contribution_viewer_modal.html'%}
+	    {%endfor%}
+	{%endif%}
+	{%if partner_collabs%}
+	    {%for collab_item in partner_collabs%}
+	    {%include 'dashboard/collaborator/items/contribution_viewer_modal.html'%}
+	    {%endfor%}
+	{%endif%}
+	{%if volenteer_collabs%}
+	    {%for collab_item in volenteer_collabs%}
+	    {%include 'dashboard/collaborator/items/contribution_viewer_modal.html'%}
+	    {%endfor%}
+	{%endif%}
+{%endfor%}
 <div class="mb-4">
 	<div class="card-body">
 		<div class="card shadow mb-4">
@@ -12,49 +35,98 @@ Manage Collaborations
 				<h5 class="h4 mb-1 text-primary font-weight-bold">
 					Collaboration Manager
 				</h5>
-				<div class="dropdown no-arrow">
-					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
-					</a>
-					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-						aria-labelledby="dropdownMenuLink">
-						<div class="dropdown-header">Actions:</div>
-						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#AddCollabModal">
-							Add Collaborator
-						</a>
-					</div>
-				</div>
-					
 			</div>
-			    <div class="card-body">
-				<h3 class="h6 mb-1 text-primary font-weight-bold">
-					Your Contributions
-				</h3>
-				{%for contributer in context.MyContributions%}
-				{%definevar context.MyContributions|index:contributer as collab_list%}
-					<div class="card mb-4 ml-4">
-						<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-							<h5 class="h6 mb-1 text-secondary font-weight-bold">
-								{{collab_list.0.orchistrator.first_name|title}}
-								{{collab_list.0.orchistrator.last_name|title}}
-							</h5>
-						</div>
-						    <div class="card-body">
-							    <div class='ml-1 mb-3' style='border-left: 1px solid black;padding-left: 5px;'>
-							    {%for collab_item in collab_list%}
-								<a 
-								href='#'
-								class="mb-1 btn btn-primary
-								">
+		</div>
+		{%definevar 'managecollaborations' as alert_loc%}
+		{%include 'base/alert.html'%}
+		<div class='courseplace_wrapper' id='courseplace_wrapper' style='width:95%;margin:auto;'>
+		{%for collaborator in context.MyContributions%}
+		{%definevar context.MyContributions|index:collaborator as collab_list%}
+		{%definevar collab_list.0 as collaboration_user%}
+		{%definevar collab_list.1 as freelance_collabs%}
+		{%definevar collab_list.2 as partner_collabs%}
+		{%definevar collab_list.3 as volenteer_collabs%}
+		{%definevar collab_list.4 as valid_specs%}
+		<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
+			{%if course.course_pic_status%}
+			<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+			{%else%}
+			<img class="card-img-top mt-3" style='width: 60%;margin:auto' src="{%static "base/svg/undraw_pic_profile_re_7g2h.svg"%}" alt="Card image cap">
+			{%endif%}
+			<div class="card-body">
+				<div class="h6 font-weight-bold" style='color:black;'>
+					{{collab_list.0.first_name|title}}
+					{{collab_list.0.last_name|title}}
+				</div>
+				<div class="card-text mb-3" >{{course.course_summary}}</div>
+				<div style='color:black;font-size: 12px;' class='mb-1'>
+					{%if freelance_collabs%}
+					<strong>Freelancer collaborations:</strong><br>
+					    {%for collab_item in freelance_collabs%}
+						<span 
+							class='spec_collaboration_span mb-1
+							{%if collab_item.active%}
+							bg-success
+							{%elif collab_item.initial_invite_acceptance%}
+							bg-warning
+							{%else%}
+							bg-danger
+							{%endif%}
+							'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+				     			type='button'
+				     			data-toggle="modal"
+							data-target="#collaboration_view_{{collab_item.id}}"
+						>
+						    {{collab_item.specification}}
+						</span><br>
+					    {%endfor%}
+				    	{%endif%}
+					{%if partner_collabs%}
+					<strong>Partner collaborations:</strong><br>
+					    {%for collab_item in partner_collabs%}
+						<span 
+							class='spec_collaboration_span mb-1
+							{%if collab_item.active%}
+							bg-success
+							{%elif collab_item.initial_invite_acceptance%}
+							bg-warning
+							{%else%}
+							bg-danger
+							{%endif%}
+							'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+				     			type='button'
+				     			data-toggle="modal"
+							data-target="#collaboration_view_{{collab_item.id}}"
+						>
+						    {{collab_item.specification}}
+						</span><br>
+					    {%endfor%}
+				    	{%endif%}
+					{%if volenteer_collabs%}
+					<strong>Volenteer collaborations:</strong><br>
+					    {%for collab_item in volenteer_collabs%}
+						<span class='
+							spec_collaboration_span mb-1
+							{%if collab_item.active%}
+							bg-success
+							{%elif collab_item.initial_invite_acceptance%}
+							bg-warning
+							{%else%}
+							bg-danger
+							{%endif%}
+							' style='display:inline-block;padding:3px;border-radius:5px;color:white;'>
+							<a data-toggle="modal" data-target="#collaboration_view_{{collab_item.id}}">
 								{{collab_item.specification}}
-								</a><br>
-							    {%endfor%}
-							    </div>
-						    </div>
-					</div>
-				{%endfor%}
-			    </div>
+							</a>
+						</span><br>
+					    {%endfor%}
+				    	{%endif%}
+				</div>
+			</div>
+		</div>
+		{%endfor%}
 		</div>
 	</div>
 </div>

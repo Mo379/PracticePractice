@@ -1,0 +1,32 @@
+{%load general%}
+{%definevar collab_item|getcontract as contract%}
+<h1 style='margin:auto;text-decoration:underline;'> FREELANCE CONTRACT </h1>
+
+<div>
+	<div class='contract_section'>
+		<p>
+			This Freelance Contract (this  "Agreement") is made as of {{contract.created_at}} and is immediately effective as of the same date. This Agreement is between the ("Orchistrator") {{collab_item.orchistrator.first_name}} {{collab_item.orchistrator.last_name}} and the (“Contributer”) {{collab_item.user.first_name}} {{collab_item.user.last_name}}, and is immediated by PracticePractice LTD through the Platform under the domain ({{context.domain}}). The Orchistrator and the Contributer may each be referred to in this Agreement as a “Party” and collectively as the “Parties.”, and PracticePractice LTD and the Platform each or collectively reffered to as "Immediator".
+		</p>
+	</div>
+
+	<div class='contract_section'>
+		<h6 style=''> 1. Services. </h6>
+		<p>
+			The Contributor shall provide the following services to Orchistrator (the “Services”):  Writing Points and Question. In addition, the Contributor shall perform such other duties and tasks, or changes to the Services, as may be agreed upon by the Parties.
+		</p>
+	</div>
+
+	<div class='contract_section'>
+		<h6 style=''> 2. Compensation. </h6>
+		<p>
+			Inconsideration for the Contributor’s performance of the Services, The Orchistrator shall pay the Contributer a fixed amount for each point and/or question writter as per the following rates:
+			{%for rate in contract.conditions%}
+			<ul>
+				<li> Point Rate: {{rates.point}}</li>
+				<li> Question Rate: {{rates.question}}</li>
+			</ul>
+			{%endfor%}
+		</p>
+	</div>
+
+</div>

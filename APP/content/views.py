@@ -581,165 +581,6 @@ def _inheritfromspec(request):
             )
 
 
-def _add_collaborator(request):
-    if request.method == 'POST':
-        #
-        email = request.POST['Collaborator_email']
-        collaborator_type = request.POST['Collaborator_type']
-        spec_id = h_decode(request.POST['spec_id'])
-        #
-        try:
-            user_collaborator = User.objects.get(
-                    email__iexact=email,
-                    )
-            spec = Specification.objects.get(pk=spec_id)
-        except Exception as e:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something went wrong, check that the email and all other fields are correct and valid.',
-                    extra_tags='alert-danger managecollaborators'
-                )
-            return redirect(
-                    'dashboard:collaborators_manage',
-                )
-        if user_collaborator == spec.user:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'The creator of the specification cannot become a collaborator.',
-                    extra_tags='alert-danger managecollaborators'
-                )
-            return redirect(
-                    'dashboard:collaborators_manage',
-                )
-        if collaborator_type in ['1', '2', '3']:
-            history_check = Collaborator.objects.filter(
-                    orchistrator=spec.user,
-                    user=user_collaborator,
-                    deleted=False
-                )
-            if len(history_check) == 0:
-                obj_collaborator = Collaborator(
-                        orchistrator=spec.user,
-                        user=user_collaborator,
-                        specification=spec,
-                        collaborator_type=int(collaborator_type)
-                    )
-                obj_collaborator.save()
-                # mail
-                to_email = user_collaborator.email
-                mail_subject = 'Collaboration invite.'
-                mail_sender = settings.EMAIL_MAIN
-                message = str(
-                    f"You have a new invitation from {spec.user.first_name} " +
-                    f"{spec.user.last_name} to become a collaborator as a " +
-                    f"{Collaborator.type_choices[int(collaborator_type)-1][1]} " +
-                    f"for the following specification: \n ({str(spec)}) \n" +
-                    "If you would like to accept this invitation see this page: \n" +
-                    f"({settings.SITE_URL}/dashboard/specifications)"
-                )
-                _send_email(
-                        mail_subject,
-                        message,
-                        mail_sender,
-                        to_email,
-                    )
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'An invitation has been sent to your collaborator.',
-                        extra_tags='alert-success managecollaborators'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'This collaborator already has already been added, \
-                        to assign them more specifications please do so \
-                        from their personal menu.',
-                        extra_tags='alert-warning managecollaborators'
-                    )
-            return redirect(
-                    'dashboard:collaborators_manage',
-                )
-        return redirect(
-                'dashboard:collaborators_manage',
-            )
-
-
-def _assign_collaborator_spec(request):
-    if request.method == 'POST':
-        #
-        collaborator_id = h_decode(request.POST['collaborator_id'])
-        spec_id = h_decode(request.POST['spec_id']) if 'spec_id' in request.POST else None
-        collaborator_type = request.POST['Collaborator_type']
-        # check duplicate spec assignments
-        history_check = Collaborator.objects.filter(
-                orchistrator=request.user,
-                user=collaborator_id,
-                specification=spec_id
-            )
-        if len(history_check) == 0:
-            try:
-                spec = Specification.objects.get(pk=spec_id)
-                user_collaborator = User.objects.get(pk=collaborator_id)
-                collaborator = Collaborator(
-                        orchistrator=request.user,
-                        user=user_collaborator,
-                        specification=spec,
-                        collaborator_type=int(collaborator_type)
-                    )
-                collaborator.save()
-                to_email = user_collaborator.email
-                mail_subject = 'Collaboration invite.'
-                mail_sender = settings.EMAIL_MAIN
-                message = str(
-                    f"You have a new invitation from {spec.user.first_name} " +
-                    f"{spec.user.last_name} to become a collaborator as a " +
-                    f"{Collaborator.type_choices[int(collaborator_type)-1][1]} " +
-                    f"for the following specification: \n ({str(spec)}) \n" +
-                    "If you would like to accept this invitation see this page: \n" +
-                    f"({settings.SITE_URL}/dashboard/specifications)"
-                )
-                _send_email(
-                        mail_subject,
-                        message,
-                        mail_sender,
-                        to_email,
-                    )
-            except Exception as e:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong, cannot assign specification to collaborator.',
-                        extra_tags='alert-danger managecollaborators'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Successfully assigned your collaborator to your \
-                            selected specification, and notified them.',
-                        extra_tags='alert-success managecollaborators'
-                    )
-            #
-            return redirect(
-                    'dashboard:collaborators_manage',
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Duplicate specifications for the same collaborator are not allowed.',
-                    extra_tags='alert-warning managecollaborators'
-                )
-
-    return redirect(
-            'dashboard:collaborators_manage',
-        )
-
-
 def _ordermoduels(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2477,6 +2318,165 @@ def _management_options(request):
         )
 
 
+def _add_collaborator(request):
+    if request.method == 'POST':
+        #
+        email = request.POST['Collaborator_email']
+        collaborator_type = request.POST['Collaborator_type']
+        spec_id = h_decode(request.POST['spec_id'])
+        #
+        try:
+            user_collaborator = User.objects.get(
+                    email__iexact=email,
+                    )
+            spec = Specification.objects.get(pk=spec_id)
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, check that the email and all other fields are correct and valid.',
+                    extra_tags='alert-danger managecollaborators'
+                )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        if user_collaborator == spec.user:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'The creator of the specification cannot become a collaborator.',
+                    extra_tags='alert-danger managecollaborators'
+                )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        if collaborator_type in ['1', '2', '3']:
+            history_check = Collaborator.objects.filter(
+                    orchistrator=spec.user,
+                    user=user_collaborator,
+                    deleted=False
+                )
+            if len(history_check) == 0:
+                obj_collaborator = Collaborator(
+                        orchistrator=spec.user,
+                        user=user_collaborator,
+                        specification=spec,
+                        collaborator_type=int(collaborator_type)
+                    )
+                obj_collaborator.save()
+                # mail
+                to_email = obj_collaborator.user.email
+                mail_subject = 'Collaboration invite.'
+                mail_sender = settings.EMAIL_MAIN
+                message = str(
+                    f"You have a new invitation from {obj_collaborator.orchistrator.first_name} " +
+                    f"{obj_collaborator.orchistrator.last_name} to become a collaborator as a " +
+                    f"{Collaborator.type_choices[int(collaborator_type)-1][1]} " +
+                    f"for the following specification: \n ({str(spec)}) \n" +
+                    "If you would like to accept this invitation see this page: \n" +
+                    f"({settings.SITE_URL}/dashboard/specifications)"
+                )
+                _send_email(
+                        mail_subject,
+                        message,
+                        mail_sender,
+                        to_email,
+                    )
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'An invitation has been sent to your collaborator.',
+                        extra_tags='alert-success managecollaborators'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'This collaborator already has already been added, \
+                        to assign them more specifications please do so \
+                        from their personal menu.',
+                        extra_tags='alert-warning managecollaborators'
+                    )
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        return redirect(
+                'dashboard:collaborators_manage',
+            )
+
+
+def _assign_collaborator_spec(request):
+    if request.method == 'POST':
+        #
+        collaborator_id = h_decode(request.POST['collaborator_id'])
+        spec_id = h_decode(request.POST['spec_id']) if 'spec_id' in request.POST else None
+        collaborator_type = request.POST['Collaborator_type']
+        # check duplicate spec assignments
+        history_check = Collaborator.objects.filter(
+                orchistrator=request.user,
+                user=collaborator_id,
+                specification=spec_id
+            )
+        if len(history_check) == 0:
+            try:
+                spec = Specification.objects.get(pk=spec_id)
+                user_collaborator = User.objects.get(pk=collaborator_id)
+                collaborator = Collaborator(
+                        orchistrator=request.user,
+                        user=user_collaborator,
+                        specification=spec,
+                        collaborator_type=int(collaborator_type)
+                    )
+                collaborator.save()
+                to_email = obj_collaborator.user.email
+                mail_subject = 'Collaboration invite.'
+                mail_sender = settings.EMAIL_MAIN
+                message = str(
+                    f"You have a new invitation from {obj_collaborator.orchistrator.first_name} " +
+                    f"{obj_collaborator.orchistrator.last_name} to become a collaborator as a " +
+                    f"{Collaborator.type_choices[int(collaborator_type)-1][1]} " +
+                    f"for the following specification: \n ({str(spec)}) \n" +
+                    "If you would like to accept this invitation see this page: \n" +
+                    f"({settings.SITE_URL}/dashboard/specifications)"
+                )
+                _send_email(
+                        mail_subject,
+                        message,
+                        mail_sender,
+                        to_email,
+                    )
+            except Exception as e:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong, cannot assign specification to collaborator.',
+                        extra_tags='alert-danger managecollaborators'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Successfully assigned your collaborator to your \
+                            selected specification, and notified them.',
+                        extra_tags='alert-success managecollaborators'
+                    )
+            #
+            return redirect(
+                    'dashboard:collaborators_manage',
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Duplicate specifications for the same collaborator are not allowed.',
+                    extra_tags='alert-warning managecollaborators'
+                )
+
+    return redirect(
+            'dashboard:collaborators_manage',
+        )
+
+
 def _collab_freelancer_conditions(request):
     if request.method == 'POST':
         collaboration_id = h_decode(request.POST['collaboration_id'])
@@ -2517,6 +2517,25 @@ def _collab_freelancer_conditions(request):
         collaborator.rate_per_question = question_rate
         collaborator.condition_created = True
         collaborator.save()
+        collab_type = int(collaborator.collaborator_type)
+        # mail
+        to_email = collaborator.orchistrator.email
+        mail_subject = 'Collaboration conditions have been set.'
+        mail_sender = settings.EMAIL_MAIN
+        message = str(
+            f"You have a new update from {collaborator.user.first_name} " +
+            f"{collaborator.user.last_name}, the conditions for the " +
+            f"{Collaborator.type_choices[collab_type -1 ][1]} collaboration " +
+            f"for the following specification: \n ({str(collaborator.specification)}) have been set \n" +
+            "If you would like to see and accept those conditions see this page: \n" +
+            f"({settings.SITE_URL}/dashboard/specifications)"
+        )
+        _send_email(
+                mail_subject,
+                message,
+                mail_sender,
+                to_email,
+            )
         messages.add_message(
                 request,
                 messages.INFO,
@@ -2565,9 +2584,28 @@ def _collab_partner_conditions(request):
             return redirect(
                     'dashboard:collaborators_manage',
                 )
-        collaborator.percentage_split= percentage_split
+        collaborator.percentage_split = percentage_split
         collaborator.condition_created = True
         collaborator.save()
+        collab_type = int(collaborator.collaborator_type)
+        # mail
+        to_email = collaborator.orchistrator.email
+        mail_subject = 'Collaboration conditions have been set.'
+        mail_sender = settings.EMAIL_MAIN
+        message = str(
+            f"You have a new update from {collaborator.user.first_name} " +
+            f"{collaborator.user.last_name}, the conditions for the " +
+            f"{Collaborator.type_choices[collab_type -1 ][1]} collaboration " +
+            f"for the following specification: \n ({str(collaborator.specification)}) have been set \n" +
+            "If you would like to see and accept those conditions see this page: \n" +
+            f"({settings.SITE_URL}/dashboard/specifications)"
+        )
+        _send_email(
+                mail_subject,
+                message,
+                mail_sender,
+                to_email,
+            )
         messages.add_message(
                 request,
                 messages.INFO,
@@ -2579,6 +2617,143 @@ def _collab_partner_conditions(request):
             )
     return redirect(
             'dashboard:collaborators_manage',
+        )
+
+
+def _initial_invitation_acceptance(request):
+    if request.method == 'POST':
+        collaboration_id = h_decode(request.POST['collaboration_id'])
+        acceptance_check = True if 'initial_invitation_acceptance_check' in request.POST else False
+        #
+        if acceptance_check is not True:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'To accept the invitation you have to check the box to \
+                            indicate you acceptance of the terms and conditions.',
+                    extra_tags='alert-danger managecollaborations'
+                )
+            return redirect(
+                    'dashboard:collab_manage',
+                )
+        #
+        try:
+            collaborator = Collaborator.objects.get(
+                    pk=collaboration_id, user=request.user
+                )
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, cannot find collaboration or incorrect input.',
+                    extra_tags='alert-danger managecollaborations'
+                )
+            return redirect(
+                    'dashboard:collab_manage',
+                )
+        collaborator.initial_invite_acceptance= True
+        if collaborator.collaborator_type == '3':
+            collaborator.active = True
+        collaborator.save()
+        collab_type = int(collaborator.collaborator_type)
+        # mail
+        to_email = collaborator.orchistrator.email
+        mail_subject = 'Collaboration update.'
+        mail_sender = settings.EMAIL_MAIN
+        message = str(
+            f"You have a new update from {collaborator.user.first_name} " +
+            f"{collaborator.user.last_name}, the conditions for the " +
+            f"{Collaborator.type_choices[collab_type -1 ][1]} collaboration " +
+            f"for the following specification: \n ({str(collaborator.specification)}) have been accepted \n" +
+            "visit this page to see more: \n" +
+            f"({settings.SITE_URL}/dashboard/specifications)"
+        )
+        _send_email(
+                mail_subject,
+                message,
+                mail_sender,
+                to_email,
+            )
+        messages.add_message(
+                request,
+                messages.INFO,
+                'You have accepted the initial invitation, you can now accept the \
+                        conditions of the collaboration.',
+                extra_tags='alert-success managecollaborations'
+            )
+        return redirect(
+                'dashboard:collab_manage',
+            )
+    return redirect(
+            'dashboard:collab_manage',
+        )
+
+
+def _condition_acceptance(request):
+    if request.method == 'POST':
+        collaboration_id = h_decode(request.POST['collaboration_id'])
+        acceptance_check = True if 'condition_acceptance_check' in request.POST else False
+        #
+        if acceptance_check is not True:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'To accept conditions you have to check the box to \
+                            indicate you acceptance of the terms and conditions.',
+                    extra_tags='alert-danger managecollaborations'
+                )
+            return redirect(
+                    'dashboard:collab_manage',
+                )
+        #
+        try:
+            collaborator = Collaborator.objects.get(
+                    pk=collaboration_id, user=request.user
+                )
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, cannot find collaboration or incorrect input.',
+                    extra_tags='alert-danger managecollaborations'
+                )
+            return redirect(
+                    'dashboard:collab_manage',
+                )
+        collaborator.condition_acceptance = True
+        collaborator.active = True
+        collaborator.save()
+        collab_type = int(collaborator.collaborator_type)
+        # mail
+        to_email = collaborator.orchistrator.email
+        mail_subject = 'Collaboration update.'
+        mail_sender = settings.EMAIL_MAIN
+        message = str(
+            f"You have a new update from {collaborator.user.first_name} " +
+            f"{collaborator.user.last_name}, the conditions for the " +
+            f"{Collaborator.type_choices[collab_type -1 ][1]} collaboration " +
+            f"for the following specification: \n ({str(collaborator.specification)}) have been accepted\n" +
+            "If you would like to see the full agreement visit this page: \n" +
+            f"({settings.SITE_URL}/dashboard/specifications)"
+        )
+        _send_email(
+                mail_subject,
+                message,
+                mail_sender,
+                to_email,
+            )
+        messages.add_message(
+                request,
+                messages.INFO,
+                'You have accepted the conditions, a contract between you and \
+                        the orchistrator is now active, you can begin contributing.',
+                extra_tags='alert-success managecollaborations'
+            )
+        return redirect(
+                'dashboard:collab_manage',
+            )
+    return redirect(
+            'dashboard:collab_manage',
         )
 
 

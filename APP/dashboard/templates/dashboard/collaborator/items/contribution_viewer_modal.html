@@ -1,0 +1,168 @@
+{%load general%}
+<div class="modal fade" id="collaboration_view_{{collab_item.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+	<h5 class="modal-title" id="exampleModalLabel">Manage Collaboration</h5>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
+      </div>
+      <div class="modal-body">
+		<h5 class="modal-title" id="exampleModalLabel">Collaboration status:</h5>
+		<label class='ml-3' name=''>Initial invitation acceptance:</label>
+	      	{% if collab_item.initial_invite_acceptance%}
+		<i class="bi bi-check-circle-fill text-success"></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill text-danger"></i>
+		{%endif%}
+		<br>
+
+		{%if collab_item.collaborator_type != '3' %}
+			<label class='ml-3' name=''>Condition created:</label>
+			{% if collab_item.condition_created%}
+			<i class="bi bi-check-circle-fill text-success"></i><br>
+				{%if collab_item.collaborator_type == '1'%}
+				<div class='ml-5'>
+				$ {{collab_item.rate_per_point}} per point.<br>
+				$ {{collab_item.rate_per_question}} per question.
+				</div>
+				{%elif collab_item.collaborator_type == '2'%}
+				<div class='ml-5'>
+				Course earning percentage split: {{collab_item.percentage_split}} %<br>
+				</div>
+				{%endif%}
+			{%else%}
+			<i class="bi bi-x-circle-fill text-danger"></i>
+			{%endif%}
+			<br>
+
+			<label class='ml-3' name=''>Condition acceptance:</label>
+			{% if collab_item.condition_acceptance%}
+			<i class="bi bi-check-circle-fill text-success"></i>
+			{%else%}
+			<i class="bi bi-x-circle-fill text-danger"></i>
+			{%endif%}
+			<br>
+		{%endif%}
+
+		<label class='ml-3' name=''>Active:</label>
+	      	{% if collab_item.active%}
+		<i class="bi bi-check-circle-fill text-success"></i>
+		{%else%}
+		<i class="bi bi-x-circle-fill text-danger"></i>
+		{%endif%}
+		<br>
+
+		<hr class="sidebar-divider mb-3">
+		{%if collab_item.initial_invite_acceptance != True%}
+		<h5 class="modal-title" id="exampleModalLabel">Initial invitation acceptance:</h5>
+		<form class="ml-3 px-3 py-3"  action="{%url 'content:_initial_invitation_acceptance'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input 
+				type='hidden' 
+				name='collaboration_id' 
+				class="form-control"
+				value='{{collab_item.id|hashid}}'
+			/>
+			<div>
+			 <input class="form-check-input" name='initial_invitation_acceptance_check' type="checkbox" value="" id="flexCheckDefault">
+			  <label class="form-check-label" for="flexCheckDefault">
+				  Check this box to accept the invitation before clicking the button below.
+			  </label>
+			</div>
+			<div class='mt-3'>
+			</div>
+			<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Accept Invitation</button>
+		</form>
+		{%endif%}
+
+
+		<h5 class="modal-title" id="exampleModalLabel">Conditions:</h5>
+		{%if collab_item.collaborator_type == '1'%}
+			{%if collab_item.condition_created != True%}
+			Please wait until the orchistrator has set your collaboration conditions.
+			{%elif collab_item.initial_invite_acceptance != True%}
+			It is required that you accept the initial invitation
+			before you can accept the orchistrators collaboration
+			conditions.
+			{%elif collab_item.condition_acceptance == True%}
+			You have accepted the conditions, and should now be 
+			able to edit, unless the orchistrator restricted your access.
+			{%else%}
+			The conditions for this collaboration has been set.
+			<form class="ml-3 px-3 py-3"  action="{%url 'content:_condition_acceptance'%}" method="POST" role="form">
+				{%csrf_token%}
+				<input 
+					type='hidden' 
+					name='collaboration_id' 
+					class="form-control"
+					value='{{collab_item.id|hashid}}'
+				/>
+				<div>
+				 <input class="form-check-input" name='condition_acceptance_check' type="checkbox" value="" id="flexCheckDefault">
+				  <label class="form-check-label" for="flexCheckDefault">
+				    By checking this box and clicking the button below, you display your acceptance of the terms and conditions.
+				  </label>
+				</div>
+				<div class='mt-3'>
+				An agreement document (contract) between you and the orchistrator will be generated, and you can
+				view it here once you accept the conditions.
+				</div>
+				<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Accept conditions</button>
+			</form>
+			{%endif%}
+		{%elif collab_item.collaborator_type == '2'%}
+			{%if collab_item.condition_created != True%}
+			Please wait until the orchistrator has set your collaboration conditions.
+			{%elif collab_item.initial_invite_acceptance != True%}
+			It is required that you accept the initial invitation
+			before you can accept the orchistrators collaboration
+			conditions.
+			{%elif collab_item.condition_acceptance == True%}
+			You have accepted the conditions, and should now be 
+			able to edit, unless the orchistrator restricted your access.
+			{%else%}
+			The conditions for this collaboration has been set.
+			<form class="ml-3 px-3 py-3"  action="{%url 'content:_condition_acceptance'%}" method="POST" role="form">
+				{%csrf_token%}
+				<input 
+					type='hidden' 
+					name='collaboration_id' 
+					class="form-control"
+					value='{{collab_item.id|hashid}}'
+				/>
+				<div class='mt-3'>
+				 <input class="form-check-input" name='condition_acceptance_check' type="checkbox" value="" id="flexCheckDefault">
+				  <label class="form-check-label" for="flexCheckDefault">
+				    Confirm your acceptance of the conditions by checking this box and then clicking the button below.
+				  </label>
+				</div>
+				<div>
+				An agreement document (contract) between you and the orchistrator will be generated, and you can
+				view it here once you accept the conditions.
+				</div>
+				<button type= 'submit' class='btn btn-primary mb-2 mt-3' style='float-right'>Accept conditions</button>
+			</form>
+			{%endif%}
+		{%elif collab_item.collaborator_type == '3'%}
+		<p>No conditions for volenteers, we thank you for your contributions!</p>
+		{%endif%}
+		<br>
+		Contract:
+			<span 
+				class='spec_collaboration_span mb-1
+				bg-primary
+				'
+				style='display:inline-block;padding:3px;border-radius:5px;color:white'
+				type='button'
+				data-toggle="modal"
+				data-target="#Contract_view_{{collab_item.id}}"
+			>
+			    View Contract
+			</span><br>
+      </div>
+    </div>
+  </div>
+</div>
+{%include 'dashboard/collaborator/items/contract_viewer_modal.html'%}
