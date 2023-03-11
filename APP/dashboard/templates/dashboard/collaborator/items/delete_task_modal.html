@@ -1,0 +1,50 @@
+{%load general%}
+<div class="modal fade" id="DeleteTaskModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add a Collaborator to a specification</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="px-3 py-3"  action="{%url 'content:_add_collaborator'%}" method="POST" role="form">
+			{%csrf_token%}
+			<label for="Collaborator_email">Give Collaborator's Email:</label>
+			<input 
+				type='text' 
+				name='Collaborator_email' 
+			        class='form-control'
+				placeholder='Email'
+			/><br>
+			<label for="Collaborator_username">Give Collaborator's type:</label>
+			<select name="Collaborator_type" id="collaborator_type_select" class="form-control">
+			  <option value="1">
+				Freelancer
+			  </option>
+			  <option value="2">
+				Partner
+			  </option>
+			  <option value="3">
+				Volenteer
+			  </option>
+			</select><br>
+
+			<label for="Specifications">Choose a Specification:</label>
+			<select name="spec_id" id="Specifications" class="form-control">
+			  {%for spec in context.raw_specs%}
+			  <option value="{{spec.id|hashid}}">
+				{{spec.spec_level}} -
+				{{spec.spec_subject}} -
+				{{spec.spec_board}} -
+				{{spec.spec_name}}
+			  </option>
+			  {%endfor%}
+			</select><br>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Invite Collaborator</button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>

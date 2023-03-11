@@ -1,0 +1,41 @@
+{% extends 'base/base.html'%}
+{%load general %}
+{%load static %}
+
+{%block page_name%}
+Question editor
+{%endblock%}
+
+{%block title%}
+Editor
+{%endblock%}
+
+
+{%block content%}
+{%definevar 'editorquestion' as alert_loc%}
+{%include 'base/alert.html'%}
+{%include 'content/mathjax.html'%}
+
+
+<script>
+var object_id = "{{context.question.id}}";
+var object_type = "Question";
+</script>
+<div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
+	Please Use a desktop on chrome to see the editor, or zoom out.
+</div>
+<form class="user px-3 py-3 editing_form"  action="{%url 'content:_savequestionedit'%}" 
+	method="POST" role="form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type='hidden' name='point_id' value={{context.question.id}}>
+    {{ context.editor_form.media }}
+    {{ context.editor_form.q_MDcontent}}
+    <button class="btn btn-primary" type="submit">Save changes</button>
+    <a class="btn btn-info" href='{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}' target='_blank'>View</a>
+</form>
+
+<div style='border:1px solid black;'>
+{{context.question.q_content|ToMarkdownQuestion:context.question|safe}}
+</div>
+
+{%endblock%}

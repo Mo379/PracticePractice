@@ -1,0 +1,38 @@
+{%load general%}
+<div class="modal fade" id="chapter_navigation_modal_{{task.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Open task</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		{%if task.task_chapter != 'Null'%}
+			<div class="dropdown">
+			  <button class="btn btn-primary mb-2 dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				  {{task.task_chapter|field_name_to_label}}
+			  </button>
+			  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+			    <a class="dropdown-item" href="{%url 'content:contribution_noteedit' task.collaboration.specification.id task.task_moduel task.task_chapter%}">Content editing</a>
+			    <a class="dropdown-item" href="{%url 'content:contribution_questionedit' task.collaboration.specification.id task.task_moduel task.task_chapter%}">Questions editing</a>
+			  </div>
+			</div>
+		{%else%}
+			{%for chapter in context.module_chapters|index:task.task_moduel%}
+			<div class="dropdown">
+			  <button class="btn btn-primary mb-2 dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				{{chapter|field_name_to_label}}
+			  </button>
+			  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+			    <a class="dropdown-item" href="{%url 'content:contribution_noteedit' task.collaboration.specification.id task.task_moduel task.task_chapter%}">Content editing</a>
+			    <a class="dropdown-item" href="{%url 'content:contribution_questionedit' task.collaboration.specification.id task.task_moduel chapter%}">Questions editing</a>
+			  </div>
+			</div>
+			{%endfor%}
+		{%endif%}
+      </div>
+    </div>
+  </div>
+</div>

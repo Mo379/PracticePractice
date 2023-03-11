@@ -532,6 +532,185 @@ class EditorQuestionView(
         return context
 
 
+class ContributionNoteEditView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/contributor/noteedit.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        # Get details of page
+        spec_id = self.kwargs['spec_id']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        context['title'] = chapter
+        #
+        source_spec = Specification.objects.get(pk=spec_id)
+        #
+        content = order_full_spec_content(source_spec.spec_content)
+        #
+        chapter_info = content[module]['content'][chapter]
+        keys = [
+                k for k, v in
+                content[module]['content'].items() if v['position'] >= 0
+            ]
+        previous_chapter = chapter_info['position'] - 1 \
+                if chapter_info['position'] > 0 else None
+        next_chapter = chapter_info['position'] + 1 \
+                if len(keys) > chapter_info['position'] + 1 else None
+        #
+        previous_link = keys[previous_chapter] if type(previous_chapter) == int else None
+        next_link = keys[next_chapter] if type(next_chapter) == int else None
+        #
+        chapter_content = chapter_info['content']
+        filtered_chapter_content = OrderedDict({
+                key: val
+                for key, val in chapter_content.items()
+                if val['active'] == True
+            })
+        article_objects = []
+        for topic, topic_info in filtered_chapter_content.items():
+            for point_unique, info in topic_info['content'].items():
+                if info['active'] == True:
+                    obj = Point.objects.get(p_unique_id=point_unique)
+                    article_objects.append(obj)
+        #
+        article_points = [model_to_dict(obj) for obj in article_objects]
+        df = pd.DataFrame(article_points)
+        dic = {}
+        for topic, p_id in zip(list(df['p_topic']), list(df['id'])):
+            if topic not in dic:
+                dic[topic] = []
+            dic[topic].append(Point.objects.get(pk=p_id))
+        #
+        context['sampl_object'] = Point.objects.get(pk=p_id)
+        context['article'] = dic
+        context['spec'] = source_spec
+        context['next'] = next_link
+        context['previous'] = previous_link
+        return context
+
+
+class ContributionQuestionEditView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/contributor/questionedit.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+            ]
+
+    def get_queryset(self):
+        context = {}
+        spec_id = self.kwargs['spec_id']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
+        context['title'] = chapter
+        #
+        spec = Specification.objects.get(pk=spec_id)
+        #
+        content = order_full_spec_content(spec.spec_content)
+        chapter_qs = content[module]['content'][chapter]['questions']
+        dic = OrderedDict()
+        question = None
+        for difficulty in range(5):
+            difficulty += 1
+            d = str(difficulty)
+            if len(chapter_qs[d]) > 0:
+                for question in chapter_qs[d]:
+                    if d not in dic:
+                        dic[d] = []
+                    dic[d].append(Question.objects.get(q_unique_id=question))
+        context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
+        context['questions'] = dic if question else None
+        context['spec'] = spec
+        return context
+
+
+class ContributionEditorPointView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/contributor/pointeditor.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        # Get details of page
+        spec_id = self.kwargs['spec_id']
+        point_id = self.kwargs['point_id']
+        spec = Specification.objects.get(pk=spec_id)
+        point = Point.objects.get(pk=point_id)
+        translated_content = TranslatePointContent(point.p_content)
+        point.p_MDcontent = translated_content
+        #
+        editor_form = MDEditorModleForm(instance=point)
+        context['spec'] = spec
+        context['point'] = point
+        context['editor_form'] = editor_form
+        return context
+
+
+class ContributionEditorQuestionView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/contributor/questioneditor.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        # Get details of page
+        spec_id = self.kwargs['spec_id']
+        question_id = self.kwargs['question_id']
+        spec = Specification.objects.get(pk=spec_id)
+        question = Question.objects.get(pk=question_id)
+        #
+        translated_content = TranslateQuestionContent(question.q_content)
+        question.q_MDcontent = translated_content
+        #
+        editor_form = MDEditorQuestionModleForm(instance=question)
+        context['spec'] = spec
+        context['question'] = question
+        context['editor_form'] = editor_form
+        return context
+
+
 def _inheritfromspec(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2754,6 +2933,98 @@ def _condition_acceptance(request):
             )
     return redirect(
             'dashboard:collab_manage',
+        )
+
+
+def _start_new_task(request):
+    if request.method == 'POST':
+        collaboration_id = h_decode(request.POST['collaboration_id'])
+        task_module = request.POST['task_module']
+        task_chapter = request.POST['task_module_chapter']
+        kwargs = {
+            'contribution_id': collaboration_id
+        }
+        #
+        print(collaboration_id)
+        try:
+            collaboration = Collaborator.objects.get(pk=collaboration_id)
+        except Exception:
+            collaboration = False
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Collaboration does not exist!',
+                    extra_tags='alert-danger managecollaborations'
+                )
+            return redirect(
+                    'dashboard:collab_contribute',
+                )
+        content = collaboration.specification.spec_content
+        try:
+            module = content[task_module]
+            if task_chapter != 'Null':
+                chapter = module['content'][task_chapter]
+        except Exception:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'The input options are not available valid.',
+                    extra_tags='alert-danger CollaborationTasks'
+                )
+            return redirect(
+                    'dashboard:collab_contribute_manager',
+                    **kwargs
+                )
+        # Check if task is duplicate
+        all_spec_collaborations = Collaborator.objects.filter(
+                specification=collaboration.specification,
+                active=True,
+                deleted=False,
+            )
+        duplicate_module_tasks= ContributionTask.objects.filter(
+                collaboration__in=all_spec_collaborations,
+                task_moduel=task_module,
+                task_chapter='Null',
+                ended=False
+            )
+        if task_chapter=='Null':
+            duplicate_module_chapter_tasks = ContributionTask.objects.filter(
+                    collaboration__in=all_spec_collaborations,
+                    task_moduel=task_module,
+                    ended=False
+                )
+        else:
+            duplicate_module_chapter_tasks = ContributionTask.objects.filter(
+                    collaboration__in=all_spec_collaborations,
+                    task_moduel=task_module,
+                    task_chapter=task_chapter,
+                    ended=False
+                )
+        if len(duplicate_module_tasks) + len(duplicate_module_chapter_tasks) == 0:
+            ContributionTask.objects.create(
+                    collaboration=collaboration,
+                    task_moduel=task_module,
+                    task_chapter=task_chapter
+                )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your task has been successfully created!',
+                    extra_tags='alert-success CollaborationTasks'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'This task has already been started by yourself or a another collaborator.',
+                    extra_tags='alert-warning CollaborationTasks'
+                )
+        return redirect(
+                'dashboard:collab_contribute_manager',
+                **kwargs
+            )
+    return redirect(
+            'dashboard:collab_contribute',
         )
 
 

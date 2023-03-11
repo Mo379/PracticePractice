@@ -43,10 +43,31 @@ urlpatterns = [
         views.EditorPointView.as_view(),
         name='editorpoint'
     ),
-        path(
+    path(
         'content/editorquestion/<hashid:spec_id>/<hashid:question_id>',
         views.EditorQuestionView.as_view(),
         name='editorquestion'
+    ),
+    #
+    path(
+        'content/contribution_noteedit/<hashid:spec_id>/<module>/<chapter>/',
+        views.ContributionNoteEditView.as_view(),
+        name='contribution_noteedit'
+    ),
+    path(
+        'content/contribution_questionedit/<hashid:spec_id>/<module>/<chapter>/',
+        views.ContributionQuestionEditView.as_view(),
+        name='contribution_questionedit'
+        ),
+    path(
+        'content/contribution_editorpoint/<hashid:spec_id>/<hashid:point_id>',
+        views.ContributionEditorPointView.as_view(),
+        name='contribution_editorpoint'
+    ),
+    path(
+        'content/contribution_editorquestion/<hashid:spec_id>/<hashid:question_id>',
+        views.ContributionEditorQuestionView.as_view(),
+        name='contribution_editorquestion'
     ),
     #
     path(
@@ -230,5 +251,10 @@ urlpatterns = [
         'content/_initial_invitation_acceptance/',
         views._initial_invitation_acceptance,
         name='_initial_invitation_acceptance'
+    ),
+    path(
+        'content/_start_new_task/',
+        views._start_new_task,
+        name='_start_new_task'
     ),
 ]

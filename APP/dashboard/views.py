@@ -21,6 +21,8 @@ from content.models import (
         Point,
         Specification,
         Collaborator,
+        ContributionTask,
+        Contribution,
         Course,
         CourseVersion,
         CourseSubscription,
@@ -788,6 +790,99 @@ class CollabContributeView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'collaborator/contribute'
+        # get contribution specs and transform them
+        contributions = Collaborator.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        distinct_assists = contributions.distinct('orchistrator')
+        raw_specs = Specification.objects.filter(
+                user=self.request.user, deleted=False
+            )
+        final_contributions_dict = {}
+        for assist in distinct_assists:
+            all_assists = contributions.filter(orchistrator=assist.orchistrator)
+            collab_spec = [collab.specification.id for collab in all_assists]
+            valid_specs = raw_specs.exclude(id__in=collab_spec)
+            #
+            freelance = all_assists.filter(collaborator_type=1).order_by('specification')
+            partner = all_assists.filter(collaborator_type=2).order_by('specification')
+            volenteer = all_assists.filter(collaborator_type=3).order_by('specification')
+            #
+            final_contributions_dict[assist.orchistrator.id] = (
+                    assist.orchistrator, freelance, partner, volenteer, valid_specs
+                )
+        #
+        context['domain'] = settings.SITE_URL
+        context['MyContributions'] = final_contributions_dict
+        context['raw_specs'] = raw_specs
+        return context
+
+
+class CollabContributeManagerView(
+            LoginRequiredMixin,
+            GroupRequiredMixin,
+            BaseBreadcrumbMixin,
+            generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    group_required = u"Student"
+    template_name = "dashboard/collaborator/contribute_manager.html"
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("dashboard", reverse("dashboard:index")),
+                ("contribute", reverse("dashboard:collab_contribute")),
+                ("manager", '')
+                ]
+
+    def get_queryset(self):
+        context = {}
+        context['sidebar_active'] = 'collaborator/contribute_manager'
+        collaboration_id = self.kwargs['contribution_id']
+        collaboration = Collaborator.objects.get(pk=collaboration_id)
+        tasks = ContributionTask.objects.filter(
+                collaboration=collaboration
+            ).order_by('-created_at')
+        spec = collaboration.specification
+        content = order_live_spec_content(spec.spec_content)
+        modules = list(content.keys())
+        chapters = collections.OrderedDict({})
+        unclaimables = set()
+        for module in modules:
+            _chapters = list(content[module]['content'].keys())
+            chapters[module] = _chapters
+        # Apply task exclusions
+        all_spec_collaborations = Collaborator.objects.filter(
+                specification=collaboration.specification,
+                active=True,
+                deleted=False,
+            )
+        claimed_modules = ContributionTask.objects.filter(
+                collaboration__in=all_spec_collaborations,
+                task_chapter='Null',
+                ended=False
+            )
+        claimed_chapters = ContributionTask.objects.filter(
+                collaboration__in=all_spec_collaborations,
+                ended=False
+            ).exclude(task_chapter='Null')
+        for claimed_mod in claimed_modules:
+            idx = modules.index(claimed_mod.task_moduel)
+            del modules[idx]
+        for claimed_chap in claimed_chapters:
+            idx = chapters[claimed_chap.task_moduel].index(claimed_chap.task_chapter)
+            del chapters[claimed_chap.task_moduel][idx]
+        for task in tasks:
+            if task.task_chapter != 'Null':
+                unclaimables.add(task.task_moduel)
+        context['unclaimable_modules'] = unclaimables
+        context['collaboration'] = collaboration
+        context['tasks'] = tasks
+        context['modules'] = modules
+        context['module_chapters'] = chapters
         return context
 
 

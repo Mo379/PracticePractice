@@ -47,6 +47,11 @@ urlpatterns = [
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
     # collaborator
     path('contribute', views.CollabContributeView.as_view(), name='collab_contribute'),
+    path(
+        'contribute/manager/<hashid:contribution_id>',
+        views.CollabContributeManagerView.as_view(),
+        name='collab_contribute_manager'
+    ),
     path('manage-collaborations', views.CollabManageView.as_view(), name='collab_manage'),
     path('review-work', views.CollabReviewView.as_view(), name='collab_review'),
     path('manage-collaborators', views.CollaboratorsManageView.as_view(), name='collaborators_manage'),

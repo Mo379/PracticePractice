@@ -1,14 +1,92 @@
 {% extends 'dashboard/base.html'%}
 {%load static%}
+{%load general%}
 {%block page_name%}
-Contribute
+Contributions
 {%endblock%}
 {%block content%}
-	<!-- Begin Page Content -->
-	<div class="container-fluid">
-
-		<!-- Page Heading -->
-		<h1 class="h3 mb-4 text-gray-800">Tasks</h1>
-
+<div class="mb-4">
+	<div class="card-body">
+		<div class="card shadow mb-4">
+			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h5 class="h4 mb-1 text-primary font-weight-bold">
+					Contributions
+				</h5>
+			</div>
+		</div>
+		{%definevar 'managecollaborations' as alert_loc%}
+		{%include 'base/alert.html'%}
+		<div class='courseplace_wrapper' id='courseplace_wrapper' style='width:95%;margin:auto;'>
+		{%for collaborator in context.MyContributions%}
+		{%definevar context.MyContributions|index:collaborator as collab_list%}
+		{%definevar collab_list.0 as collaboration_user%}
+		{%definevar collab_list.1 as freelance_collabs%}
+		{%definevar collab_list.2 as partner_collabs%}
+		{%definevar collab_list.3 as volenteer_collabs%}
+		{%definevar collab_list.4 as valid_specs%}
+		<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
+			{%if course.course_pic_status%}
+			<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
+			{%else%}
+			<img class="card-img-top mt-3" style='width: 60%;margin:auto' src="{%static "base/svg/undraw_pic_profile_re_7g2h.svg"%}" alt="Card image cap">
+			{%endif%}
+			<div class="card-body">
+				<div class="h6 font-weight-bold" style='color:black;'>
+					{{collab_list.0.first_name|title}}
+					{{collab_list.0.last_name|title}}
+				</div>
+				<div class="card-text mb-3" >{{course.course_summary}}</div>
+				<div style='color:black;font-size: 12px;' class='mb-1'>
+					{%if freelance_collabs%}
+					<strong>Freelancer collaborations:</strong><br>
+					    {%for collab_item in freelance_collabs%}
+						{%if collab_item.active%}
+						<a
+							class='spec_collaboration_span mb-1 bg-primary'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+				     			type='button'
+							href='{%url "dashboard:collab_contribute_manager" collab_item.id%}'
+						>
+						    {{collab_item.specification}}
+						</a><br>
+						{%endif%}
+					    {%endfor%}
+				    	{%endif%}
+					{%if partner_collabs%}
+					<strong>Partner collaborations:</strong><br>
+					    {%for collab_item in partner_collabs%}
+						{%if collab_item.active%}
+						<a
+							class='spec_collaboration_span mb-1 bg-primary'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+				     			type='button'
+								href='{%url "dashboard:collab_contribute_manager" collab_item.id%}'
+						>
+						    {{collab_item.specification}}
+						</a><br>
+						{%endif%}
+					    {%endfor%}
+				    	{%endif%}
+					{%if volenteer_collabs%}
+					<strong>Volenteer collaborations:</strong><br>
+					    {%for collab_item in volenteer_collabs%}
+						{%if collab_item.active%}
+						<a
+							class='spec_collaboration_span mb-1 bg-primary'
+							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+				     			type='button'
+								href='{%url "dashboard:collab_contribute_manager" collab_item.id%}'
+						>
+							{{collab_item.specification}}
+						</a><br>
+						{%endif%}
+					    {%endfor%}
+				    	{%endif%}
+				</div>
+			</div>
+		</div>
+		{%endfor%}
+		</div>
 	</div>
+</div>
 {%endblock%}

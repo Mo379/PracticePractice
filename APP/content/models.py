@@ -128,10 +128,47 @@ class Collaborator(models.Model):
         return self.user.username + " helping -> " + self.orchistrator.username
 
 
+class ContributionTask(models.Model):
+    collaboration = models.ForeignKey(
+        Collaborator, on_delete=models.CASCADE, db_index=True, default="", null=True,
+        related_name='collaboration_contribution'
+    )
+    task_moduel = models.CharField(max_length=255, default="", null=True)
+    task_chapter = models.CharField(max_length=255, default="", null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    submitted = models.BooleanField(default=False, null=True)
+    approved = models.BooleanField(default=False, null=True)
+    ended = models.BooleanField(default=False, null=True)
+
+    def __str__(self):
+        return str(self.collaboration.id) + "-" + str(self.id)
+
+
+class Contribution(models.Model):
+    task = models.ForeignKey(
+        ContributionTask, on_delete=models.CASCADE, db_index=True, default="", null=True,
+        related_name='task_contribution'
+    )
+    point = models.ForeignKey(
+        Point, on_delete=models.CASCADE, db_index=True, default="", null=True,
+        related_name='contribution_point'
+    )
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, db_index=True, default="", null=True,
+        related_name='contribution_question'
+    )
+    new_content = models.JSONField(default=dict, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    approved = models.BooleanField(default=False, null=True)
+
+    def __str__(self):
+        return self.collaboration.id + "-" + self.id
+
+
 class Contract(models.Model):
     collaboration = models.ForeignKey(
         Collaborator, on_delete=models.CASCADE, db_index=True, default="", null=False,
-        related_name='collaboration'
+        related_name='collaboration_contract'
     )
     conditions = models.JSONField(default=dict, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -141,22 +178,6 @@ class Contract(models.Model):
     def __str__(self):
         return self.collaboration.user.username + \
                 " helping -> " + self.collaboration.orchistrator.username
-
-
-class EditingTask(models.Model):
-    specification = models.ForeignKey(
-        Specification, on_delete=models.SET_NULL, db_index=True, null=True
-    )
-    task_moduel = models.CharField(max_length=255, default="", null=True)
-    task_chapter = models.CharField(max_length=255, default="", null=True)
-    task_topic = models.CharField(max_length=255, default="", null=True)
-    task_editor = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
-    task_payment_amount = models.DecimalField(max_digits=6, decimal_places=2)
-    task_completion_status = models.BooleanField(default=False, null=True)
-    task_approval_status = models.BooleanField(default=False, null=True)
-
-    def __str__(self):
-        return self.specification + "-" + self.task_moduel
 
 
 class Keyword(models.Model):

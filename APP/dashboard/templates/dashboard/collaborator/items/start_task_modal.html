@@ -1,0 +1,66 @@
+{%load general%}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<div class="modal fade" id="StartTaskModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Start a contribution task</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="px-3 py-3"  action="{%url 'content:_start_new_task'%}" method="POST" role="form">
+			{%csrf_token%}
+			<input name='collaboration_id' value='{{context.collaboration.id|hashid}}' type='hidden'/>
+			<label for="task_module">Select Module:</label>
+			<select name="task_module" id="task_module_select" class="form-control">
+			  {%for module in context.modules %}
+			  <option value="{{module}}">
+			  	{%if module in context.unclaimable_modules%}
+				(Chapters only)
+				{%endif%}
+			  	{{module|field_name_to_label}}
+			  </option>
+			  {%endfor%}
+			</select><br>
+
+			<label for="task_chapter">Select Chapter (Optional): </label>
+			<select name="task_module_chapter" id="module_chapter_select" class="module_chapter_select form-control">
+			<option value="Null" >
+			-----
+			  </option>
+			{%for module in context.modules %}
+				{%if forloop.counter == 1%}
+					{%for chapter in context.module_chapters|index:module%}
+					<option value="{{chapter}}" class='valid_option chapter_for_{{module}}' style='color:red;'>
+						{{chapter|field_name_to_label}}
+					</option>
+					{%endfor%}
+				{%else%}
+					{%for chapter in context.module_chapters|index:module%}
+					<option value="{{chapter}}" class='valid_option chapter_for_{{module}}' style='display:none'>
+						{{chapter|field_name_to_label}}
+					</option>
+					{%endfor%}
+				{%endif%}
+			{%endfor%}
+			</select><br>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'>Start Task</button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$("#task_module_select").on("change", function() {
+  var value = $(this).val()//split value which is selected
+  $("#module_chapter_select .valid_option").hide() //hide all options from slect box
+  $select = document.querySelector('#module_chapter_select')
+  $select.value = 'Null'  //hide all options from slect box
+  //loop through values
+  $("#module_chapter_select .chapter_for_" + value).show() //show that option
+})
+</script>

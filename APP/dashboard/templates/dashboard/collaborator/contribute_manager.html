@@ -1,0 +1,78 @@
+{% extends 'dashboard/base.html'%}
+{%load static%}
+{%load general%}
+{%block page_name%}
+Contribution Manager
+{%endblock%}
+{%block content%}
+{%include 'dashboard/collaborator/items/start_task_modal.html'%}
+{%include 'dashboard/collaborator/items/delete_task_modal.html'%}
+{%for task in context.tasks%}
+{%include 'dashboard/collaborator/items/contribution_manager_chapter_selector_modal.html'%}
+{%include 'dashboard/collaborator/items/contribution_manager_submit_task.html'%}
+{%endfor%}
+<!-- Begin Page Content -->
+{%definevar 'CollaborationTasks' as alert_loc%}
+{%include 'base/alert.html'%}
+<div class="container-fluid">
+    <div class="card mb-4" id='Contributions'>
+	<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+		<h5 class="h4 mb-1 text-primary font-weight-bold">
+			Tasks
+		</h5>
+			
+		<div class="dropdown no-arrow">
+			<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+				data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
+			</a>
+			<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+				aria-labelledby="dropdownMenuLink">
+				<div class="dropdown-header">Contribution Actions:</div>
+				<a type="button" class="dropdown-item" data-toggle="modal" data-target="#StartTaskModal">
+					Start a task
+				</a>
+				<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteTaskModal">
+					Delete a task
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="card-body p-0">
+	    <!-- Billing history table-->
+	    <div class="table-responsive table-billing-history">
+		<table class="table mb-0">
+		    <thead>
+			<tr>
+			    <th class="border-gray-200" scope="col">Work</th>
+			    <th class="border-gray-200" scope="col">Module</th>
+			    <th class="border-gray-200" scope="col">Chapter</th>
+			    <th class="border-gray-200" scope="col">Number of edits</th>
+			    <th class="border-gray-200" scope="col">Status</th>
+			</tr>
+		    </thead>
+		    <tbody>
+		    {%for task in context.tasks%}
+			<tr>
+				<td>
+					<a type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#chapter_navigation_modal_{{task.id}}">
+						Open
+					</a>
+				</td>
+				<td>{{task.task_moduel|field_name_to_label}}</td>
+				<td>{{task.task_chapter|field_name_to_label}}</td>
+				<td>£</td>
+				<td>
+					<a type="button" class="btn btn-info mb-2" data-toggle="modal" data-target="#submit_task_{{task.id}}">
+						Options
+					</a>
+				</td>
+			</tr>
+		     {%endfor%}
+		    </tbody>
+		</table>
+	    </div>
+	</div>
+    </div>
+</div>
+{%endblock%}
