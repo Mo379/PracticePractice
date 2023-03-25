@@ -551,28 +551,22 @@ class ContributionNoteEditView(
         """Return all of the required hub information"""
         context = {}
         # Get details of page
-        spec_id = self.kwargs['spec_id']
-        module = self.kwargs['module']
-        chapter = self.kwargs['chapter']
+        task_id = self.kwargs['task_id']
+        #
+        task = ContributionTask.objects.get(pk=task_id)
+        module = task.task_moduel
+        chapter = task.task_chapter
         context['title'] = chapter
+        source_spec = task.collaboration.specification
         #
-        source_spec = Specification.objects.get(pk=spec_id)
-        #
+        contributions = Contribution.objects.filter(
+                task=task,
+                is_point=True,
+            )
+        article_contributions = {obj.point.id for obj in contributions}
         content = order_full_spec_content(source_spec.spec_content)
         #
         chapter_info = content[module]['content'][chapter]
-        keys = [
-                k for k, v in
-                content[module]['content'].items() if v['position'] >= 0
-            ]
-        previous_chapter = chapter_info['position'] - 1 \
-                if chapter_info['position'] > 0 else None
-        next_chapter = chapter_info['position'] + 1 \
-                if len(keys) > chapter_info['position'] + 1 else None
-        #
-        previous_link = keys[previous_chapter] if type(previous_chapter) == int else None
-        next_link = keys[next_chapter] if type(next_chapter) == int else None
-        #
         chapter_content = chapter_info['content']
         filtered_chapter_content = OrderedDict({
                 key: val
@@ -595,10 +589,10 @@ class ContributionNoteEditView(
             dic[topic].append(Point.objects.get(pk=p_id))
         #
         context['sampl_object'] = Point.objects.get(pk=p_id)
+        context['contributions'] = article_contributions
         context['article'] = dic
         context['spec'] = source_spec
-        context['next'] = next_link
-        context['previous'] = previous_link
+        context['task'] = task
         return context
 
 
@@ -619,14 +613,19 @@ class ContributionQuestionEditView(
 
     def get_queryset(self):
         context = {}
-        spec_id = self.kwargs['spec_id']
-        module = self.kwargs['module']
-        chapter = self.kwargs['chapter']
+        task_id = self.kwargs['task_id']
+        task = ContributionTask.objects.get(pk=task_id)
+        module = task.task_moduel
+        chapter = task.task_chapter
         context['title'] = chapter
+        source_spec = task.collaboration.specification
         #
-        spec = Specification.objects.get(pk=spec_id)
-        #
-        content = order_full_spec_content(spec.spec_content)
+        contributions = Contribution.objects.filter(
+                task=task,
+                is_question=True,
+            )
+        quesstion_contributions = {obj.question.id for obj in contributions}
+        content = order_full_spec_content(source_spec.spec_content)
         chapter_qs = content[module]['content'][chapter]['questions']
         dic = OrderedDict()
         question = None
@@ -640,7 +639,8 @@ class ContributionQuestionEditView(
                     dic[d].append(Question.objects.get(q_unique_id=question))
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
         context['questions'] = dic if question else None
-        context['spec'] = spec
+        context['spec'] = source_spec
+        context['task'] = task
         return context
 
 
@@ -663,16 +663,31 @@ class ContributionEditorPointView(
         """Return all of the required hub information"""
         context = {}
         # Get details of page
-        spec_id = self.kwargs['spec_id']
+        task_id = self.kwargs['task_id']
         point_id = self.kwargs['point_id']
-        spec = Specification.objects.get(pk=spec_id)
+        task = ContributionTask.objects.get(pk=task_id)
+        #
         point = Point.objects.get(pk=point_id)
-        translated_content = TranslatePointContent(point.p_content)
+        source_spec = task.collaboration.specification
+        contribution, created = Contribution.objects.get_or_create(
+                task=task,
+                point=point,
+                is_point=True
+            )
+        #
+        if created:
+            contribution.new_content = point.p_content
+            contribution.save()
+        #
+        translated_content = TranslatePointContent(
+                contribution.new_content
+            )
         point.p_MDcontent = translated_content
         #
         editor_form = MDEditorModleForm(instance=point)
-        context['spec'] = spec
+        context['spec'] = source_spec
         context['point'] = point
+        context['task'] = task
         context['editor_form'] = editor_form
         return context
 
@@ -696,17 +711,32 @@ class ContributionEditorQuestionView(
         """Return all of the required hub information"""
         context = {}
         # Get details of page
-        spec_id = self.kwargs['spec_id']
+        task_id = self.kwargs['task_id']
         question_id = self.kwargs['question_id']
-        spec = Specification.objects.get(pk=spec_id)
+        task = CollaborationTask.objects.get(pk=task_id)
+        source_spec = task.collaboration.specification
         question = Question.objects.get(pk=question_id)
         #
-        translated_content = TranslateQuestionContent(question.q_content)
-        question.q_MDcontent = translated_content
+        contribution, created = Contribution.objects.get_or_create(
+                task=task,
+                question=question,
+                is_question=True
+            )
+
         #
-        editor_form = MDEditorQuestionModleForm(instance=question)
-        context['spec'] = spec
+        if created:
+            contribution.new_content = question.q_content
+            contribution.save()
+        #
+        translated_content = TranslatePointContent(
+                contribution.new_content
+            )
+        question.p_MDcontent = translated_content
+        #
+        editor_form = MDEditorModleForm(instance=question)
+        context['spec'] = source_spec
         context['question'] = question
+        context['task'] = task
         context['editor_form'] = editor_form
         return context
 
@@ -2285,6 +2315,192 @@ def _savepointedit(request):
 
 
 def _savequestionedit(request):
+    if request.method == 'POST':
+        question_id = request.POST['point_id']
+        question = Question.objects.filter(user=request.user, pk=question_id)
+        if len(question) == 1:
+            form = MDEditorQuestionModleForm(request.POST, instance=question[0])
+            if form.is_valid():
+                form.save()
+                content = form.cleaned_data['q_MDcontent'].split('+++')
+                for details_part in content:
+                    detail_items = details_part.split('\n')
+                    if 'Meta_details' in detail_items[0]:
+                        for sub_item in detail_items:
+                            sub_item = sub_item.replace('\r','').replace('\n','')
+                            if 'question_type' in sub_item:
+                                question[0].q_content['details']['head']['0']\
+                                        ['q_type'] = sub_item.replace('question_type: ', '')
+                            if 'question_difficulty' in sub_item:
+                                question[0].q_content['details']['head']['0']\
+                                        ['q_difficulty'] = sub_item.replace('question_difficulty: ', '')
+                    if 'Question' in detail_items[0]:
+                        full_question = '\n'.join(detail_items[1:])
+                        question_parts = full_question.split('PartName_')
+                        n = 0
+                        for part in question_parts:
+                            if 'PartMark_' in part:
+                                lines = part.split('\n')
+                                details_line = lines[0].split('_')
+                                part_name = details_line[0]
+                                part_mark = details_line[-1].split(':')[0]
+                                question[0].q_content['details']['questions']\
+                                        [str(n)] = {}
+                                #
+                                question[0].q_content['details']['questions']\
+                                        [str(n)]['q_part'] = part_name
+                                question[0].q_content['details']['questions']\
+                                        [str(n)]['q_part_mark'] = part_mark
+                                n2 = 0
+                                question[0].q_content['details']['questions']\
+                                        [str(n)]['content'] = {}
+                                for line in lines:
+                                    if '!(' in line:
+                                        first_list = line.split('(')[1].split(')')
+                                        second_list = first_list[1].split('[')[1].split(']')
+                                        item = {'img': {'img_info': first_list[0],'img_name': second_list[0]}}
+                                        question[0].q_content['details']['questions']\
+                                                [str(n)]['content'][str(n2)] = item
+                                        n2 += 1
+                                    elif 'PartMark' not in line:
+                                        line = line.replace('\n','').replace('\r', '')
+                                        if line != '':
+                                            item = {'text': line}
+                                            question[0].q_content['details']['questions']\
+                                                    [str(n)]['content'][str(n2)] = item 
+                                            n2 += 1
+                                n += 1
+                    if 'Answer' in detail_items[0]:
+                        full_answer = '\n'.join(detail_items[1:])
+                        answer_parts = full_answer.split('AnswerPart')
+                        n = 0
+                        for part in answer_parts:
+                            if 'PartName_' in part:
+                                lines = part.split('\n')
+                                details_line = lines[0].split('_')
+                                part_name = details_line[-1].replace('\r', '').replace('\n', '')
+                                question[0].q_content['details']['answers']\
+                                        [str(n)] = {}
+                                #
+                                question[0].q_content['details']['answers']\
+                                        [str(n)]['q_part'] = part_name
+                                n2 = 0
+                                question[0].q_content['details']['answers']\
+                                        [str(n)]['content'] = {}
+                                for line in lines:
+                                    if '!(' in line:
+                                        first_list = line.split('(')[1].split(')')
+                                        second_list = first_list[1].split('[')[1].split(']')
+                                        item = {'img': {'img_info': first_list[0],'img_name': second_list[0]}}
+                                        question[0].q_content['details']['answers']\
+                                                [str(n)]['content'][str(n2)] = item
+                                        n2 += 1
+                                    elif 'PartName' not in line:
+                                        line = line.replace('\n','').replace('\r', '')
+                                        if line != '':
+                                            item = {'text': line}
+                                            question[0].q_content['details']['answers']\
+                                                    [str(n)]['content'][str(n2)] = item 
+                                            n2 += 1
+                                n += 1
+                question[0].save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Saved !',
+                        extra_tags='alert-success editorquestion'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something is wrong, please check that all inputs are valid.',
+                        extra_tags='alert-danger editorquestion'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, cannot find information.',
+                    extra_tags='alert-danger editorquestion'
+                )
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger home'
+            )
+        return redirect('main:index')
+
+
+def _contribution_savepointedit(request):
+    if request.method == 'POST':
+        point_id = request.POST['point_id']
+        point = Point.objects.filter(user=request.user, pk=point_id)
+        if len(point) == 1:
+            form = MDEditorModleForm(request.POST, instance=point[0])
+            if form.is_valid():
+                form.save()
+                content = form.cleaned_data['p_MDcontent'].split('```')
+                hidden = content[1].split('yaml')[1]
+                description = '```'.join(content[2:])
+                #
+                hidden_details = yaml.load(hidden.replace('\t', '  '))['hidden_details']
+                title = hidden_details['point_title']
+                vids = [(k.split('_')[1], i['video_title'], i['video_link']) for k, i in hidden_details.items() if 'vid' in k]
+                vids_content = {str(int(k)-1): {'vid':{"vid_title": i,"vid_link": j}} for k,i,j in vids}
+                #
+                description_text = description.split('\n')
+                description_content = {}
+                for idd, v in enumerate(description_text):
+                    description_content[idd] = {}
+                    if '!(' in v:
+                        first_list = v.split('(')[1].split(')')
+                        second_list = first_list[1].split('[')[1].split(']')
+                        description_content[idd]['img'] = {}
+                        description_content[idd]['img']['img_info'] = first_list[0]
+                        description_content[idd]['img']['img_name'] = second_list[0]
+                    else:
+                        description_content[idd]['text'] = v
+                #
+                point[0].p_content['details']['hidden']['0']['point_title'] = title
+                point[0].p_content['details']['hidden']['0']['content'] = vids_content
+                point[0].p_content['details']['description'] = description_content
+                point[0].save()
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Saved !',
+                        extra_tags='alert-success editorpoint'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something is wrong, please check that all inputs are valid.',
+                        extra_tags='alert-danger editorpoint'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, cannot find information.',
+                    extra_tags='alert-danger editorpoint'
+                )
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Invalid Request Method',
+                extra_tags='alert-danger home'
+            )
+        return redirect('main:index')
+
+
+def _contribution_savequestionedit(request):
     if request.method == 'POST':
         question_id = request.POST['point_id']
         question = Question.objects.filter(user=request.user, pk=question_id)

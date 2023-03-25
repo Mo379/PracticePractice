@@ -157,6 +157,8 @@ class Contribution(models.Model):
         Question, on_delete=models.CASCADE, db_index=True, default="", null=True,
         related_name='contribution_question'
     )
+    is_point = models.BooleanField(default=False, null=True)
+    is_question = models.BooleanField(default=False, null=True)
     new_content = models.JSONField(default=dict, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     approved = models.BooleanField(default=False, null=True)

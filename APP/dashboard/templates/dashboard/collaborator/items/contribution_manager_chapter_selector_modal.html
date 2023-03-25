@@ -15,8 +15,8 @@
 				  {{task.task_chapter|field_name_to_label}}
 			  </button>
 			  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-			    <a class="dropdown-item" href="{%url 'content:contribution_noteedit' task.collaboration.specification.id task.task_moduel task.task_chapter%}">Content editing</a>
-			    <a class="dropdown-item" href="{%url 'content:contribution_questionedit' task.collaboration.specification.id task.task_moduel task.task_chapter%}">Questions editing</a>
+			    <a class="dropdown-item" href="{%url 'content:contribution_noteedit' task.id%}">Content editing</a>
+			    <a class="dropdown-item" href="{%url 'content:contribution_questionedit' task.id%}">Questions editing</a>
 			  </div>
 			</div>
 		{%else%}
@@ -26,8 +26,8 @@
 				{{chapter|field_name_to_label}}
 			  </button>
 			  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-			    <a class="dropdown-item" href="{%url 'content:contribution_noteedit' task.collaboration.specification.id task.task_moduel task.task_chapter%}">Content editing</a>
-			    <a class="dropdown-item" href="{%url 'content:contribution_questionedit' task.collaboration.specification.id task.task_moduel chapter%}">Questions editing</a>
+			    <a class="dropdown-item" href="{%url 'content:contribution_noteedit' task.id%}">Content editing</a>
+			    <a class="dropdown-item" href="{%url 'content:contribution_questionedit' task.id%}">Questions editing</a>
 			  </div>
 			</div>
 			{%endfor%}

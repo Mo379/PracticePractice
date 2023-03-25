@@ -24,14 +24,14 @@ var object_type = "Question";
 <div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 	Please Use a desktop on chrome to see the editor, or zoom out.
 </div>
-<form class="user px-3 py-3 editing_form"  action="{%url 'content:_savequestionedit'%}" 
+<form class="user px-3 py-3 editing_form"  action="{%url 'content:_contribution_savequestionedit'%}" 
 	method="POST" role="form" enctype="multipart/form-data">
     {% csrf_token %}
     <input type='hidden' name='point_id' value={{context.question.id}}>
     {{ context.editor_form.media }}
     {{ context.editor_form.q_MDcontent}}
     <button class="btn btn-primary" type="submit">Save changes</button>
-    <a class="btn btn-info" href='{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}' target='_blank'>View</a>
+    <a class="btn btn-info" href='{%url 'content:contribution_questionedit' context.task.id %}#question_{{context.question.id}}' target='_blank'>View</a>
 </form>
 
 <div style='border:1px solid black;'>

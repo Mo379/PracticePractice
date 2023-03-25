@@ -4,6 +4,7 @@
 venv
 logs/**
 *.log
+*node_modules
 ### OSX ###
 .DS_Store
 .AppleDouble

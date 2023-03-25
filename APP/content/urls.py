@@ -50,22 +50,22 @@ urlpatterns = [
     ),
     #
     path(
-        'content/contribution_noteedit/<hashid:spec_id>/<module>/<chapter>/',
+        'content/contribution_noteedit/<hashid:task_id>',
         views.ContributionNoteEditView.as_view(),
         name='contribution_noteedit'
     ),
     path(
-        'content/contribution_questionedit/<hashid:spec_id>/<module>/<chapter>/',
+        'content/contribution_questionedit/<hashid:task_id>',
         views.ContributionQuestionEditView.as_view(),
         name='contribution_questionedit'
         ),
     path(
-        'content/contribution_editorpoint/<hashid:spec_id>/<hashid:point_id>',
+        'content/contribution_editorpoint/<hashid:task_id>/<hashid:point_id>',
         views.ContributionEditorPointView.as_view(),
         name='contribution_editorpoint'
     ),
     path(
-        'content/contribution_editorquestion/<hashid:spec_id>/<hashid:question_id>',
+        'content/contribution_editorquestion/<hashid:task_id>/<hashid:question_id>',
         views.ContributionEditorQuestionView.as_view(),
         name='contribution_editorquestion'
     ),
@@ -219,6 +219,16 @@ urlpatterns = [
         'content/_savequestionedit/',
         views._savequestionedit,
         name='_savequestionedit'
+    ),
+    path(
+        'content/_contribution_savepointedit/',
+        views._contribution_savepointedit,
+        name='_contribution_savepointedit'
+    ),
+    path(
+        'content/_contribution_savequestionedit/',
+        views._contribution_savequestionedit,
+        name='_contribution_savequestionedit'
     ),
     path(
         'content/_createcustomtest/',
