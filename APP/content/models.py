@@ -164,7 +164,7 @@ class Contribution(models.Model):
     approved = models.BooleanField(default=False, null=True)
 
     def __str__(self):
-        return self.collaboration.id + "-" + self.id
+        return str(self.task.collaboration.id) + "-" + str(self.id)
 
 
 class Contract(models.Model):

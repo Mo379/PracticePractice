@@ -125,7 +125,7 @@ def TranslatePointContent(content):
             output += tab + tab + 'video_title: ' + video['vid_title'] + '\n'
             output += tab + tab + 'video_link: ' + video['vid_link'] + '\n'
     #
-    out = '```yaml' + '\n' + output + '```'
+    #out = '```yaml' + '\n' + output + '```'
     out_desc = ''
     desc = content['details']['description']
     for idd, value in desc.items():
@@ -136,7 +136,7 @@ def TranslatePointContent(content):
                 info = value2['img_info']
                 name = value2['img_name']
                 out_desc += f"!({info})[{name}]" + '\n'
-    return out + out_desc
+    return out_desc #out + out_desc
 
 
 def TranslateQuestionContent(content):

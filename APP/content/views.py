@@ -494,6 +494,7 @@ class EditorPointView(
         context['spec'] = spec
         context['point'] = point
         context['editor_form'] = editor_form
+        context['url'] = reverse('content:_savepointedit')
         return context
 
 
@@ -529,6 +530,7 @@ class EditorQuestionView(
         context['spec'] = spec
         context['question'] = question
         context['editor_form'] = editor_form
+        context['url'] = ''
         return context
 
 
@@ -651,7 +653,7 @@ class ContributionEditorPointView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = 'content/contributor/pointeditor.html'
+    template_name = 'content/pointeditor.html'
     context_object_name = 'context'
 
     @cached_property
@@ -688,7 +690,9 @@ class ContributionEditorPointView(
         context['spec'] = source_spec
         context['point'] = point
         context['task'] = task
+        context['contribution'] = contribution
         context['editor_form'] = editor_form
+        context['url'] = reverse('content:_savepointedit')
         return context
 
 
@@ -699,7 +703,7 @@ class ContributionEditorQuestionView(
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    template_name = 'content/contributor/questioneditor.html'
+    template_name = 'content/questioneditor.html'
     context_object_name = 'context'
 
     @cached_property
@@ -713,7 +717,7 @@ class ContributionEditorQuestionView(
         # Get details of page
         task_id = self.kwargs['task_id']
         question_id = self.kwargs['question_id']
-        task = CollaborationTask.objects.get(pk=task_id)
+        task = ContributionTask.objects.get(pk=task_id)
         source_spec = task.collaboration.specification
         question = Question.objects.get(pk=question_id)
         #
@@ -728,16 +732,16 @@ class ContributionEditorQuestionView(
             contribution.new_content = question.q_content
             contribution.save()
         #
-        translated_content = TranslatePointContent(
-                contribution.new_content
-            )
-        question.p_MDcontent = translated_content
+        translated_content = TranslateQuestionContent(contribution.new_content)
+        question.q_MDcontent = translated_content
         #
-        editor_form = MDEditorModleForm(instance=question)
+        editor_form = MDEditorQuestionModleForm(instance=question)
         context['spec'] = source_spec
         context['question'] = question
         context['task'] = task
+        context['contribution'] = contribution
         context['editor_form'] = editor_form
+        context['url'] = ''
         return context
 
 
@@ -2282,7 +2286,7 @@ def _savepointedit(request):
                 point[0].p_content['details']['hidden']['0']['point_title'] = title
                 point[0].p_content['details']['hidden']['0']['content'] = vids_content
                 point[0].p_content['details']['description'] = description_content
-                point[0].save()
+                #point[0].save()
                 messages.add_message(
                         request,
                         messages.INFO,
@@ -2437,10 +2441,12 @@ def _savequestionedit(request):
 
 def _contribution_savepointedit(request):
     if request.method == 'POST':
-        point_id = request.POST['point_id']
-        point = Point.objects.filter(user=request.user, pk=point_id)
-        if len(point) == 1:
-            form = MDEditorModleForm(request.POST, instance=point[0])
+        contribution_id = request.POST['contribution_id']
+        contribution = Contribution.objects.filter(pk=contribution_id)
+        if len(contribution) == 1:
+            contribution = contribution[0]
+            point = contribution.point
+            form = MDEditorModleForm(request.POST, instance=point)
             if form.is_valid():
                 form.save()
                 content = form.cleaned_data['p_MDcontent'].split('```')
@@ -2465,10 +2471,10 @@ def _contribution_savepointedit(request):
                     else:
                         description_content[idd]['text'] = v
                 #
-                point[0].p_content['details']['hidden']['0']['point_title'] = title
-                point[0].p_content['details']['hidden']['0']['content'] = vids_content
-                point[0].p_content['details']['description'] = description_content
-                point[0].save()
+                contribution.new_content['details']['hidden']['0']['point_title'] = title
+                contribution.new_content['details']['hidden']['0']['content'] = vids_content
+                contribution.new_content['details']['description'] = description_content
+                #contribution.save()
                 messages.add_message(
                         request,
                         messages.INFO,
@@ -2502,9 +2508,11 @@ def _contribution_savepointedit(request):
 
 def _contribution_savequestionedit(request):
     if request.method == 'POST':
-        question_id = request.POST['point_id']
-        question = Question.objects.filter(user=request.user, pk=question_id)
-        if len(question) == 1:
+        contribution_id = request.POST['contribution_id']
+        contribution = Contribution.objects.filter(pk=contribution_id)
+        if len(contribution) == 1:
+            contribution = contribution[0]
+            question = [contribution.question]
             form = MDEditorQuestionModleForm(request.POST, instance=question[0])
             if form.is_valid():
                 form.save()

@@ -25,6 +25,42 @@ Editor
 var object_id = "{{context.point.id}}";
 var object_type = "Point";
 </script>
+
+
+{{context.url}}
+{{context.point.p_content}}
+<div class="card-body">
+	<div class="card shadow mb-1">
+		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+			<h5 class="h4 mb-1 text-primary font-weight-bold">
+				{{context.point.p_topic|field_name_to_label}}: {{context.point.p_content.details.hidden.0.point_title}}
+			</h5>
+				
+			<div class="dropdown no-arrow">
+				<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+					data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Actions
+				</a>
+				<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+					aria-labelledby="dropdownMenuLink">
+					<div class="dropdown-header">Actions:</div>
+					<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateCourseModal">
+						Edit title
+					</a>
+					<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateCourseModal">
+						Manage Videos
+					</a>
+					<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateCourseModal">
+						Manage Images
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
 <div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 	Please Use a desktop on chrome to see the editor, or zoom out.
 </div>
