@@ -183,12 +183,17 @@
             }
         },
         toolbarCustomIcons   : {               // using html tag create toolbar icon, unused default <a> tag.
-            lowercase        : "<a href=\"javascript:;\" title=\"Lowercase\" unselectable=\"on\"><i class=\"fa\" name=\"lowercase\" style=\"font-size:24px;margin-top: -10px;\">a</i></a>",
-            "ucwords"        : "<a href=\"javascript:;\" title=\"ucwords\" unselectable=\"on\"><i class=\"fa\" name=\"ucwords\" style=\"font-size:20px;margin-top: -3px;\">Aa</i></a>"
+            lowercase        : "<a href=\"javascript:;\" title=\"Lowercase\" unselectable=\"on\"><i class=\"\" name=\"lowercase\" style=\"font-size:24px;margin-top: -10px;\">a</i></a>",
+            "ucwords"        : "<a href=\"javascript:;\" title=\"ucwords\" unselectable=\"on\"><i class=\"fa\" name=\"ucwords\" style=\"font-size:20px;margin-top: -3px;\">Aa</i></a>",
         }, 
         toolbarIconsClass    : {
             undo             : "fa-undo",
             redo             : "fa-repeat",
+            GPT              : "fa-duotone fa-robot fa-beat fa-xs",
+            title	     : "fa-solid fa-sign-hanging",
+            video	     : "fa-solid fa-video",
+            image            : "fa-picture-o",
+            tex		     : "fa-solid fa-square-root-variable",
             bold             : "fa-bold",
             del              : "fa-strikethrough",
             italic           : "fa-italic",
@@ -205,7 +210,6 @@
             hr               : "fa-minus",
             link             : "fa-link",
             "reference-link" : "fa-anchor",
-            image            : "fa-picture-o",
             code             : "fa-code",
             "preformatted-text" : "fa-file-code-o",
             "code-block"     : "fa-file-code-o",
@@ -2818,6 +2822,41 @@
             this.cm.redo();
         },
         
+        GPT : function() {
+		var obj = new bootstrap.Modal(document.getElementById("GPTModal"), {});
+		obj.show()
+        },
+        title : function() {
+		var obj = new bootstrap.Modal(document.getElementById("TitleModal"), {});
+		obj.show()
+        },
+        video : function() {
+		var obj = new bootstrap.Modal(document.getElementById("VideoModal"), {});
+		obj.show()
+        },
+        image : function() {
+		var obj = new bootstrap.Modal(document.getElementById("ImageModal"), {});
+		obj.show()
+        },
+
+        tex : function() {
+            if (!this.settings.tex)
+            {
+                alert("settings.tex === false");
+                return this;
+            }
+            
+            var cm        = this.cm;
+            var cursor    = cm.getCursor();
+            var selection = cm.getSelection();
+
+            cm.replaceSelection("$$" + selection + "$$");
+
+            if(selection === "") {
+                cm.setCursor(cursor.line, cursor.ch + 2);
+            }
+        },
+
         bold : function() {
             var cm        = this.cm;
             var cursor    = cm.getCursor();
@@ -3065,23 +3104,6 @@
             cm.replaceSelection(((cursor.ch !== 0) ? "\n\n" : "\n") + "------------\n\n");
         },
 
-        tex : function() {
-            if (!this.settings.tex)
-            {
-                alert("settings.tex === false");
-                return this;
-            }
-            
-            var cm        = this.cm;
-            var cursor    = cm.getCursor();
-            var selection = cm.getSelection();
-
-            cm.replaceSelection("$$" + selection + "$$");
-
-            if(selection === "") {
-                cm.setCursor(cursor.line, cursor.ch + 2);
-            }
-        },
 
         link : function() {
             this.executePlugin("linkDialog", "link-dialog/link-dialog");
@@ -3102,10 +3124,6 @@
             var selection = cm.getSelection();
 
             cm.replaceSelection("\r\n[========]\r\n");
-        },
-
-        image : function() {
-            this.executePlugin("imageDialog", "image-dialog/image-dialog");
         },
         
         code : function() {
@@ -3190,6 +3208,7 @@
         "Ctrl-4"       : "h4",
         "Ctrl-5"       : "h5",
         "Ctrl-6"       : "h6",
+        "Ctrl-G"       : "GPT",  // if this is string ==  editormd.toolbarHandlers.xxxx
         "Ctrl-B"       : "bold",  // if this is string ==  editormd.toolbarHandlers.xxxx
         "Ctrl-D"       : "datetime",
         

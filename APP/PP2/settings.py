@@ -271,9 +271,9 @@ MDEDITOR_CONFIGS = {
         'width': '100%',  # Custom edit box width
         'height': 600,  # Custom edit box height
         'toolbar': [
-            "bold", "italic", "quote", "uppercase", "lowercase", "|",
+            "GPT", "|", "title", "video", 'image', 'tex', "|", "bold", "italic", "quote", "uppercase", "lowercase", "|",
             "list-ul", "list-ol", "|",
-            "link", "reference-link", "image", "code", "preformatted-text",
+            "link", "code", "preformatted-text",
             "code-block", "table", "|",
             "||", "preview", "watch", "fullscreen"
         ],  # custom edit box toolbar
@@ -284,9 +284,9 @@ MDEDITOR_CONFIGS = {
         'editor_theme': 'default',  # edit area theme, pastel-on-dark / default
         'toolbar_autofixed': True,  # Whether the toolbar capitals
         'search_replace': True,  # Whether to open the search for replacement
-        'emoji': True,  # whether to open the expression function
+        'emoji': False,  # whether to open the expression function
         'tex': True,  # whether to open the tex chart function
-        'flow_chart': True,  # whether to open the flow chart function
+        'flow_chart': False,  # whether to open the flow chart function
         'sequence': True,  # Whether to open the sequence diagram function
         'watch': True,  # Live preview
         'lineWrapping': True,  # lineWrapping

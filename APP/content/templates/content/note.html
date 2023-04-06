@@ -29,40 +29,40 @@
 {%definevar context.spec as spec%}
 {%definevar context.sampl_object as sample%}
 
-<div class="container col-9 text-justify" style='padding:5px;border:1px solid black;'>
-	<h1 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+<div class="container col-9 text-justify note_title_rapper" style='padding:5px;'>
+	<h1 class = "font-weight-bold notes_title_module" style=''>
 	{{context.sampl_object.p_moduel|field_name_to_label}}
 	</h1>
 	{%if context.previous != None%}
-	<a class="" 
+	<a class="chapter_nav_link" 
 		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.previous%}" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		<i class="bi bi-arrow-bar-left"></i> {{context.previous|field_name_to_label}}
 	</a>
 	{%else%}
-	<a class="" 
+	<a class="chapter_nav_link" 
 		href="#" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		End
 	</a>
 	{%endif%}
 	{%if context.next != None%}
-	<a class="ml-3" 
+	<a class="ml-3 chapter_nav_link" 
 		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.next%}" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		<i class="bi bi-arrow-bar-right"></i>{{context.next|field_name_to_label}}
 	</a>
 	{%else%}
-	<a class="ml-3" 
+	<a class="ml-3 chapter_nav_link" 
 		href="#" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		End
 	</a>
 	{%endif%}
 	<br>
-	<a class="" 
+	<a class="chapter_nav_link" 
 	   href="{% url 'content:practice' context.course.id sample.p_moduel sample.p_chapter%}" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		<i class="bi bi-star-fill"></i> Practice Questions
 	</a>
 	<div class="progress" style='height:10px;'>
@@ -74,25 +74,25 @@
 
 
 
-<div class="container col-9 text-justify" style='border-left:1px solid black;'>
+<div class="container col-9 text-justify note_container" style=''>
 
 
 
-	<h1 class = "font-weight-bold" style='border-bottom: 1px solid black;'>
+	<h1 class = "font-weight-bold note_title_chapter" style=''>
 		{{context.title|field_name_to_label}}
 	</h1>
 	{%for topic in context.article%}
 	<h2>
 		{{topic|field_name_to_label}}
 	</h2>
-	<div class='ml-1' style='border-left: 1px solid grey;'>
+	<div class='ml-1 note_point_wrapper' style=''>
         {%for point in context.article|index:topic%}
-	    <div class='point_div ml-1 mb-2' style='border-left: 2px dashed silver; padding-left:5px;'>
+	    <div class='point_div ml-1 mb-2' style=''>
 		    {{point.p_content|ToMarkdown:point|safe}}
 	    </div>
         {%endfor%}
 	</div>
-	<div style='border-bottom: 1px dashed silver;'></div>
+	<div class='note_bottom_border' style=''></div>
 	{%endfor%}
 </div>
 
@@ -101,35 +101,35 @@
 
 <div class="container col-9 text-justify" style='padding:5px;border:1px solid black;'>
 	{%if context.previous != None%}
-	<a class="" 
+	<a class="chapter_nav_link" 
 		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.previous%}" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		<i class="bi bi-arrow-bar-left"></i> {{context.previous|field_name_to_label}}
 	</a>
 	{%else%}
-	<a class="" 
+	<a class="chapter_nav_link" 
 		href="#" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		End
 	</a>
 	{%endif%}
 	{%if context.next != None%}
-	<a class="ml-3" 
+	<a class="ml-3 chapter_nav_link" 
 		href="{% url 'content:notearticle' context.course.id context.sampl_object.p_moduel context.next%}" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		<i class="bi bi-arrow-bar-right"></i>{{context.next|field_name_to_label}}
 	</a>
 	{%else%}
-	<a class="ml-3" 
+	<a class="ml-3 chapter_nav_link" 
 		href="#" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		End
 	</a>
 	{%endif%}
 	<br>
-	<a class="" 
+	<a class="chapter_nav_link" 
 		href="#" 
-		style='color:black;border-bottom: 1px solid black;'>
+		style=''>
 		<i class="bi bi-star-fill"></i> Practice Questions
 	</a>
 	<div class="progress" style='height:10px;'>

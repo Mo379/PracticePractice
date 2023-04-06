@@ -14,8 +14,8 @@ Course Page
 
 
 <div style='min-height: 100vh;'>
-	<div style='background:#212121;border-radius: 15px 15px 0px 0px'>
-		<div style='color: white;max-width: 40em;padding: 10px;'>
+	<div class = 'market_course_wrapper' style='border-radius: 15px 15px 0px 0px'>
+		<div class = 'market_course_card' style='max-width: 40em;padding: 10px;'>
 			<h1 class='font-weight-bold'><i class="bi bi-book"></i> {{course.course_name}}</h1>
 			<p> {{course.course_summary}}</p>
 			{%definevar context.versions|index:0 as latest_version%}
@@ -36,31 +36,31 @@ Course Page
 
 
 	<div style=''>
-		<div style='color: black;'>
+		<div>
 			<div class="marketcourse_middle" id='marketcourse_middle' >
-				<div style='max-width: 40em;border:1px solid black; padding:15px;' class='mt-3 mb-3' id='marketcourse_learningobjective'>
+				<div style='max-width: 40em;padding:15px;' class='mt-3 mb-3' id='marketcourse_learningobjective'>
 					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-bullseye"></i> Course Learning Objectives </h1>
 					<div class='mt-2' id='marketcourse_middle_objectives' style=''>
 						{%for idd,objective in course.course_learning_objectives.items%}
 						<p class='mr-5'><i class="bi bi-check2-circle text-info mr-2"></i> {{objective}}</p>
 						{%endfor%}
 					</div>
-					<div style='color:black;font-size: 12px;' class='mb-1'>
+					<div style='font-size: 12px;' class='mb-1'>
 						<strong><i class="bi bi-lightning-fill"></i> Skills You'll gain:</strong>
 						{%for idd, skill in course.course_skills.items%}
-						<span class='mb-1' style='display:inline-block;background: silver;color:black;padding:3px;border-radius:5px;'>{{skill}}</span>
+						<span class='mb-1 course_skill_span' style='display:inline-block;padding:3px;border-radius:5px;'>{{skill}}</span>
 						{%endfor%}
 					</div>
 				</div>
 
-				<div class="my_course_card card mt-3" id='marketcourse_coursecard'>
+				<div class="market_course_card card mt-3" id='marketcourse_coursecard'>
 					{%if course.course_pic_status%}
 					<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
 					{%else%}
 					<img class="card-img-top" src="{%static "base/svg/undraw_teaching_re_g7e3.svg"%}" alt="Card image cap">
 					{%endif%}
 					<div class="card-body">
-						<div class="" style='color:black;'>
+						<div class="marketcourse_card_bottom">
 							<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
 							</div>
 							<hr class="sidebar-divider mb-3">
@@ -81,7 +81,7 @@ Course Page
 				</div>
 
 
-				<div style='margin:auto; border:1px solid black; padding:15px;' class='mb-3 mt-5' id='marketcourse_courseoutline'>
+				<div style='margin:auto; padding:15px;' class='mb-3 mt-5' id='marketcourse_courseoutline'>
 					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-journal-text"></i> Course Outline </h1>
 					<div class='mt-2' style=''>
 						{%definevar context.ordered_content as content%}

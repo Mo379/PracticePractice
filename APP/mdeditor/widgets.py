@@ -27,12 +27,14 @@ class MDEditorWidget(forms.Textarea):
         # Setup config from defaults.
         self.config = MDConfig(config_name)
 
-    def render(self, name, value, renderer=None, attrs=None):
+    def render(self, name, value, config=None, renderer=None, attrs=None):
         """
         renderer: django2.1 新增加的参数，此处不做应用，赋值None做兼容处理
         """
         if value is None:
             value = ''
+        if config:
+            self.config = MDConfig(config_manual=config)
 
         final_attrs = self.build_attrs(self.attrs, attrs, name=name)
         return mark_safe(render_to_string('markdown.html', {

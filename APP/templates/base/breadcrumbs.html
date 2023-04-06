@@ -1,4 +1,4 @@
-<nav aria-label="breadcrumb" class='col' style='background:white;'>
+<nav aria-label="breadcrumb" class='col' id='breadcrumb_wrap'>
 	<ol class="breadcrumb col-11 mx-auto" style='padding-top:10px;padding-bottom:5px; font-size:10px;'>
     {% for url, label in breadcrumbs %}
       {% if not url or forloop.counter == breadcrumbs_total %}

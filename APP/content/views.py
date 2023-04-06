@@ -21,7 +21,8 @@ from content.util.GeneralUtil import (
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
-from content.forms import MDEditorModleForm, MDEditorQuestionModleForm
+from content.forms import MDEditorQuestionModleForm
+from mdeditor.widgets import MDEditorWidget
 from braces.views import (
         LoginRequiredMixin,
         GroupRequiredMixin,
@@ -83,6 +84,32 @@ class ContentView(
         context['next_page'] = current_page + 1 if current_page < p.num_pages else None
         context['CDN_URL'] = settings.CDN_URL
         return context
+
+
+class AIView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/AI.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
+                ("AI", ''),
+                ]
+
+    def get_queryset(self):
+        """Return all of the required hub information"""
+        context = {}
+        context['hello'] = 'Hello world'
+        # optain the subscribed spec or the unviersal spec
+        return context
+
 
 
 class NotesView(
@@ -488,12 +515,26 @@ class EditorPointView(
         spec = Specification.objects.get(pk=spec_id)
         point = Point.objects.get(pk=point_id)
         translated_content = TranslatePointContent(point.p_content)
-        point.p_MDcontent = translated_content
         #
-        editor_form = MDEditorModleForm(instance=point)
+        md_config = settings.MDEDITOR_CONFIGS
+        toolbar = md_config['default']['toolbar']
+        allowed_options = ['|', "title", "video", 'image', 'tex', '|']
+        index_1 = toolbar.index('|')
+        index_2 = toolbar.index('|', index_1+1)
+        toolbar = toolbar[:index_1] + allowed_options + toolbar[index_2+1:]
+        md_config['default']['toolbar'] = toolbar
+        editor = MDEditorWidget()
+        media = editor.media
+        render = editor.render(
+                name='p_MDcontent', value=translated_content,
+                config=md_config, attrs={'id': 'id_p_MDcontent'}
+            )
+
+
         context['spec'] = spec
         context['point'] = point
-        context['editor_form'] = editor_form
+        context['editormedia'] = media
+        context['editorrender'] = render
         context['url'] = reverse('content:_savepointedit')
         return context
 
@@ -524,12 +565,26 @@ class EditorQuestionView(
         question = Question.objects.get(pk=question_id)
         #
         translated_content = TranslateQuestionContent(question.q_content)
-        question.q_MDcontent = translated_content
+
         #
-        editor_form = MDEditorQuestionModleForm(instance=question)
+        md_config = settings.MDEDITOR_CONFIGS
+        toolbar = md_config['default']['toolbar']
+        allowed_options = ['|', "title", "video", 'image', 'tex', '|']
+        index_1 = toolbar.index('|')
+        index_2 = toolbar.index('|', index_1+1)
+        toolbar = toolbar[:index_1] + allowed_options + toolbar[index_2+1:]
+        md_config['default']['toolbar'] = toolbar
+        editor = MDEditorWidget()
+        media = editor.media
+        render = editor.render(
+                name='q_MDcontent', value=translated_content,
+                config=md_config, attrs={'id': 'id_q_MDcontent'}
+            )
+
         context['spec'] = spec
         context['question'] = question
-        context['editor_form'] = editor_form
+        context['editormedia'] = media
+        context['editorrender'] = render
         context['url'] = ''
         return context
 
@@ -685,6 +740,10 @@ class ContributionEditorPointView(
                 contribution.new_content
             )
         point.p_MDcontent = translated_content
+        md_config = settings.MDEDITOR_CONFIGS['default']['toolbar']
+        allowed_options = ['|', "title", "video", 'image', 'tex', '|']
+        index_1 = md_config.index('|')
+        index_2 = md_config.index('|', index_1+1)
         #
         editor_form = MDEditorModleForm(instance=point)
         context['spec'] = source_spec
@@ -692,7 +751,7 @@ class ContributionEditorPointView(
         context['task'] = task
         context['contribution'] = contribution
         context['editor_form'] = editor_form
-        context['url'] = reverse('content:_savepointedit')
+        context['url'] = reverse('content:_contribution_savepointedit')
         return context
 
 
@@ -2261,16 +2320,8 @@ def _savepointedit(request):
             form = MDEditorModleForm(request.POST, instance=point[0])
             if form.is_valid():
                 form.save()
-                content = form.cleaned_data['p_MDcontent'].split('```')
-                hidden = content[1].split('yaml')[1]
-                description = '```'.join(content[2:])
-                #
-                hidden_details = yaml.load(hidden.replace('\t', '  '))['hidden_details']
-                title = hidden_details['point_title']
-                vids = [(k.split('_')[1], i['video_title'], i['video_link']) for k, i in hidden_details.items() if 'vid' in k]
-                vids_content = {str(int(k)-1): {'vid':{"vid_title": i,"vid_link": j}} for k,i,j in vids}
-                #
-                description_text = description.split('\n')
+                content = form.cleaned_data['p_MDcontent']
+                description_text = content.split('\n')
                 description_content = {}
                 for idd, v in enumerate(description_text):
                     description_content[idd] = {}
@@ -2283,9 +2334,10 @@ def _savepointedit(request):
                     else:
                         description_content[idd]['text'] = v
                 #
-                point[0].p_content['details']['hidden']['0']['point_title'] = title
-                point[0].p_content['details']['hidden']['0']['content'] = vids_content
+                #point[0].p_content['details']['hidden']['0']['point_title'] = title
+                #point[0].p_content['details']['hidden']['0']['content'] = vids_content
                 point[0].p_content['details']['description'] = description_content
+                print(description_content)
                 #point[0].save()
                 messages.add_message(
                         request,
@@ -2449,16 +2501,8 @@ def _contribution_savepointedit(request):
             form = MDEditorModleForm(request.POST, instance=point)
             if form.is_valid():
                 form.save()
-                content = form.cleaned_data['p_MDcontent'].split('```')
-                hidden = content[1].split('yaml')[1]
-                description = '```'.join(content[2:])
-                #
-                hidden_details = yaml.load(hidden.replace('\t', '  '))['hidden_details']
-                title = hidden_details['point_title']
-                vids = [(k.split('_')[1], i['video_title'], i['video_link']) for k, i in hidden_details.items() if 'vid' in k]
-                vids_content = {str(int(k)-1): {'vid':{"vid_title": i,"vid_link": j}} for k,i,j in vids}
-                #
-                description_text = description.split('\n')
+                content = form.cleaned_data['p_MDcontent']
+                description_text = content.split('\n')
                 description_content = {}
                 for idd, v in enumerate(description_text):
                     description_content[idd] = {}
@@ -2471,8 +2515,8 @@ def _contribution_savepointedit(request):
                     else:
                         description_content[idd]['text'] = v
                 #
-                contribution.new_content['details']['hidden']['0']['point_title'] = title
-                contribution.new_content['details']['hidden']['0']['content'] = vids_content
+                #contribution.new_content['details']['hidden']['0']['point_title'] = title
+                #contribution.new_content['details']['hidden']['0']['content'] = vids_content
                 contribution.new_content['details']['description'] = description_content
                 #contribution.save()
                 messages.add_message(

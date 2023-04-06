@@ -15,23 +15,44 @@ Editor
 {%definevar 'editorquestion' as alert_loc%}
 {%include 'base/alert.html'%}
 {%include 'content/mathjax.html'%}
+{%include 'content/items/GPT_item.html'%}
+{%include 'content/items/editor_items.html'%}
 
 
 <script>
 var object_id = "{{context.question.id}}";
 var object_type = "Question";
 </script>
+
+<div class="card-body">
+	<div class="card shadow">
+		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+			<h5 class="h4 mb-1 text-primary font-weight-bold">
+				<a href='
+{%if 'contribution' in context.url%}
+{%url 'content:contribution_noteedit' context.task.id %}#point_{{context.point.id}}
+{%else%}
+{%url 'content:noteedit' context.spec.id context.point.p_moduel context.point.p_chapter%}#point_{{context.point.id}}
+{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}
+{%endif%}
+			'>
+Question: {{context.qurstion.q_chapter}}
+			</a>
+			</h5>
+		</div>
+	</div>
+</div>
+
+
 <div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 	Please Use a desktop on chrome to see the editor, or zoom out.
 </div>
+
 <form class="user px-3 py-3 editing_form"  action="{%url 'content:_savequestionedit'%}" 
 	method="POST" role="form" enctype="multipart/form-data">
     {% csrf_token %}
-    <input type='hidden' name='point_id' value={{context.question.id}}>
-    {{ context.editor_form.media }}
-    {{ context.editor_form.q_MDcontent}}
-    <button class="btn btn-primary" type="submit">Save changes</button>
-    <a class="btn btn-info" href='{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}' target='_blank'>View</a>
+    {{ context.editormedia}}
+    {{ context.editorrender}}
 </form>
 
 <div style='border:1px solid black;'>

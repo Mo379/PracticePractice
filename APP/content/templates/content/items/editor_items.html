@@ -1,0 +1,207 @@
+<div class="modal fade" id="TitleModal" tabindex="-1" style='z-index:5000000;'role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+		  <label for="usr">Title:</label>
+		  <input type="text" class="form-control" id="point_title" name='point_title'>
+		</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="VideoModal" tabindex="-1" style='z-index:5000000;' role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Manage videos</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<label for="new_skill_input">Videos: </label>
+		<div class="input-group mb-3">
+		  <div class="input-group-prepend">
+		    <span class="input-group-text" id="">Title and URL</span>
+		  </div>
+		  <input type="text" id='new_skill_input' class="form-control" placeholder='Video title...'>
+		  <input type="text" class="form-control" placeholder='Video URL...'>
+		  <div class="input-group-append">
+		    <button class="btn btn-outline-info" id="add_skill_button" type="button">Add</button>
+		  </div>
+		</div>
+		<div class="col-12">
+			<ol class='list_group' id='skill_list'>
+				{%for idd, skill in course.course_skills.items %}
+				<li class='list-group-item'>
+					<input type='hidden' name='ordered_items_skills[]' value='{{skill}}'/>
+					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+						<i class="bi bi-trash-fill"></i>
+					</a>
+					<a style='text-decoration:none;'>
+						test
+					</a>
+				</li >
+				{%endfor%}
+				<li class='list-group-item'>
+					<input type='hidden' name='ordered_items_skills[]' value='{{skill}}'/>
+					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+						<i class="bi bi-trash-fill"></i>
+					</a>
+					<a style='text-decoration:none;'>
+						Some video
+					</a>
+				</li >
+			</ol>
+		</div><br>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+var skill_button = document.getElementById("add_skill_button");
+var skill_ul = document.getElementById("skill_list");
+
+skill_button.addEventListener("click", function() {
+  var skill_input = document.getElementById("new_skill_input");
+  var skill_list_li = document.createElement("li");
+  skill_list_li.classList.add("list-group-item");
+
+  var child_input = document.createElement("input");
+  child_input.value = skill_input.value
+  child_input.type = 'hidden'
+  child_input.name = 'ordered_items_skills[]'
+  skill_list_li.appendChild(child_input);
+
+  var icon = document.createElement("i");
+  icon.classList.add("bi"); 
+  icon.classList.add("bi-trash-fill"); 
+  var child_del_button = document.createElement("a");
+  child_del_button.type = 'button'
+  child_del_button.style.cssText= 'font-size:12px;';
+  child_del_button.classList.add("btn"); 
+  child_del_button.classList.add("btn-danger"); 
+  child_del_button.classList.add("deletable_btn"); 
+  child_del_button.classList.add("mr-1"); 
+  child_del_button.classList.add("ml-1"); 
+  child_del_button.appendChild(icon);
+  skill_list_li.appendChild(child_del_button);
+
+  var child_text = document.createElement("a");
+  child_text.appendChild(document.createTextNode(skill_input.value));
+  skill_list_li.appendChild(child_text);
+
+  skill_ul.appendChild(skill_list_li);
+  skill_input.value = ''
+  const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+  }
+})
+
+
+
+var objective_button = document.getElementById("add_objective_button");
+var objective_ul = document.getElementById("objectives_list");
+
+objective_button.addEventListener("click", function() {
+  var objective_input = document.getElementById("new_objective_input");
+  var objective_list_li = document.createElement("li");
+  objective_list_li.classList.add("list-group-item");
+
+  var child_input = document.createElement("input");
+  child_input.value = objective_input.value
+  child_input.type = 'hidden'
+  child_input.name = 'ordered_items_objectives[]'
+  objective_list_li.appendChild(child_input);
+
+  var icon = document.createElement("i");
+  icon.classList.add("bi"); 
+  icon.classList.add("bi-trash-fill"); 
+  var child_del_button = document.createElement("a");
+  child_del_button.type = 'button'
+  child_del_button.style.cssText= 'font-size:12px;';
+  child_del_button.classList.add("btn"); 
+  child_del_button.classList.add("btn-danger"); 
+  child_del_button.classList.add("deletable_btn"); 
+  child_del_button.classList.add("mr-1"); 
+  child_del_button.classList.add("ml-1"); 
+  child_del_button.appendChild(icon);
+  objective_list_li.appendChild(child_del_button);
+
+  var child_text = document.createElement("a");
+  child_text.appendChild(document.createTextNode(objective_input.value));
+  objective_list_li.appendChild(child_text);
+
+  objective_ul.appendChild(objective_list_li);
+  objective_input.value = ''
+  const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+  }
+})
+
+
+const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+}
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="ImageModal" tabindex="-1" style='z-index:5000000;' role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Manage images</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>
+			A short description of the initial course version.
+		</textarea>
+      </div>
+    </div>
+  </div>
+</div>

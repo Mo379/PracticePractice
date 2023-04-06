@@ -70,12 +70,12 @@ Manage Collaborators
 			<img class="card-img-top mt-3" style='width: 60%;margin:auto' src="{%static "base/svg/undraw_pic_profile_re_7g2h.svg"%}" alt="Card image cap">
 			{%endif%}
 			<div class="card-body">
-				<div class="h6 font-weight-bold" style='color:black;'>
+				<div class="h6 font-weight-bold" style=''>
 					{{collab_list.0.first_name|title}}
 					{{collab_list.0.last_name|title}}
 				</div>
 				<div class="card-text mb-3" >{{course.course_summary}}</div>
-				<div style='color:black;font-size: 12px;' class='mb-1'>
+				<div style='font-size: 12px;' class='mb-1'>
 					{%if freelance_collabs%}
 					<strong>Freelancer collaborations:</strong><br>
 					    {%for collab_item in freelance_collabs%}
@@ -89,7 +89,7 @@ Manage Collaborators
 							bg-danger
 							{%endif%}
 							'
-							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+							style='display:inline-block;padding:3px;border-radius:5px;'
 				     			type='button'
 				     			data-toggle="modal"
 							data-target="#collaboration_view_{{collab_item.id}}"
@@ -111,7 +111,7 @@ Manage Collaborators
 							bg-danger
 							{%endif%}
 							'
-							style='display:inline-block;padding:3px;border-radius:5px;color:white'
+							style='display:inline-block;padding:3px;border-radius:5px;'
 				     			type='button'
 				     			data-toggle="modal"
 							data-target="#collaboration_view_{{collab_item.id}}"
@@ -132,7 +132,7 @@ Manage Collaborators
 							{%else%}
 							bg-danger
 							{%endif%}
-							' style='display:inline-block;padding:3px;border-radius:5px;color:white;'>
+							' style='display:inline-block;padding:3px;border-radius:5px;'>
 							<a data-toggle="modal" data-target="#collaboration_view_{{collab_item.id}}">
 								{{collab_item.specification}}
 							</a>

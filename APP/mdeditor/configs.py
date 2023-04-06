@@ -28,7 +28,7 @@ DEFAULT_CONFIG = {
     'task_list': False,
     'flow_chart': True,
     'sequence': True,
-    'language': 'zh',  # zh / en / de 
+    'language': 'zh',  # zh / en / de
     'watch': True,  # Live preview
     'lineWrapping': False,  # lineWrapping
     'lineNumbers': False  # lineNumbers
@@ -37,18 +37,21 @@ DEFAULT_CONFIG = {
 
 class MDConfig(dict):
 
-    def __init__(self, config_name='default'):
+    def __init__(self, config_name='default', config_manual=None):
         self.update(DEFAULT_CONFIG)
-        self.set_configs(config_name)
+        self.set_configs(config_name, config_manual)
 
-    def set_configs(self, config_name='default'):
+    def set_configs(self, config_name='default', config_manual=None):
         """
         set config item
         :param config_name:
         :return:
         """
         # Try to get valid config from settings.
-        configs = getattr(settings, 'MDEDITOR_CONFIGS', None)
+        if config_manual:
+            configs = config_manual
+        else:
+            configs = getattr(settings, 'MDEDITOR_CONFIGS', None)
         if configs:
             if isinstance(configs, dict):
                 # Make sure the config_name exists.

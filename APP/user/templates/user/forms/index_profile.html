@@ -17,42 +17,44 @@
 <br>
 <div class="card mb-4 mb-xl-0">
 <div class="card-header">Key Information</div>
-<div class="mb-3" style="margin-left:10px;padding:5px;">
-	<label class="large mb-1"><i class="bi bi-person-plus"></i> Member Status: 
-		{%if context.user_member_bool %}
-		<i class="bi bi-check-circle-fill" style='color:green;'></i>
-		{%else%}
-		<i class="bi bi-x-circle-fill" style='color:red;'></i>
-		{%endif%}
-	</label><br>
-	<label class="large mb-1"><i class="bi bi-credit-card-2-back"></i> Billing Details: 
-		{%if context.user_billing_bool%}
-		<i class="bi bi-check-circle-fill" style='color:green;'></i>
-		{%else%}
-		<i class="bi bi-x-circle-fill" style='color:red;'></i>
-		{%endif%}
-	</label><br>
-	<label class="large mb-1"><i class="bi bi-clipboard2-check"></i> Registration Status: 
-		{%if user.registration%}
-		<i class="bi bi-check-circle-fill" style='color:green;'></i>
-		{%else%}
-		<i class="bi bi-x-circle-fill" style='color:red;'></i>
-		{%endif%}
-	</label><br>
-	<label class="large mb-1"><i class="bi bi-shield-lock"></i> Password Status: 
-		{%if user.password_set%}
-		<i class="bi bi-check-circle-fill" style='color:green;'></i>
-		{%else%}
-		<i class="bi bi-x-circle-fill" style='color:red;'></i>
-		{%endif%}
-	</label><br>
-	<label class="large mb-1"><i class="bi bi-journal-text"></i> Account Details: 
-		{%if user.account_details_complete%}
-		<i class="bi bi-check-circle-fill" style='color:green;'></i>
-		{%else%}
-		<i class="bi bi-x-circle-fill" style='color:red;'></i>
-		{%endif%}
-	</label><br>
+<div class="card-body">
+	<div class='mb-3' style="margin-left:10px;padding:5px;">
+		<label class="large mb-1"><i class="bi bi-person-plus"></i> Member Status: 
+			{%if context.user_member_bool %}
+			<i class="bi bi-check-circle-fill" style='color:green;'></i>
+			{%else%}
+			<i class="bi bi-x-circle-fill" style='color:red;'></i>
+			{%endif%}
+		</label><br>
+		<label class="large mb-1"><i class="bi bi-credit-card-2-back"></i> Billing Details: 
+			{%if context.user_billing_bool%}
+			<i class="bi bi-check-circle-fill" style='color:green;'></i>
+			{%else%}
+			<i class="bi bi-x-circle-fill" style='color:red;'></i>
+			{%endif%}
+		</label><br>
+		<label class="large mb-1"><i class="bi bi-clipboard2-check"></i> Registration Status: 
+			{%if user.registration%}
+			<i class="bi bi-check-circle-fill" style='color:green;'></i>
+			{%else%}
+			<i class="bi bi-x-circle-fill" style='color:red;'></i>
+			{%endif%}
+		</label><br>
+		<label class="large mb-1"><i class="bi bi-shield-lock"></i> Password Status: 
+			{%if user.password_set%}
+			<i class="bi bi-check-circle-fill" style='color:green;'></i>
+			{%else%}
+			<i class="bi bi-x-circle-fill" style='color:red;'></i>
+			{%endif%}
+		</label><br>
+		<label class="large mb-1"><i class="bi bi-journal-text"></i> Account Details: 
+			{%if user.account_details_complete%}
+			<i class="bi bi-check-circle-fill" style='color:green;'></i>
+			{%else%}
+			<i class="bi bi-x-circle-fill" style='color:red;'></i>
+			{%endif%}
+		</label><br>
+	</div>
 </div>
 </div>
 

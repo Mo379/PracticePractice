@@ -30,7 +30,7 @@ class User(AbstractUser):
     theme = models.CharField(
         max_length=3,
         choices=CHOICES_THEME,
-        default='lig',
+        default='dar',
     )
     CHOICES_LANGUAGE = [
         ('en', 'English'),
