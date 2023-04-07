@@ -1,11 +1,11 @@
 :root{
-	--main-bg-color: #1e2024;
-	--second-bg-color: #414141;
-	--third-bg-color: #151515;
-	--color-1: #454545;
-	--color-2: brown;
-	--color-3: #010542;
-	--text-color-1: white;
-	--text-color-2: #e3e3e3;
-	--text-color-3: brown;
+	--second-bg-color: #FFFFFF;
+	--main-bg-color: #F2F2F2;
+	--third-bg-color: #E7E7E7;
+	--color-1: #FFFFFF;
+	--color-2: #7F7F7F;
+	--color-3: #000000;
+	--text-color-1: #202020;
+	--text-color-2: #373737;
+	--text-color-3: #616161;
 }

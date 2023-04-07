@@ -1,0 +1,44 @@
+{%load static %}
+{%load general%}
+<div class='AI_main_window'>
+	<div class='AI_window_chat'>
+	<div style='height: 0px;'>
+		{%for i in '0123456789'|make_list%}
+		<div class='AI_chat_text AI_text_user'>
+			<div class='AI_text_wrap'>
+				<div class='AI_text_image'>
+					<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+				</div>
+				<div class='AI_text_text'>
+					This is where the text go
+					This is where the text go
+				</div>
+			</div>
+		</div>
+		<div class='AI_chat_text AI_text_ai'>
+			<div class='AI_text_wrap'>
+				<div class='AI_text_image'>
+					<i class="bi bi-robot"></i>
+				</div>
+				<div class='AI_text_text'>
+					This is where the text go
+					This is where the text go
+					This is where the text go
+				</div>
+			</div>
+		</div>
+		{%endfor%}
+	</div>
+	</div>
+	<div class='AI_window_typing'>
+		<a class='mt-2 mb-2 sidebar_button lesson_button'>
+			regenerate
+		</a>
+	      <div class="input-group mb-3" id ='message_field'>
+		  <div class="input-group-prepend">
+		    <button class="btn btn-outline-secondary" type="button" id="button-addon1"><i class="fa-solid fa-paper-plane"></i></button>
+		  </div>
+		  <input type="text" class="form-control" placeholder='Send a message...'>
+		</div>
+	</div>
+</div>

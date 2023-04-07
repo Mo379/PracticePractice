@@ -37,11 +37,8 @@ body{
 	color: var(--text-color-1);
 }
 .modal-body{
-	background: var(--second-bg-color) !important;
-	color: var(--text-color-2);
-}
-.modal-footer{
 	background: var(--third-bg-color) !important;
+	color: var(--text-color-2);
 }
 .my_course_card{
 	background: var(--thrid-bg-color);

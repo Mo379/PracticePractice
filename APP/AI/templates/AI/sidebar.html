@@ -1,0 +1,74 @@
+{%load static %}
+{%load general%}
+{%include 'AI/items/modal_lessons.html'%}
+{%include 'AI/items/modal_theme.html'%}
+{%include 'AI/items/modal_help.html'%}
+<div class='AI_side_bar'>
+	<div class='AI_side_lessons_wrapper'>
+		<div class ='new_lesson_button'>
+			<button class='sidebar_button' data-toggle="modal" data-target="#all_lessons_modal">
+				<i class="bi bi-mortarboard-fill"></i> Create New Lesson
+			</button>
+		</div>
+		<div class='AI_side_lessons'>
+			<a class='sidebar_button lesson_button'>
+				Lesson 1
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 2
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+			<a class='sidebar_button lesson_button'>
+				Lesson 3
+			</a>
+		</div>
+	</div>
+	<div class='AI_side_options'>
+	<hr class="sidebar-divider">
+	<a class='sidebar_button lesson_button'>
+	    {%definevar 'AI_window' as alert_loc%}
+	    {%include 'base/alert.html'%}
+	</a>
+	<a class='sidebar_button lesson_button' href='{%url 'main:index' %}'>
+		<i class="bi bi-house-door-fill"></i> Home
+	</a>
+	<button class='sidebar_button lesson_button' data-toggle="modal" data-target="#theme_modal">
+		<i class="bi bi-lightbulb"></i> Toggle theme
+	</button>
+	<button class='sidebar_button lesson_button' data-toggle="modal" data-target="#help_modal">
+		<i class="bi bi-patch-question"></i> Help
+	</button>
+	<a class='sidebar_button lesson_button' href='{%url 'user:_logout'%}'>
+		<i class="bi bi-arrow-bar-left"></i> Log out
+	</a>
+	</div>
+</div>
