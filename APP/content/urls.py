@@ -6,7 +6,6 @@ from content import views
 app_name = 'content'
 urlpatterns = [
     path('content/', views.ContentView.as_view(), name='content'),
-    path('content/AI', views.AIView.as_view(), name='AI'),
     path('content/<int:page>', views.ContentView.as_view(), name='content'),
     path(
         'content/questionbank/<hashid:course_id>/',
