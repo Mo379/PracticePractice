@@ -51,15 +51,28 @@ body{
 	width: 100%;
 	background: var(--second-bg-color);
 	color: var(--text-color-1);
-	padding: 10px;
+	padding: 30px;
+}
+#loading_spinner{
+	position: absolute !important;
+	padding:10px;
+	background: var(--main-bg-color);
+	color: var(--text-color-1);
+	border: 1px solid var(--second-bg-color);
+	border-radius: 6px;
+	top: 50% !important;
+	right: 50% !important;
+	display: block;
+	color: var(--text-color-1);
+	text-align: center;
 }
 .AI_window_typing{
 	grid-area: typing;
 	background: var(--first-bg-color);
-	border-top: 1px solid var(--second-bg-color);
+	border-top: 2px solid var(--text-color-1);
 }
 .AI_text_wrap{
-	width: 95%;
+	width: 80%;
 	height:auto;
 	margin:auto;
 	display:grid;
@@ -130,6 +143,8 @@ body{
 #message_field{
 	width: 50%;
 	margin:auto;
+	border: 1px solid white;
+	border-radius: 5px;
 }
 .AI_window_typing .lesson_button{
 	width: auto;

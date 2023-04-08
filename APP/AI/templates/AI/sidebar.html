@@ -7,49 +7,15 @@
 	<div class='AI_side_lessons_wrapper'>
 		<div class ='new_lesson_button'>
 			<button class='sidebar_button' data-toggle="modal" data-target="#all_lessons_modal">
-				<i class="bi bi-mortarboard-fill"></i> Create New Lesson
+				<i class="bi bi-mortarboard-fill"></i> Start Lesson
 			</button>
 		</div>
 		<div class='AI_side_lessons'>
-			<a class='sidebar_button lesson_button'>
-				Lesson 1
+			{%for lesson in context.lessons%}
+			<a class='sidebar_button lesson_button' onclick="controller.C_open_lesson('{%url "AI:_load_lesson"%}', '{{lesson.id|hashid}}', ' {{csrf_token}}')">
+				{{lesson.moduel|field_name_to_label}}
 			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 2
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
-			<a class='sidebar_button lesson_button'>
-				Lesson 3
-			</a>
+			{%endfor%}
 		</div>
 	</div>
 	<div class='AI_side_options'>

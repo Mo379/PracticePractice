@@ -13,8 +13,9 @@ class Lesson(models.Model):
         Course, on_delete=models.CASCADE, db_index=True,
         default="", null=False, related_name='AI_lesson_course'
     )
-    moduel = models.CharField(max_length=50, default="", null=True)
+    moduel = models.CharField(max_length=150, default="", null=True)
     lesson_chat = models.JSONField(default=dict, null=True)
+    lesson_content = models.JSONField(default=dict, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     terminated_at = models.DateTimeField(null=True, default=None, blank=True)
 

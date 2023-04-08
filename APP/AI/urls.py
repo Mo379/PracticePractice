@@ -12,5 +12,15 @@ urlpatterns = [
         views._themechange,
         name='_themechange'
     ),
+    path(
+        '_start_new_lesson',
+        views._start_new_lesson,
+        name='_start_new_lesson'
+    ),
+    path(
+        '_load_lesson',
+        views._load_lesson,
+        name='_load_lesson'
+    ),
 ]
 

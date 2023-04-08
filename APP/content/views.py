@@ -3187,7 +3187,6 @@ def _start_new_task(request):
             'contribution_id': collaboration_id
         }
         #
-        print(collaboration_id)
         try:
             collaboration = Collaborator.objects.get(pk=collaboration_id)
         except Exception:
