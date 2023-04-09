@@ -45,6 +45,15 @@ body{
 	overflow-y:scroll;
 	position: relative;
 }
+.main_chat_container{
+}
+#introduction_container{
+	position: absolute;
+	top: 50%;
+	right: 50%;
+	color: var(--text-color-1);
+	text-align: center;
+}
 .AI_chat_text{
 	min-height: 50px;
 	height: auto;
@@ -84,6 +93,16 @@ body{
 	margin-right: 15px;
 	display: inline-block;
 }
+.blink {
+	animation: blink 3s infinite;
+}
+
+@keyframes blink {
+	50% {
+		opacity: 0;
+	}
+}
+
 .AI_text_text{
 	grid-area: text;
 	display: inline-block;

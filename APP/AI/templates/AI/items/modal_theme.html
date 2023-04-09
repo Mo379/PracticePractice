@@ -13,6 +13,7 @@
       <div class="modal-body">
 	<form class="user px-3 py-3"  action="{%url 'AI:_themechange'%}" method="POST" role="form">
 		{% csrf_token %}
+		<input name='course_id' value='{{context.course.id|hashid}}' type='hidden'/>
 		{{context.form_appearancechoice}}
 		<br>
 		<button class="btn btn-primary" type="submit">Update</button>

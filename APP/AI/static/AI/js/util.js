@@ -29,4 +29,24 @@ class util{
 		var html = 'Some html';
 		return html + chat;
 	}
+	write(elemID, text, delay_lower=50, delay_higher=120, char_lower=3, char_higher=10) {
+	  let element = document.getElementById(elemID);
+	  let i = 0;
+	  function type() {
+	    let charCount = Math.floor(Math.random() * (char_higher - char_lower + 1)) + char_lower;
+	    let delay = Math.floor(Math.random() * (delay_higher - delay_lower + 1)) + delay_lower;
+	    
+	    let shouldPause = Math.random() < 0.1;
+	    if (shouldPause) {
+	      delay += 100;
+	    }
+	    if (i < text.length) {
+	      element.innerHTML += text.slice(i, i + charCount);
+	      i += charCount;
+	      setTimeout(type, delay);
+	    }
+	  }
+
+	  type();
+	}
 }

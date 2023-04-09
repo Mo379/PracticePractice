@@ -5,7 +5,23 @@
 <div class='AI_main_window'>
 	<div class='AI_window_chat' id='AI_window_chat_id'>
 	<div style='height: 0px;' id='main_chat_container'>
-		{%for i in '0123456789'|make_list%}
+		<div class='AI_chat_text AI_text_ai'>
+			<div class='AI_text_wrap'>
+				<div class='AI_text_image'>
+					<i class="bi bi-robot"></i>
+				</div>
+				<div class='AI_text_text' id='AI_text_introduction'>
+					<span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
+						 
+					</span>
+				</div>
+				<script>
+				window.onload = function() {
+				  util.write('AI_text_introduction', 'Hi {{user.first_name}}, please select or start a new lesson using the menu on your left. I will do my best to walk you through. This course is {{context.course}}.');
+				};
+				</script>
+			</div>
+		</div>
 		<div class='AI_chat_text AI_text_user'>
 			<div class='AI_text_wrap'>
 				<div class='AI_text_image'>
@@ -32,29 +48,6 @@
 				</div>
 			</div>
 		</div>
-		<div class='AI_chat_text AI_text_ai'>
-			<div class='AI_text_wrap'>
-				<div class='AI_text_image'>
-					<i class="bi bi-robot"></i>
-				</div>
-				<div class='AI_text_text'>
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-					This is where the text go
-				</div>
-			</div>
-		</div>
-		{%endfor%}
 	</div>
 	</div>
 	<div class='AI_window_typing'>

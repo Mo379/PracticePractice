@@ -63,6 +63,10 @@ class AIView(
 def _themechange(request):
     if request.method == 'POST':
         form = AppearanceChoiceForm(request.POST, instance=request.user)
+        course_id = h_decode(request.POST['course_id'])
+        kwargs = {
+            'course_id': course_id
+        }
         if form.is_valid():
             form.save()
             messages.add_message(
@@ -79,6 +83,10 @@ def _themechange(request):
                     'Something is wrong, please check that all inputs are valid.'+str(form.errors),
                     extra_tags='alert-danger AI_window'
                 )
+        return redirect(
+                'AI:index',
+                **kwargs
+            )
     else:
         messages.add_message(
                 request,
@@ -86,7 +94,7 @@ def _themechange(request):
                 'Invalid Request Method',
                 extra_tags='alert-danger AI_window'
             )
-    return redirect('AI:index')
+        return redirect('content:content')
 
 
 @login_required(login_url='/user/login', redirect_field_name=None)
@@ -118,7 +126,7 @@ def _start_new_lesson(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'The input options are not available valid.',
+                    'The input options are not valid.',
                     extra_tags='alert-danger CollaborationTasks'
                 )
             return redirect(
