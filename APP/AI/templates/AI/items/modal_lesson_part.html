@@ -1,0 +1,30 @@
+{%load general%}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Modal -->
+<div class="modal fade" id="all_lesson{{lesson.id|hashid}}_parts_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{lesson.moduel|field_name_to_label}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		  {%for chapter in context.chapters|index:lesson.moduel %}
+		  <a class='sidebar_button lesson_button chapter_button' onclick="controller.C_open_lesson('{%url "AI:_load_lesson"%}', '{{lesson.id|hashid}}', '{{chapter}}',' {{csrf_token}}', 'all_lesson{{lesson.id|hashid}}_parts_modal')">
+			  	{%if chapter in context.started_chapters|index:lesson.moduel%}
+				<i class="bi bi-envelope-paper"></i> 
+				{%endif%}
+				{{chapter|field_name_to_label}}
+			</a>
+		  {%endfor%}
+		</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

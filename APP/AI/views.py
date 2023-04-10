@@ -1,4 +1,5 @@
 import collections
+from collections import defaultdict
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,7 +13,7 @@ from content.models import Course
 from user.models import (
         User
     )
-from AI.models import Lesson
+from AI.models import Lesson, Lesson_part
 from user.forms import (
         AppearanceChoiceForm,
     )
@@ -49,13 +50,27 @@ class AIView(
                 user=user,
                 course=course,
             ).order_by('-created_at')
-        claimed_lessons = {lesson.moduel for lesson in active_lessons}
+        started_lesson_parts = Lesson_part.objects.filter(
+                user=user,
+                lesson__in=active_lessons
+            )
+
+        # create a defaultdict with default value as an empty list
+        lesson_parts_holder = defaultdict(list)
+        for part in started_lesson_parts:
+            lesson_parts_holder[part.lesson.moduel].append(part.chapter)
+
+        chapters = collections.OrderedDict({})
+        for module in modules:
+            _chapters = list(content[module]['content'].keys())
+            chapters[module] = _chapters
         #
         context['form_appearancechoice'] = appearancechoiceform
         context['course'] = course
         context['modules'] = modules
+        context['chapters'] = chapters
+        context['started_chapters'] = lesson_parts_holder
         context['lessons'] = active_lessons
-        context['claimed_lessons'] = claimed_lessons
         return context
 
 
@@ -171,13 +186,23 @@ def _start_new_lesson(request):
 @login_required(login_url='/user/login', redirect_field_name=None)
 def _load_lesson(request):
     if request.method == 'POST':
+        user = request.user
         lesson_id = h_decode(request.POST['lesson_id'])
+        lesson = Lesson.objects.get(pk=lesson_id)
+        chapter = request.POST['chapter']
         #
         try:
-            lesson = Lesson.objects.get(pk=lesson_id)
+            lesson_part, created = Lesson_part.objects.get_or_create(
+                    user=user,
+                    lesson=lesson,
+                    chapter=chapter
+                )
         except Exception:
             return JsonResponse({'error': 1, 'message': 'Lesson does not exits!'})
-        chat = lesson.lesson_chat
-        content = lesson.lesson_content
-        return JsonResponse({'error': 0, 'chat': chat, 'content': content})
+        part_chat = lesson_part.part_content
+        response = {'error': 0, 'chat': part_chat}
+        print(created)
+        if created:
+            response['introduction'] = lesson_part.part_introduction
+        return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})

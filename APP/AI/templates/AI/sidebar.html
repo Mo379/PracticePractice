@@ -12,7 +12,8 @@
 		</div>
 		<div class='AI_side_lessons'>
 			{%for lesson in context.lessons%}
-			<a class='sidebar_button lesson_button' onclick="controller.C_open_lesson('{%url "AI:_load_lesson"%}', '{{lesson.id|hashid}}', ' {{csrf_token}}')">
+			{%include 'AI/items/modal_lesson_part.html'%}
+			<a class='sidebar_button lesson_button' data-toggle="modal" data-target="#all_lesson{{lesson.id|hashid}}_parts_modal">
 				{{lesson.moduel|field_name_to_label}}
 			</a>
 			{%endfor%}

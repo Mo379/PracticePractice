@@ -45,8 +45,9 @@ body{
 	overflow-y:scroll;
 	position: relative;
 }
-.main_chat_container{
+#main_chat_container{
 }
+#main_chat_scroll_container{}
 #introduction_container{
 	position: absolute;
 	top: 50%;
@@ -150,6 +151,17 @@ body{
 }
 .lesson_button:hover{
 	background: var(--main-bg-color);
+	cursor: pointer;
+}
+.chapter_button{
+	margin-bottom: 3px;
+	border:1px solid var(--text-color-3);
+	background: var(--third-bg-color);
+	text-align: left;
+}
+.chapter_button:hover{
+	background: var(--main-bg-color);
+	border: 1px solid var(--text-color-1);
 	cursor: pointer;
 }
 .sidebar-divider{
