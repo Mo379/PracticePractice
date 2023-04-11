@@ -25,7 +25,6 @@ class User(AbstractUser):
     CHOICES_THEME = [
         ('lig', 'Light'),
         ('dar', 'Dark'),
-        ('lib', 'Library'),
     ]
     theme = models.CharField(
         max_length=3,

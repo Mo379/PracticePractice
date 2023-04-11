@@ -31,6 +31,7 @@ from braces.views import (
 from mdeditor.configs import MDConfig
 from io import BytesIO
 from PP2.utils import h_encode, h_decode
+from AI.tasks import _generate_course_introductions
 from notification.tasks import _send_email
 
 
@@ -1178,6 +1179,7 @@ def _updatecourseinformation(request):
                                     extra_tags='alert-warning course'
                                 )
                 course.save()
+                _generate_course_introductions.delay(course.id)
             except Exception as e:
                 messages.add_message(
                         request,
@@ -2797,7 +2799,7 @@ def _add_collaborator(request):
                     "If you would like to accept this invitation see this page: \n" +
                     f"({settings.SITE_URL}/dashboard/specifications)"
                 )
-                _send_email(
+                _send_email.delay(
                         mail_subject,
                         message,
                         mail_sender,
@@ -2860,7 +2862,7 @@ def _assign_collaborator_spec(request):
                     "If you would like to accept this invitation see this page: \n" +
                     f"({settings.SITE_URL}/dashboard/specifications)"
                 )
-                _send_email(
+                _send_email.delay(
                         mail_subject,
                         message,
                         mail_sender,
@@ -2951,7 +2953,7 @@ def _collab_freelancer_conditions(request):
             "If you would like to see and accept those conditions see this page: \n" +
             f"({settings.SITE_URL}/dashboard/specifications)"
         )
-        _send_email(
+        _send_email.delay(
                 mail_subject,
                 message,
                 mail_sender,
@@ -3021,7 +3023,7 @@ def _collab_partner_conditions(request):
             "If you would like to see and accept those conditions see this page: \n" +
             f"({settings.SITE_URL}/dashboard/specifications)"
         )
-        _send_email(
+        _send_email.delay(
                 mail_subject,
                 message,
                 mail_sender,
@@ -3089,7 +3091,7 @@ def _initial_invitation_acceptance(request):
             "visit this page to see more: \n" +
             f"({settings.SITE_URL}/dashboard/specifications)"
         )
-        _send_email(
+        _send_email.delay(
                 mail_subject,
                 message,
                 mail_sender,
@@ -3157,7 +3159,7 @@ def _condition_acceptance(request):
             "If you would like to see the full agreement visit this page: \n" +
             f"({settings.SITE_URL}/dashboard/specifications)"
         )
-        _send_email(
+        _send_email.delay(
                 mail_subject,
                 message,
                 mail_sender,

@@ -31,12 +31,9 @@
 		
 		{%if user.theme == 'lig' %}
 		<link rel="stylesheet" href="{%static 'base/css/light_theme.css'%}">
-		{%elif user.theme == 'lib' %}
-		<link rel="stylesheet" href="{%static 'base/css/library_theme.css'%}">
 		{%elif user.theme == 'dar' or user.is_authenticated == False%}
 		<link rel="stylesheet" href="{%static 'base/css/dark_theme.css'%}">
 		{%endif%}
-		<link rel="stylesheet" href="{%static 'base/css/color_patterns.css'%}">
 
 		{% block meta%}
 		{% endblock %}

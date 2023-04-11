@@ -4,7 +4,7 @@
 style='color:white;'
 {%endif%}
 >
-	Writer
+	Author
 </div>
 <li class="nav-item">
 	<a class="nav-link" href="{%url 'dashboard:mycourses'%}">
@@ -30,5 +30,17 @@ style='color:white;'
 		     style='color:white;'
 		     {%endif%}
 		>MySpecifications</span>
+	</a>
+	<a class="nav-link" href="{%url 'dashboard:earning_statistics'%}">
+		<i class="fas fa-fw fa-chart-area" 
+		     {%if sidebar_active == 'earning/statistics'%}
+		     style='color:white;'
+		     {%endif%}
+		   >
+		</i><span
+		     {%if sidebar_active == 'earning/statistics'%}
+		     style='color:white;'
+		     {%endif%}
+		>Statistics</span>
 	</a>
 </li>

@@ -7,6 +7,7 @@ style='color:white;'
 	Student
 </div>
 <li class="nav-item">
+	{% comment %}
 	<a class="nav-link" href="{%url 'dashboard:student_performance'%}">
 		<i class="bi bi-graph-up-arrow" 
 		     {%if sidebar_active == 'student/performance'%}
@@ -19,6 +20,7 @@ style='color:white;'
 		     {%endif%}
 		>Performance</span>
 	</a>
+	{% endcomment %}
 	<a class="nav-link" href="{%url 'dashboard:student_contentmanagement'%}">
 		<i class="bi bi-journal-bookmark-fill" 
 		     {%if sidebar_active == 'student/contentmanagement'%}
