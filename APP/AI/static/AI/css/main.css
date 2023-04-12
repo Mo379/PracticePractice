@@ -9,6 +9,7 @@ body{
 	grid-template-areas: "sidebar window";
 	min-height: 100vh;
 	max-height: 100vh;
+	height: 100vh;
 	padding: 0px;
 }	
 .AI_side_bar{
