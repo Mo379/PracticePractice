@@ -4,9 +4,7 @@
 		font-size: 11px;
 	}
 	.AI_main_container{
-		display:grid;
-		grid-template-columns: 1fr;
-		grid-template-areas: "window";
+		display:flex;
 	}	
 	#AI_side_bar{
 		position: absolute;
@@ -34,9 +32,7 @@
 		margin-bottom: 10px;
 	}
 	.AI_main_container{
-		display:grid;
-		grid-template-columns: 1fr;
-		grid-template-areas: "window";
+		display:flex;
 	}	
 	#AI_side_bar{
 		position: absolute;
