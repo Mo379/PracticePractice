@@ -53,9 +53,22 @@
 	</div>
 	</div>
 	<div class='AI_window_typing'>
-		<button class='sidebar_button lesson_button mt-2' id='collapse_side_bar_button'>
+		<button class='sidebar_button lesson_button mt-2' id='toggle-sidebar-btn'>
 			<i class="bi bi-arrows-fullscreen"></i>	
 		</button>
+	<script>
+		const toggleSidebarBtn = document.querySelector('#toggle-sidebar-btn');
+		const toggleSidebarBtn_2 = document.querySelector('#toggle-sidebar-btn-2');
+		const sidebar = document.querySelector('#sidebar');
+		const mainContent = document.querySelector('#main-content');
+
+		toggleSidebarBtn.addEventListener('click', function() {
+			document.body.classList.toggle('show-sidebar');
+		});
+		toggleSidebarBtn_2.addEventListener('click', function() {
+			document.body.classList.toggle('show-sidebar');
+		});
+	</script>
 	      <div class="input-group mt-2" id ='message_field'>
 		  <div class="input-group-prepend">
 		    <button class="btn btn-outline-secondary" type="button" id="button-addon1"><i class="fa-solid fa-paper-plane"></i></button>

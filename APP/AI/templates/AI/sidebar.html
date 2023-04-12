@@ -3,7 +3,7 @@
 {%include 'AI/items/modal_lessons.html'%}
 {%include 'AI/items/modal_theme.html'%}
 {%include 'AI/items/modal_help.html'%}
-<div class='AI_side_bar'>
+<div class='AI_side_bar' id='AI_side_bar'>
 	<div class='AI_side_lessons_wrapper'>
 		<div class ='new_lesson_button'>
 			<button class='sidebar_button' data-toggle="modal" data-target="#all_lessons_modal">
@@ -12,6 +12,9 @@
 			<button class='sidebar_button' data-toggle="modal" data-target="#modal_lesson_options">
 				<i class="bi bi-hand-index-thumb"></i>
 				Options
+			</button>
+			<button class='sidebar_button mt-2' id='toggle-sidebar-btn-2'>
+				<i class="bi bi-arrows-fullscreen"></i>	
 			</button>
 		</div>
 		<div class='AI_side_lessons'>
