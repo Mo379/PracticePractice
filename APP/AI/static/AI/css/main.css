@@ -172,10 +172,13 @@ body{
 }
 
 #message_field{
-	width: 50%;
+	width: 80%;
 	margin:auto;
 	border: 1px solid white;
 	border-radius: 5px;
+}
+#typing_text_area{
+	height: 25px;
 }
 .AI_window_typing .lesson_button{
 	width: auto;
