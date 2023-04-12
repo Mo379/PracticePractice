@@ -3,6 +3,9 @@
 {%include 'AI/items/modal_lessons.html'%}
 {%include 'AI/items/modal_theme.html'%}
 {%include 'AI/items/modal_help.html'%}
+{%for lesson in context.lessons%}
+{%include 'AI/items/modal_lesson_part.html'%}
+{%endfor%}
 <div class='AI_side_bar' id='AI_side_bar'>
 	<div class='AI_side_lessons_wrapper'>
 		<div class ='new_lesson_button'>
@@ -19,7 +22,6 @@
 		</div>
 		<div class='AI_side_lessons'>
 			{%for lesson in context.lessons%}
-			{%include 'AI/items/modal_lesson_part.html'%}
 			<a class='sidebar_button lesson_button' data-toggle="modal" data-target="#all_lesson{{lesson.id|hashid}}_parts_modal">
 				{{lesson.moduel|field_name_to_label}}
 			</a>

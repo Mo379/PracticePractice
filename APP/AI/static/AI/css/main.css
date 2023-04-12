@@ -36,7 +36,7 @@ body{
 	display:grid;
 	grid-area: window;
 	background: var(--third-bg-color);
-	grid-template-rows: 8fr 2fr;
+	grid-template-rows: 8fr 2.5fr;
 	grid-template-areas:'chat' 'typing';
 }
 .AI_window_chat{

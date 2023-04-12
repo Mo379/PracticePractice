@@ -1,5 +1,8 @@
 
 @media only screen and (max-width: 450px){
+	body{
+		font-size: 11px;
+	}
 	.AI_main_container{
 		display:grid;
 		grid-template-columns: 1fr;
@@ -22,6 +25,14 @@
 
 }
 @media only screen and (min-width: 451px) and (max-width: 1199px){
+	body{
+		font-size: 11px;
+	}
+	.sidebar_button{
+		padding: 8px;
+		margin-top: 5px;
+		margin-bottom: 10px;
+	}
 	.AI_main_container{
 		display:grid;
 		grid-template-columns: 1fr;
@@ -43,4 +54,10 @@
 	}
 }
 @media only screen and (min-width: 1200px){
+	#toggle-sidebar-btn{
+		display:none;
+	}
+	#toggle-sidebar-btn-2{
+		display:none;
+	}
 }
