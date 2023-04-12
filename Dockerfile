@@ -1,5 +1,5 @@
 #seed
-FROM python:3.8
+FROM python:3.10
 #setup
 ENV TZ=Europe/Minsk
 ENV DEBIAN_FRONTEND=noninteractive 
@@ -17,7 +17,7 @@ RUN ln /usr/bin/python3 /usr/bin/python
 RUN wget https://github.com/GrahamDumpleton/mod_wsgi/archive/refs/tags/4.9.4.tar.gz \
 	&& tar xvfz 4.9.4.tar.gz \
 	&& cd mod_wsgi-4.9.4 \
-	&& ./configure --with-python=/usr/local/bin/python3.8 \
+	&& ./configure --with-python=/usr/local/bin/python3.10 \
 	&& make \
 	&& make install 
 #app periferals

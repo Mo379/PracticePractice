@@ -1179,7 +1179,7 @@ def _updatecourseinformation(request):
                                     extra_tags='alert-warning course'
                                 )
                 course.save()
-                _generate_course_introductions.delay(course.id)
+                _generate_course_introductions(course.id)
             except Exception as e:
                 messages.add_message(
                         request,
