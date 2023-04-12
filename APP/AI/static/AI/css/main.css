@@ -20,8 +20,6 @@ body{
 	grid-template-areas: 'lessons' 'options';
 }
 .AI_side_lessons_wrapper{
-	display:flex;
-	flex-direction: column;
 	grid-area: lessons;
 	position:relative;
 	max-height: 100% !important;
@@ -31,8 +29,6 @@ body{
 	height: 0px;
 }
 .AI_side_options{
-	display:flex;
-	flex-direction: column;
 	grid-area; options;
 	margin-top: 10px;
 }
@@ -40,7 +36,7 @@ body{
 	display:grid;
 	grid-area: window;
 	background: var(--third-bg-color);
-	grid-template-rows: 8fr 2fr;
+	grid-template-rows: 8fr auto;
 	grid-template-areas:'chat' 'typing';
 }
 .AI_window_chat{
