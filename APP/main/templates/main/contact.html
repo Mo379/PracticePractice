@@ -1,19 +1,63 @@
-{% extends 'base/base.html'%}
-
-{%block page_name%}
-	Contact
+{%extends 'user/registration/base.html'%}
+{%block pagename%}
+Contact
 {%endblock%}
-
-{%block title%}
-Contact us
-{%endblock%}
-
-{%block meta%}
-<meta name="description" content="
-Write to us about anthing relevant, we love to hear from you! :).
-">
-{%endblock%}
-
 {%block content%}
-	{{context}}
+{%load general%}
+<!-- Outer Row -->
+<div class="row justify-content-center">
+<div class="col-xl-10 col-lg-12 col-md-9">
+<div class="card o-hidden border-0 shadow-lg my-5">
+<div class="card-body p-0">
+<!-- Nested Row within Card Body -->
+<div class="row">
+<div class="col-lg-6 d-none d-lg-block bg-login-image" style='background:Black;'></div>
+<div class="col-lg-6">
+<div class="p-5">
+	<div class="text-center">
+		<h1 class="h4 text-gray-900 mb-4">Contact Us</h1>
+	</div>
+	{%definevar 'contact_form' as alert_loc%}
+	{%include 'base/alert.html'%}
+	<form class="px-3 py-3"  action="{%url 'user:_contact_us'%}" method="POST" role="form">
+		{%csrf_token%}
+		<label for="spec_level">About you:</label>
+		<input 
+			type='text' 
+			name='full_name' 
+			class='form-control mb-3'
+			placeholder='Full Name'
+		/>
+		<input 
+			type='text' 
+			name='mail_sender' 
+			class='form-control mb-3'
+			placeholder='Email'
+		/>
+		<label for="spec_board">Message</label>
+		<input 
+			type='text' 
+			name='message_subject' 
+			class='form-control mb-3'
+			placeholder='subject'
+		/>
+		<textarea
+			type='text' 
+			name='message' 
+			class='form-control mb-3'
+			placeholder='Your message...'
+				></textarea>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Send </button>
+	</form>
+	<hr>
+	<div class="text-center">
+		<a class="small" href="{%url 'main:index'%}">Home</a>
+	</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 {%endblock%}

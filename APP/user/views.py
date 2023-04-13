@@ -441,6 +441,50 @@ def _loginUser(request):
 
 
 # Register user action
+def _contact_us(request):
+    if request.method == "POST":
+        full_name = request.POST['full_name']
+        email_sender = request.POST['mail_sender']
+        message_subject = request.POST['message_subject']
+        message = request.POST['message']
+        to_email = 'info@practicepractice.net'
+        try:
+            #validate email
+            x = 4
+        except Exception:
+            #return error
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong, please check that your input is valid.',
+                    extra_tags='alert-success contact_form'
+                )
+        else:
+            send_mail(
+                message_subject,
+                message,
+                to_email,
+                [to_email],
+                fail_silently=False,
+            )
+            send_mail(
+                message_subject,
+                message,
+                to_email,
+                [email_sender],
+                fail_silently=False,
+            )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your message has been recieved, \
+                            check your email for the confimration.',
+                    extra_tags='alert-success contact_form'
+                )
+    return redirect('main:contact')
+
+
+# Register user action
 def _registerUser(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)

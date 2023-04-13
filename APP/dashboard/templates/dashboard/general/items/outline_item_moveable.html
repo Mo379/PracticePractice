@@ -1,0 +1,22 @@
+{%load general%}
+{%for module in content%}
+<div class="accordion mb-1" id="Module_{{module}}">
+  <div class="card course_outline_card">
+	  <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
+      <h2 class="mb-0">
+	        <button class="btn btn-block text-left" style='' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
+			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module {{forloop.counter}} - {{module|field_name_to_label}}</span>
+	</button>
+      </h2>
+    </div>
+
+    <div id="collapse-{{module}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
+      <div class="card-body" style='padding:10px;'>
+	        {%for chapter in content|index:module|index:'content'%}
+		    <span class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} </span><br>
+		{%endfor%}
+      </div>
+    </div>
+  </div>
+</div>
+{%endfor%}

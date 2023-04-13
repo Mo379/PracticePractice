@@ -72,6 +72,15 @@ function Redirect_FN_Question() {
 
 </script>
 
+
+<div style='margin:auto; padding:15px;' class='mb-3 mt-5' id='marketcourse_courseoutline'>
+	<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-journal-text"></i> Course Outline </h1>
+	<div class='mt-2' style=''>
+		{%definevar context.spec.spec_content as content%}
+		{%include 'dashboard/general/items/outline_item_moveable.html'%}
+	</div>
+</div>
+
 <div class="mb-4">
 	<div class="card-body">
 		<div class="card shadow mb-4">
@@ -158,6 +167,9 @@ function Redirect_FN_Question() {
 		</div>
 	</div>
 </div>
+
+
+
 
 <script>
 dragula([document.getElementById('left'), document.getElementById('right')], {

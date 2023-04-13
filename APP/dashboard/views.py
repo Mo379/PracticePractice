@@ -164,12 +164,9 @@ class MarketCourseView(
 
 
 class CourseReviewsView(
-            LoginRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
-    login_url = 'user:login'
-    redirect_field_name = ''
 
     template_name = "dashboard/general/course_reviews.html"
     context_object_name = 'context'

@@ -46,6 +46,7 @@ urlpatterns = [
     ),
     # actions
     path('_login', views._loginUser, name='_login'),
+    path('_contact_us', views._contact_us, name='_contact_us'),
     path('_registerUser', views._registerUser, name='_register'),
     path('_updatepassword', views._updatepassword, name='_updatepassword'),
     path('_pwdreset_form', views._pwdreset_form, name='_pwdreset_form'),
