@@ -1,22 +1,100 @@
 {%load general%}
-{%for module in content%}
+<ol id='modules_list'>
+
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+	New
+</button>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+	Removed
+</button>
+
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+Delete
+</button>
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+Bin
+</button>
+<br>
+
+
+{%for module in all_modules%}
 <div class="accordion mb-1" id="Module_{{module}}">
   <div class="card course_outline_card">
-	  <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
-      <h2 class="mb-0">
-	        <button class="btn btn-block text-left" style='' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
+    <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
+		<span class='' style='display:inline-block;cursor:pointer;'>
+			<input type='hidden' name='ordered_modules[]' value='{{module}}'/>
+			<span class='handle mr-2 ml-2'style='font-size:25px;'>
+				+
+			</span>
+		</span>
+	        <button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
 			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module {{forloop.counter}} - {{module|field_name_to_label}}</span>
-	</button>
-      </h2>
+		</button>
+		<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+		Remove
+		</button>
     </div>
 
     <div id="collapse-{{module}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
       <div class="card-body" style='padding:10px;'>
-	        {%for chapter in content|index:module|index:'content'%}
-		    <span class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} </span><br>
-		{%endfor%}
+	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+		New
+	</button>
+	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+		residuals
+	</button>
+
+	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+	Delete
+	</button>
+	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+	Bin
+	</button>
+	      <ol id='chapter_list_{{module}}'>
+
+	        {%if module in content%}
+			{%for chapter in content|index:module|index:'content'%}
+				<div class='' style='cursor:pointer;'>
+					<input type='hidden' name='ordered_chapters[]' value='{{chapter}}'/>
+					<span class='chapter_handle mr-2 ml-5'style='font-size:25px;'>
+						+
+					</span>
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}</a></span>
+				<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+				Remove
+				</button>
+				</div>
+			{%endfor%}
+		{%else%}
+		{{module}}
+		{%endif%}
+		</ol>
+			<script>
+			dragula([document.getElementById('chapter_list_{{module}}')], {
+			  moves: function (el, container, handle) {
+			    return handle.classList.contains('chapter_handle');
+			  },
+			}).on('drop', function (el, container, handle) {
+					let elements = container.querySelectorAll('input')
+					let currentOrder = Array.from(elements).map(input => input.value);
+					alert(currentOrder);
+			});
+			</script>
       </div>
     </div>
   </div>
 </div>
 {%endfor%}
+</ol>
+<script>
+dragula([document.getElementById('modules_list')], {
+  moves: function (el, container, handle) {
+    return handle.classList.contains('handle');
+  },
+}).on('drop', function (el, container, handle) {
+		let elements = container.querySelectorAll('input[name="ordered_modules[]"]')
+		let currentOrder = Array.from(elements).map(input => input.value);
+		alert(currentOrder);
+});
+
+</script>

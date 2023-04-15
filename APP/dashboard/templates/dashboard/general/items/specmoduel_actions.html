@@ -1,70 +1,4 @@
 {%load general %}
-<div class="modal fade" id="InheritModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Inherit</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_inheritfromspec'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<label for="Specifications">Choose a Specification:</label>
-
-		<select name="parent_spec_id" id="Specifications">
-		  {%for n_spec in context.neighbor_specs%}
-		  <option value="{{n_spec.id}}">
-			{{n_spec.spec_level}} -
-			{{n_spec.spec_subject}} -
-			{{n_spec.spec_board}} -
-			{{n_spec.spec_name}}
-		  </option>
-		  {%endfor%}
-		</select>
-		<input type='hidden' name='child_spec_id' value='{{spec.id}}'/>
-		<br>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Inherit </button>
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="RenameModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Rename</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_renamespec'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='new_name' 
-			placeholder='Rename specification'
-		       value='{{spec.spec_name}}'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal fade" id="CrateModuelModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -75,18 +9,19 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_createmoduel'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_createmoduel'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 		<input 
+		       class ='form-control mb-3'
 			type='text' 
 			name='new_module' 
 			placeholder='New Module'
 		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create New Moduel</button>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float:right;'> Create New Moduel</button>
 	</form>
       </div>
     </div>
@@ -103,7 +38,7 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_deletemoduel'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_deletemoduel'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
@@ -111,14 +46,46 @@
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 
 		<label for="Modules">Choose a Module:</label>
-		<select name="delete_moduel" id="Modules" class='mb-3'>
-		  {%for mod in context.all_moduels%}
-		  <option value="{{mod.p_moduel}}">
-			{{mod.p_moduel|field_name_to_label}}
+		<select class ='form-control mb-3' name="delete_moduel" id="Modules" class='mb-3'>
+		  {%for mod in context.modules%}
+		  <option value="{{mod}}">
+			{{mod|field_name_to_label}}
 		  </option>
 		  {%endfor%}
 		</select>
-		<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete Moduel</button>
+		<button type= 'submit' class='btn btn-danger mb-2' style='float:right;'> Delete Moduel</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="BinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Bin</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		  {%for module in context.deleted_moduels%}
+			  <div class="card course_outline_card mb-2">
+			    <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
+					<button class="btn text-left">
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
+					</button>
+					<button class="btn text-left text-primary" type="button">
+						Restore
+					</button>
+					<button class="btn text-left text-danger" type="button">
+						Erase
+					</button>
+			    </div>
+			  </div>
+		  {%endfor%}
 	</form>
       </div>
     </div>

@@ -35,6 +35,7 @@ class Question(models.Model):
         max_length=11, db_index=True, default="", null=True, unique=True
     )
     deleted = models.BooleanField(default=False, null=True)
+    erased = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.q_unique_id
@@ -58,6 +59,7 @@ class Point(models.Model):
     is_completed_content = models.BooleanField(default=False, null=True)
     is_completed_questions = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
+    erased = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.p_unique_id

@@ -80,6 +80,10 @@ body{
 	color: var(--text-color-2);
 }
 
+.nav_bar_menu_icon{
+	color: var(--text-color-1) !important;
+}
+
 .nav-link{
 	color: var(--text-color-1);
 }

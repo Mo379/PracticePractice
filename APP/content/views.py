@@ -1545,6 +1545,7 @@ def _createmoduel(request):
                 p_level=level,
                 p_subject=subject,
                 p_moduel=new_module,
+                erased=False,
             )
         if len(points) == 0:
             my_point = Point()
