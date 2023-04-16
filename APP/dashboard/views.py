@@ -430,15 +430,18 @@ class SpecModuelHandlerView(
         # Ordering the modules
         moduels_objs = [obj['p_moduel'] for obj in moduels]
         deleted_objs = [obj['p_moduel'] for obj in deleted_moduels]
-        ordered_spec = order_full_spec_content(spec.spec_content)
+        ordered_spec = order_live_spec_content(spec.spec_content)
         keys = list(ordered_spec.keys())
         left_over = [mod for mod in moduels_objs if mod not in keys]
         moduels_objs = left_over + keys
-        #
+        # Getting removed items
+        items = [item[0] for item in spec.spec_content.items() if item[1]['active'] == False]
+
         context['spec'] = spec
         context['modules'] = moduels_objs
         context['deleted_moduels'] = deleted_objs
         context['full_ord_spec'] = ordered_spec
+        context['removed_items'] = items
         return context
 
 

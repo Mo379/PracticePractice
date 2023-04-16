@@ -828,53 +828,40 @@ def _inheritfromspec(request):
             )
 
 
-def _ordermoduels(request):
+def _removemodule(request):
     if request.method == 'POST':
-        level = request.POST['level']
-        subject = request.POST['subject']
-        board = request.POST['board']
-        name = request.POST['name']
-        ordered_moduels = request.POST.getlist('ordered_items[]')
-        if 'completed' in request.POST:
-            completed = True
-        else:
-            completed = False
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
         # Get objects
         spec = Specification.objects.get(
                 user=request.user,
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name
+                pk=int(spec_id)
+            )
+        content = spec.spec_content.copy()
+        content[module]['active'] = False
+        content[module]['position'] = -1
+        # Update the values
+        spec.spec_content = content
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _ordermoduels(request):
+    if request.method == 'POST':
+        spec_id = request.POST.getlist('spec_id')
+        ordered_moduels = request.POST.getlist('order')[0].split(',')
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id[0])
             )
         content = spec.spec_content.copy()
         new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
         content = new_information
         # Update the values
-        if completed:
-            spec.spec_completion = True
-        else:
-            spec.spec_completion = False
         spec.spec_content = content
         spec.save()
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Specification Moduels Updated!',
-                extra_tags='alert-success specmoduel'
-            )
-
-        #
-        kwargs = {
-            'level': level,
-            'subject': subject,
-            'board': board,
-            'name': name,
-        }
-        return redirect(
-                'dashboard:specmoduel',
-                **kwargs
-            )
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 def _orderchapters(request):

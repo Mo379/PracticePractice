@@ -4,7 +4,7 @@
 <button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
 	New
 </button>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
 	Removed
 </button>
 
@@ -18,6 +18,7 @@ Bin
 
 
 {%for module in all_modules%}
+{%if module in content%}
 <div class="accordion mb-1" id="Module_{{module}}">
   <div class="card course_outline_card">
     <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
@@ -30,8 +31,8 @@ Bin
 	        <button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
 			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module {{forloop.counter}} - {{module|field_name_to_label}}</span>
 		</button>
-		<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
-		Remove
+		<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_module('{%url 'content:_removemodule'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}')">
+			Remove
 		</button>
     </div>
 
@@ -41,7 +42,7 @@ Bin
 		New
 	</button>
 	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
-		residuals
+		Removed
 	</button>
 
 	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
@@ -60,7 +61,7 @@ Bin
 						+
 					</span>
 					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}</a></span>
-				<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+					<button class="btn text-left text-danger" type="button" onclick='controller.C_remove_chapter("{%url 'content:_removemodule'%}", '{{csrf_token}}', '{{spec_id}}','{{chapter}}')'>
 				Remove
 				</button>
 				</div>
@@ -84,6 +85,7 @@ Bin
     </div>
   </div>
 </div>
+{%endif%}
 {%endfor%}
 </ol>
 <script>
@@ -94,7 +96,7 @@ dragula([document.getElementById('modules_list')], {
 }).on('drop', function (el, container, handle) {
 		let elements = container.querySelectorAll('input[name="ordered_modules[]"]')
 		let currentOrder = Array.from(elements).map(input => input.value);
-		alert(currentOrder);
+		controller.C_update_module_list("{%url 'content:_ordermoduels'%}", '{{csrf_token}}', '{{spec.id}}', currentOrder);
 });
 
 </script>

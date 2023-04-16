@@ -61,6 +61,37 @@
 </div>
 
 
+<div class="modal fade" id="RemovedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Removed</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id='remove_modules_div'>
+		  {%for module in context.removed_items%}
+			  <div class="card course_outline_card mb-2">
+			    <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
+					<button class="btn text-left">
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
+					</button>
+					<button class="btn text-left text-primary" type="button">
+						Restore
+					</button>
+			    </div>
+			  </div>
+		  {%endfor%}
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 <div class="modal fade" id="BinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
