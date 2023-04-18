@@ -1,35 +1,5 @@
-{%load general%}
-<div class="modal fade" id="RenameModuleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Rename Module</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_renamemodule'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='new_name' 
-			placeholder='Rename Module'
-		        value='{{sample.p_moduel}}'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="CrateChapterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{%load general %}
+<div class="modal fade" id="CrateChapter_{{module}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -39,26 +9,27 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_createchapter'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_createchapter'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 		<input 
+		       class ='form-control mb-3'
 			type='text' 
 			name='new_chapter' 
 			placeholder='New Chapter'
 		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create New Chapter</button>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float:right;'> Create New Chapter</button>
 	</form>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="DeleteChapterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="DeleteChapter_{{module}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -68,26 +39,83 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_deletechapter'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_deletechapter'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 
-
-		<label for="Chapters">Choose a Chapter:</label>
-		<select name="delete_chapter" id="Chapters" class='mb-3'>
-		  {%for chap in context.all_chapters%}
-		  <option value="{{chap.p_chapter}}">
-			{{chap.p_chapter|field_name_to_label}}
+		<label for="Modules">Choose a Chapter:</label>
+		<select class ='form-control mb-3' name="delete_chapter" id="Modules" class='mb-3'>
+		  {%for chap in context.module_chapters|index:module%}
+		  <option value="{{chap}}">
+			{{chap|field_name_to_label}}
 		  </option>
 		  {%endfor%}
 		</select>
-		<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete Chapter</button>
+		<button type= 'submit' class='btn btn-danger mb-2' style='float:right;'> Delete Chapter</button>
 	</form>
       </div>
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="RemoveChapter_{{module}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Removed</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id='remove_chapters_div'>
+		  {%for chapter in context.removed_module_chapters|index:module%}
+			<div class='' style='cursor:pointer;' id='Remove_chapter_{{module}}_{{chapter}}'>
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter - {{chapter|field_name_to_label}}</a></span>
+					<button class="btn text-left text-primary" type="button">
+						Restore
+					</button>
+			</div>
+		  {%endfor%}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal fade" id="BinnedChapter_{{module}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Bin</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		  {%for chapter in context.deleted_module_chapters|index:module%}
+			  <div class="card course_outline_card mb-2">
+			    <div class="card-header course_outline_cell" id="heading-{{chapter}}" style=''>
+					<button class="btn text-left">
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Chapter - {{chapter|field_name_to_label}}</span>
+					</button>
+					<button class="btn text-left text-primary" type="button">
+						Restore
+					</button>
+					<button class="btn text-left text-danger" type="button">
+						Erase
+					</button>
+			    </div>
+			  </div>
+		  {%endfor%}
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -12,6 +12,10 @@ Moduel Selection and ordering
 
 
 {%include 'dashboard/general/items/specmoduel_actions.html'%}
+
+{%for module in context.modules%}
+{%include 'dashboard/general/items/specchapter_actions.html'%}
+{%endfor%}
 <script src="{%static 'dashboard/js/specmoduel_controller.js'%}"></script>
 <div class="mb-4">
 	<div class="card-body">

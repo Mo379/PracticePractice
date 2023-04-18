@@ -15,6 +15,7 @@ from content.util.GeneralUtil import (
         TagGenerator,
         insert_new_spec_order,
         order_full_spec_content,
+        order_live_spec_content,
         TranslatePointContent,
         TranslateQuestionContent,
     )
@@ -864,48 +865,46 @@ def _ordermoduels(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-def _orderchapters(request):
+def _restoremodule(request):
     if request.method == 'POST':
-        level = request.POST['level']
-        subject = request.POST['subject']
-        board = request.POST['board']
-        name = request.POST['name']
-        moduel = request.POST['moduel']
-        ordered_chapters = request.POST.getlist('ordered_items[]')
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
         # Get objects
         spec = Specification.objects.get(
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name
+                user=request.user,
+                pk=int(spec_id)
+            )
+        content = spec.spec_content.copy()
+        # Update the values
+        ordered_moduels = list(order_live_spec_content(content).keys())
+        ordered_moduels = [module] + ordered_moduels
+        new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
+        # Update the values
+        spec.spec_content = new_information
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _orderchapters(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        ordered_chapters = request.POST.getlist('order')[0].split(',')
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
             )
         content = spec.spec_content.copy()
         new_information = insert_new_spec_order(
                 ordered_chapters,
-                content[moduel]['content'],
+                content[module]['content'],
                 'chapter'
             )
-        content[moduel]['content'] = new_information
+        content[module]['content'] = new_information
         spec.spec_content = content
         spec.save()
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Specification Moduel-Chapters Updated !',
-                extra_tags='alert-success specchapter'
-            )
-        #
-        kwargs = {
-            'level': level,
-            'subject': subject,
-            'board': board,
-            'name': name,
-            'module': moduel,
-        }
-        return redirect(
-                'dashboard:specchapter',
-                **kwargs
-            )
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 def _ordertopics(request):
@@ -1522,7 +1521,7 @@ def _createmoduel(request):
         subject = request.POST['subject']
         board = request.POST['board']
         name = request.POST['name']
-        new_module = request.POST['new_module']
+        new_module = request.POST['new_module'].replace(' ', '_')
         Template = ContentTemplate.objects.get(
                 name='Point'
             )
@@ -1533,6 +1532,13 @@ def _createmoduel(request):
                 p_subject=subject,
                 p_moduel=new_module,
                 erased=False,
+            )
+        spec = Specification.objects.filter(
+                user=request.user,
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=new_module,
+                spec_name=name
             )
         if len(points) == 0:
             my_point = Point()
@@ -1547,17 +1553,18 @@ def _createmoduel(request):
             my_point.p_unique_id = TagGenerator()
             my_point.save()
             #
+            #
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Successfully created a new moduel',
+                    'Successfully created a new moduel, activate it from the removed list!',
                     extra_tags='alert-success specmoduel'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Module Already exists, check your binned modules.',
+                    'Module Already exists, check your removed and binned modules.',
                     extra_tags='alert-success specmoduel'
                 )
         kwargs = {
@@ -1699,7 +1706,7 @@ def _createchapter(request):
         module = request.POST['moduel']
         board = request.POST['board']
         name = request.POST['name']
-        new_chapter = request.POST['new_chapter']
+        new_chapter = request.POST['new_chapter'].replace(' ', '_')
         Template = ContentTemplate.objects.get(
                 name='Point'
             )
@@ -1728,24 +1735,23 @@ def _createchapter(request):
                     request,
                     messages.INFO,
                     'Successfully created a new chapter',
-                    extra_tags='alert-success specchapter'
+                    extra_tags='alert-success specmoduel'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Chapter Already exists, check your binned chapters.',
-                    extra_tags='alert-warning specchapter'
+                    'Chapter Already exists, check your removed or binned chapters.',
+                    extra_tags='alert-warning specmoduel'
                 )
         kwargs = {
             'level': level,
             'subject': subject,
-            'module': module,
             'board': board,
             'name': name
         }
         return redirect(
-                'dashboard:specchapter',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -1787,28 +1793,45 @@ def _deletechapter(request):
                     request,
                     messages.INFO,
                     f'chapter {deleted_chapter} was binned but not permanently deleted.',
-                    extra_tags='alert-warning specchapter'
+                    extra_tags='alert-warning specmoduel'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
                     'Something is wrong, please check that the input is correct.',
-                    extra_tags='alert-warning specchapter'
+                    extra_tags='alert-warning specmoduel'
                 )
         kwargs = {
             'level': level,
             'subject': subject,
-            'module': module,
             'board': board,
             'name': name
         }
         return redirect(
-                'dashboard:specchapter',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
 
+def _removechapter(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        chapter = request.POST['chapter']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        content = spec.spec_content.copy()
+        content[module]['content'][chapter]['active'] = False
+        content[module]['content'][chapter]['position'] = -1
+        # Update the values
+        spec.spec_content = content
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 def _renamechapter(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1889,7 +1912,7 @@ def _createtopic(request):
         moduel = request.POST['moduel']
         chapter = request.POST['chapter']
         name = request.POST['name']
-        new_topic = request.POST['new_topic']
+        new_topic = request.POST['new_topic'].replace(' ', '_')
         #
         Template = ContentTemplate.objects.get(
                 name='Point'
@@ -2092,7 +2115,7 @@ def _createpoint(request):
         moduel = request.POST['moduel']
         chapter = request.POST['chapter']
         topic = request.POST['topic']
-        name = request.POST['name']
+        name = request.POST['name'].replace(' ', '_')
         new_point = request.POST['new_point']
         #
         Template = ContentTemplate.objects.get(

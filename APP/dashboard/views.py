@@ -418,7 +418,7 @@ class SpecModuelHandlerView(
                     'p_subject',
                     'p_moduel',
                 )        # reformat moduels
-        deleted_moduels = deleted_chapters.values(
+        deleted_modules = deleted_chapters.values(
                     'p_level',
                     'p_subject',
                     'p_moduel',
@@ -429,19 +429,36 @@ class SpecModuelHandlerView(
                 )        # reformat moduels
         # Ordering the modules
         moduels_objs = [obj['p_moduel'] for obj in moduels]
-        deleted_objs = [obj['p_moduel'] for obj in deleted_moduels]
+        deleted_objs = [obj['p_moduel'] for obj in deleted_modules]
         ordered_spec = order_live_spec_content(spec.spec_content)
         keys = list(ordered_spec.keys())
         left_over = [mod for mod in moduels_objs if mod not in keys]
-        moduels_objs = left_over + keys
+        moduels_objs = keys
+        #
+        module_chapters = collections.defaultdict(list)
+        for key in keys:
+            module_chapters[key] = ordered_spec[key]['content'].keys()
+        #
+        deleted_module_chapters = collections.defaultdict(list)
+        for d_mod in deleted_chapters:
+            deleted_module_chapters[d_mod['p_moduel']].append(d_mod['p_chapter'])
+        #
+        removed_module_chapters = collections.defaultdict(list)
+        for mod in keys:
+            for chap in chapters.filter(p_moduel=mod):
+                if chap['p_chapter'] not in ordered_spec[mod]['content'].keys():
+                    removed_module_chapters[mod].append(chap['p_chapter'])
         # Getting removed items
-        items = [item[0] for item in spec.spec_content.items() if item[1]['active'] == False]
-
         context['spec'] = spec
+        context['full_ord_spec'] = ordered_spec
+        #
         context['modules'] = moduels_objs
         context['deleted_moduels'] = deleted_objs
-        context['full_ord_spec'] = ordered_spec
-        context['removed_items'] = items
+        context['removed_items'] = left_over
+        #
+        context['module_chapters'] = module_chapters
+        context['deleted_module_chapters'] = deleted_module_chapters
+        context['removed_module_chapters'] = removed_module_chapters
         return context
 
 

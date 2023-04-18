@@ -91,9 +91,19 @@ urlpatterns = [
         name='_removemodule'
     ),
     path(
+        'content/_removechapter',
+        views._removechapter,
+        name='_removechapter'
+    ),
+    path(
         'content/_ordermoduels',
         views._ordermoduels,
         name='_ordermoduels'
+    ),
+    path(
+        'content/_restoremodule',
+        views._restoremodule,
+        name='_restoremodule'
     ),
     path(
         'content/_orderchapters',

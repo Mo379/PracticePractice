@@ -72,12 +72,12 @@
       </div>
       <div class="modal-body" id='remove_modules_div'>
 		  {%for module in context.removed_items%}
-			  <div class="card course_outline_card mb-2">
+		  <div class="card course_outline_card mb-2" id='Remove_module_{{module}}'>
 			    <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
 					<button class="btn text-left">
 						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
 					</button>
-					<button class="btn text-left text-primary" type="button">
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_module('{%url 'content:_restoremodule'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}')">
 						Restore
 					</button>
 			    </div>

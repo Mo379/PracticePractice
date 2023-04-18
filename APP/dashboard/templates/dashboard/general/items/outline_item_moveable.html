@@ -1,6 +1,6 @@
 {%load general%}
-<ol id='modules_list'>
 
+<div class='d-flex justify-content-center'>
 <button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
 	New
 </button>
@@ -14,9 +14,11 @@ Delete
 <button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
 Bin
 </button>
+</div>
 <br>
 
 
+<ol id='modules_list'>
 {%for module in all_modules%}
 {%if module in content%}
 <div class="accordion mb-1" id="Module_{{module}}">
@@ -29,7 +31,7 @@ Bin
 			</span>
 		</span>
 	        <button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
-			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module {{forloop.counter}} - {{module|field_name_to_label}}</span>
+			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
 		</button>
 		<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_module('{%url 'content:_removemodule'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}')">
 			Remove
@@ -38,33 +40,33 @@ Bin
 
     <div id="collapse-{{module}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
       <div class="card-body" style='padding:10px;'>
-	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+	      <button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateChapter_{{module}}">
 		New
 	</button>
-	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemoveChapter_{{module}}">
 		Removed
 	</button>
 
-	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteChapter_{{module}}">
 	Delete
 	</button>
-	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinnedChapter_{{module}}">
 	Bin
 	</button>
 	      <ol id='chapter_list_{{module}}'>
 
 	        {%if module in content%}
 			{%for chapter in content|index:module|index:'content'%}
-				<div class='' style='cursor:pointer;'>
+			<div class='' style='cursor:pointer;' id='module_chapter_{{module}}_{{chapter}}'>
 					<input type='hidden' name='ordered_chapters[]' value='{{chapter}}'/>
 					<span class='chapter_handle mr-2 ml-5'style='font-size:25px;'>
 						+
 					</span>
-					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}</a></span>
-					<button class="btn text-left text-danger" type="button" onclick='controller.C_remove_chapter("{%url 'content:_removemodule'%}", '{{csrf_token}}', '{{spec_id}}','{{chapter}}')'>
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter - {{chapter|field_name_to_label}}</a></span>
+					<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_chapter('{%url 'content:_removechapter'%}', '{{csrf_token}}', '{{spec.id}}', '{{module}}','{{chapter}}')">
 				Remove
 				</button>
-				</div>
+			</div>
 			{%endfor%}
 		{%else%}
 		{{module}}
@@ -76,9 +78,9 @@ Bin
 			    return handle.classList.contains('chapter_handle');
 			  },
 			}).on('drop', function (el, container, handle) {
-					let elements = container.querySelectorAll('input')
+					let elements = container.querySelectorAll('input[name="ordered_chapters[]"]');
 					let currentOrder = Array.from(elements).map(input => input.value);
-					alert(currentOrder);
+					controller.C_update_chapter_list("{%url 'content:_orderchapters'%}", '{{csrf_token}}', '{{spec.id}}', '{{module}}', currentOrder);
 			});
 			</script>
       </div>
