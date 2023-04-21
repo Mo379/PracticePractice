@@ -72,11 +72,11 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" id='remove_chapters_div'>
+      <div class="modal-body" id='remove_chapters_div_{{module}}'>
 		  {%for chapter in context.removed_module_chapters|index:module%}
 			<div class='' style='cursor:pointer;' id='Remove_chapter_{{module}}_{{chapter}}'>
 					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter - {{chapter|field_name_to_label}}</a></span>
-					<button class="btn text-left text-primary" type="button">
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_chapter('{%url 'content:_restorechapter'%}', '{%url 'content:_removechapter'%}','{%url 'content:noteedit' context.spec.id module chapter%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}')">
 						Restore
 					</button>
 			</div>
@@ -100,15 +100,15 @@
       </div>
       <div class="modal-body">
 		  {%for chapter in context.deleted_module_chapters|index:module%}
-			  <div class="card course_outline_card mb-2">
+		  <div class="card course_outline_card mb-2" id='deleted_chapter_{{module}}_{{chapter}}'>
 			    <div class="card-header course_outline_cell" id="heading-{{chapter}}" style=''>
 					<button class="btn text-left">
 						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Chapter - {{chapter|field_name_to_label}}</span>
 					</button>
-					<button class="btn text-left text-primary" type="button">
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_undelete_chapter('{%url 'content:_undeletechapter'%}', '{%url 'content:_removechapter'%}', '{%url 'content:_restorechapter'%}', '{%url 'content:noteedit' context.spec.id module chapter%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}')">
 						Restore
 					</button>
-					<button class="btn text-left text-danger" type="button">
+					<button class="btn text-left text-danger" type="button" onclick="controller.C_erase_chapter('{%url 'content:_erasechapter'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}')">
 						Erase
 					</button>
 			    </div>

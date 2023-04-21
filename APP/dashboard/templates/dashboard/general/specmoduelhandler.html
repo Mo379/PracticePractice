@@ -9,6 +9,7 @@ Moduel Selection and ordering
 {%definevar 'specmoduel' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
+<script src="{%static 'dashboard/js/specmoduel_controller.js'%}"></script>
 
 
 {%include 'dashboard/general/items/specmoduel_actions.html'%}
@@ -16,7 +17,6 @@ Moduel Selection and ordering
 {%for module in context.modules%}
 {%include 'dashboard/general/items/specchapter_actions.html'%}
 {%endfor%}
-<script src="{%static 'dashboard/js/specmoduel_controller.js'%}"></script>
 <div class="mb-4">
 	<div class="card-body">
 		<div class="card shadow mb-4">

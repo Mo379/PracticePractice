@@ -390,13 +390,11 @@ class SpecModuelHandlerView(
                 spec_name=name,
             )
         # get moduels from db
-        chapters = Point.objects.values(
+        all_chapters = Point.objects.values(
                     'p_level',
                     'p_subject',
                     'p_moduel',
                     'p_chapter',
-                    'is_completed_content',
-                    'is_completed_questions',
                 ).distinct().order_by(
                     'p_level',
                     'p_subject',
@@ -406,9 +404,10 @@ class SpecModuelHandlerView(
                         user=self.request.user,
                         p_level=level,
                         p_subject=subject,
+                        erased=False,
                 )
-        deleted_chapters = chapters.filter(deleted=True, erased=False)
-        chapters = chapters.filter(deleted=False, erased=False)
+        chapters = all_chapters.filter(deleted=False, erased=False)
+        deleted_chapters = all_chapters.exclude(id__in=chapters.values_list('id'))
         moduels = chapters.values(
                     'p_level',
                     'p_subject',

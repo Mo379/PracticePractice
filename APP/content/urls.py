@@ -91,6 +91,11 @@ urlpatterns = [
         name='_removemodule'
     ),
     path(
+        'content/_undeletemodule',
+        views._undeletemodule,
+        name='_undeletemodule'
+    ),
+    path(
         'content/_removechapter',
         views._removechapter,
         name='_removechapter'
@@ -104,6 +109,11 @@ urlpatterns = [
         'content/_restoremodule',
         views._restoremodule,
         name='_restoremodule'
+    ),
+    path(
+        'content/_restorechapter',
+        views._restorechapter,
+        name='_restorechapter'
     ),
     path(
         'content/_orderchapters',
@@ -181,6 +191,11 @@ urlpatterns = [
         name='_deletemoduel'
     ),
     path(
+        'content/_erasemodule/',
+        views._erasemodule,
+        name='_erasemodule'
+    ),
+    path(
         'content/_renamemodule/',
         views._renamemodule,
         name='_renamemodule'
@@ -194,6 +209,16 @@ urlpatterns = [
         'content/_deletechpter/',
         views._deletechapter,
         name='_deletechapter'
+    ),
+    path(
+        'content/_undeletechpter/',
+        views._undeletechapter,
+        name='_undeletechapter'
+    ),
+    path(
+        'content/_erasechpter/',
+        views._erasechapter,
+        name='_erasechapter'
     ),
     path(
         'content/_renamechapter/',

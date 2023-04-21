@@ -77,7 +77,7 @@
 					<button class="btn text-left">
 						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
 					</button>
-					<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_module('{%url 'content:_restoremodule'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}')">
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_module('{%url 'content:_restoremodule'%}', '{%url 'content:_removemodule'%}','{{csrf_token}}', '{{spec.id}}','{{module}}')">
 						Restore
 					</button>
 			    </div>
@@ -103,15 +103,15 @@
       </div>
       <div class="modal-body">
 		  {%for module in context.deleted_moduels%}
-			  <div class="card course_outline_card mb-2">
+		  <div class="card course_outline_card mb-2" id='deleted_module_{{module}}'>
 			    <div class="card-header course_outline_cell" id="heading-{{module}}" style=''>
 					<button class="btn text-left">
 						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
 					</button>
-					<button class="btn text-left text-primary" type="button">
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_undelete_module('{%url 'content:_undeletemodule'%}', '{%url 'content:_removemodule'%}', '{%url 'content:_restoremodule'%}','{{csrf_token}}', '{{spec.id}}','{{module}}')">
 						Restore
 					</button>
-					<button class="btn text-left text-danger" type="button">
+					<button class="btn text-left text-danger" type="button" onclick="controller.C_erase_module('{%url 'content:_erasemodule'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}')">
 						Erase
 					</button>
 			    </div>

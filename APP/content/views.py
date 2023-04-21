@@ -412,12 +412,13 @@ class NoteEditView(
         article_points = [model_to_dict(obj) for obj in article_objects]
         df = pd.DataFrame(article_points)
         dic = {}
-        for topic, p_id in zip(list(df['p_topic']), list(df['id'])):
-            if topic not in dic:
-                dic[topic] = []
-            dic[topic].append(Point.objects.get(pk=p_id))
+        if len(df) > 0:
+            for topic, p_id in zip(list(df['p_topic']), list(df['id'])):
+                if topic not in dic:
+                    dic[topic] = []
+                dic[topic].append(Point.objects.get(pk=p_id))
         #
-        context['sampl_object'] = Point.objects.get(pk=p_id)
+        context['sampl_object'] = {'p_moduel': module, 'p_chapter': chapter}
         context['article'] = dic
         context['spec'] = source_spec
         context['next'] = next_link
@@ -881,6 +882,82 @@ def _restoremodule(request):
         new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
         # Update the values
         spec.spec_content = new_information
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _undeletemodule(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=spec.spec_level,
+                p_subject=spec.spec_subject,
+                p_moduel__iexact=module,
+            )
+        points.update(deleted=False)
+        content = spec.spec_content.copy()
+        # Update the values
+        ordered_moduels = list(order_live_spec_content(content).keys())
+        ordered_moduels = [module] + ordered_moduels
+        new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
+        # Update the values
+        spec.spec_content = new_information
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _restorechapter(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        chapter = request.POST['chapter']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        content = spec.spec_content.copy()
+        # Update the values
+        ordered_chapters = list(order_live_spec_content(content)[module]['content'].keys())
+        ordered_chapters = [chapter] + ordered_chapters
+        new_information = insert_new_spec_order(ordered_chapters, content[module]['content'], 'chapter')
+        # Update the values
+        content[module]['content'] = new_information
+        spec.spec_content = content
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _undeletechapter(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        chapter = request.POST['chapter']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=spec.spec_level,
+                p_subject=spec.spec_subject,
+                p_moduel__iexact=module,
+                p_chapter__iexact=chapter,
+            )
+        points.update(deleted=False)
+        content = spec.spec_content.copy()
+        # Update the values
+        ordered_chapters = list(order_live_spec_content(content)[module]['content'].keys())
+        ordered_chapters = [chapter] + ordered_chapters
+        new_information = insert_new_spec_order(ordered_chapters, content[module]['content'], 'chapter')
+        # Update the values
+        content[module]['content'] = new_information
+        spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
     return JsonResponse({'error': 1, 'message': 'Error'})
@@ -1633,6 +1710,33 @@ def _deletemoduel(request):
             )
 
 
+def _erasemodule(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        deleted_moduel = request.POST['module']
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=spec_id
+            )
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=spec.spec_level,
+                p_subject=spec.spec_subject,
+                p_moduel=deleted_moduel,
+            )
+        if len(points) > 0:
+            points.update(deleted=True, erased=True)
+            content = spec.spec_content
+            if deleted_moduel in content.keys():
+                content[deleted_moduel]['active'] = False
+                content[deleted_moduel]['position'] = -1
+                spec.spec_content = content
+                spec.save()
+            #
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+
 def _renamemodule(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1832,6 +1936,35 @@ def _removechapter(request):
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
     return JsonResponse({'error': 1, 'message': 'Error'})
+def _erasechapter(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        deleted_moduel = request.POST['module']
+        deleted_chapter = request.POST['chapter']
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=spec_id
+            )
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=spec.spec_level,
+                p_subject=spec.spec_subject,
+                p_moduel=deleted_moduel,
+                p_chapter=deleted_chapter,
+            )
+        if len(points) > 0:
+            points.update(deleted=True, erased=True)
+            content = spec.spec_content
+            if deleted_moduel in content.keys():
+                content[deleted_moduel]['content'][deleted_chapter]['active'] = False
+                content[deleted_moduel]['content'][deleted_chapter]['position'] = -1
+                spec.spec_content = content
+                spec.save()
+            #
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+
 def _renamechapter(request):
     if request.method == 'POST':
         level = request.POST['level']
