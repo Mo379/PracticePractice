@@ -1,0 +1,104 @@
+{%load general%}
+
+<div class='d-flex justify-content-center'>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
+	New
+</button>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
+	Removed
+</button>
+
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteTopicModal">
+Delete
+</button>
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+Bin
+</button>
+</div>
+<br>
+
+
+<ol id='topic_list'>
+{%for topic in all_topics%}
+{%if topic in content%}
+<div class="accordion mb-1" id="topic_{{topic}}">
+  <div class="card course_outline_card">
+    <div class="card-header course_outline_cell" id="heading-{{topic}}" style=''>
+		<span class='' style='display:inline-block;cursor:pointer;'>
+			<input type='hidden' name='ordered_topics[]' value='{{topic}}'/>
+			<span class='handle mr-2 ml-2'style='font-size:25px;'>
+				+
+			</span>
+		</span>
+	        <button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{topic}}" aria-expanded="true" aria-controls="collapse-{{topic}}">
+			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Topic - {{topic|field_name_to_label}}</span>
+		</button>
+		<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_topic('{%url 'content:_removetopic'%}', '{%url 'content:_restoretopic'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}')">
+			Remove
+		</button>
+    </div>
+
+    <div id="collapse-{{topic}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{topic}}" data-parent="#topic_{{topic}}">
+      <div class="card-body" style='padding:10px;'>
+	      <button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#CratePoint_{{topic}}">
+		New
+	</button>
+	<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovePoint_{{topic}}">
+		Removed
+	</button>
+
+	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeletePoint_{{topic}}">
+	Delete
+	</button>
+	<button class="btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinnedPoint_{{topic}}">
+	Bin
+	</button>
+	      <ol id='point_list_{{topic}}'>
+
+	        {%if topic in content%}
+			{%for point in content|index:topic|index:'content'%}
+			<div class='' style='cursor:pointer;' id='module_point_{{topic}}_{{point}}'>
+					<input type='hidden' name='ordered_points[]' value='{{point}}'/>
+					<span class='point_handle mr-2 ml-5'style='font-size:25px;'>
+						+
+					</span>
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="">Point - {{point|p_unique_to_title}}</a></span>
+					<button class="btn text-left text-danger" type="button" >
+					Remove
+				</button>
+			</div>
+			{%endfor%}
+		{%else%}
+		{{topic}}
+		{%endif%}
+		</ol>
+			<script>
+			dragula([document.getElementById('point_list_{{topic}}')], {
+			  moves: function (el, container, handle) {
+			    return handle.classList.contains('point_handle');
+			  },
+			}).on('drop', function (el, container, handle) {
+					let elements = container.querySelectorAll('input[name="ordered_points[]"]');
+					let currentOrder = Array.from(elements).map(input => input.value);
+					alert(currentOrder)
+			});
+			</script>
+      </div>
+    </div>
+  </div>
+</div>
+{%endif%}
+{%endfor%}
+</ol>
+<script>
+dragula([document.getElementById('topic_list')], {
+  moves: function (el, container, handle) {
+    return handle.classList.contains('handle');
+  },
+}).on('drop', function (el, container, handle) {
+		let elements = container.querySelectorAll('input[name="ordered_topics[]"]')
+		let currentOrder = Array.from(elements).map(input => input.value);
+		controller.C_update_topic_list("{%url 'content:_ordertopics'%}", '{{csrf_token}}', '{{spec.id}}', '{{module}}', '{{chapter}}', currentOrder);
+});
+
+</script>

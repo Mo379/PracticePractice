@@ -1,35 +1,4 @@
 {%load general%}
-<div class="modal fade" id="RenameChapterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Rename Chapter</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_renamechapter'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='new_name' 
-			placeholder='Rename Chapter'
-		       value='{{sample.p_chapter}}'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal fade" id="CrateTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -40,15 +9,16 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_createtopic'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_createtopic'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
+		<input type='hidden' name='moduel' value='{{context.module}}'/>
+		<input type='hidden' name='chapter' value='{{context.chapter}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 		<input 
+		        class ='form-control mb-3'
 			type='text' 
 			name='new_topic' 
 			placeholder='New Topic'
@@ -60,6 +30,34 @@
   </div>
 </div>
 
+<div class="modal fade" id="RemovedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Removed</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id='remove_topic_div'>
+		  {%for topic in context.removed_items%}
+		  <div class="card course_outline_card mb-2" id='Remove_topic_{{topic}}'>
+			    <div class="card-header course_outline_cell" id="heading-{{topic}}" style=''>
+					<button class="btn text-left">
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Topic - {{topic|field_name_to_label}}</span>
+						<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_topic('{%url 'content:_restoretopic'%}', '{%url 'content:_removetopic'%}','{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}')">
+						Restore
+					</button>
+			    </div>
+			  </div>
+		  {%endfor%}
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal fade" id="DeleteTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -70,24 +68,56 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_deletetopic'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_deletetopic'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='chapter' value='{{chapter}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 
-		<label for="Topics">Choose a Topic:</label>
-		<select name="delete_topic" id="Topics" class='mb-3'>
-		  {%for topic in context.all_topics%}
-		  <option value="{{topic.p_topic}}">
-			{{topic.p_topic|field_name_to_label}}
+		<label for="Topics">Choose a topic:</label>
+		<select class ='form-control mb-3' name="delete_topic" id="Topics" class='mb-3'>
+		  {%for topic in context.topics%}
+		  <option value="{{topic}}">
+			{{topic|field_name_to_label}}
 		  </option>
 		  {%endfor%}
 		</select> <br>
 		<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete Topic</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="BinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Bin</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		  {%for topic in context.deleted_topics%}
+		  <div class="card course_outline_card mb-2" id='deleted_topic_{{topic}}'>
+			    <div class="card-header course_outline_cell" id="heading-{{topic}}" style=''>
+					<button class="btn text-left">
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Topic - {{topic|field_name_to_label}}</span>
+					</button>
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_undelete_topic('{%url 'content:_undeletetopic'%}', '{%url 'content:_removetopic'%}', '{%url 'content:_restoretopic'%}','{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}')">
+						Restore
+					</button>
+					<button class="btn text-left text-danger" type="button" onclick="controller.C_erase_topic('{%url 'content:_erasetopic'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}')">
+						Erase
+					</button>
+			    </div>
+			  </div>
+		  {%endfor%}
 	</form>
       </div>
     </div>

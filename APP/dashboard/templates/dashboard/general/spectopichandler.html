@@ -2,121 +2,45 @@
 {%load static%}
 {%load general%}
 {%block page_name%}
-Topic Selection and ordering
+Topic selection and ordering
 {%endblock%}
 {%block content%}
 {%definevar context.spec as spec %}
-{%definevar context.sample_obj as sample %}
-<!-- Begin Page Content -->
-{%include 'dashboard/general/items/spectopic_actions.html'%}
 {%definevar 'spectopic' as alert_loc%}
 {%include 'base/alert.html'%}
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js'></script>
+<script src="{%static 'dashboard/js/spectopic_controller.js'%}"></script>
+
+{%definevar context.module as module%}
+{%definevar context.chapter as chapter%}
 
 
+{%include 'dashboard/general/items/spectopic_actions.html'%}
 
-
-
-
-
+{%for topic in context.topics%}
+{%include 'dashboard/general/items/specpoint_actions.html'%}
+{%endfor%}
 <div class="mb-4">
 	<div class="card-body">
-		<div class="card shadow mb-1">
+		<div class="card shadow mb-4">
 			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-				<h5 class="h4 mb-1 text-primary font-weight-bold">
-					Topics for: {{spec.spec_level}} -
-					{{spec.spec_subject}} -
-					{{spec.spec_board}} - 
-					{{spec.spec_name}} -
-					{{context.sample_obj.p_moduel|field_name_to_label}} -
-					{{context.sample_obj.p_chapter|field_name_to_label}}
-					<a href='{%url 'content:noteedit' context.spec.id context.sample_obj.p_moduel context.sample_obj.p_chapter%}'>
-						<i class="bi bi-pencil-square"></i>
-					</a>
+				<h5 class="h4 mb-1 mr-3 text-primary font-weight-bold">
+					Topics for: {{spec.spec_level}} {{spec.spec_subject}} {{spec.spec_board}} {{spec.spec_name}} {{context.module|field_name_to_label}} {{context.chapter|field_name_to_label}}
 				</h5>
+				<span id='saving_indicator'> all saved</span>
 					
-				<div class="dropdown no-arrow">
-					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
-					</a>
-					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-						aria-labelledby="dropdownMenuLink">
-						<div class="dropdown-header">Chapter Actions:</div>
-						<a type="button" class="dropdown-item" href='{%url "dashboard:specificationoutline" spec.id%}'>
-							View outline
-						</a>
-						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#RenameChapterModal">
-							Rename Chapter
-						</a>
-						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateTopicModal">
-							Create New Topic
-						</a>
-						<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteTopicModal">
-							Delete Topic
-						</a>
-					</div>
-				</div>
 			</div>
 			<div class="card-body">
-				<div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
-					Please Use a desktop on chrome to make your specification, or zoom out.
-				</div>
-				<div class='spec_organiser_container shadow' id='spec_organiser_container' style='text-align:center;'>
-					<ol class='list'id='right'>
-						{%for obj in context.topics%}
-						<li class='child shadow'>
-							<input type='hidden' name='ordered_items[]' value='{{obj.p_topic}}'/>
-							<span class='handle mr-1 ml-1'style='font-size:25px;'>
-								+
-							</span>
-							<a style='text-decoration:none'>
-							{{obj.p_topic|field_name_to_label}}
-							</a>
-						</li >
-						{%endfor%}
-					</ol>
-					<form class="list user px-3 py-3"  action="{%url 'content:_ordertopics'%}" method="POST" role="form">
-						{%csrf_token%}
-						<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save </button>
-						<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-						<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-						<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-						<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-						<input type='hidden' name='moduel' value='{{context.sample_obj.p_moduel}}'/>
-						<input type='hidden' name='chapter' value='{{context.sample_obj.p_chapter}}'/>
-						<input type='hidden' name='topic' value='{{context.sample_obj.p_topic}}'/>
-						<br>
-						<ol class = 'list' id='left' style='height:1000px;'>
-							{%for obj in context.specification_topics%}
-							<li class='child shadow'>
-								<input type='hidden' name='ordered_items[]' value='{{obj.p_topic}}'/>
-								<span class='handle mr-1 ml-1'style='font-size:25px;'>
-									+
-								</span>
-								<a href='{%url 'dashboard:specpoint' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name obj.p_moduel obj.p_chapter obj.p_topic%}' target='_blank'>
-								{{obj.p_topic|field_name_to_label}}
-								</a>
-							</li >
-							{%endfor%}
-						</ol>
-					</form>
+				<div class='mt-2' style=''>
+					{%definevar context.full_ord_spec as content%}
+					{%definevar context.topics as all_topics%}
+					{%include 'dashboard/general/items/outline_item_moveable_topics.html'%}
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-<script>
-dragula([document.getElementById('left'), document.getElementById('right')], {
-  moves: function (el, container, handle) {
-    return handle.classList.contains('handle');
-  },
-  copy: function (el, source) {
-    return source === document.getElementById(left)
-  },
-  accepts: function (el, target) {
-    return target !== document.getElementById(left)
-  },
-});
-</script>
+
+
+
 {%endblock%}

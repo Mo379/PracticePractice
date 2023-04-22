@@ -558,49 +558,96 @@ class SpecTopicHandlerView(
         name = self.kwargs['name']
         moduel = self.kwargs['module']
         chapter = self.kwargs['chapter']
+
         spec = Specification.objects.get(
                 user=self.request.user,
                 spec_level=level,
                 spec_subject=subject,
                 spec_board=board,
                 spec_name=name,
-                deleted=False
-                )
-        topics = Point.objects.values(
+            )
+        # get moduels from db
+        all_points = Point.objects.values(
                     'p_level',
                     'p_subject',
                     'p_moduel',
                     'p_chapter',
                     'p_topic',
+                    'p_number',
+                    'p_unique_id',
                 ).distinct().order_by(
                     'p_level',
                     'p_subject',
                     'p_moduel',
                     'p_chapter',
                     'p_topic',
+                    'p_number',
                 ).filter(
                         user=self.request.user,
                         p_level=level,
                         p_subject=subject,
                         p_moduel=moduel,
                         p_chapter=chapter,
-                        deleted=False
+                        erased=False,
                 )
-        topics_objs = [obj for obj in topics]
-        chapter_content = spec.spec_content[moduel]['content'][chapter]['content']
-        dict2 = [
-                str(content['position'])+'_'+key
-                for key, content in chapter_content.items()
-            ]
-        topic_objs_final, final_spec_objs = filter_drag_drop_selection(
-                topics_objs, dict2, 'p_topic'
-            )
+        points = all_points.filter(deleted=False, erased=False)
+        deleted_points = all_points.exclude(id__in=points.values_list('id'))
+        topics = points.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_topic',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_topic',
+                )        # reformat moduels
+        deleted_topics = deleted_points.values(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_topic',
+                ).distinct().order_by(
+                    'p_level',
+                    'p_subject',
+                    'p_moduel',
+                    'p_topic',
+                )        # reformat moduels
+        # Ordering the modules
+        topic_objs = [obj['p_topic'] for obj in topics]
+        deleted_objs = [obj['p_topic'] for obj in deleted_topics]
+        ordered_spec = order_live_spec_content(spec.spec_content)[moduel]['content'][chapter]['content']
+        keys = list(ordered_spec.keys())
+        left_over = [topic for topic in topic_objs if topic not in keys]
+        topic_objs = keys
+        #
+        topic_points = collections.defaultdict(list)
+        for key in keys:
+            topic_points[key] = ordered_spec[key]['content'].keys()
+        #
+        deleted_topic_points = collections.defaultdict(list)
+        for d_points in deleted_points:
+            deleted_topic_points[d_points['p_topic']].append(d_points['p_unique_id'])
+        #
+        removed_topic_points = collections.defaultdict(list)
+        for topic in keys:
+            for point in points.filter(p_topic=topic):
+                if point['p_unique_id'] not in ordered_spec[topic]['content'].keys():
+                    removed_topic_points[topic].append(point['p_unique_id'])
+        # Getting removed items
         context['spec'] = spec
-        context['sample_obj'] = topics_objs[0] if len(topics_objs) > 0 else None
-        context['all_topics'] = topics_objs
-        context['topics'] = topic_objs_final
-        context['specification_topics'] = final_spec_objs
-        # return result
+        context['full_ord_spec'] = ordered_spec
+        #
+        context['module'] = moduel
+        context['chapter'] = chapter
+        #
+        context['topics'] = topic_objs
+        context['deleted_topics'] = deleted_objs
+        context['removed_items'] = left_over
+        #
+        context['topic_points'] = topic_points
+        context['deleted_topic_points'] = deleted_topic_points
+        context['removed_topic_points'] = removed_topic_points
         return context
 
 

@@ -876,10 +876,15 @@ def _restoremodule(request):
                 pk=int(spec_id)
             )
         content = spec.spec_content.copy()
+        if module in content.keys():
+            save_content = content[module]['content']
+        else:
+            save_content = {}
         # Update the values
         ordered_moduels = list(order_live_spec_content(content).keys())
         ordered_moduels = [module] + ordered_moduels
         new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
+        new_information[module]['content'] = save_content
         # Update the values
         spec.spec_content = new_information
         spec.save()
@@ -902,10 +907,15 @@ def _undeletemodule(request):
             )
         points.update(deleted=False)
         content = spec.spec_content.copy()
+        if module in content.keys():
+            save_content = content[module]['content']
+        else:
+            save_content = {}
         # Update the values
         ordered_moduels = list(order_live_spec_content(content).keys())
         ordered_moduels = [module] + ordered_moduels
         new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
+        new_information[module]['content'] = save_content
         # Update the values
         spec.spec_content = new_information
         spec.save()
@@ -922,12 +932,44 @@ def _restorechapter(request):
                 pk=int(spec_id)
             )
         content = spec.spec_content.copy()
+        if chapter in content[module]['content'].keys():
+            save_content = content[module]['content'][chapter]['content']
+        else:
+            save_content = {}
         # Update the values
         ordered_chapters = list(order_live_spec_content(content)[module]['content'].keys())
         ordered_chapters = [chapter] + ordered_chapters
         new_information = insert_new_spec_order(ordered_chapters, content[module]['content'], 'chapter')
+        new_information[chapter]['content'] = save_content
         # Update the values
         content[module]['content'] = new_information
+        spec.spec_content = content
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _restoretopic(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        content = spec.spec_content.copy()
+        if topic in content[module]['content'][chapter]['content'].keys():
+            save_content = content[module]['content'][chapter]['content'][topic]['content']
+        else:
+            save_content = {}
+        # Update the values
+        ordered_topics = list(order_live_spec_content(content)[module]['content'][chapter]['content'].keys())
+        ordered_topics = [topic] + ordered_topics
+        new_information = insert_new_spec_order(ordered_topics, content[module]['content'][chapter]['content'], 'topic')
+        # Update the values
+        new_information[topic]['content'] = save_content
+        content[module]['content'][chapter]['content'] = new_information
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -951,12 +993,53 @@ def _undeletechapter(request):
             )
         points.update(deleted=False)
         content = spec.spec_content.copy()
+        if chapter in content[module]['content'].keys():
+            save_content = content[module]['content'][chapter]['content']
+        else:
+            save_content = {}
         # Update the values
         ordered_chapters = list(order_live_spec_content(content)[module]['content'].keys())
         ordered_chapters = [chapter] + ordered_chapters
         new_information = insert_new_spec_order(ordered_chapters, content[module]['content'], 'chapter')
+        new_information[chapter]['content'] = save_content
         # Update the values
         content[module]['content'] = new_information
+        spec.spec_content = content
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+def _undeletetopic(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=spec.spec_level,
+                p_subject=spec.spec_subject,
+                p_moduel__iexact=module,
+                p_chapter__iexact=chapter,
+                p_topic__iexact=topic,
+            )
+        points.update(deleted=False)
+        content = spec.spec_content.copy()
+        if topic in content[module]['content'][chapter]['content'].keys():
+            save_content = content[module]['content'][chapter]['content'][topic]['content']
+        else:
+            save_content = {}
+        # Update the values
+        ordered_topics = list(order_live_spec_content(content)[module]['content'][chapter]['content'].keys())
+        ordered_topics = [topic] + ordered_topics
+        new_information = insert_new_spec_order(ordered_topics, content[module]['content'][chapter]['content'], 'topic')
+        new_information[topic]['content'] = save_content
+        # Update the values
+        content[module]['content'][chapter]['content'] = new_information
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -986,19 +1069,14 @@ def _orderchapters(request):
 
 def _ordertopics(request):
     if request.method == 'POST':
-        level = request.POST['level']
-        subject = request.POST['subject']
-        board = request.POST['board']
-        name = request.POST['name']
-        moduel = request.POST['moduel']
+        spec_id = request.POST['spec_id']
+        moduel = request.POST['module']
         chapter = request.POST['chapter']
-        ordered_topics = request.POST.getlist('ordered_items[]')
+        ordered_topics = request.POST.getlist('order')[0].split(',')
         # Get objects
         spec = Specification.objects.get(
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name
+                user=request.user,
+                pk=spec_id
             )
         content = spec.spec_content.copy()
         new_information = insert_new_spec_order(
@@ -1009,25 +1087,8 @@ def _ordertopics(request):
         content[moduel]['content'][chapter]['content'] = new_information
         spec.spec_content = content
         spec.save()
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Specification Chapter-Topics Updated !',
-                extra_tags='alert-success spectopic'
-            )
-        #
-        kwargs = {
-            'level': level,
-            'subject': subject,
-            'board': board,
-            'name': name,
-            'module': moduel,
-            'chapter': chapter,
-        }
-        return redirect(
-                'dashboard:spectopic',
-                **kwargs
-            )
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 def _orderpoints(request):
@@ -2099,6 +2160,25 @@ def _createtopic(request):
             )
 
 
+def _removetopic(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        module = request.POST['module']
+        chapter = request.POST['chapter']
+        topic = request.POST['topic']
+        # Get objects
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=int(spec_id)
+            )
+        content = spec.spec_content.copy()
+        content[module]['content'][chapter]['content'][topic]['active'] = False
+        content[module]['content'][chapter]['content'][topic]['position'] = -1
+        # Update the values
+        spec.spec_content = content
+        spec.save()
+        return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 def _deletetopic(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2161,6 +2241,37 @@ def _deletetopic(request):
                 'dashboard:spectopic',
                 **kwargs
             )
+
+
+def _erasetopic(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        deleted_moduel = request.POST['module']
+        deleted_chapter = request.POST['chapter']
+        deleted_topic = request.POST['topic']
+        spec = Specification.objects.get(
+                user=request.user,
+                pk=spec_id
+            )
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=spec.spec_level,
+                p_subject=spec.spec_subject,
+                p_moduel=deleted_moduel,
+                p_chapter=deleted_chapter,
+                p_topic=deleted_topic,
+            )
+        if len(points) > 0:
+            points.update(deleted=True, erased=True)
+            content = spec.spec_content
+            if deleted_moduel in content.keys():
+                content[deleted_moduel]['content'][deleted_chapter]['content'][deleted_topic]['active'] = False
+                content[deleted_moduel]['content'][deleted_chapter]['content'][deleted_topic]['position'] = -1
+                spec.spec_content = content
+                spec.save()
+            #
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 def _renametopic(request):
