@@ -1,25 +1,11 @@
 {%load static %}
 {%load general%}
-{%include 'AI/items/modal_lessons.html'%}
-{%include 'AI/items/modal_theme.html'%}
 {%include 'AI/items/modal_help.html'%}
 {%for lesson in context.lessons%}
 {%include 'AI/items/modal_lesson_part.html'%}
 {%endfor%}
 <div class='AI_side_bar' id='AI_side_bar'>
 	<div class='AI_side_lessons_wrapper'>
-		<div class ='new_lesson_button'>
-			<button class='sidebar_button' data-toggle="modal" data-target="#all_lessons_modal">
-				<i class="bi bi-mortarboard-fill"></i> Start Lesson
-			</button>
-			<button class='sidebar_button' data-toggle="modal" data-target="#modal_lesson_options">
-				<i class="bi bi-hand-index-thumb"></i>
-				Options
-			</button>
-			<button class='sidebar_button mt-2' id='toggle-sidebar-btn-2'>
-				<i class="bi bi-arrows-fullscreen"></i>	
-			</button>
-		</div>
 		<div class='AI_side_lessons'>
 			{%for lesson in context.lessons%}
 			<a class='sidebar_button lesson_button' data-toggle="modal" data-target="#all_lesson{{lesson.id|hashid}}_parts_modal">
@@ -34,17 +20,14 @@
 	    {%definevar 'AI_window' as alert_loc%}
 	    {%include 'base/alert.html'%}
 	</a>
-	<a class='sidebar_button lesson_button' href='{%url 'content:content' %}'>
-		<i class="bi bi-book"></i> Your courses
-	</a>
-	<button class='sidebar_button lesson_button' data-toggle="modal" data-target="#theme_modal">
-		<i class="bi bi-lightbulb"></i> Toggle theme
+	<button class='sidebar_button lesson_button' id='toggle-sidebar-btn-2'>
+		<i class="bi bi-arrows-fullscreen"></i> Hide distractions	
 	</button>
 	<button class='sidebar_button lesson_button' data-toggle="modal" data-target="#help_modal">
 		<i class="bi bi-patch-question"></i> Help
 	</button>
-	<a class='sidebar_button lesson_button' href='{%url 'user:_logout'%}'>
-		<i class="bi bi-arrow-bar-left"></i> Log out
+	<a class='sidebar_button lesson_button mb-3' href='{%url 'content:notes' context.course.id%}'>
+		<i class="bi bi-arrow-bar-left"> </i>Go back
 	</a>
 	</div>
 </div>

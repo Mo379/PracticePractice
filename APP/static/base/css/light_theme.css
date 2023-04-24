@@ -155,6 +155,11 @@ body{
 	background: var(--main-bg-color);
 	color: var(--text-color-1);
 }
+.prog-nav-item{
+	background: var(--main-bg-color);
+	color: var(--text-color-1);
+	border: 1px solid var(--text-color-1);
+}
 
 
 
@@ -193,6 +198,12 @@ body{
 }
 .note_bottom_border{
 	border-bottom: 1px dashed var(--text-color-1);
+}
+
+/* practice page */
+.my_table_theme{
+	background: var(--main-bg-color);
+	color: var(--text-color-1) !important;
 }
 
 

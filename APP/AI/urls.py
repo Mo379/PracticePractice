@@ -6,12 +6,7 @@ from AI import views
 app_name = 'AI'
 urlpatterns = [
     # Pages
-    path('<hashid:course_id>', views.AIView.as_view(), name='index'),
-    path(
-        '_themechange',
-        views._themechange,
-        name='_themechange'
-    ),
+    path('<hashid:course_id>/<module>/<chapter>/', views.AIView.as_view(), name='index'),
     path(
         '_start_new_lesson',
         views._start_new_lesson,

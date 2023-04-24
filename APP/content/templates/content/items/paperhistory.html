@@ -1,24 +1,45 @@
 {%load general %}
+<div class="modal fade" id="customtest_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body" style='padding:0px;'>
+	      {%include "content/items/custompractice-testmaker.html"%}
+      </div>
+
+      <div class="modal-footer">
+	<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	<button type="button" class="btn btn-primary" onclick= "controller.C_get_practice_paper()">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 <div id='paperhistory'>
 	<div class="mb-4">
 		<div class="card-body">
-			<div class="card shadow mb-4">
-				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+			<div class="card shadow mb-4 border-0">
+				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between border">
 					<h5 class="h4 mb-1 text-primary font-weight-bold">
-					Custom Tests History
+					Custom Tests:
+					<button type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#customtest_modal">
+						Create Custom Test
+					</button>
 					</h5>
 				</div>
 			        <div class="card mb-4" id='billing_history'>
 			            <div class="card-body p-0">
 			                <!-- Billing history table-->
 			                <div class="table-responsive table-billing-history">
-			            	<table class="table mb-0">
+			            	<table class="table mb-0 my_table_theme">
 			            	    <thead>
 			            		<tr>
-			            		    <th class="border-gray-200" scope="col">Paper</th>
-			            		    <th class="border-gray-200" scope="col">Description</th>
-			            		    <th class="border-gray-200" scope="col">Completed</th>
-			            		    <th class="border-gray-200" scope="col">Date</th>
+			            		    <th class="">Paper</th>
+			            		    <th class="">Description</th>
+			            		    <th class="">Completed</th>
+			            		    <th class="">Date</th>
 			            		</tr>
 			            	    </thead>
 			            	    <tbody>

@@ -39,6 +39,8 @@ class AIView(
         """Return all of the required hub information"""
         context = {}
         course_id = self.kwargs['course_id']
+        module = self.kwargs['module']
+        chapter = self.kwargs['chapter']
         user = User.objects.get(pk=self.request.user.id)
         appearancechoiceform = AppearanceChoiceForm(instance=user)
         # Get course modules and chapters
@@ -72,44 +74,6 @@ class AIView(
         context['started_chapters'] = lesson_parts_holder
         context['lessons'] = active_lessons
         return context
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _themechange(request):
-    if request.method == 'POST':
-        form = AppearanceChoiceForm(request.POST, instance=request.user)
-        course_id = h_decode(request.POST['course_id'])
-        kwargs = {
-            'course_id': course_id
-        }
-        if form.is_valid():
-            form.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your preferred theme was successfully updated ' +
-                    '(Try to refresh your browser if no changes show).',
-                    extra_tags='alert-success AI_window'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all inputs are valid.'+str(form.errors),
-                    extra_tags='alert-danger AI_window'
-                )
-        return redirect(
-                'AI:index',
-                **kwargs
-            )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger AI_window'
-            )
-        return redirect('content:content')
 
 
 @login_required(login_url='/user/login', redirect_field_name=None)

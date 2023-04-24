@@ -79,8 +79,6 @@ body{
 }
 .AI_window_typing{
 	grid-area: typing;
-	background: var(--first-bg-color);
-	border-top: 2px solid var(--text-color-1);
 }
 .AI_text_wrap{
 	width: 80%;
