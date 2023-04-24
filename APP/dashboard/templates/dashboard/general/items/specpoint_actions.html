@@ -1,37 +1,5 @@
-{%load general%}
-<div class="modal fade" id="RenameTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Rename Topic</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_renametopic'%}" method="POST" role="form">
-		{%csrf_token%}
-		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
-		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
-		<input type='hidden' name='topic' value='{{sample.p_topic}}'/>
-		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
-		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
-		<input 
-			type='text' 
-			name='new_name' 
-			placeholder='Rename Topic'
-		       value='{{sample.p_topic}}'
-		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="CratePointModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{%load general %}
+<div class="modal fade" id="CratePoint_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -41,28 +9,29 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_createpoint'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_createpoint'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
-		<input type='hidden' name='topic' value='{{sample.p_topic}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='chapter' value='{{chapter}}'/>
+		<input type='hidden' name='topic' value='{{topic}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 		<input 
+		       class ='form-control mb-3'
 			type='text' 
 			name='new_point' 
 			placeholder='New Point'
 		/>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create New Point</button>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float:right;'>Create New Point</button>
 	</form>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="DeletePointModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="DeletePoint_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -72,27 +41,83 @@
         </button>
       </div>
       <div class="modal-body">
-	<form class="list user px-3 py-3"  action="{%url 'content:_deletepoint'%}" method="POST" role="form">
+	<form class="user px-3 py-3"  action="{%url 'content:_deletepoint'%}" method="POST" role="form">
 		{%csrf_token%}
 		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
 		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='hidden' name='moduel' value='{{sample.p_moduel}}'/>
-		<input type='hidden' name='chapter' value='{{sample.p_chapter}}'/>
-		<input type='hidden' name='topic' value='{{sample.p_topic}}'/>
 		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='chapter' value='{{chapter}}'/>
+		<input type='hidden' name='topic' value='{{topic}}'/>
 		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
 
-		<label for="Points">Choose a Point:</label>
-		<select name="delete_point" id="Points" class='mb-3'>
-		  {%for point in context.all_points%}
-		  <option value="{{point.p_unique_id}}">
-			{{point.p_unique_id}}
+		<label for="Modules">Choose a Chapter:</label>
+		<select class ='form-control mb-3' name="delete_point" id="Modules" class='mb-3'>
+		  {%for chap in context.topic_points|index:topic%}
+		  <option value="{{chap}}">
+			{{chap|p_unique_to_title}}
 		  </option>
 		  {%endfor%}
 		</select>
-		<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete Point</button>
+		<button type= 'submit' class='btn btn-danger mb-2' style='float:right;'> Delete Point</button>
 	</form>
       </div>
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="RemovePoint_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Removed</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id='remove_points_div_{{topic}}'>
+		  {%for point in context.removed_topic_points|index:topic%}
+			<div class='' style='cursor:pointer;' id='Remove_point_{{topic}}_{{point}}'>
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Point - {{point|p_unique_to_title|field_name_to_label}}</a></span>
+					<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_point('{%url 'content:_restorepoint'%}', '{%url 'content:_removepoint'%}','{%url 'content:noteedit' context.spec.id module chapter%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}', '{{point}}', '{{point|p_unique_to_title}}')">
+						Restore
+					</button>
+			</div>
+		  {%endfor%}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal fade" id="BinnedPoint_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Bin</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		  {%for point in context.deleted_topic_points|index:topic%}
+		  <div class="" id="deleted_point_{{topic}}_{{point}}" style=''>
+				<button class="btn text-left">
+					<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Point - {{point|p_unique_to_title}}</span>
+				</button>
+				<button class="btn text-left text-primary" type="button" onclick="controller.C_undelete_point('{%url 'content:_undeletepoint'%}', '{%url 'content:_removepoint'%}', '{%url 'content:_restorepoint'%}', '{%url 'content:noteedit' context.spec.id module chapter%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}', '{{point}}', '{{point|p_unique_to_title}}')">
+					Restore
+				</button>
+				<button class="btn text-left text-danger" type="button" onclick="controller.C_erase_point('{%url 'content:_erasepoint'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}', '{{chapter}}', '{{topic}}', '{{point}}')">
+					Erase
+				</button>
+		    </div>
+		  {%endfor%}
+      </div>
+    </div>
+  </div>
+</div>
+

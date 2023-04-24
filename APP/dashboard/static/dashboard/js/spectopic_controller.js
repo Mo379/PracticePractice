@@ -63,48 +63,48 @@ class model extends xhttp {
 		//sending query to model
 		this.xhttp.send(query);
 	}
-	M_update_chapter_list(url, csrf_token, spec_id, module, order) {
+	M_update_point_list(url, csrf_token, spec_id, module, chapter, topic, order) {
 		//opening the port using xhttp
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = `spec_id=${spec_id}&module=${module}&order=${order}`;
+		var query = `spec_id=${spec_id}&module=${module}&chapter=${chapter}&topic=${topic}&order=${order}`;
 		//sending query to model
 		this.xhttp.send(query);
 	}
-	M_remove_chapter(url, csrf_token, spec_id, module, chapter) {
+	M_remove_point(url, csrf_token, spec_id, module, chapter, topic, point) {
 		//opening the port using xhttp
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = 'spec_id=' + spec_id + '&module=' + module + '&chapter='+ chapter;
+		var query = `spec_id=${spec_id}&module=${module}&chapter=${chapter}&topic=${topic}&point=${point}`;
 		//sending query to model
 		this.xhttp.send(query);
 	}
-	M_restore_chapter(url, csrf_token, spec_id, module, chapter) {
+	M_restore_point(url, csrf_token, spec_id, module, chapter, topic, point) {
 		//opening the port using xhttp
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = 'spec_id=' + spec_id + '&module=' + module + "&chapter=" + chapter;
+		var query = `spec_id=${spec_id}&module=${module}&chapter=${chapter}&topic=${topic}&point=${point}`;
 		//sending query to model
 		this.xhttp.send(query);
 	}
-	M_undelete_chapter(url, csrf_token, spec_id, module, chapter) {
+	M_undelete_point(url, csrf_token, spec_id, module, chapter, topic, point) {
 		//opening the port using xhttp
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = 'spec_id=' + spec_id + '&module=' + module + "&chapter=" + chapter;
+		var query = `spec_id=${spec_id}&module=${module}&chapter=${chapter}&topic=${topic}&point=${point}`;
 		//sending query to model
 		this.xhttp.send(query);
 	}
-	M_erase_chapter(url, csrf_token, spec_id, module, chapter) {
+	M_erase_point(url, csrf_token, spec_id, module, chapter, topic, point) {
 		//opening the port using xhttp
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = 'spec_id=' + spec_id + '&module=' + module + "&chapter=" + chapter;
+		var query = `spec_id=${spec_id}&module=${module}&chapter=${chapter}&topic=${topic}&point=${point}`;
 		//sending query to model
 		this.xhttp.send(query);
 	}
@@ -312,10 +312,10 @@ class controller extends model {
 		}
 	}
 
-	C_update_chapter_list(url, csrf_token, spec_id, module, order) {
+	C_update_point_list(url, csrf_token, spec_id, module, chapter, topic, order) {
 		//send command
 		// Get a reference to the modal element
-		this.M_update_chapter_list(url, csrf_token, spec_id, module, order);
+		this.M_update_point_list(url, csrf_token, spec_id, module, chapter, topic, order);
 		var s = document.getElementById('saving_indicator');
 		s.innerHTML = 'saving...'
 		//listen for the repsponse from the server script
@@ -335,10 +335,10 @@ class controller extends model {
 			}
 		}
 	}
-	C_remove_chapter(url, action_url, chapter_url, csrf_token, spec_id, module, chapter) {
+	C_remove_point(url, action_url, chapter_url, csrf_token, spec_id, module, chapter, topic, point, point_title) {
 		//send command
 		// Get a reference to the modal element
-		this.M_remove_chapter(url, csrf_token, spec_id, module, chapter);
+		this.M_remove_point(url, csrf_token, spec_id, module, chapter, topic, point);
 		var s = document.getElementById('saving_indicator');
 		s.innerHTML = 'saving...'
 		//listen for the repsponse from the server script
@@ -350,18 +350,18 @@ class controller extends model {
 					var s = document.getElementById('saving_indicator');
 					if (json.error == 0){
 						s.innerHTML = 'all saved'
-						const chapter_card = document.getElementById(`module_chapter_${module}_${chapter}`);
+						const point_card = document.getElementById(`topic_point_${topic}_${point}`);
 						const html = `
-							<div class='' style='cursor:pointer;' id='Remove_chapter_${module}_${chapter}'>
-									<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="${chapter_url}">Chapter - ${chapter}</a></span>
-									<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_chapter('${action_url}', '${url}','${chapter_url}','${csrf_token}', '${spec_id}','${module}', '${chapter}')">
+							<div class='' style='cursor:pointer;' id='Remove_point_${topic}_${point}'>
+									<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="${chapter_url}">Point - ${point_title}</a></span>
+									<button class="btn text-left text-primary" type="button" onclick="controller.C_restore_point('${action_url}', '${url}','${chapter_url}','${csrf_token}', '${spec_id}','${module}', '${chapter}', '${topic}', '${point}', '${point_title}')">
 										Restore
 									</button>
 							</div>
 						`
-						const removed_modules = document.getElementById(`remove_chapters_div_${module}`);
-						removed_modules.innerHTML += html
-						chapter_card.remove();
+						const removed_point = document.getElementById(`remove_points_div_${topic}`);
+						removed_point.innerHTML += html
+						point_card.remove();
 					}else{
 						s.innerHTML = 'error :('
 					}
@@ -370,10 +370,10 @@ class controller extends model {
 			}
 		}
 	}
-	C_restore_chapter(url, action_url, chapter_url, csrf_token, spec_id, module, chapter) {
+	C_restore_point(url, action_url, chapter_url, csrf_token, spec_id, module, chapter, topic, point, point_title) {
 		//send command
 		// Get a reference to the modal element
-		this.M_restore_chapter(url, csrf_token, spec_id, module, chapter);
+		this.M_restore_point(url, csrf_token, spec_id, module, chapter, topic, point);
 		var s = document.getElementById('saving_indicator');
 		s.innerHTML = 'saving...'
 		//listen for the repsponse from the server script
@@ -385,22 +385,22 @@ class controller extends model {
 					var s = document.getElementById('saving_indicator');
 					if (json.error == 0){
 						s.innerHTML = 'all saved'
-						const chapter_card = document.getElementById(`Remove_chapter_${module}_${chapter}`);
+						const point_card = document.getElementById(`Remove_point_${topic}_${point}`);
 						const html = `
-						<div class='' style='cursor:pointer;' id='module_chapter_${module}_${chapter}'>
-								<input type='hidden' name='ordered_chapters[]' value='${chapter}'/>
-								<span class='chapter_handle mr-2 ml-5'style='font-size:25px;'>
+						<div class='' style='cursor:pointer;' id='topic_point_${topic}_${point}'>
+								<input type='hidden' name='ordered_points[]' value='${point}'/>
+								<span class='point_handle mr-2 ml-5'style='font-size:25px;'>
 									+
 								</span>
-								<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="${chapter_url}">Chapter - ${chapter}</a></span>
-								<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_chapter('${action_url}', '${url}','${chapter_url}','${csrf_token}', '${spec_id}', '${module}','${chapter}')">
+								<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="${chapter_url}">Point - ${point_title}</a></span>
+								<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_point('${action_url}', '${url}','${chapter_url}','${csrf_token}', '${spec_id}', '${module}','${chapter}', '${topic}', '${point}', '${point_title}')">
 							Remove
 							</button>
 						</div>
 						`
-						const chapter_list = document.getElementById(`chapter_list_${module}`);
-						chapter_list.innerHTML = html + chapter_list.innerHTML
-						chapter_card.remove();
+						const point_list = document.getElementById(`point_list_${topic}`);
+						point_list.innerHTML = html + point_list.innerHTML
+						point_card.remove();
 					}else{
 						s.innerHTML = 'error :('
 					}
@@ -409,10 +409,10 @@ class controller extends model {
 			}
 		}
 	}
-	C_undelete_chapter(url, action_url, second_action_url, chapter_url, csrf_token, spec_id, module, chapter) {
+	C_undelete_point(url, action_url, second_action_url, chapter_url, csrf_token, spec_id, module, chapter, topic, point, point_title) {
 		//send command
 		// Get a reference to the modal element
-		this.M_undelete_chapter(url, csrf_token, spec_id, module, chapter);
+		this.M_undelete_point(url, csrf_token, spec_id, module, chapter, topic, point);
 		var s = document.getElementById('saving_indicator');
 		s.innerHTML = 'saving...'
 		//listen for the repsponse from the server script
@@ -424,22 +424,22 @@ class controller extends model {
 					var s = document.getElementById('saving_indicator');
 					if (json.error == 0){
 						s.innerHTML = 'all saved'
-						const chapter_card = document.getElementById(`deleted_chapter_${module}_${chapter}`);
+						const point_card = document.getElementById(`deleted_point_${topic}_${point}`);
 						const html = `
-						<div class='' style='cursor:pointer;' id='module_chapter_${module}_${chapter}'>
-								<input type='hidden' name='ordered_chapters[]' value='${chapter}'/>
-								<span class='chapter_handle mr-2 ml-5'style='font-size:25px;'>
+						<div class='' style='cursor:pointer;' id='topic_point_${topic}_${point}'>
+								<input type='hidden' name='ordered_points[]' value='${point}'/>
+								<span class='point_handle mr-2 ml-5'style='font-size:25px;'>
 									+
 								</span>
-								<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="${chapter_url}">Chapter - ${chapter}</a></span>
-								<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_chapter('${action_url}', '${second_action_url}','${chapter_url}','${csrf_token}', '${spec_id}', '${module}','${chapter}')">
+								<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="${chapter_url}">Point - ${point_title}</a></span>
+								<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_point('${action_url}', '${second_action_url}','${chapter_url}','${csrf_token}', '${spec_id}', '${module}','${chapter}', '${topic}', '${point}', '${point_title}')">
 							Remove
 							</button>
 						</div>
 						`
-						const chapter_list = document.getElementById(`chapter_list_${module}`);
-						chapter_list.innerHTML = html + chapter_list.innerHTML
-						chapter_card.remove();
+						const point_list = document.getElementById(`point_list_${topic}`);
+						point_list.innerHTML = html + point_list.innerHTML
+						point_card.remove();
 					}else{
 						s.innerHTML = 'error :('
 					}
@@ -448,10 +448,10 @@ class controller extends model {
 			}
 		}
 	}
-	C_erase_chapter(url, csrf_token, spec_id, module, chapter) {
+	C_erase_point(url, csrf_token, spec_id, module, chapter, topic, point) {
 		//send command
 		// Get a reference to the modal element
-		this.M_erase_chapter(url, csrf_token, spec_id, module, chapter);
+		this.M_erase_point(url, csrf_token, spec_id, module, chapter, topic, point);
 		var s = document.getElementById('saving_indicator');
 		s.innerHTML = 'saving...'
 		//listen for the repsponse from the server script
@@ -463,7 +463,7 @@ class controller extends model {
 					var s = document.getElementById('saving_indicator');
 					if (json.error == 0){
 						s.innerHTML = 'all saved'
-						const chapter_card = document.getElementById(`deleted_chapter_${module}_${chapter}`);
+						const chapter_card = document.getElementById(`deleted_point_${topic}_${point}`);
 						chapter_card.remove();
 					}else{
 						s.innerHTML = 'error :('

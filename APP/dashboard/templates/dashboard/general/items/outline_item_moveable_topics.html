@@ -1,6 +1,9 @@
 {%load general%}
 
 <div class='d-flex justify-content-center'>
+<a class="mb-2 btn text-left text-primary" href='{%url 'content:noteedit' context.spec.id module chapter%}'>
+ View
+</a>
 <button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
 	New
 </button>
@@ -57,13 +60,13 @@ Bin
 
 	        {%if topic in content%}
 			{%for point in content|index:topic|index:'content'%}
-			<div class='' style='cursor:pointer;' id='module_point_{{topic}}_{{point}}'>
+			<div class='' style='cursor:pointer;' id='topic_point_{{topic}}_{{point}}'>
 					<input type='hidden' name='ordered_points[]' value='{{point}}'/>
 					<span class='point_handle mr-2 ml-5'style='font-size:25px;'>
 						+
 					</span>
-					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="">Point - {{point|p_unique_to_title}}</a></span>
-					<button class="btn text-left text-danger" type="button" >
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="">Point - {{point|p_unique_to_title|field_name_to_label}}</a></span>
+					<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_point('{%url 'content:_removepoint'%}', '{%url 'content:_restorepoint'%}','{%url 'content:noteedit' context.spec.id module chapter%}','{{csrf_token}}', '{{spec.id}}', '{{module}}','{{chapter}}', '{{topic}}', '{{point}}', '{{point|p_unique_to_title}}')">
 					Remove
 				</button>
 			</div>
@@ -80,7 +83,7 @@ Bin
 			}).on('drop', function (el, container, handle) {
 					let elements = container.querySelectorAll('input[name="ordered_points[]"]');
 					let currentOrder = Array.from(elements).map(input => input.value);
-					alert(currentOrder)
+					controller.C_update_point_list("{%url 'content:_orderpoints'%}", '{{csrf_token}}', '{{spec.id}}', '{{module}}', '{{chapter}}', '{{topic}}', currentOrder);
 			});
 			</script>
       </div>
