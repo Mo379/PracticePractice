@@ -41,11 +41,11 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 	    <div id="collapse-{{module}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
 	      <div class="card-body" style='padding:10px;'>
 			{%for chapter in information|index:module%}
-			    <span class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> 
+			    <div class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> 
 				    Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} 
 				    <a type= 'button' class='' href="{%url 'AI:index' context.course.id module chapter%}"><i class="fa-solid fa-robot ml-1 mr-2" style=''></i></a>
 				    <a type= 'button' class='' href="{%url 'content:notearticle' context.course.id module chapter%}"><i class="fa-solid fa-book"></i></a>
-			    </span><br>
+			    </div><br>
 				
 			{%endfor%}
 	      </div>
