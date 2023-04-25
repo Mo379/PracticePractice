@@ -46,16 +46,22 @@ class AIView(
         # Get course modules and chapters
         course = Course.objects.get(pk=course_id)
         spec = course.specification
-        content = order_live_spec_content(spec.spec_content)
-        modules = list(content.keys())
-        active_lessons = Lesson.objects.filter(
+        content = order_live_spec_content(spec.spec_content)[module]['content'][chapter]['content']
+        topics = list(content.keys())
+        active_lesson, created = Lesson.objects.get_or_create(
                 user=user,
                 course=course,
-            ).order_by('-created_at')
-        started_lesson_parts = Lesson_part.objects.filter(
-                user=user,
-                lesson__in=active_lessons
+                module=module,
+                chapter=chapter,
             )
+        if created:
+            active_lesson.lesson_content = course.specification.spec_content
+            active_lesson.save()
+        for topic in topics:
+            started_lesson_parts = Lesson_part.objects.filter(
+                    user=user,
+                    lesson=active_lesson
+                )
 
         # create a defaultdict with default value as an empty list
         lesson_parts_holder = defaultdict(list)
@@ -74,77 +80,6 @@ class AIView(
         context['started_chapters'] = lesson_parts_holder
         context['lessons'] = active_lessons
         return context
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _start_new_lesson(request):
-    if request.method == 'POST':
-        user = request.user
-        course_id = h_decode(request.POST['course_id'])
-        lesson_module = request.POST['lesson_module']
-        kwargs = {
-            'course_id': course_id
-        }
-        #
-        try:
-            course = Course.objects.get(pk=course_id)
-        except Exception:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Course does not exist!',
-                    extra_tags='alert-danger AI_window'
-                )
-            return redirect(
-                    'content:content',
-                )
-        content = course.specification.spec_content
-        try:
-            module_content = content[lesson_module]
-        except Exception:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'The input options are not valid.',
-                    extra_tags='alert-danger CollaborationTasks'
-                )
-            return redirect(
-                    'AI:index',
-                    **kwargs
-                )
-        # Check if task is duplicate
-        check_lessons = Lesson.objects.filter(
-                user=user,
-                course=course,
-                moduel=lesson_module
-                )
-        if len(check_lessons) == 0:
-            Lesson.objects.create(
-                    user=user,
-                    course=course,
-                    moduel=lesson_module,
-                    lesson_content=module_content
-                )
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Your lesson has been created!',
-                    extra_tags='alert-success AI_window'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'This lesson has already been started.',
-                    extra_tags='alert-warning AI_window'
-                )
-        return redirect(
-                'AI:index',
-                **kwargs
-            )
-    return redirect(
-            'content:content',
-        )
 
 
 @login_required(login_url='/user/login', redirect_field_name=None)

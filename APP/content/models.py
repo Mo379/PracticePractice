@@ -11,21 +11,12 @@ from mdeditor.fields import MDTextField
 class Question(models.Model):
     #
     user = models.ForeignKey(User, on_delete=models.SET_NULL, db_index=True, null=True)
-    q_in_house = models.BooleanField(default=False, null=True)
-    q_level = models.CharField(max_length=30, default="", null=True)
-    q_board = models.CharField(max_length=10, default="", null=True)
-    q_board_moduel = models.CharField(max_length=50, default="", null=True)
-    q_exam_month = models.IntegerField(default=0, null=True)
-    q_exam_year = models.IntegerField(default=0, null=True)
-    q_is_exam = models.BooleanField(default=False, null=True)
-    q_exam_num = models.IntegerField(default=0, null=True)
     #
     q_subject = models.CharField(max_length=50, default="", null=True)
     q_moduel = models.CharField(max_length=50, default="", null=True)
     q_chapter = models.CharField(max_length=50, default="", null=True)
-    q_topic = models.CharField(max_length=50, default="", null=True)
+    q_number = models.IntegerField(default=0, null=True)
     #
-    q_type = models.CharField(max_length=50, default="", null=True)
     q_difficulty = models.IntegerField(default=0, null=True)
     q_total_marks = models.IntegerField(default=0, null=True)
     q_content = models.JSONField(default=dict, null=True)

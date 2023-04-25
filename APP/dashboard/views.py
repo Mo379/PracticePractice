@@ -18,6 +18,7 @@ from braces.views import (
         SuperuserRequiredMixin,
     )
 from content.models import (
+        Question,
         Point,
         Specification,
         Collaborator,
@@ -542,6 +543,13 @@ class SpecTopicHandlerView(
                 spec_board=board,
                 spec_name=name,
             )
+        # get chapter questions
+        questions = spec.spec_content[moduel]['content'][chapter]['questions']
+        for level in questions.keys():
+            level_questions = questions[level]
+            qs = Question.objects.filter(q_unique_id__in=level_questions)
+            questions[level] = qs
+
         # get moduels from db
         all_points = Point.objects.values(
                     'p_level',
@@ -613,6 +621,7 @@ class SpecTopicHandlerView(
         # Getting removed items
         context['spec'] = spec
         context['full_ord_spec'] = ordered_spec
+        context['questions'] = questions
         #
         context['module'] = moduel
         context['chapter'] = chapter

@@ -30,6 +30,12 @@ def p_unique_to_title(p_unique_id):
     title = point.p_content['details']['hidden']['0']['point_title']
     return title
 
+@register.filter(name='p_unique_to_id')
+def p_unique_to_id(p_unique_id):
+    """Returns the point id from the unique id"""
+    point = Point.objects.get(p_unique_id=p_unique_id)
+    return point.id
+
 @register.filter(name='split')
 def split(value, key):
     """Splits a string into a list using key"""

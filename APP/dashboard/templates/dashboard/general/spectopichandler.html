@@ -15,6 +15,7 @@ Topic selection and ordering
 {%definevar context.chapter as chapter%}
 
 
+{%include 'dashboard/general/items/chapter_questions_menu_modal.html'%}
 {%include 'dashboard/general/items/spectopic_actions.html'%}
 
 {%for topic in context.topics%}
@@ -34,6 +35,11 @@ Topic selection and ordering
 				<div class='mt-2' style=''>
 					{%definevar context.full_ord_spec as content%}
 					{%definevar context.topics as all_topics%}
+					<a class="chapter_nav_link" 
+					   data-toggle="modal" data-target="#BrowseQuestionsModal"
+						style='cursor:pointer;'>
+						<i class="bi bi-star-fill"></i> Chapter Practice Questions
+					</a>
 					{%include 'dashboard/general/items/outline_item_moveable_topics.html'%}
 				</div>
 			</div>

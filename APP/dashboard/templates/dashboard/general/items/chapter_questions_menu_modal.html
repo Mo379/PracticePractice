@@ -1,0 +1,44 @@
+{%load general%}
+<div class="modal fade" id="BrowseQuestionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Browse Questions</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<br>
+		<ol id='level_list'>
+			{%for level in context.questions%}
+			<div class="accordion mb-1" id="level_{{level}}">
+			  <div class="card course_outline_card">
+			    <div class="card-header course_outline_cell" id="heading-{{level}}" style=''>
+					<button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{level}}" aria-expanded="true" aria-controls="collapse-{{level}}">
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Difficulty - {{level}}</span>
+					</button>
+			    </div>
+
+			    <div id="collapse-{{level}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{level}}" data-parent="#level_{{level}}">
+			      <div class="card-body" style='padding:10px;'>
+				      <ol id='question_list_{{level}}'>
+						{%for question in context.questions|index:level%}
+						<div class='' style='cursor:pointer;' id='level_question_{{level}}_{{question}}'>
+							<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:editorquestion' spec.id question.id%}">Question - {{question.q_number}}</a></span>
+								<button class="btn text-left text-danger" type="button" onclick="">
+								Remove
+							</button>
+						</div>
+						{%endfor%}
+					</ol>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			{%endfor%}
+		</ol>
+      </div>
+    </div>
+  </div>
+</div>

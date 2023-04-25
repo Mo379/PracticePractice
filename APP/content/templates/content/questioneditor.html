@@ -23,21 +23,16 @@ Editor
 var object_id = "{{context.question.id}}";
 var object_type = "Question";
 </script>
+{%definevar context.spec as spec%}
+{%definevar context.question as question%}
 
 <div class="card-body">
 	<div class="card shadow">
 		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 			<h5 class="h4 mb-1 text-primary font-weight-bold">
-				<a href='
-{%if 'contribution' in context.url%}
-{%url 'content:contribution_noteedit' context.task.id %}#point_{{context.point.id}}
-{%else%}
-{%url 'content:noteedit' context.spec.id context.point.p_moduel context.point.p_chapter%}#point_{{context.point.id}}
-{%url 'content:questionedit' context.spec.id context.question.q_moduel context.question.q_chapter%}#question_{{context.question.id}}
-{%endif%}
-			'>
-Question: {{context.qurstion.q_chapter}}
-			</a>
+				<a href='{%url 'dashboard:spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name question.q_moduel question.q_chapter%}'>
+					{{context.question.q_chapter|field_name_to_label}}: Difficulty {{question.q_difficulty}}, Number {{question.q_number}}
+				</a>
 			</h5>
 		</div>
 	</div>
