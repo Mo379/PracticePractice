@@ -18,8 +18,8 @@ class Question(models.Model):
     q_number = models.IntegerField(default=0, null=True)
     #
     q_difficulty = models.IntegerField(default=0, null=True)
-    q_total_marks = models.IntegerField(default=0, null=True)
     q_content = models.JSONField(default=dict, null=True)
+    q_answer = models.JSONField(default=dict, null=True)
     q_MDcontent = MDTextField(default="", null=True)
     q_files_directory = models.CharField(max_length=255, default="", null=True)
     q_unique_id = models.CharField(

@@ -44,6 +44,25 @@
 	    <a class="nav-item nav-link" data-toggle="tab" href="#ref-{{A}}" id="id-{{A}}">{{A}}</a>
 	    {%endfor%}
 	</nav>
+<div class='d-flex justify-content-center'>
+<a class="mb-2 btn text-left text-primary" href='{%url 'content:noteedit' context.spec.id module chapter%}'>
+ View
+</a>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
+	New
+</button>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
+	Removed
+</button>
+
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteTopicModal">
+Delete
+</button>
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+Bin
+</button>
+</div>
+<br>
 
 	<div class="tab-content" id="pricingTab">
         <hr class="sidebar-divider bg-dark">
