@@ -294,6 +294,9 @@ body{
 .CodeMirror-gutters{
 	border: 1px solid var(--third-bg-color) !important;
 }
+.editormd-preview-theme-default{
+	background: var(--main-bg-color) !important;
+}
 
 
 

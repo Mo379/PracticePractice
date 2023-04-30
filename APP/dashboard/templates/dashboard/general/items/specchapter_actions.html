@@ -1,4 +1,67 @@
 {%load general %}
+<div class="modal fade" id="RenameModuleModal_{{module}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Rename Module</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="px-3 py-3"  action="{%url 'content:_renamemodule'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input 
+		       	class ='form-control mb-3'
+			type='text' 
+			name='new_name' 
+			placeholder='Rename Module'
+		        value='{{module|field_name_to_label}}'
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{%for chapter in context.module_chapters|index:module%}
+<div class="modal fade" id="RenameChapterModal_{{module}}_{{chapter}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Rename Chapter</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="px-3 py-3"  action="{%url 'content:_renamechapter'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='chapter' value='{{chapter}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input 
+		       	class ='form-control mb-3'
+			type='text' 
+			name='new_name' 
+			placeholder='Rename Chapter'
+		       value='{{chapter|field_name_to_label}}'
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{%endfor%}
 <div class="modal fade" id="CrateChapter_{{module}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

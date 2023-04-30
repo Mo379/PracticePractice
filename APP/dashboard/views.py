@@ -482,7 +482,7 @@ class SpecModuelHandlerView(
         #
         module_chapters = collections.defaultdict(list)
         for key in keys:
-            module_chapters[key] = ordered_spec[key]['content'].keys()
+            module_chapters[key] = list(ordered_spec[key]['content'].keys())
         #
         deleted_module_chapters = collections.defaultdict(list)
         for d_mod in deleted_chapters:
@@ -545,10 +545,10 @@ class SpecTopicHandlerView(
             )
         # get chapter questions
         questions = spec.spec_content[moduel]['content'][chapter]['questions']
-        for level in questions.keys():
-            level_questions = questions[level]
-            qs = Question.objects.filter(q_unique_id__in=level_questions)
-            questions[level] = qs
+        for q_level in questions.keys():
+            level_questions = questions[q_level]
+            qs = Question.objects.filter(q_unique_id__in=level_questions).order_by('q_number')
+            questions[q_level] = qs
 
         # get moduels from db
         all_points = Point.objects.values(
@@ -557,7 +557,6 @@ class SpecTopicHandlerView(
                     'p_moduel',
                     'p_chapter',
                     'p_topic',
-                    'p_number',
                     'p_unique_id',
                 ).distinct().order_by(
                     'p_level',
@@ -584,6 +583,7 @@ class SpecTopicHandlerView(
                 ).distinct().order_by(
                     'p_level',
                     'p_subject',
+                    'p_moduel',
                     'p_topic',
                 )        # reformat moduels
         deleted_topics = deleted_points.values(

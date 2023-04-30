@@ -131,6 +131,11 @@ urlpatterns = [
         name='_renametopic'
     ),
     path(
+        'content/_renamepoint/',
+        views._renamepoint,
+        name='_renamepoint'
+    ),
+    path(
         'content/_ordermoduels',
         views._ordermoduels,
         name='_ordermoduels'

@@ -13,11 +13,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from content.util.GeneralUtil import (
         TagGenerator,
+        ChapterQuestionGenerator,
         insert_new_spec_order,
         order_full_spec_content,
         order_live_spec_content,
         TranslatePointContent,
         TranslateQuestionContent,
+        TranslateQuestionAnswer,
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
@@ -542,6 +544,7 @@ class EditorQuestionView(
         question = Question.objects.get(pk=question_id)
         #
         translated_content = TranslateQuestionContent(question.q_content)
+        translated_answer = TranslateQuestionAnswer(question.q_content)
 
         #
         md_config = settings.MDEDITOR_CONFIGS
@@ -1281,72 +1284,6 @@ def _updatecourseinformation(request):
             )
 
 
-def _renamemodule(request):
-    if request.method == 'POST':
-        level = request.POST['level']
-        subject = request.POST['subject']
-        module = request.POST['moduel']
-        board = request.POST['board']
-        name = request.POST['name']
-        new_name = request.POST['new_name']
-        points = Point.objects.filter(
-                user=request.user,
-                p_level=level,
-                p_subject=subject,
-                p_moduel=module
-            )
-        spec = Specification.objects.get(
-                user=request.user,
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name,
-            )
-        if len(points) > 0:
-            points.update(p_moduel=new_name)
-            # change spec info
-            content = spec.spec_content.copy()
-            if module in content.keys():
-                content[new_name] = content.pop(module)
-                spec.spec_content = content
-                spec.save()
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    f'Successfully Renamed the moduel: {module} -> {new_name}',
-                    extra_tags='alert-warning specchapter'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that the input is correct.',
-                    extra_tags='alert-warning specchapter'
-            )
-            kwargs = {
-                'level': level,
-                'subject': subject,
-                'module': module,
-                'board': board,
-                'name': name,
-            }
-            return redirect(
-                    'dashboard:specchapter',
-                    **kwargs
-                )
-        kwargs = {
-            'level': level,
-            'subject': subject,
-            'module': new_name,
-            'board': board,
-            'name': name,
-        }
-        return redirect(
-                'dashboard:specchapter',
-                **kwargs
-            )
-
-
 def _renamespec(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1409,6 +1346,66 @@ def _renamespec(request):
             )
 
 
+def _renamemodule(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        board = request.POST['board']
+        name = request.POST['name']
+        new_name = request.POST['new_name'].replace(' ', '_')
+        points = Point.objects.filter(
+                user=request.user,
+                p_level=level,
+                p_subject=subject,
+                p_moduel=module
+            )
+        questions = Question.objects.filter(
+                user=request.user,
+                q_subject=subject,
+                q_moduel=module
+            )
+        spec = Specification.objects.get(
+                user=request.user,
+                spec_level=level,
+                spec_subject=subject,
+                spec_board=board,
+                spec_name=name,
+            )
+        if len(points) > 0:
+            points.update(p_moduel=new_name)
+            questions.update(q_moduel=new_name)
+            # change spec info
+            content = spec.spec_content.copy()
+            if module in content.keys():
+                content[new_name] = content.pop(module)
+                spec.spec_content = content
+                spec.save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully Renamed the moduel: {module} -> {new_name}',
+                    extra_tags='alert-warning specmoduel'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that the input is correct.',
+                    extra_tags='alert-warning specmoduel'
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:specmoduel',
+                **kwargs
+            )
+
+
 def _renamechapter(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1417,7 +1414,7 @@ def _renamechapter(request):
         chapter = request.POST['chapter']
         board = request.POST['board']
         name = request.POST['name']
-        new_name = request.POST['new_name']
+        new_name = request.POST['new_name'].replace(' ', '_')
         #
         points = Point.objects.filter(
                 user=request.user,
@@ -1425,6 +1422,12 @@ def _renamechapter(request):
                 p_subject=subject,
                 p_moduel=module,
                 p_chapter=chapter,
+            )
+        questions = Question.objects.filter(
+                user=request.user,
+                q_subject=subject,
+                q_moduel=module,
+                q_chapter=chapter,
             )
         spec = Specification.objects.get(
                 user=request.user,
@@ -1435,6 +1438,7 @@ def _renamechapter(request):
             )
         if len(points) > 0:
             points.update(p_chapter=new_name)
+            questions.update(q_chapter=new_name)
             # change spec info
             content = spec.spec_content.copy()
             if module in content.keys():
@@ -1446,37 +1450,33 @@ def _renamechapter(request):
                     request,
                     messages.INFO,
                     f'Successfully Renamed the chapter: {chapter} -> {new_name}',
-                    extra_tags='alert-warning spectopic'
+                    extra_tags='alert-warning specmoduel'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
                     'Something is wrong, please check that the input is correct.',
-                    extra_tags='alert-warning spectopic'
+                    extra_tags='alert-warning specmoduel'
             )
             kwargs = {
                 'level': level,
                 'subject': subject,
-                'module': module,
-                'chapter': chapter,
                 'board': board,
                 'name': name,
             }
             return redirect(
-                    'dashboard:spectopic',
+                    'dashboard:specmoduel',
                     **kwargs
                 )
         kwargs = {
             'level': level,
             'subject': subject,
-            'module': module,
-            'chapter': new_name,
             'board': board,
             'name': name,
         }
         return redirect(
-                'dashboard:spectopic',
+                'dashboard:specmoduel',
                 **kwargs
             )
 
@@ -1490,7 +1490,7 @@ def _renametopic(request):
         topic = request.POST['topic']
         board = request.POST['board']
         name = request.POST['name']
-        new_name = request.POST['new_name']
+        new_name = request.POST['new_name'].replace(' ', '_')
         #
         points = Point.objects.filter(
                 user=request.user,
@@ -1520,27 +1520,26 @@ def _renametopic(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    f'Successfully Renamed the chapter: {topic} -> {new_name}',
-                    extra_tags='alert-warning specpoint'
+                    f'Successfully Renamed the topic: {topic} -> {new_name}',
+                    extra_tags='alert-warning spectopic'
                 )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
                     'Something is wrong, please check that the input is correct.',
-                    extra_tags='alert-warning specpoint'
+                    extra_tags='alert-warning spectopic'
             )
             kwargs = {
                 'level': level,
                 'subject': subject,
                 'module': module,
                 'chapter': chapter,
-                'topic': topic,
                 'board': board,
                 'name': name,
             }
             return redirect(
-                    'dashboard:specpoint',
+                    'dashboard:spectopic',
                     **kwargs
                 )
         kwargs = {
@@ -1548,12 +1547,69 @@ def _renametopic(request):
             'subject': subject,
             'module': module,
             'chapter': chapter,
-            'topic': new_name,
             'board': board,
             'name': name,
         }
         return redirect(
-                'dashboard:specpoint',
+                'dashboard:spectopic',
+                **kwargs
+            )
+
+
+def _renamepoint(request):
+    if request.method == 'POST':
+        level = request.POST['level']
+        subject = request.POST['subject']
+        module = request.POST['moduel']
+        chapter = request.POST['chapter']
+        board = request.POST['board']
+        name = request.POST['name']
+        #
+        point_id = request.POST['p_id']
+        title = request.POST['new_name'].replace(' ', '_')
+        #
+        points = Point.objects.filter(
+                user=request.user,
+                p_unique_id=point_id
+            )
+        if len(points) > 0:
+            points[0].p_content['details']['hidden']['0']['point_title'] = title
+            points[0].save()
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Successfully Renamed the point.',
+                    extra_tags='alert-warning spectopic'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something is wrong, please check that the input is correct.',
+                    extra_tags='alert-warning spectopic'
+            )
+            kwargs = {
+                'level': level,
+                'subject': subject,
+                'module': module,
+                'chapter': chapter,
+                'board': board,
+                'name': name,
+            }
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
+                )
+        kwargs = {
+            'level': level,
+            'subject': subject,
+            'module': module,
+            'chapter': chapter,
+            'board': board,
+            'name': name,
+        }
+        return redirect(
+                'dashboard:spectopic',
                 **kwargs
             )
 
@@ -1594,6 +1650,15 @@ def _orderchapters(request):
                 'chapter'
             )
         content[module]['content'] = new_information
+        # Check and insert questions
+        module_content = ChapterQuestionGenerator(
+                request.user,
+                spec.spec_subject,
+                module,
+                content[module]['content'].copy()
+            )
+        content[module]['content'] = module_content
+        #
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -1780,6 +1845,14 @@ def _restorechapter(request):
         new_information[chapter]['content'] = save_content
         # Update the values
         content[module]['content'] = new_information
+        # Check and insert questions
+        module_content = ChapterQuestionGenerator(
+                request.user,
+                spec.spec_subject,
+                module,
+                content[module]['content'].copy()
+            )
+        content[module]['content'] = module_content
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -1903,6 +1976,14 @@ def _undeletechapter(request):
         new_information[chapter]['content'] = save_content
         # Update the values
         content[module]['content'] = new_information
+        # Check and insert questions
+        module_content = ChapterQuestionGenerator(
+                request.user,
+                spec.spec_subject,
+                module,
+                content[module]['content'].copy()
+            )
+        content[module]['content'] = module_content
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})

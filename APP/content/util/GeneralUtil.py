@@ -2,8 +2,10 @@ import io
 import random
 import string
 import collections
+from collections import defaultdict
 import markdown
 import ruamel.yaml
+from content.models import Question
 
 
 
@@ -13,6 +15,32 @@ def TagGenerator():
         ).lower()
     return x
 
+def ChapterQuestionGenerator(user, subject, module, module_content):
+    difficulty_levels = [1, 2, 3, 4, 5]
+    for chapter in module_content.keys():
+        chapter_qs = module_content[chapter]['questions']
+        for diff_level in difficulty_levels:
+            if str(diff_level) not in chapter_qs.keys():
+                chapter_qs[str(diff_level)] = []
+        for level in chapter_qs.keys():
+            level_qs = chapter_qs[level]
+            while len(level_qs) < 5:
+                tag = TagGenerator()
+                while Question.objects.filter(q_unique_id=tag).exists():
+                    tag = TagGenerator()
+                q_number = len(level_qs) + 1
+                question = Question.objects.create(
+                        user=user,
+                        q_subject=subject,
+                        q_moduel=module,
+                        q_chapter=chapter,
+                        q_difficulty=level,
+                        q_unique_id=tag,
+                        q_number=q_number
+                    )
+                level_qs.append(question.q_unique_id)
+    #
+    return module_content
 
 def filter_drag_drop_selection(global_objects, selected_options, item_name):
     # remove disabled moduels from selection_option
@@ -141,46 +169,12 @@ def TranslatePointContent(content):
 
 def TranslateQuestionContent(content):
     output = ''
-    output += '+++ Meta_details:' + '\n'
-    output += 'question_type: ' + str(content['details']['head']['0']['q_type']) + '\n'
-    output += 'question_difficulty: ' + str(content['details']['head']['0']['q_difficulty']) + '\n'
-    output += '\n\n+++ Question:\n'
-    for n in range(len(content['details']['questions'])):
-        part = content['details']['questions'][str(n)]
-        part_name = part['q_part']
-        part_mark = part['q_part_mark']
-        part_content = part['content']
-        output += f'\nPartName_{part_name}'
-        output += f'_PartMark_{part_mark}:\n'
-        for n2 in range(len(part_content)):
-            item = part_content[str(n2)]
-            if 'text' in item:
-                string = item['text'].replace('\n', '')
-                output += f'{string}\n'
-            if 'img' in item:
-                img_name = item['img']['img_name']
-                img_info = item['img']['img_info']
-                output += f'!({img_info})'
-                output += f'[{img_name}]\n'
-    output += '\n\n+++ Answer:' + '\n'
-    for n in range(len(content['details']['answers'])):
-        part = content['details']['answers'][str(n)]
-        part_name = part['q_part']
-        part_content = part['content']
-        output +=f'\nAnswerPart_PartName_{part_name}:\n'
-        for n2 in range(len(part_content)):
-            item = part_content[str(n2)]
-            if 'text' in item:
-                string = item['text'].replace('\n', '')
-                output += f'{string}\n'
-            if 'img' in item:
-                img_name = item['img']['img_name']
-                img_info = item['img']['img_info']
-                output += f'!({img_info})'
-                output += f'[{img_name}]\n'
     return output
 
 
+def TranslateQuestionAnswer(content):
+    output = ''
+    return output
 
 
 

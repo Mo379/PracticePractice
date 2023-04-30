@@ -33,6 +33,9 @@ Bin
 	        <button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
 			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Module - {{module|field_name_to_label}}</span>
 		</button>
+		<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RenameModuleModal_{{module}}">
+			Rename
+		</button>
 		<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_module('{%url 'content:_removemodule'%}', '{%url 'content:_restoremodule'%}', '{{csrf_token}}', '{{spec.id}}','{{module}}')">
 			Remove
 		</button>
@@ -63,6 +66,9 @@ Bin
 						+
 					</span>
 					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter - {{chapter|field_name_to_label}}</a></span>
+					<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RenameChapterModal_{{module}}_{{chapter}}">
+						Rename
+					</button>
 					<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_chapter('{%url 'content:_removechapter'%}', '{%url 'content:_restorechapter'%}','{%url 'content:noteedit' context.spec.id module chapter%}','{{csrf_token}}', '{{spec.id}}', '{{module}}','{{chapter}}')">
 				Remove
 				</button>

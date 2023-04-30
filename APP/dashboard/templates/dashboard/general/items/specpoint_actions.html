@@ -1,4 +1,125 @@
 {%load general %}
+
+<div class="modal fade" id="RenameTopicModal_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Rename Topic</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="px-3 py-3"  action="{%url 'content:_renametopic'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='chapter' value='{{chapter}}'/>
+		<input type='hidden' name='topic' value='{{topic}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input 
+		       class ='form-control mb-3'
+			type='text' 
+			name='new_name' 
+			placeholder='Rename Topic'
+		       value='{{topic|field_name_to_label}}'
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="PromptTopicModal_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Prompt Topic</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<textarea
+		       class ='form-control mb-3'
+			name='Prompt' 
+			placeholder='Prompt...'
+		       value=''
+		></textarea>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save Prompt</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{%for point in context.topic_points|index:topic%}
+<div class="modal fade" id="RenamePointModal_{{topic}}_{{point}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Rename Topic</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	<form class="px-3 py-3"  action="{%url 'content:_renamepoint'%}" method="POST" role="form">
+		{%csrf_token%}
+		<input type='text' name='level' value='{{spec.spec_level}}'/>
+		<input type='text' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='text' name='moduel' value='{{module}}'/>
+		<input type='text' name='chapter' value='{{chapter}}'/>
+		<input type='text' name='topic' value='{{topic}}'/>
+		<input type='text' name='board' value='{{spec.spec_board}}'/>
+		<input type='text' name='name' value='{{spec.spec_name}}'/>
+		<input type='text' name='p_id' value='{{point}}'/>
+		<input 
+		       class ='form-control mb-3'
+			type='text' 
+			name='new_name' 
+			placeholder='Rename Point'
+		       value=''
+		/>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Rename </button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="PromptPointModal_{{topic}}_{{point}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Prompt Point</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<textarea
+		       class ='form-control mb-3'
+			name='Prompt' 
+			placeholder='Prompt...'
+		       value=''
+		></textarea>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save Prompt</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{%endfor%}
+
 <div class="modal fade" id="CratePoint_{{topic}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

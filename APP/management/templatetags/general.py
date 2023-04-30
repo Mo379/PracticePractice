@@ -215,50 +215,6 @@ def ToMarkdown(content, point):
 def ToMarkdownQuestion(content, question):
     # setup output
     html = ""
-    # kw items in content
-    details = content['details']
-    # kw items in details
-    question_parts = details['questions']
-    answer_parts= details['answers']
-    # Title
-    # The question part is different from the answer part
-    for item in range(len(question_parts)):
-        # to keep the order of the description
-        item = str(item)
-        q_part = question_parts[item]
-        q_part_name = q_part['q_part']
-        q_part_content = q_part['content']
-        q_part_mark = q_part['q_part_mark']
-        #
-        if q_part_name != 'head':
-            html += markdown.markdown("##### " + f'{q_part_name})')
-        for content_item in range(len(q_part_content)):
-            content_item = str(content_item)
-            # each item has a single child either text or img
-            # the text element is direct access
-            if 'text' in q_part_content[content_item]:
-                text = q_part_content[content_item]['text']
-                text = text.replace('\\', '\\\\')
-                html += markdown.markdown(text)
-            # the image element is made of two parts, info and file name
-            if 'img' in q_part_content[content_item]:
-                img_element = q_part_content[content_item]['img']
-                img_info = img_element['img_info']
-                img_name = img_element['img_name']
-                if img_name:
-                    question_dir = question.q_files_directory
-                    file_path = os.path.join(question_dir, img_name)
-                    context = {
-                            'CDN': settings.CDN_URL,
-                            'img_info': img_info,
-                            'file_path': file_path,
-                        }
-                    template = loader.get_template('content/image_question.html')
-                    content = template.render(context)
-                    html += content
-        if q_part_name != 'head':
-            html += f'<p style="text-align:right;"> [{q_part_mark}] </p>';
-    # convert markdown to html for display
     return html
 
 @register.filter(name='DifficultyToLabel')
@@ -269,6 +225,8 @@ def DifficultyToLabel(diff):
     icons = ['<i class="bi bi-snow2"></i>','<i class="bi bi-reception-2"></i>','<i class="bi bi-reception-3"></i>','<i class="bi bi-reception-4"></i>','<i class="bi bi-radioactive"></i>']
     label = icons[diff] + ' ' + labels[diff]
     return label
+
+
 @register.filter(name='QuestionMarkRange')
 def filter_range(start, end):
     return range(start, end+1)

@@ -1,4 +1,7 @@
 {%load general%}
+
+
+
 <div class="modal fade" id="BrowseQuestionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -18,6 +21,9 @@
 					<button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{level}}" aria-expanded="true" aria-controls="collapse-{{level}}">
 						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Difficulty - {{level}}</span>
 					</button>
+					<button class="btn text-left text-success" type="button" data-toggle="modal" data-target="#PromptQuestionModal_{{level}}">
+						Prompt
+					</button>
 			    </div>
 
 			    <div id="collapse-{{level}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{level}}" data-parent="#level_{{level}}">
@@ -26,9 +32,6 @@
 						{%for question in context.questions|index:level%}
 						<div class='' style='cursor:pointer;' id='level_question_{{level}}_{{question}}'>
 							<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:editorquestion' spec.id question.id%}">Question - {{question.q_number}}</a></span>
-								<button class="btn text-left text-danger" type="button" onclick="">
-								Remove
-							</button>
 						</div>
 						{%endfor%}
 					</ol>
@@ -42,3 +45,27 @@
     </div>
   </div>
 </div>
+{%for level in context.questions%}
+<div class="modal fade" id="PromptQuestionModal_{{level}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Prompt Questions</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<textarea
+		       class ='form-control mb-3'
+			name='Prompt' 
+			placeholder='Prompt...'
+		       value=''
+		></textarea>
+		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save Prompt</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+{%endfor%}

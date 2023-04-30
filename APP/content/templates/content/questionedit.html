@@ -27,12 +27,15 @@
 
 
 {%definevar context.questions as information%}
+{%definevar context.spec as spec%}
+{%definevar context.sampl_object as sample%}
 {%definevar 'Question' as A_tag%}
 
 <section class="py-5 " style='margin-bottom:250px;'>
     <div class="container">
 	<h1 class="text-center pb-3 mb-4" style='font-size:24px;'>
 	    {{context.sampl_object.q_chapter|field_name_to_label}}
+	    <a href='{%url 'dashboard:spectopic' spec.spec_level  spec.spec_subject spec.spec_board spec.spec_name sample.q_moduel sample.q_chapter%}'><i class="bi bi-plus-square"></i></a>
 	</h1>
 	<p class="text-center pb-3 mb-4" style='font-size:12px;'>
 	{{context.sampl_object.q_level|field_name_to_label}} Chapter questions, on {{context.sampl_object.q_moduel|field_name_to_label}}.
@@ -44,24 +47,6 @@
 	    <a class="nav-item nav-link" data-toggle="tab" href="#ref-{{A}}" id="id-{{A}}">{{A}}</a>
 	    {%endfor%}
 	</nav>
-<div class='d-flex justify-content-center'>
-<a class="mb-2 btn text-left text-primary" href='{%url 'content:noteedit' context.spec.id module chapter%}'>
- View
-</a>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
-	New
-</button>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
-	Removed
-</button>
-
-<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteTopicModal">
-Delete
-</button>
-<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
-Bin
-</button>
-</div>
 <br>
 
 	<div class="tab-content" id="pricingTab">
@@ -73,7 +58,7 @@ Bin
 				<nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin:auto;margin-bottom:30px;'>
 				    {%for B in information|index:A%}
 				    <a class="nav-item nav-link mr-1 mb-1" data-toggle="tab" href="#ref-{{A}}-{{B}}" 
-					id="id-{{A}}-{{B}}" style='border: 1px solid black;'>{{B}}</a>
+					id="id-{{A}}-{{B}}" style='border: 1px solid black;'>{{B.q_number}}</a>
 				    {%endfor%}
 				</nav>
 			</div>
