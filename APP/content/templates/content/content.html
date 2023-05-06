@@ -41,13 +41,13 @@ Find the revision notes, questions and past papers you want, all in one place!
 			<div style='font-size: 12px;' class='mb-1'>
 				<strong>Skills You'll gain:</strong>
 				{%for idd, skill in course.course_skills.items%}
-				<span class='mb-1 course_skill_span' style='display:inline-block;background: silver;padding:3px;border-radius:5px;'>{{skill}}</span>
+				<span class='mb-1 course_skill_span'>{{skill}}</span>
 				{%endfor%}
 			</div>
-			<div class="" ><strong>Estimated Time:</strong> {{course.course_estimated_time}}</div>
-			<div class="" ><strong>Level:</strong> {{course.course_level}}</div>
-			<div class="" ><strong>English:</strong> {{course.course_language}}</div>
-			<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href="{%url 'dashboard:coursereviews' course.id%}">reviews</a>) {{context.total_learners}} learners
+			<div style='font-size: 12px;' class='mb-1'>
+				<strong>Level:</strong> {{course.course_level}}
+			</div>
+			<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.reviews|index:course.id|index:0}} (<a href="{%url 'dashboard:coursereviews' course.id%}">{{context.reviews|index:course.id|index:1}} reviews</a>) {{context.course_sub_counts|index:course.id}} learners
 	</div>
 			<div class="">
 				<hr class="sidebar-divider mb-3">

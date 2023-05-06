@@ -1,0 +1,36 @@
+<div class="modal fade" id="GiveReviewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Give a Course Review</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<form class="px-3 py-3"  action="{%url 'content:_new_review'%}" method="POST" role="form">
+			{%csrf_token%}
+
+			<input name='course_id' value='{{course.id}}' type='hidden'>
+			<div>
+				<div class="rating">
+				  <input type="radio" name="course_rating" value="5" id="5"><label for="5">☆</label>
+				  <input type="radio" name="course_rating" value="4" id="4"><label for="4">☆</label>
+				  <input type="radio" name="course_rating" value="3" id="3"><label for="3">☆</label>
+				  <input type="radio" name="course_rating" value="2" id="2"><label for="2">☆</label>
+				  <input type="radio" name="course_rating" value="1" id="1"><label for="1">☆</label>
+				</div>
+			</div>
+			<label for="course_review">How was the course ?</label>
+			<textarea
+				type='text' 
+				name='course_review' 
+			        class='form-control mb-3'
+				placeholder='Your review...'
+			></textarea><br><br>
+			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>

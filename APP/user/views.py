@@ -230,14 +230,6 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
         context['paymentmethods'] = payment_methods
         #
-        if Subscription.objects.filter(customer=user.id, status='active').exists():
-            subscription = Subscription.objects.get(customer=user.id, status='active')
-            context['subscription_status'] = subscription.status
-            context['billing_interval'] = subscription.plan.interval
-            context['billing_amount'] = subscription.plan.amount
-            context['billing_next'] = subscription.current_period_end
-            context['plan_name'] = subscription.plan.nickname
-            context['cancel_later'] = subscription.cancel_at_period_end
         return context
 
 
@@ -1221,112 +1213,5 @@ def _create_checkout_session(request):
             return JsonResponse({'error': 'product does not exist.'})
     else:
         return JsonResponse({'error': 'Invalid Request Method.'})
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _cancelsubscription(request):
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            # checking if the user authentication is correct
-            # Log user in
-            user = authenticate(request, username=username, password=password)
-            if user:
-                try:
-                    subscription = Subscription.objects.get(customer=user.id, status='active')
-                    stripe.api_key = settings.STRIPE_SECRET_KEY
-                    # Create Stripe Checkout session
-                    stripe.Subscription.modify(
-                            subscription.id,
-                            cancel_at_period_end=True
-                        )
-                except Exception as e :
-                    messages.add_message(
-                            request,
-                            messages.INFO,
-                            'Something went wrong, please try again or contact us.'+str(e),
-                            extra_tags='alert-danger cancelsubscription_form'
-                        )
-                    # Redirect to a success page.
-                    return redirect('user:cancelsubscription')
-                else:
-                    messages.add_message(
-                            request,
-                            messages.INFO,
-                            'Your subscription has been cancelled, see the billing page to see when your membership will end.',
-                            extra_tags='alert-success user_profile'
-                        )
-                    # Redirect to a success page.
-                    return redirect('user:index')
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Incorrect details, please try again.',
-                        extra_tags='alert-danger cancelsubscription_form'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, please check that all ' +
-                    'inputs are valid.' + str(form.errors),
-                    extra_tags='alert-danger cancelsubscription_form'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger cancelsubscription_form'
-            )
-    return redirect('user:cancelsubscription')
-
-
-@login_required(login_url='/user/login', redirect_field_name=None)
-def _reactivatemembership(request):
-    if request.method == "GET":
-        user = request.user
-        # Log user in
-        try:
-            subscription = Subscription.objects.get(
-                    customer=user.id,
-                    status='active',
-                    cancel_at_period_end=True
-                )
-            stripe.api_key = settings.STRIPE_SECRET_KEY
-            # Create Stripe Checkout session
-            stripe.Subscription.modify(
-                    subscription.id,
-                    cancel_at_period_end=False
-                )
-        except Exception as e:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something went wrong, please try again or contact us.'+str(e),
-                    extra_tags='alert-danger user_profile'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Success, your subscription has been reactivated.',
-                    extra_tags='alert-success user_profile'
-                )
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger user_profile'
-            )
-    return redirect('user:index')
-
-
-
-
 
 

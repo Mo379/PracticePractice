@@ -27,12 +27,6 @@ urlpatterns = [
     path('billing', views.BillingView.as_view(), name='billing'),
     path('security', views.SecurityView.as_view(), name='security'),
     path('settings', views.SettingsView.as_view(), name='settings'),
-    path('join', views.JoinView.as_view(), name='join'),
-    path(
-        'joinsuccess/<sessid>/',
-        views.JoinSuccess.as_view(),
-        name='joinsuccess'
-    ),
     path(
         'cancelsubscription',
         views.CancelSubscription.as_view(),
@@ -92,15 +86,5 @@ urlpatterns = [
         '_create_checkout_session',
         views._create_checkout_session,
         name='_create_checkout_session'
-    ),
-    path(
-        '_cancelsubscription',
-        views._cancelsubscription,
-        name='_cancelsubscription'
-    ),
-    path(
-        '_reactivatemembership',
-        views._reactivatemembership,
-        name='_reactivatemembership'
     ),
 ]

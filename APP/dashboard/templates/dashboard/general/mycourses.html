@@ -65,21 +65,20 @@ Courses
 					<a class="text-warning">Unpublished</a>
 					{%endif%}
 				</div>
-				<div class="" style='font-size: 12px;'><strong>Course Versions:</strong> 
+				<div class="" style='font-size: 12px;'><strong>Specification:</strong> {{course.specification}}</div>
+				<div class="" style='font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
+				<div class="" style='font-size: 12px;'><strong>Course Versions (last 3 version):</strong> 
 					<div>
 					{%for version in courseversions%}
 					<span class='ml-2'>- {{version.version_name}}</span><br>
 					{%endfor%}
 					</div>
 				</div>
-				<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>x reviews</a>) {{context.total_learners}} from y learners
+				<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.reviews|index:course.id|index:0}}/5.0 (<a href='{%url 'dashboard:coursereviews' course.id%}'>{{context.reviews|index:course.id|index:1}} reviews</a>) {{context.course_sub_counts|index:course.id}} learners
 	</div>
 				<div class="" >
 					<hr class="sidebar-divider mb-3">
-					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course Information</a>
-					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a>
-					<a class="btn btn-success mb-1" data-toggle="modal" data-target="#PublishCourseModal_{{course.id}}">Publish this course</a>
-					<a class="btn btn-danger mb-1" data-toggle="modal" data-target="#UnPublishCourseModal_{{course.id}}">UnPublish this course</a>
+					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course</a>
 				</div>
 			</div>
 		</div>

@@ -16,7 +16,7 @@ function insertAfter(referenceNode, newNode) {
         </button>
       </div>
       <div class="modal-body">
-	      	Please use alphanumeric names only, those inputs are only seen by you and your collaborators for organisation purposes.
+	      	Please use alphanumeric names only, those inputs are only seen by you for organisation purposes.
 		<form class="px-3 py-3"  action="{%url 'content:_createspec'%}" method="POST" role="form">
 			{%csrf_token%}
 			<label for="spec_level">Spcification Level:</label>
@@ -32,13 +32,6 @@ function insertAfter(referenceNode, newNode) {
 				name='spec_subject' 
 			        class='form-control mb-3'
 				placeholder='Spec Subject'
-			/>
-			<label for="spec_board">Spcification Board:</label>
-			<input 
-				type='text' 
-				name='spec_board' 
-			        class='form-control mb-3'
-				placeholder='Spec Board'
 			/>
 			<label for="spec_name">Spcification Name:</label>
 			<input 
@@ -68,12 +61,13 @@ function insertAfter(referenceNode, newNode) {
 			{%csrf_token%}
 			<label for="Specifications">Choose a Specification:</label>
 
-			<select name="spec_id" id="Specifications">
+			<select name="spec_id" id="Specifications"
+		       	class ='form-control mb-3'
+				>
 			  {%for spec in context.raw_specs%}
 			  <option value="{{spec.id}}">
 				{{spec.spec_level}} -
 				{{spec.spec_subject}} -
-				{{spec.spec_board}} -
 				{{spec.spec_name}}
 			  </option>
 			  {%endfor%}

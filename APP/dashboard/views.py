@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.utils.functional import cached_property
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from view_breadcrumbs import BaseBreadcrumbMixin
-from django.db.models import CharField
+from django.db.models import CharField, Count, Avg
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from braces.views import (
         LoginRequiredMixin,
@@ -119,6 +119,28 @@ class MarketPlaceView(
         except EmptyPage:
             context['courses'] = p.page(p.num_pages)
             current_page = p.num_pages
+        #
+        total_learners = CourseSubscription.objects.filter(
+                course__in=context['courses']
+                ).values('course_id').annotate(count=Count('course'))
+        course_sub_counts = {}
+        for subscription in total_learners:
+            course_sub_counts[int(subscription['course_id'])] = subscription['count']
+        for key in context['courses']:
+            if key.id not in course_sub_counts.keys():
+                course_sub_counts[key.id] = 0
+        #
+        all_reviews = CourseReview.objects.filter(course__in=context['courses'])
+        avg_reviews = all_reviews.values('course_id').annotate(rating=Avg('rating'), count=Count('id'))
+        reviews = collections.defaultdict(list)
+        for review in avg_reviews:
+            reviews[int(subscription['course_id'])] = [review['rating'], review['count']]
+        for key in context['courses']:
+            if key.id not in reviews.keys():
+                reviews[key.id] = [0.0, 0]
+        #
+        context['course_sub_counts'] = course_sub_counts
+        context['reviews'] = reviews
         context['num_pages'] = p.num_pages
         context['current_page'] = current_page
         context['previous_page'] = current_page - 1 if current_page > 1 else None
@@ -155,10 +177,18 @@ class MarketCourseView(
                 user=self.request.user,
                 course=course
             ).exists() if self.request.user.is_authenticated else False
+        #
+        total_learners = CourseSubscription.objects.filter(course=course).count()
+        all_reviews = CourseReview.objects.filter(course=course)
+        avg_reviews = list(all_reviews.aggregate(Avg('rating')).values())[0]
+        total_reviews = all_reviews.count()
         content = order_live_spec_content(versions[0].version_content)
         context['course'] = course
+        context['avg_reviews'] = avg_reviews if avg_reviews else 0.0
+        context['total_reviews'] = total_reviews
         context['versions'] = versions
         context['ordered_content'] = content
+        context['total_learners'] = total_learners
         context['course_subscription_status'] = subscription_status
         context['CDN_URL'] = settings.CDN_URL
         return context
@@ -297,7 +327,6 @@ class MyCoursesView(
         #
         specs = Specification.objects.filter(
                     user=self.request.user,
-                    spec_completion=True,
                     deleted=False
                 )
         courses = Course.objects.filter(
@@ -306,6 +335,7 @@ class MyCoursesView(
                 ).order_by(
                         '-course_created_at'
                     )
+        specs = specs.exclude(pk__in=[course.specification.pk for course in courses])
         if 'search' in self.request.GET:
             search_query = self.request.GET['search']
             vector = SearchVector('course_name')
@@ -317,7 +347,7 @@ class MyCoursesView(
         for course in courses:
             courseversions = CourseVersion.objects.filter(course=course).order_by(
                         '-version_number'
-                    )
+                        )[:3]
             final_courses.append((courseversions, course))
         p = Paginator(final_courses, 9)
         try:
@@ -325,6 +355,27 @@ class MyCoursesView(
         except EmptyPage:
             context['courses'] = p.page(p.num_pages)
             current_page = p.num_pages
+        total_learners = CourseSubscription.objects.filter(
+                course__in=courses
+                ).values('course_id').annotate(count=Count('course'))
+        course_sub_counts = {}
+        for subscription in total_learners:
+            course_sub_counts[int(subscription['course_id'])] = subscription['count']
+        for key in courses:
+            if key.id not in course_sub_counts.keys():
+                course_sub_counts[key.id] = 0
+        #
+        all_reviews = CourseReview.objects.filter(course__in=courses)
+        avg_reviews = all_reviews.values('course_id').annotate(rating=Avg('rating'), count=Count('id'))
+        reviews = collections.defaultdict(list)
+        for review in avg_reviews:
+            reviews[int(subscription['course_id'])] = [review['rating'], review['count']]
+        for key in courses:
+            if key.id not in reviews.keys():
+                reviews[key.id] = [0.0, 0]
+        #
+        context['course_sub_counts'] = course_sub_counts
+        context['reviews'] = reviews
         context['num_pages'] = p.num_pages
         context['current_page'] = current_page
         context['previous_page'] = current_page - 1 if current_page > 1 else None

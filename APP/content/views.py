@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.views import generic
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.db.models import Count, Avg
 from content.util.GeneralUtil import (
         TagGenerator,
         ChapterQuestionGenerator,
@@ -82,6 +83,28 @@ class ContentView(
         except EmptyPage:
             context['courses'] = p.page(p.num_pages)
             current_page = p.num_pages
+        #
+        total_learners = CourseSubscription.objects.filter(
+                course__in=context['courses']
+                ).values('course_id').annotate(count=Count('course'))
+        course_sub_counts = {}
+        for subscription in total_learners:
+            course_sub_counts[int(subscription['course_id'])] = subscription['count']
+        for key in context['courses']:
+            if key.id not in course_sub_counts.keys():
+                course_sub_counts[key.id] = 0
+        #
+        all_reviews = CourseReview.objects.filter(course__in=courses)
+        avg_reviews = all_reviews.values('course_id').annotate(rating=Avg('rating'), count=Count('id'))
+        reviews = collections.defaultdict(list)
+        for review in avg_reviews:
+            reviews[int(subscription['course_id'])] = [review['rating'], review['count']]
+        for key in courses:
+            if key.id not in reviews.keys():
+                reviews[key.id] = [0.0, 0]
+        #
+        context['course_sub_counts'] = course_sub_counts
+        context['reviews'] = reviews
         context['num_pages'] = p.num_pages
         context['current_page'] = current_page
         context['previous_page'] = current_page - 1 if current_page > 1 else None
@@ -690,6 +713,53 @@ def _course_subscribe(request):
             )
 
 
+def _new_review(request):
+    if request.method == 'POST':
+        user = request.user
+        course_id = request.POST['course_id']
+        course_rating = request.POST['course_rating'] if 'course_rating' in request.POST.keys() else False
+        course_review = request.POST['course_review'] if 'course_rating' in request.POST.keys() else False
+        #
+        course = Course.objects.get(
+                pk=course_id
+            )
+        #
+        if course_rating and course_review:
+            try:
+                review, _= CourseReview.objects.get_or_create(
+                        user=request.user,
+                        course=course,
+                    )
+                review.review = course_review
+                review.rating = course_rating
+                review.save()
+            except Exception as e :
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Something went wrong, could not create review.',
+                        extra_tags='alert-warning marketcourse'
+                    )
+            else:
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'Thank you for giving a review.',
+                        extra_tags='alert-success marketcourse'
+                    )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Please provide a rating and a review.',
+                    extra_tags='alert-danger marketcourse'
+                )
+        #
+        return redirect(
+                'dashboard:marketcourse', course_id=int(course_id)
+            )
+
+
 def _management_options(request):
     if request.method == 'POST':
         subscription_id = h_decode(request.POST['subscription_id'])
@@ -830,7 +900,7 @@ def _createspec(request):
     if request.method == 'POST':
         spec_level = request.POST['spec_level']
         spec_subject = request.POST['spec_subject']
-        spec_board = request.POST['spec_board']
+        spec_board = 'Universal'
         spec_name = request.POST['spec_name']
         #
         if spec_level.isalnum() and spec_subject.isalnum() and \
@@ -1189,17 +1259,8 @@ def _updatecourseinformation(request):
         course_id = request.POST['course_id']
         course_name = request.POST['new_name']
         course_upload_image = request.FILES.get("course_thmbnail", None)
-        course_question_bank_only = request.POST.get('question_bank_only')
-        if course_question_bank_only == 'on':
-           course_question_bank_only = True
-        else:
-           course_question_bank_only = False
-        course_skills = request.POST.getlist('ordered_items_skills[]')
-        course_objectives = request.POST.getlist('ordered_items_objectives[]')
-        course_summary = request.POST['course_summary']
         course_level = request.POST['course_level']
-        course_language = request.POST['course_language']
-        course_estimated_time = request.POST['estimated_time']
+        # AI created 
         courses = Course.objects.filter(
                 user=request.user,
                 pk=course_id
@@ -1209,14 +1270,11 @@ def _updatecourseinformation(request):
             try:
                 course = courses[0]
                 course.course_name = course_name
-                course.course_summary = course_summary
                 course.course_level = course_level
-                course.course_language = course_language
-                course.course_estimated_time = course_estimated_time
-                course.course_question_bank_only = course_question_bank_only
                 #
-                course.course_skills = {idd: skill for idd, skill in enumerate(course_skills)}
-                course.course_learning_objectives = {idd: skill for idd, skill in enumerate(course_objectives)}
+                course.course_summary = 'AI generated summary'
+                course.course_skills = {idd: 'AI Generated' for idd in range(6)}
+                course.course_learning_objectives = {idd: 'AI Generated' for idd in range(6)}
                 #
                 # Upload image
                 if course_upload_image:

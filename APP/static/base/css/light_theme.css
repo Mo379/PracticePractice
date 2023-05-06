@@ -164,9 +164,18 @@ body{
 
 
 /* user settings pages */
+.table-billing-history{
+	background: var(--main-bg-color);
+	color: var(--text-color-1);
+	border: 1px solid var(--text-color-1);
+}
+.my_link_button{
+	color: var(--text-color-1);
+}
 .nav{
 	border-bottom: 1px solid var(--text-color-1);
 }
+
 
 
 
@@ -198,6 +207,13 @@ body{
 }
 .note_bottom_border{
 	border-bottom: 1px dashed var(--text-color-1);
+}
+.course_skill_span{
+	display: inline-block;
+	padding: 3px;
+	border-radius: 5px;
+	background: var(--third-bg-color);
+	color: var(--text-color-1);
 }
 
 /* practice page */

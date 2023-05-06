@@ -66,6 +66,11 @@ urlpatterns = [
         name='_course_subscribe'
     ),
     path(
+        'content/_new_review/',
+        views._new_review,
+        name='_new_review'
+    ),
+    path(
         'content/_management_options/',
         views._management_options,
         name='_management_options'

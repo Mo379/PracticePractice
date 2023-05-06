@@ -72,7 +72,6 @@ class Specification(models.Model):
         "Last assessment", blank=True, null=True
     )
     spec_content = models.JSONField(default=OrderedDict, null=True)
-    spec_completion = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):
@@ -205,10 +204,7 @@ class Course(models.Model):
     course_skills = models.JSONField(default=OrderedDict, null=True)
     course_learning_objectives = models.JSONField(default=OrderedDict, null=True)
     course_contributors = models.JSONField(default=OrderedDict, null=True)
-    course_language = models.CharField(max_length=150, default="", null=True)
     course_level = models.CharField(max_length=150, default="", null=True)
-    course_question_bank_only = models.BooleanField(default=False, null=True)
-    course_estimated_time = models.CharField(max_length=150, default="", null=True)
     #
     course_created_at = models.DateTimeField(auto_now_add=True)
     course_updated_at = models.DateTimeField(auto_now=True)
@@ -219,7 +215,6 @@ class Course(models.Model):
 
     def __str__(self):
         return self.course_name
-
 
 class CourseVersion(models.Model):
     course = models.ForeignKey(
@@ -239,23 +234,6 @@ class CourseVersion(models.Model):
         return self.version_name
 
 
-class CourseReview(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, db_index=True)
-    review_stars = models.PositiveSmallIntegerField(null=True)
-    review_text = models.CharField(max_length=255, default="", null=True)
-    review_created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return (
-            self.user.username
-            + "-"
-            + self.course.specification.spec_subject
-            + "-"
-            + self.course.specification.spec_name
-        )
-
-
 class CourseSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, db_index=True)
@@ -273,6 +251,18 @@ class CourseSubscription(models.Model):
             + self.course.specification.spec_name
         )
 
+
+class CourseReview(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, null=True)
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, db_index=True, default="", null=True
+    )
+    rating = models.PositiveSmallIntegerField(null=True)
+    review = models.TextField(max_length=2500, default="", null=True)
+    review_created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.user.username) + str(self.course)
 
 class QuestionTrack(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)

@@ -11,7 +11,7 @@ Course Page
 {%include 'base/alert.html'%}
 
 {%definevar context.course as course%}
-
+{%include 'content/items/course_review_modal.html'%}
 
 <div style='min-height: 100vh;'>
 	<div class = 'market_course_wrapper' style='border-radius: 15px 15px 0px 0px'>
@@ -19,10 +19,7 @@ Course Page
 			<h1 class='font-weight-bold'><i class="bi bi-book"></i> {{course.course_name}}</h1>
 			<p> {{course.course_summary}}</p>
 			{%definevar context.versions|index:0 as latest_version%}
-			<div class="" style=''><strong><i class="bi bi-clock-fill"></i> Estimated Time:</strong> {{course.course_estimated_time}}</div>
 			<div class="" style=''><strong><i class="bi bi-bar-chart-line"></i> Level:</strong> {{course.course_level}}</div>
-			<div> <i class="bi bi-translate"></i> <strong>Language:</strong> {{course.course_language}}</div>
-			<div> <i class="bi bi-patch-question"></i> <strong>Question Bank Only:</strong> {{course.course_question_bank_only}}</div>
 			<div> <i class="bi bi-hammer"></i> <strong>Created by:</strong> 
 				{{course.user.first_name}}
 				{{course.user.last_name}}
@@ -48,7 +45,7 @@ Course Page
 					<div style='font-size: 12px;' class='mb-1'>
 						<strong><i class="bi bi-lightning-fill"></i> Skills You'll gain:</strong>
 						{%for idd, skill in course.course_skills.items%}
-						<span class='mb-1 course_skill_span' style='display:inline-block;padding:3px;border-radius:5px;'>{{skill}}</span>
+						<span class='mb-1 course_skill_span'>{{skill}}</span>
 						{%endfor%}
 					</div>
 				</div>
@@ -61,7 +58,7 @@ Course Page
 					{%endif%}
 					<div class="card-body">
 						<div class="marketcourse_card_bottom">
-							<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.review_average}} ({{context.total_reviews}}<a href='{%url 'dashboard:coursereviews' course.id%}'>reviews</a>) {{context.total_learners}} learners
+							<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.avg_reviews}}/5.0 (<a href='{%url 'dashboard:coursereviews' course.id%}'>{{context.total_reviews}} reviews</a>) {{context.total_learners}} learners
 							</div>
 							<hr class="sidebar-divider mb-3">
 							{%if user.is_authenticated == False%}
@@ -74,7 +71,7 @@ Course Page
 							</form>
 							{%else%}
 							<a type= 'button' class='btn btn-success mb-2' href='{%url 'content:content'%}'>Study</a>
-							<a type= 'button' class='btn btn-success mb-2' href='#'>Give a review</a>
+							<a type= 'button' class='btn btn-success mb-2' data-toggle="modal" data-target="#GiveReviewModal">Give/Update review</a>
 							{%endif%}
 						</div>
 					</div>
