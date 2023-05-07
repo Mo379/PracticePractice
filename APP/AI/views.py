@@ -9,7 +9,7 @@ from braces.views import (
         SuperuserRequiredMixin,
     )
 from django.views import generic
-from content.models import Course
+from content.models import Course, CourseSubscription
 from user.models import (
         User
     )
@@ -73,6 +73,12 @@ class AIView(
             _chapters = list(content[module]['content'].keys())
             chapters[module] = _chapters
         #
+        course_subscription = CourseSubscription.objects.filter(
+                user=self.request.user,
+                course=course
+                )
+        #
+        context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['form_appearancechoice'] = appearancechoiceform
         context['course'] = course
         context['modules'] = modules

@@ -17,8 +17,12 @@ Your personalised AI tutor.
 {%endblock%}
 
 {%block content%}
+{%if context.coursesubscription == False%}
+	{%include 'content/items/course_buy.html'%}
+{%else%}
 <div class='AI_main_container'>
 	{%include 'AI/sidebar.html'%}
 	{%include 'AI/main_window.html'%}
 </div>
+{%endif%}
 {%endblock%}

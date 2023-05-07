@@ -13,7 +13,7 @@
     <div id="collapse-{{module}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
       <div class="card-body" style='padding:10px;'>
 	        {%for chapter in content|index:module|index:'content'%}
-		    <span class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} </span><br>
+		<span class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a type= 'button' class='' href="{%url 'content:notearticle' context.course.id module chapter%}">Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}</a></span><br>
 		{%endfor%}
       </div>
     </div>

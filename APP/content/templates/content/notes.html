@@ -15,6 +15,9 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 {%endblock%}
 
 {%block content%}
+{%if context.coursesubscription == False%}
+	{%include 'content/items/course_buy.html'%}
+{%else%}
 {%definevar context.notes as information%}
 {%definevar 'Chapter' as A_tag%}
 
@@ -55,6 +58,7 @@ Find the revision notes you want, exam boards include AQA, Edexcel, OCR and more
 	{%endfor%}
     </div>
 </section>
+{%endif%}
 
 
 

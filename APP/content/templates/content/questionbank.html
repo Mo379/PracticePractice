@@ -11,6 +11,9 @@
 {%endblock%}
 
 {%block content%}
+{%if context.coursesubscription == False%}
+	{%include 'content/items/course_buy.html'%}
+{%else%}
 {%definevar context.content as content%}
 <div id='qbank_container'>
 	{%definevar 'questionbank' as alert_loc%}
@@ -29,4 +32,5 @@
 	{%include 'content/items/qchapter_nav.html'%}
 	</div>
 </div>
+{%endif%}
 {%endblock%}

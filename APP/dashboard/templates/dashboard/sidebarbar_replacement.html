@@ -12,12 +12,14 @@
 {%include 'dashboard/sidebar/general.html'%}
 <hr class="sidebar-divider">
 
+{%if user.is_authenticated%}
 {%include 'dashboard/sidebar/student.html'%}
 <hr class="sidebar-divider">
 
 
 {%include 'dashboard/sidebar/writer.html'%}
 <hr class="sidebar-divider">
+{%endif%}
 
 {% comment %}
 {%include 'dashboard/sidebar/collaborator.html'%}

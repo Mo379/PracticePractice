@@ -164,6 +164,11 @@ class NotesView(
             if m not in dic:
                 dic[m] = []
             dic[m].append(c)
+        course_subscription = CourseSubscription.objects.filter(
+                user=self.request.user,
+                course=course
+                )
+        context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['notes'] = dic
         context['spec_names'] = spec_names
         context['course'] = course
@@ -172,12 +177,9 @@ class NotesView(
 
 
 class NoteArticleView(
-        LoginRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
-    login_url = 'user:login'
-    redirect_field_name = False
     template_name = 'content/note.html'
     context_object_name = 'context'
 
@@ -294,6 +296,11 @@ class QuestionBankView(
         for m_key in moduels:
             chapter_list = [chapter for i, chapter in enumerate(content[moduels[m_key]]['content'])]
             chapters[moduels[m_key]] = chapter_list
+        course_subscription = CourseSubscription.objects.filter(
+                user=self.request.user,
+                course=course
+                )
+        context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['content'] = content
         context['moduels'] = moduels
         context['chapters'] = chapters
@@ -356,6 +363,10 @@ class PracticeView(
         course = Course.objects.get(
                     pk=course_id
                 )
+        course_subscription = CourseSubscription.objects.filter(
+                user=self.request.user,
+                course=course
+                )
         content = CourseVersion.objects.filter(
                 course=course
             ).order_by('-version_number')[0].version_content
@@ -373,6 +384,7 @@ class PracticeView(
                         dic[d] = []
                     dic[d].append(Question.objects.get(q_unique_id=question))
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
+        context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['questions'] = dic if question else None
         context['course'] = course
         context['module'] = module

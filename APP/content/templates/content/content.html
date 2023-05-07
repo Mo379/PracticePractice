@@ -47,7 +47,7 @@ Find the revision notes, questions and past papers you want, all in one place!
 			<div style='font-size: 12px;' class='mb-1'>
 				<strong>Level:</strong> {{course.course_level}}
 			</div>
-			<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.reviews|index:course.id|index:0}} (<a href="{%url 'dashboard:coursereviews' course.id%}">{{context.reviews|index:course.id|index:1}} reviews</a>) {{context.course_sub_counts|index:course.id}} learners
+			<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.reviews|index:course.id|index:0}}/5.0 (<a href="{%url 'dashboard:coursereviews' course.id%}">{{context.reviews|index:course.id|index:1}} reviews</a>) {{context.course_sub_counts|index:course.id}} learners
 	</div>
 			<div class="">
 				<hr class="sidebar-divider mb-3">
