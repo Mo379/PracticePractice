@@ -76,6 +76,7 @@ Courses
 				</div>
 				<div class="" style='font-size: 12px;'><i class="bi bi-star-fill" style='color:gold;'></i> {{context.reviews|index:course.id|index:0}}/5.0 (<a href='{%url 'dashboard:coursereviews' course.id%}'>{{context.reviews|index:course.id|index:1}} reviews</a>) {{context.course_sub_counts|index:course.id}} learners
 	</div>
+				<a type= 'button' class='' href='{%url 'dashboard:marketcourse' course.id%}'> View Course</a>
 				<div class="" >
 					<hr class="sidebar-divider mb-3">
 					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course</a>

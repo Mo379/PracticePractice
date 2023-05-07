@@ -1284,9 +1284,10 @@ def _updatecourseinformation(request):
                 course.course_name = course_name
                 course.course_level = course_level
                 #
-                course.course_summary = 'AI generated summary'
-                course.course_skills = {idd: 'AI Generated' for idd in range(6)}
-                course.course_learning_objectives = {idd: 'AI Generated' for idd in range(6)}
+                course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
+                course.course_summary = '(AI is working...)'
+                course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
+                course.course_publication = False
                 #
                 # Upload image
                 if course_upload_image:
@@ -1326,7 +1327,7 @@ def _updatecourseinformation(request):
                                     extra_tags='alert-warning course'
                                 )
                 course.save()
-                _generate_course_introductions(course.id)
+                _generate_course_introductions.delay(request.user.id, course.id)
             except Exception as e:
                 messages.add_message(
                         request,

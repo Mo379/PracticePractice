@@ -28,7 +28,14 @@ Content Management
 			{%endif%}
 			<div class="card-body">
 				<div class="h6 font-weight-bold" style=''>{{course.course_name}}</div>
-				<div class="card-text mb-3" >{{course.course_summary}}</div>
+				<div style='font-size: 12px;' class='mb-1'>
+					<strong>Skills You'll gain:</strong>
+					{%for idd, skill in course.course_skills.items%}
+					<span class='mb-1 course_skill_span'>{{skill}}</span>
+					{%endfor%}
+				</div>
+				<div class="" style='font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
+				<a type= 'button' class='' href='{%url 'dashboard:marketcourse' course.id%}'> View Course</a>
 				<div class="" style=''>
 					<hr class="sidebar-divider mb-3">
 					<a type="button" class="btn btn-info mb-2" data-toggle="modal" data-target="#Manage_course_{{course.id|hashid}}">

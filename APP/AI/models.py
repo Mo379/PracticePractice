@@ -3,6 +3,20 @@ from user.models import User
 from content.models import Course
 
 
+# Prompt Usage
+class Usage(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, db_index=True, default="", null=False,
+        related_name='AI_usage_user'
+    )
+    model = models.CharField(max_length=150, default="", null=True)
+    prompt = models.IntegerField(default=0, null=True)
+    completion = models.IntegerField(default=0, null=True)
+    total = models.IntegerField(default=0, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.user.username) + str(self.created_at)
 # Create your models here.
 class Lesson(models.Model):
     user = models.ForeignKey(
