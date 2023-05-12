@@ -45,13 +45,18 @@
         </button>
       </div>
       <div class="modal-body">
+		{% definevar context.t_prompts|index:topic|index:0 as t_prompt%}
 		<textarea
 		       class ='form-control mb-3'
 			name='Prompt' 
 			placeholder='Prompt...'
+			id='text_t_prompt_{{t_prompt.id}}'
 		       value=''
-		></textarea>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save Prompt</button>
+		>{{t_prompt.prompt}}</textarea>
+		<button class="btn btn-primary" type="button" onclick="controller.C_save_prompt_topic('{%url 'AI:_saveprompttopic'%}', '{{csrf_token}}', '{{t_prompt.id}}')">
+		Save Prompt
+		</button>
+		<span class='ml-3' id='t_saving_indicator_{{t_prompt.id}}'> all saved</span>
 	</form>
       </div>
     </div>
@@ -73,14 +78,14 @@
       <div class="modal-body">
 	<form class="px-3 py-3"  action="{%url 'content:_renamepoint'%}" method="POST" role="form">
 		{%csrf_token%}
-		<input type='text' name='level' value='{{spec.spec_level}}'/>
-		<input type='text' name='subject' value='{{spec.spec_subject}}'/>
-		<input type='text' name='moduel' value='{{module}}'/>
-		<input type='text' name='chapter' value='{{chapter}}'/>
-		<input type='text' name='topic' value='{{topic}}'/>
-		<input type='text' name='board' value='{{spec.spec_board}}'/>
-		<input type='text' name='name' value='{{spec.spec_name}}'/>
-		<input type='text' name='p_id' value='{{point}}'/>
+		<input type='hidden' name='level' value='{{spec.spec_level}}'/>
+		<input type='hidden' name='subject' value='{{spec.spec_subject}}'/>
+		<input type='hidden' name='moduel' value='{{module}}'/>
+		<input type='hidden' name='chapter' value='{{chapter}}'/>
+		<input type='hidden' name='topic' value='{{topic}}'/>
+		<input type='hidden' name='board' value='{{spec.spec_board}}'/>
+		<input type='hidden' name='name' value='{{spec.spec_name}}'/>
+		<input type='hidden' name='p_id' value='{{point}}'/>
 		<input 
 		       class ='form-control mb-3'
 			type='text' 
@@ -106,13 +111,26 @@
         </button>
       </div>
       <div class="modal-body">
+		{% definevar context.p_prompts|index:topic|index:point as p_prompt%}
+		<div class="mt-4 custom-control custom-switch">
+			<input name='regenerate_summary' type="checkbox" class="custom-control-input" id="activated_p_prompt_{{p_prompt.id}}" 
+			{%if p_prompt.activated == True%}
+			checked
+			{%endif%}
+		  >
+		  <label class="custom-control-label" for="activated_p_prompt_{{p_prompt.id}}">Toggle to genrate using AI.</label>
+		</div><br> 
 		<textarea
 		       class ='form-control mb-3'
 			name='Prompt' 
 			placeholder='Prompt...'
+			id='text_p_prompt_{{p_prompt.id}}'
 		       value=''
-		></textarea>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save Prompt</button>
+		>{{p_prompt.prompt}}</textarea>
+		<button class="btn btn-primary" type="button" onclick="controller.C_save_prompt_point('{%url 'AI:_savepromptpoint'%}', '{{csrf_token}}', '{{p_prompt.id}}')">
+		Save Prompt
+		</button>
+		<span class='ml-3' id='p_saving_indicator_{{p_prompt.id}}'> all saved</span>
 	</form>
       </div>
     </div>

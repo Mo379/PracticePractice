@@ -1,5 +1,21 @@
 {%load general%}
 
+{%if context.last_job.finished == False%}
+<div class = 'd-flex justify-content-center mb-1'>
+	<i class="fa fa-duotone fa-robot fa-beat" name="GPT" unselectable="on" aria-hidden="true"></i>
+</div>
+<div class = 'd-flex justify-content-center'>
+	working...
+</div>
+{%else%}
+<div class = 'd-flex justify-content-center mb-1'>
+	<i class="fa fa-duotone fa-robot" name="GPT" unselectable="on" aria-hidden="true"></i>
+</div>
+{%endif%}
+
+
+
+
 <div class='d-flex justify-content-center'>
 <a class="mb-2 btn text-left text-primary" href='{%url 'content:noteedit' context.spec.id module chapter%}'>
 <i class="bi bi-book-fill"></i> Notes

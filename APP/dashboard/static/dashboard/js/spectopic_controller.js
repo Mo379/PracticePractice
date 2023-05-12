@@ -108,6 +108,33 @@ class model extends xhttp {
 		//sending query to model
 		this.xhttp.send(query);
 	}
+	M_save_prompt_question(url, csrf_token, prompt_id, q_prompt, activated) {
+		//opening the port using xhttp
+		this.open_port(url);
+		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
+		//prepairing query
+		var query = `q_prompt_id=${prompt_id}&q_prompt=${q_prompt}&activated=${activated}`;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+	M_save_prompt_topic(url, csrf_token, prompt_id, t_prompt) {
+		//opening the port using xhttp
+		this.open_port(url);
+		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
+		//prepairing query
+		var query = `t_prompt_id=${prompt_id}&t_prompt=${t_prompt}`;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+	M_save_prompt_point(url, csrf_token, prompt_id, p_prompt, activated) {
+		//opening the port using xhttp
+		this.open_port(url);
+		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
+		//prepairing query
+		var query = `p_prompt_id=${prompt_id}&p_prompt=${p_prompt}&activated=${activated}`;
+		//sending query to model
+		this.xhttp.send(query);
+	}
 }
 
 //used by the user, tells the model to do something. this class is both a controller and a view
@@ -465,6 +492,80 @@ class controller extends model {
 						s.innerHTML = 'all saved'
 						const chapter_card = document.getElementById(`deleted_point_${topic}_${point}`);
 						chapter_card.remove();
+					}else{
+						s.innerHTML = 'error :('
+					}
+
+				}, 1000);
+			}
+		}
+	}
+	C_save_prompt_question(url, csrf_token, prompt_id) {
+		//send command
+		// Get a reference to the modal element
+		const q_prompt = document.getElementById(`text_q_prompt_${prompt_id}`).value;
+		const activated = document.getElementById(`activated_q_prompt_${prompt_id}`).checked;
+		this.M_save_prompt_question(url, csrf_token, prompt_id, q_prompt, activated);
+		var s = document.getElementById(`q_saving_indicator_${prompt_id}`);
+		s.innerHTML = 'saving...'
+		//listen for the repsponse from the server script
+		this.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				setTimeout(function (){
+					var s = document.getElementById(`q_saving_indicator_${prompt_id}`);
+					if (json.error == 0){
+						s.innerHTML = 'all saved'
+					}else{
+						s.innerHTML = 'error :('
+					}
+
+				}, 1000);
+			}
+		}
+	}
+	C_save_prompt_topic(url, csrf_token, prompt_id) {
+		//send command
+		// Get a reference to the modal element
+		const t_prompt = document.getElementById(`text_t_prompt_${prompt_id}`).value;
+		this.M_save_prompt_topic(url, csrf_token, prompt_id, t_prompt);
+		var s = document.getElementById(`t_saving_indicator_${prompt_id}`);
+		s.innerHTML = 'saving...'
+		//listen for the repsponse from the server script
+		this.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				setTimeout(function (){
+					var s = document.getElementById(`t_saving_indicator_${prompt_id}`);
+					if (json.error == 0){
+						s.innerHTML = 'all saved'
+					}else{
+						s.innerHTML = 'error :('
+					}
+
+				}, 1000);
+			}
+		}
+	}
+	C_save_prompt_point(url, csrf_token, prompt_id) {
+		//send command
+		// Get a reference to the modal element
+		const p_prompt = document.getElementById(`text_p_prompt_${prompt_id}`).value;
+		const activated = document.getElementById(`activated_p_prompt_${prompt_id}`).checked;
+		this.M_save_prompt_point(url, csrf_token, prompt_id, p_prompt, activated);
+		var s = document.getElementById(`p_saving_indicator_${prompt_id}`);
+		s.innerHTML = 'saving...'
+		//listen for the repsponse from the server script
+		this.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				setTimeout(function (){
+					var s = document.getElementById(`p_saving_indicator_${prompt_id}`);
+					if (json.error == 0){
+						s.innerHTML = 'all saved'
 					}else{
 						s.innerHTML = 'error :('
 					}

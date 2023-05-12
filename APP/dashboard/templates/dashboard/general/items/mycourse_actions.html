@@ -57,7 +57,12 @@
 			  >
 			  	Advanced
 			  </option>
-			</select><br> 
+			</select>
+			<div class="mt-4 custom-control custom-switch">
+				<input name='regenerate_summary' type="checkbox" class="custom-control-input" id="customSwitch1_{{course.id|hashid}}" 
+			  >
+			  <label class="custom-control-label" for="customSwitch1_{{course.id|hashid}}">Toggle to regenrate course summary using AI.</label>
+			</div><br> 
 			<button type= 'submit' class='btn btn-primary mb-2' > Update </button><br><br>
 		</form>
 		<a class="btn btn-info mb-1" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a><br>

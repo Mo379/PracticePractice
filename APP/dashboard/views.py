@@ -17,6 +17,12 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from AI.models import (
+        ContentGenerationJob,
+        ContentPromptQuestion,
+        ContentPromptTopic,
+        ContentPromptPoint,
+    )
 from content.models import (
         Question,
         Point,
@@ -596,10 +602,19 @@ class SpecTopicHandlerView(
             )
         # get chapter questions
         questions = spec.spec_content[moduel]['content'][chapter]['questions']
+        question_prompts = collections.defaultdict(list)
         for q_level in questions.keys():
             level_questions = questions[q_level]
             qs = Question.objects.filter(q_unique_id__in=level_questions).order_by('q_number')
             questions[q_level] = qs
+            q_prompts, _ = ContentPromptQuestion.objects.get_or_create(
+                    user=self.request.user,
+                    specification=spec,
+                    moduel=moduel,
+                    chapter=chapter,
+                    level=q_level
+                )
+            question_prompts[q_level].append(q_prompts)
 
         # get moduels from db
         all_points = Point.objects.values(
@@ -657,18 +672,48 @@ class SpecTopicHandlerView(
         topic_objs = keys
         #
         topic_points = collections.defaultdict(list)
+        topic_prompts = collections.defaultdict(list)
         for key in keys:
             topic_points[key] = ordered_spec[key]['content'].keys()
+            t_prompt, _ = ContentPromptTopic.objects.get_or_create(
+                    user=self.request.user,
+                    specification=spec,
+                    moduel=moduel,
+                    chapter=chapter,
+                    topic=key
+                )
+            topic_prompts[key].append(t_prompt)
         #
         deleted_topic_points = collections.defaultdict(list)
         for d_points in deleted_points:
             deleted_topic_points[d_points['p_topic']].append(d_points['p_unique_id'])
         #
         removed_topic_points = collections.defaultdict(list)
+        point_prompts = collections.defaultdict(dict)
         for topic in keys:
             for point in points.filter(p_topic=topic):
                 if point['p_unique_id'] not in ordered_spec[topic]['content'].keys():
                     removed_topic_points[topic].append(point['p_unique_id'])
+                p_prompt, _ = ContentPromptPoint.objects.get_or_create(
+                        user=self.request.user,
+                        specification=spec,
+                        moduel=moduel,
+                        chapter=chapter,
+                        topic=topic,
+                        p_unique=point['p_unique_id']
+                    )
+                point_prompts[topic][point['p_unique_id']] = p_prompt
+        #
+        generation_jobs = ContentGenerationJob.objects.filter(
+                user=self.request.user,
+                specification=spec,
+                moduel=moduel,
+                chapter=chapter,
+            ).order_by('-created_at')
+        if len(generation_jobs) > 0:
+            last_job = generation_jobs[0]
+        else:
+            last_job = False
         # Getting removed items
         context['spec'] = spec
         context['full_ord_spec'] = ordered_spec
@@ -684,6 +729,11 @@ class SpecTopicHandlerView(
         context['topic_points'] = topic_points
         context['deleted_topic_points'] = deleted_topic_points
         context['removed_topic_points'] = removed_topic_points
+        #
+        context['last_job'] = last_job
+        context['q_prompts'] = question_prompts
+        context['t_prompts'] = topic_prompts
+        context['p_prompts'] = point_prompts
         return context
 
 

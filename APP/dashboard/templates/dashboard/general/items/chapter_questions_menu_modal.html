@@ -46,6 +46,7 @@
   </div>
 </div>
 {%for level in context.questions%}
+{% definevar context.q_prompts|index:level|index:0 as q_prompt%}
 <div class="modal fade" id="PromptQuestionModal_{{level}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -56,13 +57,26 @@
         </button>
       </div>
       <div class="modal-body">
+		<div class="mt-4 custom-control custom-switch">
+			<input name='regenerate_summary' type="checkbox" class="custom-control-input" id="activated_q_prompt_{{q_prompt.id}}" 
+			{%if q_prompt.activated == True%}
+			checked
+			{%endif%}
+		  >
+		  <label class="custom-control-label" for="activated_q_prompt_{{q_prompt.id}}">Toggle to genrate using AI.</label>
+		</div><br> 
 		<textarea
 		       class ='form-control mb-3'
 			name='Prompt' 
 			placeholder='Prompt...'
+			id='text_q_prompt_{{q_prompt.id}}'
 		       value=''
-		></textarea>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Save Prompt</button>
+		>{{q_prompt.prompt}}</textarea>
+		<button class="btn btn-primary" type="button" onclick="controller.C_save_prompt_question('{%url 'AI:_savepromptquestion'%}', '{{csrf_token}}', '{{q_prompt.id}}')">
+			Save Prompt
+		</button>
+		<span class='ml-3' id='q_saving_indicator_{{q_prompt.id}}'> all saved</span>
+
 	</form>
       </div>
     </div>

@@ -8,10 +8,16 @@ from content.util.GeneralUtil import (
         order_live_spec_content
     )
 import json
-from AI.models import Usage
 from AI.prompt import Prompter
-from content.models import Course
+from content.models import Course, Question
 from user.models import User
+from AI.models import (
+        ContentGenerationJob,
+        ContentPromptQuestion,
+        ContentPromptTopic,
+        ContentPromptPoint,
+        Usage,
+    )
 
 
 @shared_task()
@@ -39,11 +45,12 @@ def _generate_course_introductions(user_id, course_id):
     course_spec_level = course.specification.spec_level
     course_spec_subject = course.specification.spec_subject
     prompt = f"Create a json response with 3 keys (course_skills, \
-course_summary and course_learning_objectives), the skills and \
-summary are lists with exactly 6 entries each and the summary is simply \
-a string, the summary should be very informative while being short, and shoud \
+course_summary and course_learning_objectives), the course_skills and \
+course_learning_objectives are lists with exactly 6 entries each with each \
+item in the list being a string and the summary is simply \
+a string, the summary should be very informative while being short, and should\
 get the student exited about the course. The values are for a course named {course_name}, has \
-difficulty level of '{course_level}-{course_spec_level}', and the \
+difficulty level of '{course_level}', and the \
 course subject is {course_spec_subject}. Use the following chapters list \
 to create an informative summary \n\n{context}"
     #
@@ -69,3 +76,75 @@ to create an informative summary \n\n{context}"
     course.course_publication = True
     #
     course.save()
+
+
+@shared_task()
+def _generate_course_content(job_id):
+    prom = Prompter()
+    #
+    job = ContentGenerationJob.objects.get(
+            pk=job_id
+        )
+    user = job.user
+    spec = job.specification
+    #
+    level = spec.spec_level
+    subject = spec.spec_subject
+    module = job.moduel
+    chapter = job.chapter
+    #
+    q_prmpts = ContentPromptQuestion.objects.filter(
+            user=user,
+            specification=spec,
+            moduel=module,
+            chapter=chapter,
+            activated=True,
+        )
+    t_prmpts = ContentPromptTopic.objects.filter(
+            user=user,
+            specification=spec,
+            moduel=module,
+            chapter=chapter,
+        )
+    p_prmpts = ContentPromptPoint.objects.filter(
+            user=user,
+            specification=spec,
+            moduel=module,
+            chapter=chapter,
+            activated=True,
+        )
+    #
+    questions = {}
+    for prompt in q_prmpts:
+        text = prompt.prompt
+        generated_prompt = f"Create a json response with 5 keys (1, 2, 3, 4, 5) \
+where the content for each key is simply a string. \
+the string for each of the keys is an exam style question, this \
+is for a course staged in '{level}', where the subject is {subject}, \
+the module for the questions is {module} and the chapter is {chapter}, \
+the questions are of increasing difficulty and arranged in such \
+a way that is easy for a beginner to build their understanding, \
+overall the difficult of this list of qustions is of level {prompt.level}. \
+The instructor provided the following context to help guide the style and content \
+of the question, thus the question content should closely follow it with combination \
+with the previous content. \n\n ('instructor_context':'{text}')."
+        questions[prompt.level] = generated_prompt
+    for key in sorted(list(questions.keys())):
+        #response_json, response = prom.prompt('course_content_question', {}, questions[key])
+        #output = json.loads(response_json)
+        #q_1 = output['1']
+        #q_2 = output['2']
+        #q_3 = output['3']
+        #q_4 = output['4']
+        #q_5 = output['5']
+        questions = Question.objects.filter(
+                user=user,
+                q_subject=subject,
+                q_moduel=module,
+                q_chapter=chapter,
+                q_difficulty=key,
+            )
+        print(questions, key)
+    #
+    job.finished = True
+    job.save()

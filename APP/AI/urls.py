@@ -12,5 +12,25 @@ urlpatterns = [
         views._load_lesson,
         name='_load_lesson'
     ),
+    path(
+        '_newgenerationjob',
+        views._newgenerationjob,
+        name='_newgenerationjob'
+    ),
+    path(
+        '_savepromptquestion',
+        views._savepromptquestion,
+        name='_savepromptquestion'
+    ),
+    path(
+        '_saveprompttopic',
+        views._saveprompttopic,
+        name='_saveprompttopic'
+    ),
+    path(
+        '_savepromptpoint',
+        views._savepromptpoint,
+        name='_savepromptpoint'
+    ),
 ]
 

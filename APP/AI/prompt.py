@@ -11,6 +11,9 @@ class Prompter:
         openai.api_key = OPENAI_SECRET
         self.system_prompts = {
                 'course_introductions': "Respond only in pure json format.",
+                'course_content_question': "Respond only in pure json format.the question list can have a difficulty level between 1 and 5,level 1 questions are usually those found at the start of a beginner topic, while level 5 are exam level questions and are usually very difficultand rigorous, the other levels are slow step ups in difficulty to help the student learn efficently, each question can include multiple parts for example parts (a,b,c) given as a mix between plain text and markdown",
+                'course_content_answer': "Respond only in pure json format.",
+                'course_content_point': "Respond only in pure json format.",
             }
 
     #

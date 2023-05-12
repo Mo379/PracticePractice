@@ -36,6 +36,11 @@ from mdeditor.configs import MDConfig
 from io import BytesIO
 from PP2.utils import h_encode, h_decode
 from AI.tasks import _generate_course_introductions
+from AI.models import (
+        ContentPromptQuestion,
+        ContentPromptTopic,
+        ContentPromptPoint,
+    )
 from notification.tasks import _send_email
 
 
@@ -1272,6 +1277,7 @@ def _updatecourseinformation(request):
         course_name = request.POST['new_name']
         course_upload_image = request.FILES.get("course_thmbnail", None)
         course_level = request.POST['course_level']
+        regenerate_summary = True if 'regenerate_summary' in request.POST else None
         # AI created 
         courses = Course.objects.filter(
                 user=request.user,
@@ -1284,10 +1290,11 @@ def _updatecourseinformation(request):
                 course.course_name = course_name
                 course.course_level = course_level
                 #
-                course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
-                course.course_summary = '(AI is working...)'
-                course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
-                course.course_publication = False
+                if regenerate_summary:
+                    course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
+                    course.course_summary = '(AI is working...)'
+                    course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
+                    course.course_publication = False
                 #
                 # Upload image
                 if course_upload_image:
@@ -1327,7 +1334,8 @@ def _updatecourseinformation(request):
                                     extra_tags='alert-warning course'
                                 )
                 course.save()
-                _generate_course_introductions.delay(request.user.id, course.id)
+                if regenerate_summary:
+                    _generate_course_introductions.delay(request.user.id, course.id)
             except Exception as e:
                 messages.add_message(
                         request,
@@ -1443,9 +1451,27 @@ def _renamemodule(request):
                 spec_board=board,
                 spec_name=name,
             )
+        q_prmpts = ContentPromptQuestion.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module
+                )
+        t_prmpts = ContentPromptTopic.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module
+                )
+        p_prmpts = ContentPromptPoint.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module
+                )
         if len(points) > 0:
             points.update(p_moduel=new_name)
             questions.update(q_moduel=new_name)
+            q_prmpts.update(moduel=new_name)
+            t_prmpts.update(moduel=new_name)
+            p_prmpts.update(moduel=new_name)
             # change spec info
             content = spec.spec_content.copy()
             if module in content.keys():
@@ -1507,9 +1533,30 @@ def _renamechapter(request):
                 spec_board=board,
                 spec_name=name,
             )
+        q_prmpts = ContentPromptQuestion.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                )
+        t_prmpts = ContentPromptTopic.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                )
+        p_prmpts = ContentPromptPoint.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                )
         if len(points) > 0:
             points.update(p_chapter=new_name)
             questions.update(q_chapter=new_name)
+            q_prmpts.update(chapter=new_name)
+            t_prmpts.update(chapter=new_name)
+            p_prmpts.update(chapter=new_name)
             # change spec info
             content = spec.spec_content.copy()
             if module in content.keys():
@@ -1578,8 +1625,24 @@ def _renametopic(request):
                 spec_board=board,
                 spec_name=name,
             )
+        t_prmpts = ContentPromptTopic.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                topic=topic,
+                )
+        p_prmpts = ContentPromptPoint.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                topic=topic,
+                )
         if len(points) > 0:
             points.update(p_topic=new_name)
+            t_prmpts.update(topic=new_name)
+            p_prmpts.update(topic=new_name)
             # change spec info
             content = spec.spec_content.copy()
             if module in content.keys():
