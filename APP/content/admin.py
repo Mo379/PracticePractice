@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib import admin
 from content.models import (
+        Image,
+        Video,
         Question,
         QuestionTrack,
         UserPaper,
@@ -20,6 +22,8 @@ from content.models import (
 
 
 # Register your models here.
+admin.site.register(Image)
+admin.site.register(Video)
 admin.site.register(Question)
 admin.site.register(QuestionTrack)
 admin.site.register(UserPaper)

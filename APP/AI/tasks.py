@@ -9,7 +9,7 @@ from content.util.GeneralUtil import (
     )
 import json
 from AI.prompt import Prompter
-from content.models import Course, Question
+from content.models import Course, Question, Point
 from user.models import User
 from AI.models import (
         ContentGenerationJob,
@@ -18,6 +18,9 @@ from AI.models import (
         ContentPromptPoint,
         Usage,
     )
+import asyncio
+from asgiref.sync import sync_to_async
+
 
 
 @shared_task()
@@ -114,10 +117,11 @@ def _generate_course_content(job_id):
             activated=True,
         )
     #
-    questions = {}
+    questions_prompts = {}
+    points_prompts = {}
     for prompt in q_prmpts:
         text = prompt.prompt
-        generated_prompt = f"Create a json response with 5 keys (1, 2, 3, 4, 5) \
+        generated_prompt = f"Create a json response with exactly 5 keys (1, 2, 3, 4, 5) \
 where the content for each key is simply a string. \
 the string for each of the keys is an exam style question, this \
 is for a course staged in '{level}', where the subject is {subject}, \
@@ -127,24 +131,64 @@ a way that is easy for a beginner to build their understanding, \
 overall the difficult of this list of qustions is of level {prompt.level}. \
 The instructor provided the following context to help guide the style and content \
 of the question, thus the question content should closely follow it with combination \
-with the previous content. \n\n ('instructor_context':'{text}')."
-        questions[prompt.level] = generated_prompt
-    for key in sorted(list(questions.keys())):
-        #response_json, response = prom.prompt('course_content_question', {}, questions[key])
-        #output = json.loads(response_json)
-        #q_1 = output['1']
-        #q_2 = output['2']
-        #q_3 = output['3']
-        #q_4 = output['4']
-        #q_5 = output['5']
-        questions = Question.objects.filter(
-                user=user,
-                q_subject=subject,
-                q_moduel=module,
-                q_chapter=chapter,
-                q_difficulty=key,
+with the previous context. \n\n ('instructor_context':'{text}')."
+        questions_prompts[prompt.level] = generated_prompt
+    for prompt in p_prmpts:
+        topic = prompt.topic
+        topic_text = t_prmpts.filter(topic=topic)[0].prompt
+        point_text = prompt.prompt
+        point = Point.objects.get(p_unique_id=prompt.p_unique)
+        point_title = 'some point title'
+        generated_prompt = f"For a course staged in '{level}', the subject is {subject}, \
+the module for content is {module} and the chapter is {chapter}, \
+create a short lesson, that teaches this in a way that is easy \
+to build an understanding, use the following \
+context that specifies the lesson, \
+\n\n ('context_1':'{topic_text}', 'context_2':'{point_text}')."
+        points_prompts[prompt.p_unique] = generated_prompt
+
+    async def _get_questions(questions_prompts, spec):
+        job_list = []
+        for key in sorted(list(questions_prompts.keys())):
+            job_list.append(
+                asyncio.create_task(
+                    prom.async_prompt(
+                        'course_content_question',
+                        {},
+                        questions_prompts[key],
+                    )
+                )
             )
-        print(questions, key)
+        responses = await asyncio.gather(*job_list)
+        for key, response in zip(sorted(list(questions_prompts.keys())), responses):
+            response_content = response['choices'][0]['message']['content']
+            output = json.loads(response_content)
+            #
+            _questions = spec.spec_content[module]['content'][chapter]['questions'][str(key)]
+            for question, out in zip(_questions, output):
+                q = await sync_to_async(Question.objects.get)(q_unique_id=question)
+                q.q_content = output[out]
+                await sync_to_async(q.save)()
+    async def _get_points(points_prompts, spec):
+        job_list = []
+        for key in sorted(list(points_prompts.keys())):
+            job_list.append(
+                asyncio.create_task(
+                    prom.async_prompt(
+                        'course_content_point',
+                        {},
+                        points_prompts[key],
+                    )
+                )
+            )
+        responses = await asyncio.gather(*job_list)
+        for key, response in zip(sorted(list(points_prompts.keys())), responses):
+            response_content = response['choices'][0]['message']['content']
+            output = json.loads(response_content)
+            #
+            print(output)
+    #asyncio.run(_get_questions(questions_prompts, spec))
+    asyncio.run(_get_points(points_prompts, spec))
     #
     job.finished = True
     job.save()
