@@ -48,9 +48,10 @@ var object_type = "Point";
 {%url 'content:noteedit' context.spec.id context.point.p_moduel context.point.p_chapter%}#point_{{context.point.id}}
 {%endif%}
 			'>
-{{context.point.p_topic|field_name_to_label}}: {{context.point.p_content.details.hidden.0.point_title}}
+{{context.point.p_topic|field_name_to_label}}: {{context.point.p_title|field_name_to_label}}
 			</a>
 			</h5>
+			<span id="saving_indicator"> all saved</span>
 		</div>
 	</div>
 </div>

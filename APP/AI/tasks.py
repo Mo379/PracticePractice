@@ -9,6 +9,7 @@ from content.util.GeneralUtil import (
     )
 import json
 from AI.prompt import Prompter
+from AI import prompts
 from content.models import Course, Question, Point
 from user.models import User
 from AI.models import (
@@ -45,18 +46,11 @@ def _generate_course_introductions(user_id, course_id):
     # Prompt context generation
     course_name = course.course_name
     course_level = course.course_level
-    course_spec_level = course.specification.spec_level
     course_spec_subject = course.specification.spec_subject
-    prompt = f"Create a json response with 3 keys (course_skills, \
-course_summary and course_learning_objectives), the course_skills and \
-course_learning_objectives are lists with exactly 6 entries each with each \
-item in the list being a string and the summary is simply \
-a string, the summary should be very informative while being short, and should\
-get the student exited about the course. The values are for a course named {course_name}, has \
-difficulty level of '{course_level}', and the \
-course subject is {course_spec_subject}. Use the following chapters list \
-to create an informative summary \n\n{context}"
     #
+    prompt = prompts.course_introduction_prompt(
+            course_name, course_level, course_spec_subject, context
+        )
     response_json, response = prom.prompt('course_introductions', {}, prompt)
     output = json.loads(response_json)
     #
@@ -121,30 +115,19 @@ def _generate_course_content(job_id):
     points_prompts = {}
     for prompt in q_prmpts:
         text = prompt.prompt
-        generated_prompt = f"Create a json response with exactly 5 keys (1, 2, 3, 4, 5) \
-where the content for each key is simply a string. \
-the string for each of the keys is an exam style question, this \
-is for a course staged in '{level}', where the subject is {subject}, \
-the module for the questions is {module} and the chapter is {chapter}, \
-the questions are of increasing difficulty and arranged in such \
-a way that is easy for a beginner to build their understanding, \
-overall the difficult of this list of qustions is of level {prompt.level}. \
-The instructor provided the following context to help guide the style and content \
-of the question, thus the question content should closely follow it with combination \
-with the previous context. \n\n ('instructor_context':'{text}')."
+        generated_prompt = prompts.questions_prompt(
+                level, subject, module, chapter, prompt.level, text
+                )
         questions_prompts[prompt.level] = generated_prompt
     for prompt in p_prmpts:
         topic = prompt.topic
         topic_text = t_prmpts.filter(topic=topic)[0].prompt
         point_text = prompt.prompt
         point = Point.objects.get(p_unique_id=prompt.p_unique)
-        point_title = 'some point title'
-        generated_prompt = f"For a course staged in '{level}', the subject is {subject}, \
-the module for content is {module} and the chapter is {chapter}, \
-create a short lesson, that teaches this in a way that is easy \
-to build an understanding, use the following \
-context that specifies the lesson, \
-\n\n ('context_1':'{topic_text}', 'context_2':'{point_text}')."
+        point_title = point.p_title
+        generated_prompt = prompts.points_prompt(
+                level, subject, module, chapter, point_title, topic_text, point_text
+            )
         points_prompts[prompt.p_unique] = generated_prompt
 
     async def _get_questions(questions_prompts, spec):
@@ -192,9 +175,8 @@ context that specifies the lesson, \
                 full_result[str(idd)] = {'text': result}
             p = await sync_to_async(Point.objects.get)(p_unique_id=key)
             p.p_content = full_result
-            print(p.p_content)
             await sync_to_async(p.save)()
-    #asyncio.run(_get_questions(questions_prompts, spec))
+    asyncio.run(_get_questions(questions_prompts, spec))
     asyncio.run(_get_points(points_prompts, spec))
     #
     job.finished = True

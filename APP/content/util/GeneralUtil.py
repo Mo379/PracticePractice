@@ -140,24 +140,8 @@ def order_live_spec_content(content):
 
 
 def TranslatePointContent(content):
-    return ''
-    tab = '	'
-    output = ''
-    output += 'hidden_details:' + '\n'
-    output += tab + 'point_title: ' + str(content['details']['hidden']['0']['point_title']) + '\n'
-    point_content = content['details']['hidden']['0']['content']
-    for pos, item in point_content.items():
-        pos = int(pos)
-        if item['vid']:
-            video = item['vid']
-            output += tab + f'vid_{pos+1}:' + '\n'
-            output += tab + tab + 'video_title: ' + video['vid_title'] + '\n'
-            output += tab + tab + 'video_link: ' + video['vid_link'] + '\n'
-    #
-    #out = '```yaml' + '\n' + output + '```'
     out_desc = ''
-    desc = content['details']['description']
-    for idd, value in desc.items():
+    for idd, value in content.items():
         for idd2, value2 in value.items():
             if idd2 == 'text':
                 out_desc += value2 + '\n'
@@ -165,7 +149,7 @@ def TranslatePointContent(content):
                 info = value2['img_info']
                 name = value2['img_name']
                 out_desc += f"!({info})[{name}]" + '\n'
-    return out_desc #out + out_desc
+    return out_desc
 
 
 def TranslateQuestionContent(content):

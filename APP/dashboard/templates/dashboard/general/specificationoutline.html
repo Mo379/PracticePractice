@@ -1,4 +1,4 @@
-{% extends 'dashboard/base.html'%}
+{content% extends 'dashboard/base.html'%}
 {%load static%}
 {%load general%}
 {%block page_name%}
@@ -37,7 +37,7 @@ Specification Outline
 						    	{%for point in content|index:module|index:'content'|index:chapter|index:'content'|index:topic|index:'content'%}
 							<div class='ml-3 mb-1'style='border-left: 1px dashed black;padding-left: 5px;'>
 								<a target='_blank' href='#' target='blank' class="">
-									Point {{forloop.counter}} - {{point|p_unique_to_title}}
+									Point {{forloop.counter}} - {{point|p_unique_to_title|filed_name_to_label}}
 								</a>
 						    	</div>
 							{%endfor%}

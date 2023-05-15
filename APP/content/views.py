@@ -537,7 +537,7 @@ class EditorPointView(
         #
         md_config = settings.MDEDITOR_CONFIGS
         toolbar = md_config['default']['toolbar']
-        allowed_options = ['|', "title", "video", 'image', 'tex', '|']
+        allowed_options = ['|', "video", 'image', '|']
         index_1 = toolbar.index('|')
         index_2 = toolbar.index('|', index_1+1)
         toolbar = toolbar[:index_1] + allowed_options + toolbar[index_2+1:]
@@ -589,7 +589,7 @@ class EditorQuestionView(
         #
         md_config = settings.MDEDITOR_CONFIGS
         toolbar = md_config['default']['toolbar']
-        allowed_options = ['|', "title", "video", 'image', 'tex', '|']
+        allowed_options = ['|', "video", 'image', '|']
         index_1 = toolbar.index('|')
         index_2 = toolbar.index('|', index_1+1)
         toolbar = toolbar[:index_1] + allowed_options + toolbar[index_2+1:]
@@ -1003,6 +1003,7 @@ def _createmoduel(request):
             my_point.p_chapter = 'new_chapter'
             my_point.p_topic = 'new_topic'
             my_point.p_number = 1
+            my_point.p_title = 'New Point'
             my_point.p_content = Template.content
             my_point.p_unique_id = TagGenerator()
             my_point.save()
@@ -1061,6 +1062,7 @@ def _createchapter(request):
             my_point.p_chapter = new_chapter
             my_point.p_topic = 'new_topic'
             my_point.p_number = 1
+            my_point.p_title = 'New Point'
             my_point.p_content = Template.content
             my_point.p_unique_id = TagGenerator()
             my_point.save()
@@ -1121,6 +1123,7 @@ def _createtopic(request):
             my_point.p_chapter = chapter
             my_point.p_topic = new_topic
             my_point.p_number = 1
+            my_point.p_title = 'New Point'
             my_point.p_content = Template.content
             my_point.p_unique_id = TagGenerator()
             my_point.save()
@@ -1187,6 +1190,7 @@ def _createpoint(request):
         my_point.p_moduel = moduel
         my_point.p_chapter = chapter
         my_point.p_topic = topic
+        my_point.p_title = 'New Point'
         my_point.p_content = Template.content
         my_point.p_unique_id = TagGenerator()
         my_point.save()
@@ -2643,9 +2647,7 @@ def _savepointedit(request):
                     else:
                         description_content[idd]['text'] = v
                 #
-                #point[0].p_content['details']['hidden']['0']['point_title'] = title
-                #point[0].p_content['details']['hidden']['0']['content'] = vids_content
-                point[0].p_content['details']['description'] = description_content
+                point[0].p_content = description_content
                 print(description_content)
                 #point[0].save()
                 messages.add_message(

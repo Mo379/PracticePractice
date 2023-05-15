@@ -3,6 +3,7 @@ import openai
 from decouple import config as decouple_config
 import json
 import aiohttp
+from AI import prompts
 
 class Prompter:
     def __init__(self, model='gpt-3.5-turbo'):
@@ -12,10 +13,10 @@ class Prompter:
         openai.organization = self.OPENAI_ORG
         openai.api_key = self.OPENAI_SECRET
         self.system_prompts = {
-                'course_introductions': "Respond only in pure json format.",
-                'course_content_question': "Respond only in a pure json format.the question list can have a difficulty level between 1 and 5,level 1 questions are usually those found at the start of a beginner topic, while level 5 are exam level questions and are usually very difficultand rigorous, the other levels are slow step ups in difficulty to help the student learn efficently, each question can include multiple parts for example parts (a,b,c) given as a mix between plain text and markdown. The response must be in pure json.",
-                'course_content_answer': "Respond only in pure json format.",
-                'course_content_point': "Respond only in pure json format. The response should have exactly 1 key (1), the content of this key is a string, it avoids headers and introductions like 'hi' and 'hello' and it goes straight to teaching lesson.",
+                'course_introductions': prompts.course_introductions,
+                'course_content_question': prompts.course_content_question,
+                'course_content_answer': prompts.course_content_answer,
+                'course_content_point': prompts.course_content_point
             }
 
     #

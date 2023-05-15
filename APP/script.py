@@ -4,13 +4,13 @@ from django.conf import settings
 import base64
 
 
-points = Point.objects.all()
-print(points)
-for point in points:
-    content = point.p_content['details']['description']
-    point.p_content = content
-    point.save()
-    print(content)
+#points = Point.objects.all()
+#print(points)
+#for point in points:
+#    content = point.p_content['details']['description']
+#    point.p_content = content
+#    point.save()
+#    print(content)
 
 
 
