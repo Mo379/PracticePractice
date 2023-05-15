@@ -186,7 +186,14 @@ context that specifies the lesson, \
             response_content = response['choices'][0]['message']['content']
             output = json.loads(response_content)
             #
-            print(output)
+            full_result = {}
+            for idd, out in enumerate(output):
+                result = output[out]
+                full_result[str(idd)] = {'text': result}
+            p = await sync_to_async(Point.objects.get)(p_unique_id=key)
+            p.p_content = full_result
+            print(p.p_content)
+            await sync_to_async(p.save)()
     #asyncio.run(_get_questions(questions_prompts, spec))
     asyncio.run(_get_points(points_prompts, spec))
     #

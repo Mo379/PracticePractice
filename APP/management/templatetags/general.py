@@ -27,7 +27,7 @@ def hashid(id):
 def p_unique_to_title(p_unique_id):
     """Splits a string into a list using key"""
     point = Point.objects.get(p_unique_id=p_unique_id)
-    title = point.p_content['details']['hidden']['0']['point_title']
+    title = point.p_title
     return title
 
 @register.filter(name='p_unique_to_id')
@@ -144,38 +144,31 @@ def divide(value, arg):
 
 
 @register.filter(name='ToMarkdown')
-def ToMarkdown(content, point):
+def ToMarkdown(content, point_id):
     # setup output
     html = ""
     # kw items in content
-    details = content['details']
-    # kw items in details
-    hidden = details['hidden']
-    description = details['description']
-    # numbered items in hidden and description
-    # hidden has only one numbered element containing two children
-    point_title = hidden['0']['point_title']
-    #html += markdown.markdown("### " + str(number) + ': ' +point_title)
+    point = Point.objects.get(pk=point_id)
+    description = point.p_content
+    point_title = point.p_title
+    videos = point.p_videos.all()
+    images = point.p_images.all()
+    #
     html += markdown.markdown("### " + point_title)
-    hidden_content = hidden['0']['content']
     # the content element is numbered
     video_html = ''
-    for item in range(len(hidden_content)):
-        # to keep the order of the content
-        item = str(item)
-        if 'vid' in hidden_content[item]:
-            video = hidden_content[item]['vid']
-            vid_title = video['vid_title']
-            vid_link = video['vid_link']
-            if vid_link:
-                context = {
-                        'vid_unique': TagGenerator(),
-                        'vid_title': vid_title,
-                        'vid_link': vid_link
-                    }
-                template = loader.get_template('content/video_popup.html')
-                content = template.render(context)
-                video_html += content
+    for vid in videos:
+        vid_title = vid.title
+        vid_link = vid.url
+        if vid_link:
+            context = {
+                    'vid_unique': TagGenerator(),
+                    'vid_title': vid_title,
+                    'vid_link': vid_link
+                }
+            template = loader.get_template('content/video_popup.html')
+            content = template.render(context)
+            video_html += content
 
     # the description has many numbered elements
     content_html = ''
@@ -194,8 +187,7 @@ def ToMarkdown(content, point):
             img_info = img_element['img_info']
             img_name = img_element['img_name']
             if img_name and img_info:
-                point_dir = point.p_files_directory
-                file_path = os.path.join(point_dir, img_name)
+                file_path = os.path.join('universal/', f'point_{point.id}_{img_name}')
                 context = {
                         'CDN': settings.CDN_URL,
                         'img_info': img_info,

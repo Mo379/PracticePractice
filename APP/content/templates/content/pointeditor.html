@@ -67,7 +67,7 @@ var object_type = "Point";
     {{ context.editorrender}}
 </form>
 <div style='padding:10px;border:1px dashed grey;'>
-{{context.point.p_content|ToMarkdown:context.point|safe}}
+{{context.point.p_content|ToMarkdown:context.point.id|safe}}
 </div>
 
 {%endblock%}

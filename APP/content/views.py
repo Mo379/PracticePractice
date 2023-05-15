@@ -201,7 +201,7 @@ class NoteArticleView(
         context = {}
         # Get details of page
         course_id = self.kwargs['course_id']
-        module = self.kwargs['module']
+        module = self.kwargs['module'].lower()
         chapter = self.kwargs['chapter']
         context['title'] = chapter
         #
@@ -1707,7 +1707,7 @@ def _renamepoint(request):
                 p_unique_id=point_id
             )
         if len(points) > 0:
-            points[0].p_content['details']['hidden']['0']['point_title'] = title
+            points[0].p_title = title
             points[0].save()
             messages.add_message(
                     request,

@@ -85,7 +85,7 @@
 	<div class='ml-1 note_point_wrapper' style=''>
         {%for point in context.article|index:topic%}
 	    <div class='point_div ml-1 mb-2' style=''>
-		    {{point.p_content|ToMarkdown:point|safe}}
+		    {{point.p_content|ToMarkdown:point.id|safe}}
 	    </div>
         {%endfor%}
 	</div>

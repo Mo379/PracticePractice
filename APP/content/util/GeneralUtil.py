@@ -140,6 +140,7 @@ def order_live_spec_content(content):
 
 
 def TranslatePointContent(content):
+    return ''
     tab = '	'
     output = ''
     output += 'hidden_details:' + '\n'
