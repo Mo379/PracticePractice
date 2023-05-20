@@ -25,7 +25,7 @@ from content.util.GeneralUtil import (
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
-from content.forms import MDEditorQuestionModleForm
+from content.forms import MDEditorQuestionModleForm, MDEditorModleForm
 from mdeditor.widgets import MDEditorWidget
 from braces.views import (
         LoginRequiredMixin,
@@ -504,6 +504,7 @@ class QuestionEditView(
                     if d not in dic:
                         dic[d] = []
                     dic[d].append(Question.objects.get(q_unique_id=question))
+                    Question.objects.filter(q_unique_id=question).update(q_subject=spec.spec_subject, q_moduel=module, q_chapter=chapter)
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
         context['questions'] = dic if question else None
         context['spec'] = spec
@@ -2648,37 +2649,11 @@ def _savepointedit(request):
                         description_content[idd]['text'] = v
                 #
                 point[0].p_content = description_content
-                print(description_content)
-                #point[0].save()
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Saved !',
-                        extra_tags='alert-success editorpoint'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something is wrong, please check that all inputs are valid.',
-                        extra_tags='alert-danger editorpoint'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, cannot find information.',
-                    extra_tags='alert-danger editorpoint'
-                )
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger home'
-            )
-        return redirect('main:index')
+                point[0].save()
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            return JsonResponse({'error': 1, 'message': 'Error'})
+        return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 def _savequestionedit(request):

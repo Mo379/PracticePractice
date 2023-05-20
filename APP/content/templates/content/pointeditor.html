@@ -14,6 +14,7 @@ Editor
 {%block content%}
 {%definevar 'editorpoint' as alert_loc%}
 {%include 'base/alert.html'%}
+<script src="{%static 'content/js/editingcontroller.js'%}"></script>
 {%include 'content/mathjax.html'%}
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
@@ -51,7 +52,6 @@ var object_type = "Point";
 {{context.point.p_topic|field_name_to_label}}: {{context.point.p_title|field_name_to_label}}
 			</a>
 			</h5>
-			<span id="saving_indicator"> all saved</span>
 		</div>
 	</div>
 </div>
@@ -64,8 +64,10 @@ var object_type = "Point";
 <form class="user px-3 py-3 editing_form"  action="{%url 'content:_savepointedit'%}" 
 	method="POST" role="form" enctype="multipart/form-data">
     {% csrf_token %}
+    <input type='hidden' value='{{context.point.id}}' name='point_id'/>
     {{ context.editormedia}}
     {{ context.editorrender}}
+    <button type='submit' class='btn btn-primary'>Save</button> <span id="saving_indicator"> all saved</span>
 </form>
 <div style='padding:10px;border:1px dashed grey;'>
 {{context.point.p_content|ToMarkdown:context.point.id|safe}}

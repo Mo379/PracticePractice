@@ -114,7 +114,6 @@ def _load_lesson(request):
             return JsonResponse({'error': 1, 'message': 'Lesson does not exits!'})
         part_chat = lesson_part.part_content
         response = {'error': 0, 'chat': part_chat}
-        print(created)
         if created:
             response['introduction'] = lesson_part.part_introduction
         return JsonResponse(response)
@@ -137,6 +136,20 @@ def _newgenerationjob(request):
             'name': spec.spec_name,
         }
         #
+        q_prmpts = ContentPromptQuestion.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                activated=True,
+            )
+        p_prmpts = ContentPromptPoint.objects.filter(
+                user=request.user,
+                specification=spec,
+                moduel=module,
+                chapter=chapter,
+                activated=True,
+            )
         generation_jobs = ContentGenerationJob.objects.filter(
                 user=request.user,
                 specification=spec,
@@ -159,6 +172,17 @@ def _newgenerationjob(request):
                         'dashboard:spectopic',
                         **kwargs
                     )
+        if len(q_prmpts) + len(p_prmpts) < 1:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'You need to activate at least one question or point prompt.',
+                    extra_tags='alert-warning spectopic'
+                )
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
+                )
         job = ContentGenerationJob.objects.create(
                 user=request.user,
                 specification=spec,

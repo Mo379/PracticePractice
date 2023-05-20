@@ -3,7 +3,7 @@ from django.conf import settings
 from django import template
 from django.urls import reverse
 from content.util.GeneralUtil import TagGenerator
-from content.models import Point
+from content.models import Point, Question
 import markdown
 from django.template import Context, Template, loader
 from content.models import Contract
@@ -150,7 +150,7 @@ def ToMarkdown(content, point_id):
     # kw items in content
     point = Point.objects.get(pk=point_id)
     description = point.p_content
-    point_title = point.p_title
+    point_title = point.p_title.replace('_', ' ').title()
     videos = point.p_videos.all()
     images = point.p_images.all()
     #
@@ -178,7 +178,7 @@ def ToMarkdown(content, point_id):
         # each item has a single child either text or img
         # the text element is direct access
         if 'text' in description[item]:
-            text = description[item]['text']
+            text = str(description[item]['text'])
             text = text.replace('\\', '\\\\')
             content_html += text
         # the image element is made of two parts, info and file name
@@ -204,10 +204,17 @@ def ToMarkdown(content, point_id):
 
 
 @register.filter(name='ToMarkdownQuestion')
-def ToMarkdownQuestion(content, question):
+def ToMarkdownQuestion(content, question_id):
     # setup output
-    html = ""
-    return html
+    # kw items in content
+    question = Question.objects.get(pk=question_id)
+    description = question.q_content
+    #
+    # the description has many numbered elements
+    content_html = ''
+    content_html += description
+    content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
+    return content_html
 
 @register.filter(name='DifficultyToLabel')
 def DifficultyToLabel(diff):

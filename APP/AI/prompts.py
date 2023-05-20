@@ -35,13 +35,18 @@ of the question, thus the question content should closely follow it with combina
 with the previous context. \n\n ('instructor_context':'{text}')."
 
 
-course_content_answer = "Respond only in pure json format. Utilising markdown\
+course_content_answer = "Make sure to show your work using markdown\
 and MATHJAX where appropriate."
 
 
-def answers_prompt(question):
-    return f"For the following question, find a step by step solution \n\n \
-{question}"
+def answers_prompt(
+            level, subject, module, chapter, text
+        ):
+    return f"For the following question in stage {level}, with in the \
+subject {subject}, module {module} and chapter {chapter}, find a \
+comprehensivestep by step solution to the following question \
+without making common mistakes\n\n \
+{text}"
 
 
 course_content_point = "Respond only in pure json format. The response should \

@@ -130,6 +130,27 @@ def _generate_course_content(job_id):
             )
         points_prompts[prompt.p_unique] = generated_prompt
 
+    async def _get_answers(answer_prompts, spec):
+        job_list = []
+        for key in sorted(list(answer_prompts.keys())):
+            job_list.append(
+                asyncio.create_task(
+                    prom.async_prompt(
+                        'course_content_answer',
+                        {},
+                        answer_prompts[key],
+                    )
+                )
+            )
+        responses = await asyncio.gather(*job_list)
+        for key, response in zip(sorted(list(answer_prompts.keys())), responses):
+            response_content = response['choices'][0]['message']['content']
+            #
+            q = await sync_to_async(Question.objects.get)(pk=key)
+            q.q_answer = response_content
+            await sync_to_async(q.save)()
+        return responses
+
     async def _get_questions(questions_prompts, spec):
         job_list = []
         for key in sorted(list(questions_prompts.keys())):
@@ -152,6 +173,7 @@ def _generate_course_content(job_id):
                 q = await sync_to_async(Question.objects.get)(q_unique_id=question)
                 q.q_content = output[out]
                 await sync_to_async(q.save)()
+        return responses
     async def _get_points(points_prompts, spec):
         job_list = []
         for key in sorted(list(points_prompts.keys())):
@@ -172,12 +194,54 @@ def _generate_course_content(job_id):
             full_result = {}
             for idd, out in enumerate(output):
                 result = output[out]
-                full_result[str(idd)] = {'text': result}
+                full_result[str(idd)] = {'text': str(result)}
             p = await sync_to_async(Point.objects.get)(p_unique_id=key)
             p.p_content = full_result
             await sync_to_async(p.save)()
-    asyncio.run(_get_questions(questions_prompts, spec))
-    asyncio.run(_get_points(points_prompts, spec))
+        return responses
+    #
+    q_responses = asyncio.run(_get_questions(questions_prompts, spec))
+    p_responses = asyncio.run(_get_points(points_prompts, spec))
+    answer_prompts = {}
+    for key, response in zip(sorted(list(questions_prompts.keys())), q_responses):
+        _questions = spec.spec_content[module]['content'][chapter]['questions'][str(key)]
+        for question in _questions:
+            q = Question.objects.get(q_unique_id=question)
+            text = q.q_content
+            generated_prompt = prompts.answers_prompt(
+                    level, subject, module, chapter, text
+                    )
+            answer_prompts[q.id] = generated_prompt
+    a_responses = asyncio.run(_get_answers(answer_prompts, spec))
+    #
+    job.model = prom.model
+    for q_resp in q_responses:
+        toks_prompt = q_resp['usage']['prompt_tokens']
+        toks_completion = q_resp['usage']['completion_tokens']
+        toks_total = q_resp['usage']['total_tokens']
+        #
+        job.prompt += int(toks_prompt)
+        job.completion += int(toks_completion)
+        job.total += int(toks_total)
+    for p_resp in p_responses:
+        toks_prompt = p_resp['usage']['prompt_tokens']
+        toks_completion = p_resp['usage']['completion_tokens']
+        toks_total = p_resp['usage']['total_tokens']
+        #
+        job.prompt += int(toks_prompt)
+        job.completion += int(toks_completion)
+        job.total += int(toks_total)
+    for a_resp in a_responses:
+        toks_prompt = a_resp['usage']['prompt_tokens']
+        toks_completion = a_resp['usage']['completion_tokens']
+        toks_total = a_resp['usage']['total_tokens']
+        #
+        job.prompt += int(toks_prompt)
+        job.completion += int(toks_completion)
+        job.total += int(toks_total)
+    #
+    q_prmpts.update(activated=False)
+    p_prmpts.update(activated=False)
     #
     job.finished = True
     job.save()

@@ -63,6 +63,8 @@ class Prompter:
                         url=request_url, headers=request_header, json=data
                     ) as response:
                     resp = await response.json()
+                if system_prompt_name in ['course_content_answer']:
+                    return resp
                 for i in range(5):
                     try:
                         response_content = resp['choices'][0]['message']['content']
