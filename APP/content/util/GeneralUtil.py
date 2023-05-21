@@ -154,12 +154,12 @@ def TranslatePointContent(content):
 
 def TranslateQuestionContent(content):
     output = ''
-    return output
+    return content 
 
 
 def TranslateQuestionAnswer(content):
     output = ''
-    return output
+    return content
 
 
 

@@ -20,3 +20,13 @@ class MDEditorQuestionModleForm(forms.ModelForm):
         labels = {
                 'q_MDcontent': 'Editor',
             }
+
+
+class MDEditorAnswerModleForm(forms.ModelForm):
+
+    class Meta:
+        model = Question
+        fields = ['q_MDcontent_ans']
+        labels = {
+                'q_MDcontent_ans': 'Editor',
+            }

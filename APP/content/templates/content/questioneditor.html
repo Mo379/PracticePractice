@@ -38,30 +38,162 @@ var object_type = "Question";
 	</div>
 </div>
 
-
+<nav class="nav nav-pills pricing-tab py-1 justify-content-center" style='margin-bottom:30px;'>
+    <a class="nav-item nav-link" data-toggle="tab" href="" id="show_question">Question</a>
+    <a class="nav-item nav-link" data-toggle="tab" href="" id="show_answer">Answer</a>
+</nav>
 <div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 	Please Use a desktop on chrome to see the editor, or zoom out.
 </div>
-<div class='d-flex justify-content-center'>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
-	Question
-</button>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
-	Answer
-</button>
-</div>
 <br>
 
-
-<form class="user px-3 py-3 editing_form"  action="{%url 'content:_savequestionedit'%}" 
-	method="POST" role="form" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ context.editormedia}}
-    {{ context.editorrender}}
+<form target="transFrame_1" class="user px-3 editing_form mb-5" id='question_form' action="{%url 'content:_savequestionedit'%}" 
+method="POST" role="form" enctype="multipart/form-data">
+	{% csrf_token %}
+	<input type='hidden' value='{{context.question.id}}' name='question_id'/>
+	{{ context.editormedia}}
+	{{ context.editorrender}}
+	<button type='submit' class='btn btn-primary'>Save</button> <span id="saving_indicator_question"> all saved</span>
 </form>
+<iframe style="" name="transFrame_1" id="transFrame_1" hidden='hidden'></iframe>
+<script>
+$( "#question_form" ).on( "submit", function( event ) {
+	var s = document.getElementById('saving_indicator_question');
+	s.innerHTML = 'saving...'
+});
+$('iframe#transFrame_1').load(function() {
+	const responseValue = this.contentWindow.document.body.innerHTML;
+	// Extract JSON string from the response value
+	const jsonStart = responseValue.indexOf('{');
+	const jsonEnd = responseValue.lastIndexOf('}');
+	const jsonString = responseValue.substring(jsonStart, jsonEnd + 1);
+	// Parse the JSON string into an object
+	const json = JSON.parse(jsonString);
+	// Use the response object as needed
+	setTimeout(function (){
+		var s = document.getElementById('saving_indicator_question');
+		if (json.error == 0){
+			s.innerHTML = 'all saved'
+		}else{
+			s.innerHTML = 'error :('
+		}
+	}, 500);
+	});
+// Get reference to the form and iframe elements
+const form = document.getElementById('question_form');
+const iframe = document.getElementById('transFrame_1');
 
-<div style='border:1px solid black;'>
-{{context.question.q_content|ToMarkdownQuestion:context.question|safe}}
+// Define the interval duration in milliseconds (5 minutes = 5 * 60 * 1000 ms)
+const intervalDuration = 5 * 60 * 1000;
+
+// Set the target of the form to the iframe
+form.target = iframe.name;
+
+// Function to submit the form to the iframe
+function submitFormToIframe() {
+  form.submit();
+}
+
+// Set up the interval to submit the form every 5 minutes
+setInterval(submitFormToIframe, intervalDuration);
+</script>
+<form target="transFrame_2" class="user px-3 editing_form"  id='answer_form' action="{%url 'content:_saveansweredit'%}" 
+method="POST" role="form" enctype="multipart/form-data">
+	{% csrf_token %}
+	<input type='hidden' value='{{context.question.id}}' name='question_id'/>
+	{{ context.editormedia_ans}}
+	{{ context.editorrender_ans}}
+	<button type='submit' class='btn btn-primary'>Save</button> <span id="saving_indicator_answer"> all saved</span>
+</form>
+<iframe style="" name="transFrame_2" id="transFrame_2" hidden='hidden'></iframe>
+<script>
+$( "#answer_form" ).on( "submit", function( event ) {
+	var s = document.getElementById('saving_indicator_answer');
+	s.innerHTML = 'saving...'
+});
+$('iframe#transFrame_2').load(function() {
+	const responseValue = this.contentWindow.document.body.innerHTML;
+	// Extract JSON string from the response value
+	const jsonStart = responseValue.indexOf('{');
+	const jsonEnd = responseValue.lastIndexOf('}');
+	const jsonString = responseValue.substring(jsonStart, jsonEnd + 1);
+	// Parse the JSON string into an object
+	const json = JSON.parse(jsonString);
+	// Use the response object as needed
+	setTimeout(function (){
+		var s = document.getElementById('saving_indicator_answer');
+		if (json.error == 0){
+			s.innerHTML = 'all saved'
+		}else{
+			s.innerHTML = 'error :('
+		}
+	}, 500);
+});
+// Get reference to the form and iframe elements
+const form_2 = document.getElementById('answer_form');
+const iframe_2 = document.getElementById('transFrame_2');
+
+// Define the interval duration in milliseconds (5 minutes = 5 * 60 * 1000 ms)
+const intervalDuration_2 = 5 * 60 * 1000;
+
+// Set the target of the form to the iframe
+form_2.target = iframe_2.name;
+
+// Function to submit the form to the iframe
+function submitFormToIframe_2() {
+  form_2.submit();
+}
+
+// Set up the interval to submit the form every 5 minutes
+setInterval(submitFormToIframe_2, intervalDuration_2);
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Get references to the question and answer nav buttons
+  var questionNavButton = document.getElementById('show_question');
+  var answerNavButton = document.getElementById('show_answer');
+
+  // Get references to the question and answer forms
+  var questionForm = document.getElementById('question_form');
+  var answerForm = document.getElementById('answer_form');
+
+  // Add click event listener to the question nav button
+  questionNavButton.addEventListener('click', function() {
+    // Show the question form
+    questionForm.style.display = 'block';
+    // Hide the answer form
+    answerForm.style.display = 'none';
+  });
+
+  // Add click event listener to the answer nav button
+  answerNavButton.addEventListener('click', function() {
+    // Show the answer form
+    answerForm.style.display = 'block';
+    // Hide the question form
+    questionForm.style.display = 'none';
+  });
+});
+
+</script>
+<div class='mt-5' style='border:1px solid var(--text-color-1); padding: 10px;'>
+Question: <br><br>
+{{context.question.q_content|ToMarkdownQuestion:context.question.id|safe}}
+<br><br>Answer: <br><br>
+{{context.question.q_answer|safe}}
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 {%endblock%}

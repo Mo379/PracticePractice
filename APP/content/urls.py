@@ -285,4 +285,9 @@ urlpatterns = [
         views._savequestionedit,
         name='_savequestionedit'
     ),
+    path(
+        'content/_saveansweredit/',
+        views._saveansweredit,
+        name='_saveansweredit'
+    ),
 ]

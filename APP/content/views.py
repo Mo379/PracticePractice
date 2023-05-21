@@ -25,7 +25,7 @@ from content.util.GeneralUtil import (
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
-from content.forms import MDEditorQuestionModleForm, MDEditorModleForm
+from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MDEditorModleForm
 from mdeditor.widgets import MDEditorWidget
 from braces.views import (
         LoginRequiredMixin,
@@ -585,7 +585,7 @@ class EditorQuestionView(
         question = Question.objects.get(pk=question_id)
         #
         translated_content = TranslateQuestionContent(question.q_content)
-        translated_answer = TranslateQuestionAnswer(question.q_content)
+        translated_answer = TranslateQuestionAnswer(question.q_answer)
 
         #
         md_config = settings.MDEDITOR_CONFIGS
@@ -601,11 +601,19 @@ class EditorQuestionView(
                 name='q_MDcontent', value=translated_content,
                 config=md_config, attrs={'id': 'id_q_MDcontent'}
             )
+        a_editor = MDEditorWidget()
+        a_media = a_editor.media
+        a_render = a_editor.render(
+                name='q_MDcontent_ans', value=translated_answer,
+                config=md_config, attrs={'id': 'id_q_MDcontent_ans'}
+            )
 
         context['spec'] = spec
         context['question'] = question
         context['editormedia'] = media
         context['editorrender'] = render
+        context['editormedia_ans'] = a_media
+        context['editorrender_ans'] = a_render
         context['url'] = ''
         return context
 
@@ -2658,122 +2666,36 @@ def _savepointedit(request):
 
 def _savequestionedit(request):
     if request.method == 'POST':
-        question_id = request.POST['point_id']
+        question_id = request.POST['question_id']
         question = Question.objects.filter(user=request.user, pk=question_id)
         if len(question) == 1:
             form = MDEditorQuestionModleForm(request.POST, instance=question[0])
             if form.is_valid():
                 form.save()
-                content = form.cleaned_data['q_MDcontent'].split('+++')
-                for details_part in content:
-                    detail_items = details_part.split('\n')
-                    if 'Meta_details' in detail_items[0]:
-                        for sub_item in detail_items:
-                            sub_item = sub_item.replace('\r','').replace('\n','')
-                            if 'question_type' in sub_item:
-                                question[0].q_content['details']['head']['0']\
-                                        ['q_type'] = sub_item.replace('question_type: ', '')
-                            if 'question_difficulty' in sub_item:
-                                question[0].q_content['details']['head']['0']\
-                                        ['q_difficulty'] = sub_item.replace('question_difficulty: ', '')
-                    if 'Question' in detail_items[0]:
-                        full_question = '\n'.join(detail_items[1:])
-                        question_parts = full_question.split('PartName_')
-                        n = 0
-                        for part in question_parts:
-                            if 'PartMark_' in part:
-                                lines = part.split('\n')
-                                details_line = lines[0].split('_')
-                                part_name = details_line[0]
-                                part_mark = details_line[-1].split(':')[0]
-                                question[0].q_content['details']['questions']\
-                                        [str(n)] = {}
-                                #
-                                question[0].q_content['details']['questions']\
-                                        [str(n)]['q_part'] = part_name
-                                question[0].q_content['details']['questions']\
-                                        [str(n)]['q_part_mark'] = part_mark
-                                n2 = 0
-                                question[0].q_content['details']['questions']\
-                                        [str(n)]['content'] = {}
-                                for line in lines:
-                                    if '!(' in line:
-                                        first_list = line.split('(')[1].split(')')
-                                        second_list = first_list[1].split('[')[1].split(']')
-                                        item = {'img': {'img_info': first_list[0],'img_name': second_list[0]}}
-                                        question[0].q_content['details']['questions']\
-                                                [str(n)]['content'][str(n2)] = item
-                                        n2 += 1
-                                    elif 'PartMark' not in line:
-                                        line = line.replace('\n','').replace('\r', '')
-                                        if line != '':
-                                            item = {'text': line}
-                                            question[0].q_content['details']['questions']\
-                                                    [str(n)]['content'][str(n2)] = item 
-                                            n2 += 1
-                                n += 1
-                    if 'Answer' in detail_items[0]:
-                        full_answer = '\n'.join(detail_items[1:])
-                        answer_parts = full_answer.split('AnswerPart')
-                        n = 0
-                        for part in answer_parts:
-                            if 'PartName_' in part:
-                                lines = part.split('\n')
-                                details_line = lines[0].split('_')
-                                part_name = details_line[-1].replace('\r', '').replace('\n', '')
-                                question[0].q_content['details']['answers']\
-                                        [str(n)] = {}
-                                #
-                                question[0].q_content['details']['answers']\
-                                        [str(n)]['q_part'] = part_name
-                                n2 = 0
-                                question[0].q_content['details']['answers']\
-                                        [str(n)]['content'] = {}
-                                for line in lines:
-                                    if '!(' in line:
-                                        first_list = line.split('(')[1].split(')')
-                                        second_list = first_list[1].split('[')[1].split(']')
-                                        item = {'img': {'img_info': first_list[0],'img_name': second_list[0]}}
-                                        question[0].q_content['details']['answers']\
-                                                [str(n)]['content'][str(n2)] = item
-                                        n2 += 1
-                                    elif 'PartName' not in line:
-                                        line = line.replace('\n','').replace('\r', '')
-                                        if line != '':
-                                            item = {'text': line}
-                                            question[0].q_content['details']['answers']\
-                                                    [str(n)]['content'][str(n2)] = item 
-                                            n2 += 1
-                                n += 1
+                content = form.cleaned_data['q_MDcontent']
+                question[0].q_content = content
                 question[0].save()
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Saved !',
-                        extra_tags='alert-success editorquestion'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something is wrong, please check that all inputs are valid.',
-                        extra_tags='alert-danger editorquestion'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something is wrong, cannot find information.',
-                    extra_tags='alert-danger editorquestion'
-                )
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-    else:
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Invalid Request Method',
-                extra_tags='alert-danger home'
-            )
-        return redirect('main:index')
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            return JsonResponse({'error': 1, 'message': 'Error'})
+        return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+
+def _saveansweredit(request):
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
+        question = Question.objects.filter(user=request.user, pk=question_id)
+        if len(question) == 1:
+            form = MDEditorAnswerModleForm(request.POST, instance=question[0])
+            if form.is_valid():
+                form.save()
+                content = form.cleaned_data['q_MDcontent_ans']
+                q = question[0]
+                q.q_answer = content
+                q.save()
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            return JsonResponse({'error': 1, 'message': 'Error'})
+        return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
