@@ -1,0 +1,237 @@
+<div class="modal fade" id="VideoModal" tabindex="-1" style='z-index:5000000;' role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Manage videos</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<label for="new_video_input">Videos: </label>
+		  <div class="custom-control custom-switch">
+			  <input type="checkbox" class="custom-control-input" id="show_in_q_switch">
+			  <label class="custom-control-label" for="show_in_q_switch">switch to show in question</label>
+		  </div><br>
+		<div class="input-group mb-3">
+		  <div class="input-group-prepend">
+		    <span class="input-group-text" id="">Title and URL</span>
+		  </div>
+		  <input type="text" id='new_video_name' class="form-control" placeholder='Video title...'>
+		  <input type="text" id='new_video_url'class="form-control" placeholder='Video URL...'>
+		  <div class="input-group-append">
+		    <button class="btn btn-outline-info" id="add_video_button" type="button">Add</button>
+		  </div>
+		</div>
+		<div class="col-12">
+			<ol class='list_group' id='video_list'>
+				{%for video in context.point.p_videos.all %}
+				<li class='list-group-item'>
+					<input type='hidden' name='ordered_items_videos[]' value='{{video.title}}<sep>{{video.url}}'/>
+					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+						<i class="bi bi-trash-fill"></i>
+					</a>
+					<a style='text-decoration:none; color: var(--text-color-1)' >
+						{{video.title}}: {{video.url}}
+					</a>
+				</li >
+				{%endfor%}
+			</ol>
+		</div><br>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+var video_button = document.getElementById("add_video_button");
+var video_ul = document.getElementById("video_list");
+
+video_button.addEventListener("click", function() {
+  var video_name = document.getElementById("new_video_name");
+  var video_url = document.getElementById("new_video_url");
+  var placement_switch = document.getElementById("show_in_q_switch");
+  if (placement_switch.checked){
+	placement='Question'
+  }else{
+	placement='Answer'
+  }
+  var video_list_li = document.createElement("li");
+  video_list_li.classList.add("list-group-item");
+
+  var child_input = document.createElement("input");
+  child_input.value = `${placement}<sep>${video_name.value}<sep>${video_url.value}`;
+  child_input.type = 'hidden'
+  child_input.name = 'ordered_items_videos[]'
+  video_list_li.appendChild(child_input);
+
+  var icon = document.createElement("i");
+  icon.classList.add("bi"); 
+  icon.classList.add("bi-trash-fill"); 
+  var child_del_button = document.createElement("a");
+  child_del_button.type = 'button'
+  child_del_button.style.cssText= 'font-size:12px;';
+  child_del_button.classList.add("btn"); 
+  child_del_button.classList.add("btn-danger"); 
+  child_del_button.classList.add("deletable_btn"); 
+  child_del_button.classList.add("mr-1"); 
+  child_del_button.classList.add("ml-1"); 
+  child_del_button.appendChild(icon);
+  video_list_li.appendChild(child_del_button);
+
+  var child_text = document.createElement("a");
+  child_text.appendChild(document.createTextNode(placement + ': '));
+  child_text.appendChild(document.createTextNode(video_name.value));
+  child_text.appendChild(document.createTextNode(': '));
+  child_text.appendChild(document.createTextNode(video_url.value));
+  video_list_li.appendChild(child_text);
+
+  video_ul.appendChild(video_list_li);
+  video_name.value = ''
+  video_url.value = ''
+  const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+  }
+});
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modal fade" id="ImageModal" tabindex="-1" style='z-index:5000000;' role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Manage Images</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<label for="new_image_input">Images: </label>
+		  <div class="custom-control custom-switch">
+			  <input type="checkbox" class="custom-control-input" id="show_in_q_switch_img">
+			  <label class="custom-control-label" for="show_in_q_switch_img">switch to show in question</label>
+		  </div><br>
+		<div class="input-group mb-3">
+		  <div class="input-group-prepend">
+		    <span class="input-group-text" id="">Details</span>
+		  </div>
+		  <input type="text" id='new_image_desciption' class="form-control" placeholder='Image Description...'>
+		  <input type="file" id='new_image_file'class="form-control" placeholder='Upload image...'>
+		  <div class="input-group-append">
+		    <button class="btn btn-outline-info" id="add_image_button" type="button">Add</button>
+		  </div>
+		</div>
+		<div class="col-12">
+			<ol class='list_group' id='image_list'>
+				{%for image in context.point.p_images.all %}
+				<li class='list-group-item'>
+					<input type='hidden' name='ordered_items_images[]' value='{{image.description}}<sep>{{image.id}}'/>
+					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+						<i class="bi bi-trash-fill"></i>
+					</a>
+					<a style='text-decoration:none; color: var(--text-color-1)' >
+						{{image.description}}: {{image.url}}
+					</a>
+				</li >
+				{%endfor%}
+			</ol>
+		</div><br>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var image_button = document.getElementById("add_image_button");
+var image_ul = document.getElementById("image_list");
+
+image_button.addEventListener("click", function() {
+  var image_desc = document.getElementById("new_image_desciption");
+  var image_file = document.getElementById("new_image_file");
+  var placement_switch = document.getElementById("show_in_q_switch_img");
+  if (placement_switch.checked){
+	placement='Question'
+  }else{
+	placement='Answer'
+  }
+  var image_list_li = document.createElement("li");
+  image_list_li.classList.add("list-group-item");
+
+  var child_input = document.createElement("input");
+  child_input.value = `${placement}<sep>${image_desc.value}`;
+  child_input.type = 'hidden'
+  child_input.name = 'ordered_items_images[]'
+  image_list_li.appendChild(child_input);
+
+  var icon = document.createElement("i");
+  icon.classList.add("bi"); 
+  icon.classList.add("bi-trash-fill"); 
+  var child_del_button = document.createElement("a");
+  child_del_button.type = 'button'
+  child_del_button.style.cssText= 'font-size:12px;';
+  child_del_button.classList.add("btn"); 
+  child_del_button.classList.add("btn-danger"); 
+  child_del_button.classList.add("deletable_btn"); 
+  child_del_button.classList.add("mr-1"); 
+  child_del_button.classList.add("ml-1"); 
+  child_del_button.appendChild(icon);
+  image_list_li.appendChild(child_del_button);
+
+  var child_text = document.createElement("a");
+  child_text.appendChild(document.createTextNode(placement + ': '));
+  child_text.appendChild(document.createTextNode(image_desc.value));
+  image_list_li.appendChild(child_text);
+
+  image_ul.appendChild(image_list_li);
+  image_desc.value = ''
+  image_file.value = null
+  const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+  }
+});
+
+
+
+</script>
+
+<script>
+const lis = document.getElementsByClassName('deletable_btn');
+  for (const li of lis) {
+    li.addEventListener('click', function() {
+      this.parentNode.remove()
+    })
+}
+
+
+
+</script>

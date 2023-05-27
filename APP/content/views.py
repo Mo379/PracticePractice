@@ -201,7 +201,7 @@ class NoteArticleView(
         context = {}
         # Get details of page
         course_id = self.kwargs['course_id']
-        module = self.kwargs['module'].lower()
+        module = self.kwargs['module']
         chapter = self.kwargs['chapter']
         context['title'] = chapter
         #
@@ -295,7 +295,7 @@ class QuestionBankView(
                 pap_course=course
                 ).order_by('-pap_creation_time')[:25]
         #
-        content = order_full_spec_content(content)
+        content = order_live_spec_content(content)
         moduels = OrderedDict({i: moduel for i, moduel in enumerate(content)})
         chapters = collections.defaultdict(list)
         for m_key in moduels:
@@ -376,7 +376,7 @@ class PracticeView(
                 course=course
             ).order_by('-version_number')[0].version_content
         #
-        content = order_full_spec_content(content)
+        content = order_live_spec_content(content)
         chapter_qs = content[module]['content'][chapter]['questions']
         dic = OrderedDict()
         question = None

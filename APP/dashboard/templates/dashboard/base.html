@@ -33,9 +33,6 @@ rome
 {% block listsidebar%}
 {%include 'dashboard/sidebarbar_replacement.html'%}
 {% endblock %}
-{%block content%}
-Content goes here
-{%endblock%}
 {%block extra%}
     <!-- Bootstrap core JavaScript-->
     <script src="{%static 'dashboard/vendor/jquery/jquery.min.js'%}"></script>
@@ -49,7 +46,7 @@ Content goes here
     <!-- Page level plugins -->
     <script src="{%static 'dashboard/vendor/chart.js/Chart.min.js'%}"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="{%static 'dashboard/js/demo/chart-area-demo.js'%}"></script>
-    <script src="{%static 'dashboard/js/demo/chart-pie-demo.js'%}"></script>
+{%endblock%}
+{%block content%}
+Content goes here
 {%endblock%}

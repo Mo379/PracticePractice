@@ -56,43 +56,33 @@ class AIView(
         spec = course.specification
         content = order_live_spec_content(spec.spec_content)[module]['content'][chapter]['content']
         topics = list(content.keys())
-        active_lesson, created = Lesson.objects.get_or_create(
+        active_lesson, _ = Lesson.objects.get_or_create(
                 user=user,
                 course=course,
-                module=module,
+                moduel=module,
                 chapter=chapter,
             )
-        if created:
-            active_lesson.lesson_content = course.specification.spec_content
-            active_lesson.save()
+
+        lesson_parts = []
         for topic in topics:
-            started_lesson_parts = Lesson_part.objects.filter(
+            part, created = Lesson_part.objects.get_or_create(
                     user=user,
-                    lesson=active_lesson
+                    lesson=active_lesson,
+                    topic=topic,
                 )
+            lesson_parts.append(part)
 
-        # create a defaultdict with default value as an empty list
-        lesson_parts_holder = defaultdict(list)
-        for part in started_lesson_parts:
-            lesson_parts_holder[part.lesson.moduel].append(part.chapter)
-
-        chapters = collections.OrderedDict({})
-        for module in modules:
-            _chapters = list(content[module]['content'].keys())
-            chapters[module] = _chapters
         #
         course_subscription = CourseSubscription.objects.filter(
                 user=self.request.user,
                 course=course
-                )
+            )
         #
-        context['coursesubscription'] = course_subscription if len(course_subscription) else False
+        context['coursesubscription'] = course_subscription if len(course_subscription) == 1 else False
         context['form_appearancechoice'] = appearancechoiceform
         context['course'] = course
-        context['modules'] = modules
-        context['chapters'] = chapters
-        context['started_chapters'] = lesson_parts_holder
-        context['lessons'] = active_lessons
+        context['lesson'] = active_lesson
+        context['lesson_parts'] = lesson_parts
         return context
 
 
@@ -189,7 +179,7 @@ def _newgenerationjob(request):
                 moduel=module,
                 chapter=chapter,
             )
-        _generate_course_content(job.id)
+        _generate_course_content.delay(job.id)
         #
         messages.add_message(
                 request,

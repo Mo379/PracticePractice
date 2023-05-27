@@ -116,7 +116,7 @@ class Lesson(models.Model):
     )
     moduel = models.CharField(max_length=150, default="", null=True)
     chapter = models.CharField(max_length=150, default="", null=True)
-    lesson_content = models.JSONField(default=dict, null=True)
+    lesson_introduction = models.TextField(default='', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     terminated_at = models.DateTimeField(null=True, default=None, blank=True)
 
@@ -134,13 +134,11 @@ class Lesson_part(models.Model):
         default="", null=False, related_name='AI_lesson_course'
     )
     topic = models.CharField(max_length=150, default="", null=True)
-    part_introduction = models.TextField(default='', null=True)
     part_content = models.JSONField(default=dict, null=True)
     part_chat = models.JSONField(default=dict, null=True)
-    part_pointer = models.CharField(max_length=250, default="", null=True)
     part_token_count = models.IntegerField(default=0, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     terminated_at = models.DateTimeField(null=True, default=None, blank=True)
 
     def __str__(self):
-        return self.user.username + '-' + self.lesson.moduel + '-' + self.chapter
+        return self.user.username + '-' + self.topic

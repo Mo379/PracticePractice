@@ -1,24 +1,3 @@
-<div class="modal fade" id="TitleModal" tabindex="-1" style='z-index:5000000;'role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-		<div class="form-group">
-		  <label for="usr">Title:</label>
-		  <input type="text" class="form-control" id="point_title" name='point_title'>
-		</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
 <div class="modal fade" id="VideoModal" tabindex="-1" style='z-index:5000000;' role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -29,39 +8,30 @@
         </button>
       </div>
       <div class="modal-body">
-		<label for="new_skill_input">Videos: </label>
+		<label for="new_video_input">Videos: </label>
 		<div class="input-group mb-3">
 		  <div class="input-group-prepend">
 		    <span class="input-group-text" id="">Title and URL</span>
 		  </div>
-		  <input type="text" id='new_skill_input' class="form-control" placeholder='Video title...'>
-		  <input type="text" class="form-control" placeholder='Video URL...'>
+		  <input type="text" id='new_video_name' class="form-control" placeholder='Video title...'>
+		  <input type="text" id='new_video_url'class="form-control" placeholder='Video URL...'>
 		  <div class="input-group-append">
-		    <button class="btn btn-outline-info" id="add_skill_button" type="button">Add</button>
+		    <button class="btn btn-outline-info" id="add_video_button" type="button">Add</button>
 		  </div>
 		</div>
 		<div class="col-12">
-			<ol class='list_group' id='skill_list'>
-				{%for idd, skill in course.course_skills.items %}
+			<ol class='list_group' id='video_list'>
+				{%for video in context.point.p_videos.all %}
 				<li class='list-group-item'>
-					<input type='hidden' name='ordered_items_skills[]' value='{{skill}}'/>
+					<input type='hidden' name='ordered_items_videos[]' value='{{video.title}}<sep>{{video.url}}'/>
 					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
 						<i class="bi bi-trash-fill"></i>
 					</a>
-					<a style='text-decoration:none;'>
-						test
+					<a style='text-decoration:none; color: var(--text-color-1)' >
+						{{video.title}}: {{video.url}}
 					</a>
 				</li >
 				{%endfor%}
-				<li class='list-group-item'>
-					<input type='hidden' name='ordered_items_skills[]' value='{{skill}}'/>
-					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
-						<i class="bi bi-trash-fill"></i>
-					</a>
-					<a style='text-decoration:none;'>
-						Some video
-					</a>
-				</li >
 			</ol>
 		</div><br>
       </div>
@@ -73,19 +43,20 @@
 
 
 <script>
-var skill_button = document.getElementById("add_skill_button");
-var skill_ul = document.getElementById("skill_list");
+var video_button = document.getElementById("add_video_button");
+var video_ul = document.getElementById("video_list");
 
-skill_button.addEventListener("click", function() {
-  var skill_input = document.getElementById("new_skill_input");
-  var skill_list_li = document.createElement("li");
-  skill_list_li.classList.add("list-group-item");
+video_button.addEventListener("click", function() {
+  var video_name = document.getElementById("new_video_name");
+  var video_url = document.getElementById("new_video_url");
+  var video_list_li = document.createElement("li");
+  video_list_li.classList.add("list-group-item");
 
   var child_input = document.createElement("input");
-  child_input.value = skill_input.value
+  child_input.value = `${video_name.value}<sep>${video_url.value}`;
   child_input.type = 'hidden'
-  child_input.name = 'ordered_items_skills[]'
-  skill_list_li.appendChild(child_input);
+  child_input.name = 'ordered_items_videos[]'
+  video_list_li.appendChild(child_input);
 
   var icon = document.createElement("i");
   icon.classList.add("bi"); 
@@ -99,65 +70,26 @@ skill_button.addEventListener("click", function() {
   child_del_button.classList.add("mr-1"); 
   child_del_button.classList.add("ml-1"); 
   child_del_button.appendChild(icon);
-  skill_list_li.appendChild(child_del_button);
+  video_list_li.appendChild(child_del_button);
 
   var child_text = document.createElement("a");
-  child_text.appendChild(document.createTextNode(skill_input.value));
-  skill_list_li.appendChild(child_text);
+  child_text.appendChild(document.createTextNode(video_name.value));
+  child_text.appendChild(document.createTextNode(': '));
+  child_text.appendChild(document.createTextNode(video_url.value));
+  video_list_li.appendChild(child_text);
 
-  skill_ul.appendChild(skill_list_li);
-  skill_input.value = ''
+  video_ul.appendChild(video_list_li);
+  video_name.value = ''
+  video_url.value = ''
   const lis = document.getElementsByClassName('deletable_btn');
   for (const li of lis) {
     li.addEventListener('click', function() {
       this.parentNode.remove()
     })
   }
-})
+});
 
 
-
-var objective_button = document.getElementById("add_objective_button");
-var objective_ul = document.getElementById("objectives_list");
-
-objective_button.addEventListener("click", function() {
-  var objective_input = document.getElementById("new_objective_input");
-  var objective_list_li = document.createElement("li");
-  objective_list_li.classList.add("list-group-item");
-
-  var child_input = document.createElement("input");
-  child_input.value = objective_input.value
-  child_input.type = 'hidden'
-  child_input.name = 'ordered_items_objectives[]'
-  objective_list_li.appendChild(child_input);
-
-  var icon = document.createElement("i");
-  icon.classList.add("bi"); 
-  icon.classList.add("bi-trash-fill"); 
-  var child_del_button = document.createElement("a");
-  child_del_button.type = 'button'
-  child_del_button.style.cssText= 'font-size:12px;';
-  child_del_button.classList.add("btn"); 
-  child_del_button.classList.add("btn-danger"); 
-  child_del_button.classList.add("deletable_btn"); 
-  child_del_button.classList.add("mr-1"); 
-  child_del_button.classList.add("ml-1"); 
-  child_del_button.appendChild(icon);
-  objective_list_li.appendChild(child_del_button);
-
-  var child_text = document.createElement("a");
-  child_text.appendChild(document.createTextNode(objective_input.value));
-  objective_list_li.appendChild(child_text);
-
-  objective_ul.appendChild(objective_list_li);
-  objective_input.value = ''
-  const lis = document.getElementsByClassName('deletable_btn');
-  for (const li of lis) {
-    li.addEventListener('click', function() {
-      this.parentNode.remove()
-    })
-  }
-})
 
 
 const lis = document.getElementsByClassName('deletable_btn');

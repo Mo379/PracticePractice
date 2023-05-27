@@ -1,15 +1,19 @@
 {%load static %}
 {%load general%}
-{%include 'AI/items/modal_help.html'%}
 {%for lesson in context.lessons%}
 {%include 'AI/items/modal_lesson_part.html'%}
 {%endfor%}
 <div class='AI_side_bar' id='AI_side_bar'>
 	<div class='AI_side_lessons_wrapper'>
-		<div class='AI_side_lessons'>
-			{%for lesson in context.lessons%}
-			<a class='sidebar_button lesson_button' data-toggle="modal" data-target="#all_lesson{{lesson.id|hashid}}_parts_modal">
-				{{lesson.moduel|field_name_to_label}}
+		<div style='margin:auto; padding: 10px;'>
+			<h1 style='margin:auto; color:var(--text-color-2); padding:10px;'>
+				{{context.lesson.moduel|field_name_to_label}}: {{context.lesson.chapter|field_name_to_label}}
+			</h1>
+		</div>
+		<div class='AI_side_lessons mt-5'>
+			{%for part in context.lesson_parts%}
+			<a class='sidebar_button part_button disabled' data-toggle="modal" data-target="#{{part.id|hashid}}_part_modal">
+				{{part.topic|field_name_to_label}}
 			</a>
 			{%endfor%}
 		</div>
@@ -20,14 +24,11 @@
 	    {%definevar 'AI_window' as alert_loc%}
 	    {%include 'base/alert.html'%}
 	</a>
-	<button class='sidebar_button lesson_button' id='toggle-sidebar-btn-2'>
-		<i class="bi bi-arrows-fullscreen"></i> Hide distractions	
-	</button>
-	<button class='sidebar_button lesson_button' data-toggle="modal" data-target="#help_modal">
-		<i class="bi bi-patch-question"></i> Help
-	</button>
-	<a class='sidebar_button lesson_button mb-3' href='{%url 'content:notes' context.course.id%}'>
+	<a class='sidebar_button lesson_button mb-2' style='padding: 10px;' href='{%url 'content:notes' context.course.id%}'>
 		<i class="bi bi-arrow-bar-left"> </i>Go back
 	</a>
+	<button class='sidebar_button lesson_button' style='padding: 10px;' id='toggle-sidebar-btn-2'>
+		<i class="bi bi-arrows-fullscreen mr-2"></i> Hide menu
+	</button>
 	</div>
 </div>

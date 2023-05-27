@@ -65,6 +65,11 @@ body{
 	color: var(--text-color-1);
 	padding: 30px;
 }
+.AI_user_text_area{
+	color: var(--text-color-1);
+	height: 150px !important;
+	width: 100%;
+}
 #loading_spinner{
 	position: absolute !important;
 	padding:10px;
@@ -144,6 +149,7 @@ body{
 	margin-bottom: 10px;
 }
 .lesson_button{
+	padding: 10px;
 	margin-bottom: 3px;
 	border:none;
 	background: var(--second-bg-color);
