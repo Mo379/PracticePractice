@@ -14,6 +14,7 @@ Editor
 {%block content%}
 {%definevar 'editorquestion' as alert_loc%}
 {%include 'base/alert.html'%}
+<script src="{%static 'content/js/editingcontroller.js'%}"></script>
 {%include 'content/mathjax.html'%}
 {%include 'content/items/GPT_item.html'%}
 {%include 'content/items/editor_items_question.html'%}
@@ -180,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
 Question: <br><br>
 {{context.question.q_content|ToMarkdownQuestion:context.question.id|safe}}
 <br><br>Answer: <br><br>
-{{context.question.q_answer|safe}}
+{{context.question.q_answer|ToMarkdownAnswer:context.question.id|safe}}
 </div>
 
 

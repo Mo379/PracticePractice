@@ -1,0 +1,20 @@
+<script>
+// Get reference to the form and iframe elements
+	const {{form_id}}_a= document.getElementById('{{form_id}}');
+	const {{frame_id}}_a= document.getElementById('{{frame_id}}');
+
+// Define the interval duration in milliseconds (5 minutes = 5 * 60 * 1000 ms)
+	const {{form_id}}_duration= 5 * 60 * 1000;
+
+// Set the target of the form to the iframe
+{{form_id}}_a.target = {{frame_id}}_a.name;
+
+// Function to submit the form to the iframe
+function {{form_id}}_submitFormToIframe() {
+  {{form_id}}_a.submit();
+}
+
+
+// Set up the interval to submit the form every 5 minutes
+setInterval({{form_id}}_submitFormToIframe, {{form_id}}_duration);
+</script>

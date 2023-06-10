@@ -1,0 +1,24 @@
+<script>
+$( "#{{form_id}}" ).on( "submit", function( event ) {
+	var s = document.getElementById('{{indicator_id}}');
+	s.innerHTML = 'saving...'
+});
+$('iframe#{{frame_id}}').load(function() {
+	const responseValue = this.contentWindow.document.body.innerHTML;
+	// Extract JSON string from the response value
+	const jsonStart = responseValue.indexOf('{');
+	const jsonEnd = responseValue.lastIndexOf('}');
+	const jsonString = responseValue.substring(jsonStart, jsonEnd + 1);
+	// Parse the JSON string into an object
+	const json = JSON.parse(jsonString);
+	// Use the response object as needed
+	setTimeout(function (){
+		var s = document.getElementById('{{indicator_id}}');
+		if (json.error == 0){
+			s.innerHTML = 'all saved'
+		}else{
+			s.innerHTML = 'error :('
+		}
+	}, 500);
+});
+</script>

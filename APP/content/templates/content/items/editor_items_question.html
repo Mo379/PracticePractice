@@ -1,3 +1,4 @@
+{%load general%}
 <div class="modal fade" id="VideoModal" tabindex="-1" style='z-index:5000000;' role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -23,25 +24,47 @@
 		    <button class="btn btn-outline-info" id="add_video_button" type="button">Add</button>
 		  </div>
 		</div>
-		<div class="col-12">
-			<ol class='list_group' id='video_list'>
-				{%for video in context.point.p_videos.all %}
-				<li class='list-group-item'>
-					<input type='hidden' name='ordered_items_videos[]' value='{{video.title}}<sep>{{video.url}}'/>
-					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
-						<i class="bi bi-trash-fill"></i>
-					</a>
-					<a style='text-decoration:none; color: var(--text-color-1)' >
-						{{video.title}}: {{video.url}}
-					</a>
-				</li >
-				{%endfor%}
-			</ol>
-		</div><br>
+		{%definevar 'video_form' as form_id%}
+		{%definevar 'video_frame' as frame_id%}
+		{%definevar 'video_saving_indicator' as indicator_id%}
+		<form id='{{form_id}}' target='{{frame_id}}'class="px-3 py-3"  action="{%url 'content:_updatequestionvideos'%}" 
+			    method="POST" role="form" enctype="multipart/form-data">
+			{%csrf_token%}
+			<input 
+				type='hidden' 
+				name='question_id' 
+				value='{{context.question.id}}'
+			/>
+			<div class="col-12">
+				<ol class='list_group' id='video_list'>
+					{%for video in context.question.q_videos.all %}
+						{% if video.in_question_placement %}
+						{% definevar 'Question' as placement%}
+						{%else%}
+						{%definevar 'Answer' as placement%}
+						{%endif%}
+					<li class='list-group-item'>
+						
+						<input type='hidden' name='ordered_items_videos[]' value='{{placement}}<sep>{{video.title}}<sep>{{video.url}}'/>
+						<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+							<i class="bi bi-trash-fill"></i>
+						</a>
+						<a style='text-decoration:none; color: var(--text-color-1)' >
+							{{placement}}: {{video.title}}: {{video.url}}
+						</a>
+					</li >
+					{%endfor%}
+				</ol>
+			</div><br>
+			<button type= 'submit' class='btn btn-primary mb-2' > Upload/Save </button> <span id="{{indicator_id}}"> all saved</span><br><br>
+		</form>
       </div>
     </div>
   </div>
 </div>
+<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+{%include 'content/items/smart_save.html'%}
+{%include 'content/items/auto_save.html'%}
 
 
 
@@ -133,40 +156,78 @@ video_button.addEventListener("click", function() {
         </button>
       </div>
       <div class="modal-body">
-		<label for="new_image_input">Images: </label>
-		  <div class="custom-control custom-switch">
-			  <input type="checkbox" class="custom-control-input" id="show_in_q_switch_img">
-			  <label class="custom-control-label" for="show_in_q_switch_img">switch to show in question</label>
-		  </div><br>
-		<div class="input-group mb-3">
-		  <div class="input-group-prepend">
-		    <span class="input-group-text" id="">Details</span>
-		  </div>
-		  <input type="text" id='new_image_desciption' class="form-control" placeholder='Image Description...'>
-		  <input type="file" id='new_image_file'class="form-control" placeholder='Upload image...'>
-		  <div class="input-group-append">
-		    <button class="btn btn-outline-info" id="add_image_button" type="button">Add</button>
-		  </div>
-		</div>
-		<div class="col-12">
-			<ol class='list_group' id='image_list'>
-				{%for image in context.point.p_images.all %}
-				<li class='list-group-item'>
-					<input type='hidden' name='ordered_items_images[]' value='{{image.description}}<sep>{{image.id}}'/>
-					<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
-						<i class="bi bi-trash-fill"></i>
-					</a>
-					<a style='text-decoration:none; color: var(--text-color-1)' >
-						{{image.description}}: {{image.url}}
-					</a>
-				</li >
-				{%endfor%}
-			</ol>
-		</div><br>
+		{%definevar 'image_form' as form_id%}
+		{%definevar 'image_frame' as frame_id%}
+		{%definevar 'image_saving_indicator' as indicator_id%}
+		<form id='{{form_id}}' target='{{frame_id}}'class="px-3 py-3"  action="{%url 'content:_uploadquestionimage'%}" 
+			    method="POST" role="form" enctype="multipart/form-data">
+			{%csrf_token%}
+			<label for="new_image_input">
+				Images: 
+			</label>
+			  <div class="custom-control custom-switch">
+				  <input type="checkbox" class="custom-control-input" id="show_in_q_switch_img" name='image_placement'>
+				  <label class="custom-control-label" for="show_in_q_switch_img">switch to show in question</label>
+			  </div><br>
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+				    <span class="input-group-text" id="">Details</span>
+				</div>
+
+				<input 
+					type='hidden' 
+					name='question_id' 
+					value='{{context.question.id}}'
+				/>
+				<input type="text" id='new_image_desciption' name='image_desciption' class="form-control" placeholder='Image description...'>
+				<input type="file" id='new_image_file' name='image_file' class="form-control" />
+				<div class="input-group-append">
+					<button class="btn btn-outline-info" id="add_image_button" type="submit" >Add</button>
+				</div>
+			</div>
+			<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+		</form>
+		{%include 'content/items/smart_save.html'%}
+		{%include 'content/items/auto_save.html'%}
+		{%definevar 'image_dispform' as form_id%}
+		{%definevar 'image_dispframe' as frame_id%}
+		<form id='{{form_id}}' target='{{frame_id}}'class="px-3 py-3"  action="{%url 'content:_updatequestionimages'%}" 
+			    method="POST" role="form" enctype="multipart/form-data">
+			{%csrf_token%}
+			<input 
+				type='hidden' 
+				name='question_id' 
+				value='{{context.question.id}}'
+			/>
+			<div class="col-12">
+				<ol class='list_group' id='image_list'>
+					{%for image in context.question.q_images.all %}
+						{% if image.in_question_placement %}
+						{% definevar 'Question' as placement%}
+						{%else%}
+						{%definevar 'Answer' as placement%}
+						{%endif%}
+					<li class='list-group-item'>
+						<input type='hidden' name='ordered_items_images[]' value='{{image.description}}<sep>{{image.id}}<sep>{{image.in_question_placement}}'/>
+						<a type='button' class='btn btn-danger deletable_btn mr-1 ml-1'style='font-size:12px;'>
+							<i class="bi bi-trash-fill"></i>
+						</a>
+						<a style='text-decoration:none; color: var(--text-color-1)' >
+							{{placement}}: {{image.description}}: {{image.url}}
+						</a>
+					</li >
+					{%endfor%}
+				</ol>
+			</div><br>
+			<button type= 'submit' class='btn btn-primary mb-2' > Upload/Save </button> <span id="{{indicator_id}}"> all saved</span><br><br>
+			<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+		</form>
       </div>
     </div>
   </div>
 </div>
+{%include 'content/items/smart_save.html'%}
+{%include 'content/items/auto_save.html'%}
 
 <script>
 var image_button = document.getElementById("add_image_button");
@@ -184,34 +245,12 @@ image_button.addEventListener("click", function() {
   var image_list_li = document.createElement("li");
   image_list_li.classList.add("list-group-item");
 
-  var child_input = document.createElement("input");
-  child_input.value = `${placement}<sep>${image_desc.value}`;
-  child_input.type = 'hidden'
-  child_input.name = 'ordered_items_images[]'
-  image_list_li.appendChild(child_input);
-
-  var icon = document.createElement("i");
-  icon.classList.add("bi"); 
-  icon.classList.add("bi-trash-fill"); 
-  var child_del_button = document.createElement("a");
-  child_del_button.type = 'button'
-  child_del_button.style.cssText= 'font-size:12px;';
-  child_del_button.classList.add("btn"); 
-  child_del_button.classList.add("btn-danger"); 
-  child_del_button.classList.add("deletable_btn"); 
-  child_del_button.classList.add("mr-1"); 
-  child_del_button.classList.add("ml-1"); 
-  child_del_button.appendChild(icon);
-  image_list_li.appendChild(child_del_button);
-
   var child_text = document.createElement("a");
   child_text.appendChild(document.createTextNode(placement + ': '));
   child_text.appendChild(document.createTextNode(image_desc.value));
   image_list_li.appendChild(child_text);
 
   image_ul.appendChild(image_list_li);
-  image_desc.value = ''
-  image_file.value = null
   const lis = document.getElementsByClassName('deletable_btn');
   for (const li of lis) {
     li.addEventListener('click', function() {

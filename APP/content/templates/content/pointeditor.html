@@ -17,11 +17,6 @@ Editor
 <script src="{%static 'content/js/editingcontroller.js'%}"></script>
 {%include 'content/mathjax.html'%}
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
-<script src="https://kit.fontawesome.com/7db096792c.js" crossorigin="anonymous"></script>
-
-
 <script>
 var object_id = "{{context.point.id}}";
 var object_type = "Point";
@@ -58,64 +53,23 @@ var object_type = "Point";
 
 
 
+{%definevar 'editor_form' as form_id%}
+{%definevar 'editor_frame' as frame_id%}
+{%definevar 'editor_saving_indicator' as indicator_id%}
 <div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 	Please Use a desktop on chrome to see the editor, or zoom out.
 </div>
-<form id='target' target="transFrame" class="user px-3 py-3 editing_form"  action="{%url 'content:_savepointedit'%}" 
+<form id='{{form_id}}' target="{{frame_id}}" class="user px-3 py-3 editing_form"  action="{%url 'content:_savepointedit'%}" 
 	method="POST" role="form" enctype="multipart/form-data">
     {% csrf_token %}
     <input type='hidden' value='{{context.point.id}}' name='point_id'/>
     {{ context.editormedia}}
     {{ context.editorrender}}
-    <button type='submit' class='btn btn-primary' id='save_content_button'>Save</button> <span id="saving_indicator"> all saved</span>
+    <button type='submit' class='btn btn-primary' id='save_content_button'>Save</button> <span id="{{indicator_id}}"> all saved</span>
 </form>
-<iframe style="" name="transFrame" id="transFrame" hidden='hidden'></iframe>
-
-
-<script>
-$( "#target" ).on( "submit", function( event ) {
-	var s = document.getElementById('saving_indicator');
-	s.innerHTML = 'saving...'
-});
-$('iframe#transFrame').load(function() {
-	const responseValue = this.contentWindow.document.body.innerHTML;
-	// Extract JSON string from the response value
-	const jsonStart = responseValue.indexOf('{');
-	const jsonEnd = responseValue.lastIndexOf('}');
-	const jsonString = responseValue.substring(jsonStart, jsonEnd + 1);
-	// Parse the JSON string into an object
-	const json = JSON.parse(jsonString);
-	// Use the response object as needed
-	setTimeout(function (){
-		var s = document.getElementById('saving_indicator');
-		if (json.error == 0){
-			s.innerHTML = 'all saved'
-		}else{
-			s.innerHTML = 'error :('
-		}
-	}, 500);
-	});
-// Get reference to the form and iframe elements
-const form = document.getElementById('target');
-const iframe = document.getElementById('transFrame');
-
-// Define the interval duration in milliseconds (5 minutes = 5 * 60 * 1000 ms)
-const intervalDuration = 5 * 60 * 1000;
-
-// Set the target of the form to the iframe
-form.target = iframe.name;
-
-// Function to submit the form to the iframe
-function submitFormToIframe() {
-  form.submit();
-}
-
-// Submit the form initially
-submitFormToIframe();
-
-// Set up the interval to submit the form every 5 minutes
-setInterval(submitFormToIframe, intervalDuration);
-</script>
+<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+{%include 'content/items/smart_save.html'%}
+{%include 'content/items/auto_save.html'%}
 
 <div style='padding:10px;border:1px dashed grey;'>
 {{context.point.p_content|ToMarkdown:context.point.id|safe}}

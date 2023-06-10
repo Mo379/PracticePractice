@@ -65,7 +65,9 @@ Bin
 					<span class='chapter_handle mr-2 ml-5'style='font-size:25px;'>
 						+
 					</span>
-					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:noteedit' context.spec.id module chapter%}">Chapter - {{chapter|field_name_to_label}}</a></span>
+					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> 
+						<a href='{%url 'dashboard:spectopic' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name module chapter%}'>Chapter - {{chapter|field_name_to_label}}</a>
+					</span>
 					<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RenameChapterModal_{{module}}_{{chapter}}">
 						Rename
 					</button>

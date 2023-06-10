@@ -209,12 +209,60 @@ def ToMarkdownQuestion(content, question_id):
     # kw items in content
     question = Question.objects.get(pk=question_id)
     description = question.q_content
+    videos = question.q_videos.all()
+    images = question.q_images.all()
     #
     # the description has many numbered elements
+    # the content element is numbered
+    question_video_html = ''
+    for vid in videos:
+        vid_title = vid.title
+        vid_link = vid.url
+        if vid_link:
+            context = {
+                    'vid_unique': TagGenerator(),
+                    'vid_title': vid_title,
+                    'vid_link': vid_link
+                }
+            template = loader.get_template('content/video_popup.html')
+            content = template.render(context)
+            if vid.in_question_placement:
+                question_video_html += content
     content_html = ''
     content_html += description
     content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
-    return content_html
+    return question_video_html + content_html
+
+
+@register.filter(name='ToMarkdownAnswer')
+def ToMarkdownAnswer(content, question_id):
+    # setup output
+    # kw items in content
+    question = Question.objects.get(pk=question_id)
+    description = question.q_answer
+    videos = question.q_videos.all()
+    images = question.q_images.all()
+    #
+    # the description has many numbered elements
+    # the content element is numbered
+    answer_video_html = ''
+    for vid in videos:
+        vid_title = vid.title
+        vid_link = vid.url
+        if vid_link:
+            context = {
+                    'vid_unique': TagGenerator(),
+                    'vid_title': vid_title,
+                    'vid_link': vid_link
+                }
+            template = loader.get_template('content/video_popup.html')
+            content = template.render(context)
+            if vid.in_question_placement == False:
+                answer_video_html += content
+    content_html = ''
+    content_html += description
+    content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
+    return answer_video_html + content_html
 
 @register.filter(name='DifficultyToLabel')
 def DifficultyToLabel(diff):

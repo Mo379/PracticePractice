@@ -166,6 +166,36 @@ urlpatterns = [
         name='_updatecourseinformation'
     ),
     path(
+        'content/_updatepointvideos/',
+        views._updatepointvideos,
+        name='_updatepointvideos'
+    ),
+    path(
+        'content/_updatequestionvideos/',
+        views._updatequestionvideos,
+        name='_updatequestionvideos'
+    ),
+    path(
+        'content/_updatepointimages/',
+        views._updatepointimages,
+        name='_updatepointimages'
+    ),
+    path(
+        'content/_updatequestionimages/',
+        views._updatequestionimages,
+        name='_updatequestionimages'
+    ),
+    path(
+        'content/_uploadquestionimage/',
+        views._uploadquestionimage,
+        name='_uploadquestionimage'
+    ),
+    path(
+        'content/_uploadpointimage/',
+        views._uploadpointimage,
+        name='_uploadpointimage'
+    ),
+    path(
         'content/_removemodule',
         views._removemodule,
         name='_removemodule'

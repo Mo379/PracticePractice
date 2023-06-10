@@ -11,6 +11,7 @@ class Image(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, db_index=True, null=True)
     description = models.TextField(max_length=1000, default="", null=True)
     url = models.TextField(max_length=1000, default="", null=True)
+    in_question_placement = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.url
@@ -21,6 +22,7 @@ class Video(models.Model):
     title = models.CharField(max_length=255, default="", null=True)
     transcript = models.JSONField(default=dict, null=True)
     url = models.TextField(max_length=1000, default="", null=True)
+    in_question_placement = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.title
@@ -42,6 +44,7 @@ class Question(models.Model):
     q_MDcontent = MDTextField(default="", null=True)
     q_MDcontent_ans = MDTextField(default="", null=True)
     q_files_directory = models.CharField(max_length=255, default="", null=True)
+    q_videos = models.ManyToManyField(Video)
     q_images = models.ManyToManyField(Image)
     q_unique_id = models.CharField(
         max_length=11, db_index=True, default="", null=True, unique=True

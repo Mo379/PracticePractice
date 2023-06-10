@@ -1376,6 +1376,186 @@ def _updatecourseinformation(request):
             )
 
 
+def _updatepointvideos(request):
+    if request.method == 'POST':
+        point_id = request.POST['point_id']
+        point = Point.objects.filter(user=request.user, pk=point_id)
+        videos_list = request.POST.getlist('ordered_items_videos[]')
+        if len(point) == 1:
+            try:
+                point[0].p_videos.clear()
+                for vid in videos_list:
+                    title = vid.split('<sep>')[0]
+                    url = vid.split('<sep>')[1]
+                    if Video.objects.filter(user=request.user,url=url).exists():
+                        video = Video.objects.filter(
+                                user=request.user,
+                                url=url,
+                            )[0]
+                    else:
+                        video = Video.objects.create(user=request.user, url=url)
+                    video.title = title
+                    video.save()
+                    point[0].p_videos.add(video)
+                point[0].save()
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            except Exception as e:
+                return JsonResponse({'error': 1, 'message': f'Error {str(e)}'})
+        return JsonResponse({'error': 1, 'message': 'Error b'})
+    return JsonResponse({'error': 1, 'message': 'Error c'})
+
+
+def _updatequestionvideos(request):
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
+        question = Question.objects.filter(user=request.user, pk=question_id)
+        videos_list = request.POST.getlist('ordered_items_videos[]')
+        if len(question) == 1:
+            try:
+                question[0].q_videos.clear()
+                for vid in videos_list:
+                    placement = vid.split('<sep>')[0]
+                    title = vid.split('<sep>')[1]
+                    url = vid.split('<sep>')[2]
+                    if Video.objects.filter(user=request.user,url=url).exists():
+                        video = Video.objects.filter(
+                                user=request.user,
+                                url=url,
+                            )[0]
+                    else:
+                        video = Video.objects.create(user=request.user, url=url)
+                    video.in_question_placement = False if placement.lower() == 'answer' else True
+                    video.title = title
+                    video.save()
+                    question[0].q_videos.add(video)
+                question[0].save()
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            except Exception as e:
+                return JsonResponse({'error': 1, 'message': f'Error {str(e)}'})
+        return JsonResponse({'error': 1, 'message': 'Error b'})
+    return JsonResponse({'error': 1, 'message': 'Error c'})
+
+
+def _updatepointimages(request):
+    if request.method == 'POST':
+        point_id = request.POST['point_id']
+        point = Point.objects.filter(user=request.user, pk=point_id)
+        images_information = request.POST.getlist('ordered_items_images[]')
+        if len(point) == 1:
+            try:
+                point[0].p_images.clear()
+                for image_info in images_information:
+                    parts = image_info.split('<sep>')
+                    image_description = parts[0]
+                    image_id = parts[1]
+                    #
+                    image_obj = Image.objects.get(pk=image_id)
+                    image_obj.description = image_description
+                    image_obj.save()
+                    point[0].p_images.add(image_obj)
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            except Exception as e:
+                return JsonResponse({'error': 1, 'message': 'Error'+str(e)})
+        return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+
+def _updatequestionimages(request):
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
+        question = Question.objects.filter(user=request.user, pk=question_id)
+        images_information = request.POST.getlist('ordered_items_images[]')
+        if len(question) == 1:
+            try:
+                question[0].q_images.clear()
+                active_images = []
+                for image_info in images_information:
+                    parts = image_info.split('<sep>')
+                    image_description = parts[0]
+                    image_id = parts[1]
+                    image_placement = parts[2]
+                    #
+                    image_obj = Image.objects.get(pk=image_id)
+                    image_obj.description = image_description
+                    image_obj.in_question_placement = image_placement
+                    image_obj.save()
+                    question[0].q_images.add(image_obj)
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            except Exception as e:
+                return JsonResponse({'error': 1, 'message': 'Error'+str(e)})
+        return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+
+def _uploadquestionimage(request):
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
+        image_placement = request.POST.get('image_placement')
+        image_description = request.POST.get('image_desciption')
+        upload_image = request.FILES.get("image_file", None)
+        q_placement = True if image_placement else False
+        # image none check
+        if not upload_image:
+            return JsonResponse({
+                'error': 1,
+                'message': "Failed to find an image.",
+            })
+        # image format check
+        file_name_list = upload_image.name.split('.')
+        file_extension = file_name_list.pop(-1)
+        file_name = '.'.join(file_name_list)
+        if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
+            return JsonResponse({
+                'error': 1,
+                'message': "Invalid format detected, image has got to be：%s" % ','.join(
+                    MDEDITOR_CONFIGS['upload_image_formats']),
+            })
+        # save image
+        try:
+            f = BytesIO()
+            for chunk in upload_image.chunks():
+                f.write(chunk)
+            f.seek(0)
+            obj = Question.objects.get(pk=question_id)
+            file_key = f'universal/question_{obj.id}_{file_name}.{file_extension}'
+            image_obj = Image.objects.create(
+                    user=request.user,
+                    description=image_description,
+                    url=file_key,
+                    in_question_placement=q_placement,
+                )
+            obj.q_images.add(image_obj)
+            settings.AWS_S3_C.upload_fileobj(
+                    f,
+                    settings.AWS_BUCKET_NAME,
+                    file_key,
+                    ExtraArgs={'ACL': 'public-read'}
+                )
+        except Exception as e:
+            return JsonResponse({
+                'error': 1,
+                'message': 'Something went wrong cannot upload image.',
+            })
+        else:
+            # image floder check
+            return JsonResponse({'error': 0,
+                                 'message': "File uploaded!",
+                                 })
+def _uploadpointimage(request):
+    if request.method == 'POST':
+        question_id = request.POST['question_id']
+        question = Question.objects.filter(user=request.user, pk=question_id)
+        images_titles = request.POST.getlist('ordered_items_imgtitles[]')
+        images_files = request.FILES.get("ordered_items_imgfiles[]", None)
+        if len(question) == 1:
+            try:
+                for title, file in zip(images_titles, images_files):
+                    pass
+                return JsonResponse({'error': 0, 'message': 'Saved'})
+            except Exception:
+                return JsonResponse({'error': 1, 'message': 'Error'})
+        return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 def _renamespec(request):
     if request.method == 'POST':
         level = request.POST['level']

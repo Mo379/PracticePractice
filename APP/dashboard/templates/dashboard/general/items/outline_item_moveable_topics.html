@@ -17,14 +17,15 @@
 
 
 <div class='d-flex justify-content-center'>
+<a class="mb-2 btn text-left text-primary" href='{%url 'dashboard:specmoduel' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name%}'>
+<i class="bi bi-arrow-bar-left"></i>
+Modules
+</a>
 <a class="mb-2 btn text-left text-primary" href='{%url 'content:noteedit' context.spec.id module chapter%}'>
 <i class="bi bi-book-fill"></i> Notes
 </a>
 <a class="mb-2 btn text-left text-primary" href='{%url 'content:questionedit' context.spec.id module chapter%}'>
 <i class="bi bi-patch-question-fill"></i> Questions
-</a>
-<a class="mb-2 btn text-left text-primary" href='{%url 'dashboard:specmoduel' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name%}'>
-Modules
 </a>
 </div>
 <div class='d-flex justify-content-center'>
