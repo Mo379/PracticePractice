@@ -1,4 +1,5 @@
 import io
+import re
 import random
 import string
 import collections
@@ -141,25 +142,56 @@ def order_live_spec_content(content):
 
 def TranslatePointContent(content):
     out_desc = ''
-    for idd, value in content.items():
-        for idd2, value2 in value.items():
-            if idd2 == 'text':
-                out_desc += value2 + '\n'
-            if idd2 == 'img':
-                info = value2['img_info']
-                name = value2['img_name']
-                out_desc += f"!({info})[{name}]" + '\n'
+    if str(type(content)) == "<class 'dict'>":
+        for idd, value in content.items():
+            for idd2, value2 in value.items():
+                if idd2 == 'text':
+                    out_desc += value2 + '\n'
+                if idd2 == 'img':
+                    info = value2['img_info']
+                    name = value2['img_name']
+                    out_desc += f"!({info})[{name}]" + '\n'
+    else:
+        out_desc = content
     return out_desc
 
 
 def TranslateQuestionContent(content):
-    output = ''
-    return content 
+    out_desc = ''
+    if str(type(content)) == "<class 'dict'>":
+        for idd, value in content.items():
+            for idd2, value2 in value.items():
+                if idd2 == 'text':
+                    out_desc += value2 + '\n'
+                if idd2 == 'img':
+                    info = value2['img_info']
+                    name = value2['img_name']
+                    out_desc += f"!({info})[{name}]" + '\n'
+    else:
+        out_desc = content
+    return out_desc
 
 
 def TranslateQuestionAnswer(content):
-    output = ''
-    return content
+    out_desc = ''
+    if str(type(content)) == "<class 'dict'>":
+        for idd, value in content.items():
+            for idd2, value2 in value.items():
+                if idd2 == 'text':
+                    out_desc += value2 + '\n'
+                if idd2 == 'img':
+                    info = value2['img_info']
+                    name = value2['img_name']
+                    out_desc += f"!({info})[{name}]" + '\n'
+    else:
+        out_desc = content
+    return out_desc
 
 
-
+def is_valid_youtube_embed(link):
+    # Regular expression pattern for embedded YouTube links
+    embed_pattern = r'^https?://(?:www\.)?youtube\.com/embed/[-\w]+$'
+    # Check if the link matches the embedded pattern
+    if re.match(embed_pattern, link):
+        return True
+    return False

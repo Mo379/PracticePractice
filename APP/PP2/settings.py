@@ -272,7 +272,8 @@ MDEDITOR_CONFIGS = {
         'width': '100%',  # Custom edit box width
         'height': 600,  # Custom edit box height
         'toolbar': [
-            "GPT", "|", "title", "video", 'image', 'tex', "|", "bold", "italic", "quote", "uppercase", "lowercase", "|",
+            #"GPT", "|",
+            "video", 'image', 'tex', "|", "bold", "italic", "quote", "uppercase", "lowercase", "|",
             "list-ul", "list-ol", "|",
             "link", "code", "preformatted-text",
             "code-block", "table", "|",

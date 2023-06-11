@@ -17,7 +17,7 @@ $('iframe#{{frame_id}}').load(function() {
 		if (json.error == 0){
 			s.innerHTML = 'all saved'
 		}else{
-			s.innerHTML = 'error :('
+			s.innerHTML = json.message
 		}
 	}, 500);
 });

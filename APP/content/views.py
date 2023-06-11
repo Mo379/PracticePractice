@@ -21,6 +21,7 @@ from content.util.GeneralUtil import (
         TranslatePointContent,
         TranslateQuestionContent,
         TranslateQuestionAnswer,
+        is_valid_youtube_embed,
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
@@ -1387,6 +1388,9 @@ def _updatepointvideos(request):
                 for vid in videos_list:
                     title = vid.split('<sep>')[0]
                     url = vid.split('<sep>')[1]
+                    if is_valid_youtube_embed(url) == False:
+                        return JsonResponse({'error': 1, 'message': f'Invalid link'})
+
                     if Video.objects.filter(user=request.user,url=url).exists():
                         video = Video.objects.filter(
                                 user=request.user,
@@ -1412,6 +1416,10 @@ def _updatequestionvideos(request):
         videos_list = request.POST.getlist('ordered_items_videos[]')
         if len(question) == 1:
             try:
+                for vid in videos_list:
+                    url = vid.split('<sep>')[2]
+                    if is_valid_youtube_embed(url) == False:
+                        return JsonResponse({'error': 1, 'message': f'Invalid link'})
                 question[0].q_videos.clear()
                 for vid in videos_list:
                     placement = vid.split('<sep>')[0]
@@ -1501,6 +1509,7 @@ def _uploadquestionimage(request):
                 'message': "Failed to find an image.",
             })
         # image format check
+        upload_image.name = upload_image.name.replace('_', '')
         file_name_list = upload_image.name.split('.')
         file_extension = file_name_list.pop(-1)
         file_name = '.'.join(file_name_list)
@@ -1543,19 +1552,56 @@ def _uploadquestionimage(request):
                                  })
 def _uploadpointimage(request):
     if request.method == 'POST':
-        question_id = request.POST['question_id']
-        question = Question.objects.filter(user=request.user, pk=question_id)
-        images_titles = request.POST.getlist('ordered_items_imgtitles[]')
-        images_files = request.FILES.get("ordered_items_imgfiles[]", None)
-        if len(question) == 1:
-            try:
-                for title, file in zip(images_titles, images_files):
-                    pass
-                return JsonResponse({'error': 0, 'message': 'Saved'})
-            except Exception:
-                return JsonResponse({'error': 1, 'message': 'Error'})
-        return JsonResponse({'error': 1, 'message': 'Error'})
-    return JsonResponse({'error': 1, 'message': 'Error'})
+        point_id = request.POST['point_id']
+        image_description = request.POST.get('image_desciption')
+        upload_image = request.FILES.get("image_file", None)
+        # image none check
+        if not upload_image:
+            return JsonResponse({
+                'error': 1,
+                'message': "Failed to find an image.",
+            })
+        # image format check
+        upload_image.name = upload_image.name.replace('_', '')
+        file_name_list = upload_image.name.split('.')
+        file_extension = file_name_list.pop(-1)
+        file_name = '.'.join(file_name_list)
+        if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
+            return JsonResponse({
+                'error': 1,
+                'message': "Invalid format detected, image has got to be：%s" % ','.join(
+                    MDEDITOR_CONFIGS['upload_image_formats']),
+            })
+        # save image
+        try:
+            f = BytesIO()
+            for chunk in upload_image.chunks():
+                f.write(chunk)
+            f.seek(0)
+            obj = Point.objects.get(pk=point_id)
+            file_key = f'universal/point_{obj.id}_{file_name}.{file_extension}'
+            image_obj = Image.objects.create(
+                    user=request.user,
+                    description=image_description,
+                    url=file_key,
+                )
+            obj.p_images.add(image_obj)
+            settings.AWS_S3_C.upload_fileobj(
+                    f,
+                    settings.AWS_BUCKET_NAME,
+                    file_key,
+                    ExtraArgs={'ACL': 'public-read'}
+                )
+        except Exception as e:
+            return JsonResponse({
+                'error': 1,
+                'message': 'Something went wrong cannot upload image.',
+            })
+        else:
+            # image floder check
+            return JsonResponse({'error': 0,
+                                 'message': "File uploaded!",
+                                 })
 def _renamespec(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2828,11 +2874,13 @@ def _savepointedit(request):
                 for idd, v in enumerate(description_text):
                     description_content[idd] = {}
                     if '!(' in v:
+                        left_over_text = v.split('!(')[0]
                         first_list = v.split('(')[1].split(')')
                         second_list = first_list[1].split('[')[1].split(']')
                         description_content[idd]['img'] = {}
                         description_content[idd]['img']['img_info'] = first_list[0]
                         description_content[idd]['img']['img_name'] = second_list[0]
+                        left_over_text_after = second_list[1]
                     else:
                         description_content[idd]['text'] = v
                 #
@@ -2853,7 +2901,20 @@ def _savequestionedit(request):
             if form.is_valid():
                 form.save()
                 content = form.cleaned_data['q_MDcontent']
-                question[0].q_content = content
+                description_text = content.split('\n')
+                description_content = {}
+                for idd, v in enumerate(description_text):
+                    description_content[idd] = {}
+                    if '!(' in v:
+                        first_list = v.split('(')[1].split(')')
+                        second_list = first_list[1].split('[')[1].split(']')
+                        description_content[idd]['img'] = {}
+                        description_content[idd]['img']['img_info'] = first_list[0]
+                        description_content[idd]['img']['img_name'] = second_list[0]
+                    else:
+                        description_content[idd]['text'] = v
+                #
+                question[0].q_content = description_content
                 question[0].save()
                 return JsonResponse({'error': 0, 'message': 'Saved'})
             return JsonResponse({'error': 1, 'message': 'Error'})
@@ -2870,9 +2931,21 @@ def _saveansweredit(request):
             if form.is_valid():
                 form.save()
                 content = form.cleaned_data['q_MDcontent_ans']
-                q = question[0]
-                q.q_answer = content
-                q.save()
+                description_text = content.split('\n')
+                description_content = {}
+                for idd, v in enumerate(description_text):
+                    description_content[idd] = {}
+                    if '!(' in v:
+                        first_list = v.split('(')[1].split(')')
+                        second_list = first_list[1].split('[')[1].split(']')
+                        description_content[idd]['img'] = {}
+                        description_content[idd]['img']['img_info'] = first_list[0]
+                        description_content[idd]['img']['img_name'] = second_list[0]
+                    else:
+                        description_content[idd]['text'] = v
+                #
+                question[0].q_answer = description_content
+                question[0].save()
                 return JsonResponse({'error': 0, 'message': 'Saved'})
             return JsonResponse({'error': 1, 'message': 'Error'})
         return JsonResponse({'error': 1, 'message': 'Error'})

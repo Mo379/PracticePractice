@@ -12,7 +12,7 @@
 		<label for="new_video_input">Videos: </label>
 		  <div class="custom-control custom-switch">
 			  <input type="checkbox" class="custom-control-input" id="show_in_q_switch">
-			  <label class="custom-control-label" for="show_in_q_switch">switch to show in question</label>
+			  <label class="custom-control-label" for="show_in_q_switch">switch to show in question (This is for GPT to use, provide a good description too)</label>
 		  </div><br>
 		<div class="input-group mb-3">
 		  <div class="input-group-prepend">
@@ -167,7 +167,7 @@ video_button.addEventListener("click", function() {
 			</label>
 			  <div class="custom-control custom-switch">
 				  <input type="checkbox" class="custom-control-input" id="show_in_q_switch_img" name='image_placement'>
-				  <label class="custom-control-label" for="show_in_q_switch_img">switch to show in question</label>
+				  <label class="custom-control-label" for="show_in_q_switch_img">switch to show in question (This is for GPT)</label>
 			  </div><br>
 			<div class="input-group mb-3">
 				<div class="input-group-prepend">
@@ -213,7 +213,7 @@ video_button.addEventListener("click", function() {
 							<i class="bi bi-trash-fill"></i>
 						</a>
 						<a style='text-decoration:none; color: var(--text-color-1)' >
-							{{placement}}: {{image.description}}: {{image.url}}
+							{{placement}}: {{image.description}} ->  !(Your caption)[{{image.url|get_image_name}}]
 						</a>
 					</li >
 					{%endfor%}

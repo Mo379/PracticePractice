@@ -138,24 +138,37 @@ video_button.addEventListener("click", function() {
         </button>
       </div>
       <div class="modal-body">
-		<label for="new_image_input">Images: </label>
-		  <div class="custom-control custom-switch">
-			  <input type="checkbox" class="custom-control-input" id="show_in_q_switch_img">
-			  <label class="custom-control-label" for="show_in_q_switch_img">switch to show in question</label>
-		  </div><br>
-		<div class="input-group mb-3">
-		  <div class="input-group-prepend">
-		    <span class="input-group-text" id="">Details</span>
-		  </div>
-		  <input type="text" id='new_image_desciption' class="form-control" placeholder='Image Description...'>
-		  <input type="file" id='new_image_file'class="form-control" placeholder='Upload image...'>
-		  <div class="input-group-append">
-		    <button class="btn btn-outline-info" id="add_image_button" type="button" onclick="controller.C_upload_pointimage('{{csrf_token}}', '{{context.point.id}}','new_image_desciption', 'new_image_file')">Add</button>
-		  </div>
-		</div>
 		{%definevar 'image_form' as form_id%}
 		{%definevar 'image_frame' as frame_id%}
 		{%definevar 'image_saving_indicator' as indicator_id%}
+		<form id='{{form_id}}' target='{{frame_id}}'class="px-3 py-3"  action="{%url 'content:_uploadpointimage'%}" 
+			    method="POST" role="form" enctype="multipart/form-data">
+			{%csrf_token%}
+			<label for="new_image_input">
+				Images: 
+			</label>
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+				    <span class="input-group-text" id="">Details</span>
+				</div>
+
+				<input 
+					type='hidden' 
+					name='point_id' 
+					value='{{context.point.id}}'
+				/>
+				<input type="text" id='new_image_desciption' name='image_desciption' class="form-control" placeholder='Image description...'>
+				<input type="file" id='new_image_file' name='image_file' class="form-control" />
+				<div class="input-group-append">
+					<button class="btn btn-outline-info" id="add_image_button" type="submit" >Add</button>
+				</div>
+			</div>
+			<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+		</form>
+		{%include 'content/items/smart_save.html'%}
+		{%include 'content/items/auto_save.html'%}
+		{%definevar 'image_disform' as form_id%}
+		{%definevar 'image_disframe' as frame_id%}
 		<form id='{{form_id}}' target='{{frame_id}}'class="px-3 py-3"  action="{%url 'content:_updatepointimages'%}" 
 			    method="POST" role="form" enctype="multipart/form-data">
 			{%csrf_token%}
@@ -173,14 +186,14 @@ video_button.addEventListener("click", function() {
 							<i class="bi bi-trash-fill"></i>
 						</a>
 						<a style='text-decoration:none; color: var(--text-color-1)' >
-							{{image.description}}: {{image.url}}
+							{{image.description}} ->  !(Your caption)[{{image.url|get_image_name}}]
 						</a>
 					</li>
 					{%endfor%}
 				</ol>
 			</div><br>
 			<button type= 'submit' class='btn btn-primary mb-2' > Upload/Save </button> <span id="{{indicator_id}}"> all saved</span><br><br>
-<iframe style="" name="{{frame_id}}" id="{{frame_id}}"></iframe>
+<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
 		</form>
       </div>
     </div>
@@ -196,17 +209,11 @@ var image_ul = document.getElementById("image_list");
 image_button.addEventListener("click", function() {
   var image_desc = document.getElementById("new_image_desciption");
   var image_file = document.getElementById("new_image_file");
-  var placement_switch = document.getElementById("show_in_q_switch_img");
-  if (placement_switch.checked){
-	placement='Question'
-  }else{
-	placement='Answer'
-  }
   var image_list_li = document.createElement("li");
   image_list_li.classList.add("list-group-item");
 
   var child_input = document.createElement("input");
-  child_input.value = `${placement}<sep>${image_desc.value}`;
+  child_input.value = `${image_desc.value}`;
   child_input.type = 'hidden'
   child_input.name = 'ordered_items_images[]'
   image_list_li.appendChild(child_input);
@@ -226,13 +233,10 @@ image_button.addEventListener("click", function() {
   image_list_li.appendChild(child_del_button);
 
   var child_text = document.createElement("a");
-  child_text.appendChild(document.createTextNode(placement + ': '));
   child_text.appendChild(document.createTextNode(image_desc.value));
   image_list_li.appendChild(child_text);
 
   image_ul.appendChild(image_list_li);
-  image_desc.value = ''
-  image_file.value = null
   const lis = document.getElementsByClassName('deletable_btn');
   for (const li of lis) {
     li.addEventListener('click', function() {

@@ -31,6 +31,9 @@ var object_type = "Question";
 	<div class="card shadow">
 		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 			<h5 class="h4 mb-1 text-primary font-weight-bold">
+				<a href='{%url 'dashboard:spectopic' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name context.question.q_moduel context.question.q_chapter%}'>
+					<i class="bi bi-plus-square"></i>
+				</a>
 				<a href='{%url 'dashboard:spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name question.q_moduel question.q_chapter%}'>
 					{{context.question.q_chapter|field_name_to_label}}: Difficulty {{question.q_difficulty}}, Number {{question.q_number}}
 				</a>

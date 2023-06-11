@@ -79,6 +79,12 @@ def paper_year(value):
     return value
 
 
+@register.filter(name='get_image_name')
+def get_image_name(value):
+    filename = value.split('_')[-1]  # Split the string by '/' and get the last element
+    return filename
+
+
 @register.filter(name='paper_month')
 def paper_month(value):
     value = str(value)
@@ -172,30 +178,33 @@ def ToMarkdown(content, point_id):
 
     # the description has many numbered elements
     content_html = ''
-    for item in range(len(description)):
-        # to keep the order of the description
-        item = str(item)
-        # each item has a single child either text or img
-        # the text element is direct access
-        if 'text' in description[item]:
-            text = str(description[item]['text'])
-            text = text.replace('\\', '\\\\')
-            content_html += text
-        # the image element is made of two parts, info and file name
-        if 'img' in description[item]:
-            img_element = description[item]['img']
-            img_info = img_element['img_info']
-            img_name = img_element['img_name']
-            if img_name and img_info:
-                file_path = os.path.join('universal/', f'point_{point.id}_{img_name}')
-                context = {
-                        'CDN': settings.CDN_URL,
-                        'img_info': img_info,
-                        'file_path': file_path,
-                    }
-                template = loader.get_template('content/image_main.html')
-                content = template.render(context)
-                content_html += content
+    if str(type(description)) == "<class 'dict'>":
+        for item in range(len(description)):
+            # to keep the order of the description
+            item = str(item)
+            # each item has a single child either text or img
+            # the text element is direct access
+            if 'text' in description[item]:
+                text = str(description[item]['text'])
+                text = text.replace('\\', '\\\\')
+                content_html += text
+            # the image element is made of two parts, info and file name
+            if 'img' in description[item]:
+                img_element = description[item]['img']
+                img_info = img_element['img_info']
+                img_name = img_element['img_name']
+                if img_name and img_info:
+                    file_path = os.path.join('universal/', f'point_{point.id}_{img_name}')
+                    context = {
+                            'CDN': settings.CDN_URL,
+                            'img_info': img_info,
+                            'file_path': file_path,
+                        }
+                    template = loader.get_template('content/image_main.html')
+                    content = template.render(context)
+                    content_html += content
+    else:
+        content_html += description
     # convert markdown to html for display
     html = markdown.markdown(html, extensions=['tables','admonition'])
     content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
@@ -229,7 +238,33 @@ def ToMarkdownQuestion(content, question_id):
             if vid.in_question_placement:
                 question_video_html += content
     content_html = ''
-    content_html += description
+    if str(type(description)) == "<class 'dict'>":
+        for item in range(len(description)):
+            # to keep the order of the description
+            item = str(item)
+            # each item has a single child either text or img
+            # the text element is direct access
+            if 'text' in description[item]:
+                text = str(description[item]['text'])
+                text = text.replace('\\', '\\\\')
+                content_html += text
+            # the image element is made of two parts, info and file name
+            if 'img' in description[item]:
+                img_element = description[item]['img']
+                img_info = img_element['img_info']
+                img_name = img_element['img_name']
+                if img_name and img_info:
+                    file_path = os.path.join('universal/', f'question_{question.id}_{img_name}')
+                    context = {
+                            'CDN': settings.CDN_URL,
+                            'img_info': img_info,
+                            'file_path': file_path,
+                        }
+                    template = loader.get_template('content/image_main.html')
+                    content = template.render(context)
+                    content_html += content
+    else:
+        content_html += description
     content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
     return question_video_html + content_html
 
@@ -260,7 +295,33 @@ def ToMarkdownAnswer(content, question_id):
             if vid.in_question_placement == False:
                 answer_video_html += content
     content_html = ''
-    content_html += description
+    if str(type(description)) == "<class 'dict'>":
+        for item in range(len(description)):
+            # to keep the order of the description
+            item = str(item)
+            # each item has a single child either text or img
+            # the text element is direct access
+            if 'text' in description[item]:
+                text = str(description[item]['text'])
+                text = text.replace('\\', '\\\\')
+                content_html += text
+            # the image element is made of two parts, info and file name
+            if 'img' in description[item]:
+                img_element = description[item]['img']
+                img_info = img_element['img_info']
+                img_name = img_element['img_name']
+                if img_name and img_info:
+                    file_path = os.path.join('universal/', f'question_{question.id}_{img_name}')
+                    context = {
+                            'CDN': settings.CDN_URL,
+                            'img_info': img_info,
+                            'file_path': file_path,
+                        }
+                    template = loader.get_template('content/image_main.html')
+                    content = template.render(context)
+                    content_html += content
+    else:
+        content_html += description
     content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
     return answer_video_html + content_html
 

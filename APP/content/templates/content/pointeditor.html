@@ -37,6 +37,9 @@ var object_type = "Point";
 	<div class="card shadow">
 		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 			<h5 class="h4 mb-1 text-primary font-weight-bold">
+				<a href='{%url 'dashboard:spectopic' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name context.point.p_moduel context.point.p_chapter%}'>
+					<i class="bi bi-plus-square"></i>
+				</a>
 				<a href='
 {%if 'contribution' in context.url%}
 {%url 'content:contribution_noteedit' context.task.id %}#point_{{context.point.id}}
