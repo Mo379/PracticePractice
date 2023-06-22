@@ -13,6 +13,11 @@ urlpatterns = [
         name='_load_lesson'
     ),
     path(
+        '_next_point',
+        views._next_point,
+        name='_next_point'
+    ),
+    path(
         '_newgenerationjob',
         views._newgenerationjob,
         name='_newgenerationjob'

@@ -9,7 +9,7 @@ from braces.views import (
         SuperuserRequiredMixin,
     )
 from django.views import generic
-from content.models import Course, CourseSubscription, Specification
+from content.models import Course, CourseSubscription, CourseVersion, Specification, Point
 from user.models import (
         User
     )
@@ -25,7 +25,8 @@ from user.forms import (
         AppearanceChoiceForm,
     )
 from content.util.GeneralUtil import (
-        order_live_spec_content
+        order_live_spec_content,
+        TagGenerator
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
@@ -53,8 +54,12 @@ class AIView(
         appearancechoiceform = AppearanceChoiceForm(instance=user)
         # Get course modules and chapters
         course = Course.objects.get(pk=course_id)
-        spec = course.specification
-        content = order_live_spec_content(spec.spec_content)[module]['content'][chapter]['content']
+        spec_content = CourseVersion.objects.filter(
+                    course=course
+                ).order_by('-version_number')[0].version_content
+        #
+        ordered_content = order_live_spec_content(spec_content)
+        content = ordered_content[module]['content'][chapter]['content']
         topics = list(content.keys())
         active_lesson, _ = Lesson.objects.get_or_create(
                 user=user,
@@ -62,6 +67,11 @@ class AIView(
                 moduel=module,
                 chapter=chapter,
             )
+        #
+        list_chapters = list(ordered_content[module]['content'].keys())
+        chapter_index = list_chapters.index(chapter)
+        previous_chapter = list_chapters[chapter_index-1] if chapter_index -1 >= 0 else None
+        next_chapter = list_chapters[chapter_index+1] if chapter_index +1 < len(list_chapters) else None
 
         lesson_parts = []
         for topic in topics:
@@ -69,6 +79,7 @@ class AIView(
                     user=user,
                     lesson=active_lesson,
                     topic=topic,
+                    part_content=content[topic]
                 )
             lesson_parts.append(part)
 
@@ -78,11 +89,24 @@ class AIView(
                 course=course
             )
         #
+        if len(lesson_parts[0].part_chat.keys()) == 0:
+            first_point = list(lesson_parts[0].part_content['content'].keys())[0]
+            lesson_parts[0].part_chat = {
+                    "0": {
+                            'system': first_point, 'title': lesson_parts[0].topic
+                        }
+                }
+            lesson_parts[0].save()
+        #
         context['coursesubscription'] = course_subscription if len(course_subscription) == 1 else False
         context['form_appearancechoice'] = appearancechoiceform
         context['course'] = course
         context['lesson'] = active_lesson
         context['lesson_parts'] = lesson_parts
+        #
+        context['module'] = module
+        context['previous_chapter'] = previous_chapter
+        context['next_chapter'] = next_chapter
         return context
 
 
@@ -109,6 +133,49 @@ def _load_lesson(request):
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
+
+def _next_point(request):
+    if request.method == 'POST':
+        lesson_part_id = request.POST['part_id']
+        point_id = request.POST['point_id']
+        #
+        lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+        part_content = lesson_part.part_content['content']
+        previous_point_pos = int(part_content[point_id]['position'])
+        print(part_content)
+        if previous_point_pos > len(part_content):
+            next_point = None
+        else:
+            for point in part_content:
+                if int(part_content[point]['position']) == previous_point_pos + 1:
+                    next_point = point
+        #
+        if next_point is None:
+            return JsonResponse({'error': 1, 'message': 'Point does not exits!'})
+        else:
+            try:
+                point_obj = Point.objects.get(p_unique_id=next_point)
+                new_pos = len(lesson_part.part_chat.keys())
+                lesson_part.part_chat[f"str({new_pos})"] = {
+                                'system': next_point
+                            }
+                lesson_part.save()
+            except Exception:
+                return JsonResponse({'error': 1, 'message': 'Point does not exits!'})
+            else:
+                from management.templatetags.general import ToMarkdownManual
+                content_html, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
+                response = {
+                        'error': 0,
+                        'message': content_html,
+                        'videos_html': video_html,
+                        'script_html': script_html,
+                        'videos_tags': video_tags,
+                        'new_tag': TagGenerator(),
+                        'new_point_id': next_point
+                    }
+                return JsonResponse(response)
+    return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
 def _newgenerationjob(request):
     if request.method == 'POST':

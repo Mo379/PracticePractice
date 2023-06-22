@@ -66,6 +66,7 @@ class util{
 		}
 		return [output, live, element, text]
 	}
+
 	write(elemID, text, delay_lower=50, delay_higher=90, char_lower=6, char_higher=10) {
 	  let element = document.getElementById(elemID);
 	  let i = 0;
@@ -78,12 +79,12 @@ class util{
 	      delay += 50;
 	    }
 	    if (i < text.length) {
-	      element.innerHTML += text.slice(i, i + charCount);
+	      element.innerHTML = text.slice(0, i + charCount);
 	      i += charCount;
+	      MathJax.typeset()
 	      setTimeout(type, delay);
 	    }
 	  }
-
 	  type();
 	}
 }

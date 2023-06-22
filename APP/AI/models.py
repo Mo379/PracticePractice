@@ -116,9 +116,7 @@ class Lesson(models.Model):
     )
     moduel = models.CharField(max_length=150, default="", null=True)
     chapter = models.CharField(max_length=150, default="", null=True)
-    lesson_introduction = models.TextField(default='', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    terminated_at = models.DateTimeField(null=True, default=None, blank=True)
 
     def __str__(self):
         return self.user.username + self.course.course_name + self.moduel

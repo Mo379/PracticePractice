@@ -12,6 +12,11 @@ from PP2.utils import h_encode
 register = template.Library()
 
 
+@register.filter(name='TagGenerator')
+def Generator(x):
+    """Returns the contract for the contribution"""
+    return TagGenerator()
+
 @register.filter(name='getcontract')
 def getcontract(collaboration):
     """Returns the contract for the contribution"""
@@ -45,7 +50,11 @@ def split(value, key):
 @register.filter(name='index')
 def index(indexable, i):
     """ Return ith index of list"""
-    return indexable[i]
+    try:
+        output = indexable[i]
+        return output
+    except Exception:
+        return False
 
 
 @register.filter(name='list_to_string')
@@ -209,6 +218,75 @@ def ToMarkdown(content, point_id):
     html = markdown.markdown(html, extensions=['tables','admonition'])
     content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
     return html + video_html + content_html
+
+
+
+def ToMarkdownManual(content, point_id):
+    # setup output
+    html = ""
+    # kw items in content
+    point = Point.objects.get(pk=point_id)
+    description = point.p_content
+    point_title = point.p_title.replace('_', ' ').title()
+    videos = point.p_videos.all()
+    images = point.p_images.all()
+    #
+    html += markdown.markdown("### " + point_title)
+    # the content element is numbered
+    video_html = ''
+    script_html = ''
+    video_tags = []
+    for vid in videos:
+        vid_title = vid.title
+        vid_link = vid.url
+        if vid_link:
+            video_tag =  TagGenerator()
+            video_tags.append(video_tag)
+            context = {
+                    'vid_unique': video_tag,
+                    'vid_title': vid_title,
+                    'vid_link': vid_link
+                }
+            template = loader.get_template('content/video_popup_manual.html')
+            script_template = loader.get_template('content/video_popup_manual_script.html')
+            content = template.render(context)
+            script_content = script_template.render(context)
+            video_html += content
+            script_html += script_content
+
+    # the description has many numbered elements
+    content_html = ''
+    if str(type(description)) == "<class 'dict'>":
+        for item in range(len(description)):
+            # to keep the order of the description
+            item = str(item)
+            # each item has a single child either text or img
+            # the text element is direct access
+            if 'text' in description[item]:
+                text = str(description[item]['text'])
+                text = text.replace('\\', '\\\\')
+                content_html += text
+            # the image element is made of two parts, info and file name
+            if 'img' in description[item]:
+                img_element = description[item]['img']
+                img_info = img_element['img_info']
+                img_name = img_element['img_name']
+                if img_name and img_info:
+                    file_path = os.path.join('universal/', f'point_{point.id}_{img_name}')
+                    context = {
+                            'CDN': settings.CDN_URL,
+                            'img_info': img_info,
+                            'file_path': file_path,
+                        }
+                    template = loader.get_template('content/image_main.html')
+                    content = template.render(context)
+                    content_html += content
+    else:
+        content_html += description
+    # convert markdown to html for display
+    html = markdown.markdown(html, extensions=['tables','admonition'])
+    content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
+    return html + content_html, video_html, script_html, video_tags
 
 
 

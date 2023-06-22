@@ -1,160 +1,124 @@
 {%load static %}
 {%load general%}
+<script src="{%static 'AI/js/controller.js'%}"></script>
+{%include 'content/mathjax.html'%}
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+<script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
 
 <div class='AI_main_window'>
 	<div class='AI_window_chat' id='AI_window_chat_id'>
 	<div style='height: 0px;' id='main_chat_container'>
-		<div id='main_chat_scroll_container'>
-			<div class='AI_chat_text AI_text_ai'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-robot"></i>
-					</div>
-					<div class='AI_text_text' id='AI_text_introduction'>
-						<span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
-							 
-						</span>
-					</div>
-					<script>
-					window.onload = function() {
-					  util.write('AI_text_introduction', '');
-					};
-					</script>
-				</div>
-			</div>
-			<div class='AI_chat_text AI_text_user'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary'>
-								Cancel
-							</button>
+		{%for part in context.lesson_parts%}
+			<h4 class='mt-3 mb-3' style='color: var(--text-color-1); padding: 5px;text-align:center;'>
+			{{part.topic|field_name_to_label}}
+			</h4>
+			{%for chat in part.part_chat%}
+				{%if part.part_chat|index:chat|index:'system'%}
+				{% definevar 'random_tag'|TagGenerator as random_id%}
+				{% definevar part.part_chat|index:chat|index:'system' as point_unique%}
+				{% definevar part.part_chat|index:chat|index:'system'|p_unique_to_id as point_id%}
+				<div id='main_chat_scroll_container'>
+					<div class='AI_chat_text AI_text_ai' id='text_book_{{random_id}}'>
+						<div class='AI_text_wrap'>
+							<div class='AI_text_image'>
+								<i class="bi bi-book"></i>
+							</div>
+							<div class='AI_text_text'>
+								<div class='mb-3' id='AI_text_introduction'>
+									{{point_id|ToMarkdown:point_id|safe}}
+								</div>
+								<div class='AI_window_typing'>
+									<div style='margin:auto;'>
+									<button class='btn btn-primary' onclick='Controller.C_ask_from_book("text_book_{{random_id}}")'>
+										Ask
+									</button>
+									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{part.id}}","{{point_unique}}")'>
+										Next point
+									</button>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-			<div class='AI_chat_text AI_text_user'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary'>
-								Cancel
-							</button>
+					<!---
+					<div class='AI_chat_text AI_text_user'>
+						<div class='AI_text_wrap'>
+							<div class='AI_text_image'>
+								<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+							</div>
+							<div class='AI_text_text'>
+								<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
+								<div class='AI_window_typing'>
+									<div style='margin:auto;'>
+									<button class='btn btn-success'>
+										Save & Submit
+									</button>
+									<button class='btn btn-secondary'>
+										Cancel
+									</button>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-			<div class='AI_chat_text AI_text_user'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary'>
-								Cancel
-							</button>
+					<div class='AI_chat_text AI_text_user'>
+						<div class='AI_text_wrap'>
+							<div class='AI_text_image'>
+								<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+							</div>
+							<div class='AI_text_text'>
+								<div class='AI_window_typing'>
+									<div style='margin:auto;'>
+									<button class='btn btn-primary'>
+										Ask
+									</button>
+									<button class='btn btn-success'>
+										Next point
+									</button>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
+					-->
 				</div>
-			</div>
-			<div class='AI_chat_text AI_text_user'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary'>
-								Cancel
-							</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class='AI_chat_text AI_text_user'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary'>
-								Cancel
-							</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class='AI_chat_text AI_text_user'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary'>
-								Cancel
-							</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+				{%endif%}
+			{%endfor%}
+		{%endfor%}
 	</div>
 	</div>
 	<div style='margin: auto;'>
-		<button class='sidebar_button lesson_button mt-2' id='previous_topic_button' style='width:auto; padding:10px;display:inline-block;'>
-			<i class="bi bi-arrows-fullscreen mr-2"></i> Previous topic
-		</button>
+		<a 
+			class='sidebar_button lesson_button mt-2'
+			id='previous_topic_button'
+			style='width:auto; padding:10px;display:inline-block;'
+	     {%if context.previous_chapter%}
+	     		href="{%url 'AI:index' context.course.id context.module context.previous_chapter%}"
+		>
+			<i class="bi bi-arrow-bar-left"></i> Previous Chapter
+	    {%else%}
+		>
+			End
+	    {%endif%}
+		</a>
 		<button class='sidebar_button lesson_button mt-2 ml-3 mr-3' id='toggle-sidebar-btn' style='width:auto; padding:10px;display:inline-block;'>
 			<i class="bi bi-arrows-fullscreen mr-2"></i> Show menu	
 		</button>
-		<button class='sidebar_button lesson_button mt-2' id='next_topic_button' style='width:auto; padding:10px;display:inline-block;'>
-			<i class="bi bi-arrows-fullscreen mr-2"></i> Next topic
-		</button>
+		<a 
+			class='sidebar_button lesson_button mt-2'
+			id='next_topic_button'
+			style='width:auto; padding:10px;display:inline-block;'
+	     {%if context.next_chapter%}
+	     		href="{%url 'AI:index' context.course.id context.module context.next_chapter%}"
+		>
+			Next Chapter <i class="bi bi-arrow-bar-right"></i>
+	    {%else%}
+		>
+			End
+	    {%endif%}
+		</a >
 	</div>
 </div>
 <script>
