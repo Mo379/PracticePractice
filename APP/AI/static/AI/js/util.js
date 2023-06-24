@@ -79,7 +79,9 @@ class util{
 	      delay += 50;
 	    }
 	    if (i < text.length) {
-	      element.innerHTML = text.slice(0, i + charCount);
+	      element.innerHTML = text.slice(0, i + charCount) + `
+	      <span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
+	      </span>`;
 	      i += charCount;
 	      MathJax.typeset()
 	      setTimeout(type, delay);

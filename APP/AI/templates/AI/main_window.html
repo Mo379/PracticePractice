@@ -11,9 +11,9 @@
 	<div class='AI_window_chat' id='AI_window_chat_id'>
 	<div style='height: 0px;' id='main_chat_container'>
 		{%for part in context.lesson_parts%}
-			<h4 class='mt-3 mb-3' style='color: var(--text-color-1); padding: 5px;text-align:center;'>
+			<h1 id='topic_id_{{part.topic}}'class='mt-3 mb-3' style='color: var(--text-color-1); padding: 5px;text-align:center;'>
 			{{part.topic|field_name_to_label}}
-			</h4>
+			</h1>
 			{%for chat in part.part_chat%}
 				{%if part.part_chat|index:chat|index:'system'%}
 				{% definevar 'random_tag'|TagGenerator as random_id%}
@@ -34,9 +34,13 @@
 									<button class='btn btn-primary' onclick='Controller.C_ask_from_book("text_book_{{random_id}}")'>
 										Ask
 									</button>
-									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{part.id}}","{{point_unique}}")'>
+									{% with part.topic|add:'-'|add:chat as item_name%}
+									{%if context.last_item == item_name %}
+									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}","{{point_unique}}")'>
 										Next point
 									</button>
+									{%endif%}
+									{% endwith %}
 									</div>
 								</div>
 							</div>

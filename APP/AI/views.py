@@ -54,9 +54,10 @@ class AIView(
         appearancechoiceform = AppearanceChoiceForm(instance=user)
         # Get course modules and chapters
         course = Course.objects.get(pk=course_id)
-        spec_content = CourseVersion.objects.filter(
+        latest_course_version = CourseVersion.objects.filter(
                     course=course
-                ).order_by('-version_number')[0].version_content
+                ).order_by('-version_number')[0]
+        spec_content = latest_course_version.version_content
         #
         ordered_content = order_live_spec_content(spec_content)
         content = ordered_content[module]['content'][chapter]['content']
@@ -72,8 +73,10 @@ class AIView(
         chapter_index = list_chapters.index(chapter)
         previous_chapter = list_chapters[chapter_index-1] if chapter_index -1 >= 0 else None
         next_chapter = list_chapters[chapter_index+1] if chapter_index +1 < len(list_chapters) else None
-
+        #
         lesson_parts = []
+        last_item = ''
+        breaker = False
         for topic in topics:
             part, created = Lesson_part.objects.get_or_create(
                     user=user,
@@ -81,6 +84,11 @@ class AIView(
                     topic=topic,
                     part_content=content[topic]
                 )
+            if len(part.part_chat) == 0 and breaker == False:
+                breaker = True
+                last_part = lesson_parts[-1] if len(lesson_parts) > 0 else part
+                last_item_index = len(last_part.part_chat) -1 if len(lesson_parts) > 0 else 0
+                last_item = f'{last_part.topic}-{last_item_index}'
             lesson_parts.append(part)
 
         #
@@ -101,8 +109,10 @@ class AIView(
         context['coursesubscription'] = course_subscription if len(course_subscription) == 1 else False
         context['form_appearancechoice'] = appearancechoiceform
         context['course'] = course
+        context['course_version'] = latest_course_version
         context['lesson'] = active_lesson
         context['lesson_parts'] = lesson_parts
+        context['last_item'] = last_item
         #
         context['module'] = module
         context['previous_chapter'] = previous_chapter
@@ -136,15 +146,37 @@ def _load_lesson(request):
 
 def _next_point(request):
     if request.method == 'POST':
+        course_version_id = request.POST['course_version_id']
         lesson_part_id = request.POST['part_id']
         point_id = request.POST['point_id']
         #
         lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
         part_content = lesson_part.part_content['content']
         previous_point_pos = int(part_content[point_id]['position'])
-        print(part_content)
-        if previous_point_pos > len(part_content):
+        #
+        latest_course_version = CourseVersion.objects.get(
+                    id=course_version_id
+                )
+        spec_content = latest_course_version.version_content
+        #
+        ordered_content = order_live_spec_content(spec_content)
+        content = ordered_content[lesson_part.lesson.moduel]['content'][lesson_part.lesson.chapter]['content']
+        topics = list(content.keys())
+        #
+        next_point = None
+        new_topic = None
+        if previous_point_pos >= len(part_content)-1:
             next_point = None
+            if topics.index(lesson_part.topic) < len(topics)-1:
+                lesson_part = Lesson_part.objects.get(
+                        user=request.user,
+                        lesson=lesson_part.lesson,
+                        topic=topics[topics.index(lesson_part.topic)+1]
+                        )
+                for point in lesson_part.part_content['content']:
+                    if int(lesson_part.part_content['content'][point]['position']) == 0:
+                        next_point = point
+                        new_topic = lesson_part.topic
         else:
             for point in part_content:
                 if int(part_content[point]['position']) == previous_point_pos + 1:
@@ -156,9 +188,9 @@ def _next_point(request):
             try:
                 point_obj = Point.objects.get(p_unique_id=next_point)
                 new_pos = len(lesson_part.part_chat.keys())
-                lesson_part.part_chat[f"str({new_pos})"] = {
-                                'system': next_point
-                            }
+                lesson_part.part_chat[f"{str(new_pos)}"] = {
+                        'system': next_point
+                    }
                 lesson_part.save()
             except Exception:
                 return JsonResponse({'error': 1, 'message': 'Point does not exits!'})
@@ -172,7 +204,9 @@ def _next_point(request):
                         'script_html': script_html,
                         'videos_tags': video_tags,
                         'new_tag': TagGenerator(),
-                        'new_point_id': next_point
+                        'new_point_id': next_point,
+                        'relevant_part_id': lesson_part.id,
+                        'new_topic': new_topic,
                     }
                 return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})

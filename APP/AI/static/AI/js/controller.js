@@ -25,12 +25,12 @@ class view {
 //coommunicates with server and gets a result to be displayed as a view
 class model extends xhttp {
 	//
-	M_next_point(url, csrf_token, part_id, point_id) {
+	M_next_point(url, csrf_token, course_version_id, part_id, point_id) {
 		//opening the port using xhttp
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = 'part_id=' + part_id + '&point_id=' + point_id;
+		var query = 'course_version_id='+ course_version_id +'&part_id=' + part_id + '&point_id=' + point_id;
 		//sending query to model
 		this.xhttp.send(query);
 	}
@@ -76,12 +76,12 @@ class controller extends model {
 		element.insertAdjacentElement("afterend", newElement);
 		//listen for the repsponse from the server script
 	}
-	C_next_point(url, csrf_token, self_element_id, parent_element_id, part_id,point_id){
+	C_next_point(url, csrf_token, self_element_id, parent_element_id, course_version_id, part_id,point_id){
 		const utility = this.util
 
 		const next_point_button = document.getElementById(self_element_id);
 		next_point_button.remove()
-		this.M_next_point(url, csrf_token, part_id, point_id);
+		this.M_next_point(url, csrf_token, course_version_id, part_id, point_id);
 		this.xhttp.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
 				var txt = this.responseText;
@@ -93,7 +93,9 @@ class controller extends model {
 						var script_text = json.script_html
 						var tags_videos = json.videos_tags
 						var new_tag = json.new_tag
+						var relevant_part_id = json.relevant_part_id
 						var new_point_id = json.new_point_id
+						var new_topic = json.new_topic
 						// 
 						const scriptElement = document.createElement('script');
 						scriptElement.textContent = script_text;
@@ -109,7 +111,11 @@ class controller extends model {
 							`
 							videos_buttons += button_html
 						}
-						const element = document.getElementById(parent_element_id);
+						if (new_topic){
+							var element = document.getElementById(`topic_id_${new_topic}`);
+						}else{
+							var element = document.getElementById(parent_element_id);
+						}
 						// Create a new element
 						const newElement = document.createElement("div");
 						newElement.innerHTML = `
@@ -141,7 +147,7 @@ class controller extends model {
 						<button
 							id='next_point_button_${new_tag}'
 							class='btn btn-success'
-							onclick='Controller.C_next_point("${url}", "${csrf_token}", "next_point_button_${new_tag}", "text_book_${new_tag}", "${part_id}","${new_point_id}")'
+							onclick='Controller.C_next_point("${url}", "${csrf_token}", "next_point_button_${new_tag}", "text_book_${new_tag}", "${course_version_id}","${relevant_part_id}","${new_point_id}")'
 						>
 							Next point
 						</button>
