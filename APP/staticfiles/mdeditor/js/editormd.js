@@ -2850,7 +2850,7 @@
             var cursor    = cm.getCursor();
             var selection = cm.getSelection();
 
-            cm.replaceSelection("$$" + selection + "$$");
+            cm.replaceSelection("$$\n" + selection + "\n$$");
 
             if(selection === "") {
                 cm.setCursor(cursor.line, cursor.ch + 2);

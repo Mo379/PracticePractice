@@ -1,3 +1,40 @@
+.list-group-item{
+	background: var(--main-bg-color);
+}
+
+
+
+/* rating item*/
+.rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+}
+
+.rating > input{ display:none;}
+
+.rating > label {
+  position: relative;
+    width: 1em;
+    font-size: 3vw;
+    color: #FFD600;
+    cursor: pointer;
+}
+.rating > label::before{ 
+  content: "\2605";
+  position: absolute;
+  opacity: 0;
+}
+.rating > label:hover:before,
+.rating > label:hover ~ label:before {
+  opacity: 1 !important;
+}
+
+.rating > input:checked ~ label:before{
+  opacity:1;
+}
+.rating:hover > input:checked ~ label:before{ opacity: 0.4; }
+
 /* for the main app index page */
 .landing_wrapper{
 	display:grid;
@@ -15,8 +52,8 @@
 	color: black;
 }
 .content_main .container{
-	width: 100%;
-	max-width: 100%;
+	width: 90%;
+	max-width: 90%;
 	padding: 5px;
 }
 .spec_organiser_container{
@@ -119,12 +156,8 @@
 }
 #first_row{
 	display:grid;
-	grid-template-columns: 1fr 3fr;
-	grid-template-areas: 'left right';
-}
-#custompractice{
-	max-width: 100%;
-	grid-area: left;
+	grid-template-columns: 3fr;
+	grid-template-areas: 'right';
 }
 #summarystatistics{
 	max-width: 100%;
@@ -394,4 +427,10 @@
 /* For the collaborator card */
 .spec_collaboration_span:hover{
 	cursor:pointer;
+}
+
+
+
+.pricing-table{
+	color:var(--text-color-1);
 }

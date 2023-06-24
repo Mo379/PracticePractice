@@ -1,7 +1,6 @@
 body{
 	margin: 0px;
-	background: grey;
-	background:red;
+	background: var(--third-bg-color);
 }
 .AI_main_container{
 	border-top: 1px solid var(--second-bg-color);
@@ -10,7 +9,9 @@ body{
 	grid-template-areas: "sidebar window";
 	min-height: 100vh;
 	max-height: 100vh;
+	height: 100vh;
 	padding: 0px;
+	position: relative;
 }	
 .AI_side_bar{
 	display:grid;
@@ -27,16 +28,17 @@ body{
 	overflow-y: scroll;
 }
 .AI_side_lessons{
-	height: 100;
+	height: 0px;
 }
 .AI_side_options{
 	grid-area; options;
+	margin-top: 10px;
 }
 .AI_main_window{
 	display:grid;
 	grid-area: window;
 	background: var(--third-bg-color);
-	grid-template-rows: 8fr 2fr;
+	grid-template-rows: 8fr auto;
 	grid-template-areas:'chat' 'typing';
 }
 .AI_window_chat{
@@ -45,21 +47,47 @@ body{
 	overflow-y:scroll;
 	position: relative;
 }
+#main_chat_container{
+}
+#main_chat_scroll_container{}
+#introduction_container{
+	position: absolute;
+	top: 50%;
+	right: 50%;
+	color: var(--text-color-1);
+	text-align: center;
+}
 .AI_chat_text{
 	min-height: 50px;
 	height: auto;
 	width: 100%;
 	background: var(--second-bg-color);
 	color: var(--text-color-1);
-	padding: 10px;
+	padding: 30px;
+}
+.AI_user_text_area{
+	color: var(--text-color-1);
+	height: 150px !important;
+	width: 100%;
+}
+#loading_spinner{
+	position: absolute !important;
+	padding:10px;
+	background: var(--main-bg-color);
+	color: var(--text-color-1);
+	border: 1px solid var(--second-bg-color);
+	border-radius: 6px;
+	top: 50% !important;
+	right: 50% !important;
+	display: block;
+	color: var(--text-color-1);
+	text-align: center;
 }
 .AI_window_typing{
 	grid-area: typing;
-	background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,1.0));
-	border-top: 1px solid var(--second-bg-color);
 }
 .AI_text_wrap{
-	width: 95%;
+	width: 80%;
 	height:auto;
 	margin:auto;
 	display:grid;
@@ -71,6 +99,16 @@ body{
 	margin-right: 15px;
 	display: inline-block;
 }
+.blink {
+	animation: blink 3s infinite;
+}
+
+@keyframes blink {
+	50% {
+		opacity: 0;
+	}
+}
+
 .AI_text_text{
 	grid-area: text;
 	display: inline-block;
@@ -108,8 +146,10 @@ body{
 	top: 0px;
 	background: var(--main-bg-color);
 	padding: 5px;
+	margin-bottom: 10px;
 }
 .lesson_button{
+	padding: 10px;
 	margin-bottom: 3px;
 	border:none;
 	background: var(--second-bg-color);
@@ -117,6 +157,17 @@ body{
 }
 .lesson_button:hover{
 	background: var(--main-bg-color);
+	cursor: pointer;
+}
+.chapter_button{
+	margin-bottom: 3px;
+	border:1px solid var(--text-color-3);
+	background: var(--third-bg-color);
+	text-align: left;
+}
+.chapter_button:hover{
+	background: var(--main-bg-color);
+	border: 1px solid var(--text-color-1);
 	cursor: pointer;
 }
 .sidebar-divider{
@@ -127,8 +178,13 @@ body{
 }
 
 #message_field{
-	width: 50%;
+	width: 80%;
 	margin:auto;
+	border: 1px solid white;
+	border-radius: 5px;
+}
+#typing_text_area{
+	height: 25px;
 }
 .AI_window_typing .lesson_button{
 	width: auto;

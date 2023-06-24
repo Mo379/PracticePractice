@@ -1,0 +1,56 @@
+body{
+	background: var(--third-bg-color);
+}
+.AI_main_container{
+	border-top: 1px solid var(--second-bg-color);
+}	
+.AI_side_bar{
+	background: var(--third-bg-color);
+	border-right: 1px solid var(--second-bg-color);
+}
+.AI_main_window{
+	background: var(--third-bg-color);
+}
+.AI_chat_text{
+	background: var(--second-bg-color);
+	color: var(--text-color-1);
+}
+.AI_window_typing{
+	background: var(--first-bg-color);
+	border-top: 2px solid var(--text-color-1);
+}
+.AI_text_user{
+	background: var(--third-bg-color);
+}
+.AI_text_ai{
+	background: var(--main-bg-color);
+}
+.sidebar_button{
+	background: var(--main-bg-color);
+	color: var(--text-color-1);
+	border: 1px solid var(--second-bg-color);
+}
+.sidebar_button:hover{
+	background: var(--second-bg-color);
+	color: var(--text-color-2);
+}
+.new_lesson_button{
+	background: var(--main-bg-color);
+}
+.lesson_button{
+	background: var(--second-bg-color);
+}
+.lesson_button:hover{
+	background: var(--main-bg-color);
+}
+.chapter_button{
+	border:1px solid var(--text-color-3);
+	background: var(--third-bg-color);
+}
+.chapter_button:hover{
+	background: var(--main-bg-color);
+	border: 1px solid var(--text-color-1);
+}
+.sidebar-divider{
+	background: var(--text-color-1);
+}
