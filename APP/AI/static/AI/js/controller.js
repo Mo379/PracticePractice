@@ -45,38 +45,44 @@ class controller extends model {
 		this.view = view;
 	}
 	//add new spec moduel
-	C_ask_from_book(book_item_id) {
+	C_ask_from_book(book_item_id, random_id, point_id) {
 		const element = document.getElementById(book_item_id);
 		// Create a new element
 		const newElement = document.createElement("div");
-		newElement.innerHTML = `
-			<div class='AI_chat_text AI_text_user' id='ask_id'>
-				<div class='AI_text_wrap'>
-					<div class='AI_text_image'>
-						<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-					</div>
-					<div class='AI_text_text'>
-						<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">type here...</textarea>
-						<div class='AI_window_typing'>
-							<div style='margin:auto;'>
-							<button class='btn btn-success'>
-								Save & Submit
-							</button>
-							<button class='btn btn-secondary' onclick='Controller.C_cancel_ask("ask_id")'>
-								Cancel
-							</button>
+		if ($(`#ask_${random_id}`).length == 0){
+			newElement.innerHTML = `
+				<div class='AI_chat_text AI_text_user chat_thread_${point_id}' id='ask_${point_id}_${random_id}'>
+					<div class='AI_text_wrap'>
+						<div class='AI_text_image'>
+							<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+						</div>
+						<div class='AI_text_text'>
+							<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">type here...</textarea>
+							<div class='AI_window_typing'>
+								<div style='margin:auto;'>
+								<button 
+									class='btn btn-success'
+									id='submit_${random_id}'
+									onclick='Controller.C_init_prompt("submit_${random_id}", "${random_id}")'
+								>
+									Save & Submit
+								</button>
+								<button class='btn btn-secondary' onclick='Controller.C_cancel_ask("ask_${point_id}_${random_id}")'>
+									Cancel
+								</button>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			`;
+				`;
 
-		// Insert the new element below the specified element
-		element.insertAdjacentElement("afterend", newElement);
+			// Insert the new element below the specified element
+			element.insertAdjacentElement("afterend", newElement);
+		}
 		//listen for the repsponse from the server script
 	}
-	C_next_point(url, csrf_token, self_element_id, parent_element_id, course_version_id, part_id,point_id){
+	C_next_point(url, csrf_token, self_element_id, parent_element_id, course_version_id, part_id, point_iid,point_id, num_next_points, ordered_list_id){
 		const utility = this.util
 
 		const next_point_button = document.getElementById(self_element_id);
@@ -95,7 +101,10 @@ class controller extends model {
 						var new_tag = json.new_tag
 						var relevant_part_id = json.relevant_part_id
 						var new_point_id = json.new_point_id
+						var new_point_unique = json.new_point_unique
 						var new_topic = json.new_topic
+						num_next_points = Number(num_next_points) - 1
+						ordered_list_id = Number(ordered_list_id)
 						// 
 						const scriptElement = document.createElement('script');
 						scriptElement.textContent = script_text;
@@ -114,12 +123,16 @@ class controller extends model {
 						if (new_topic){
 							var element = document.getElementById(`topic_id_${new_topic}`);
 						}else{
-							var element = document.getElementById(parent_element_id);
+							//var element = document.getElementById(parent_element_id);
+							// Assuming you want to get the last element of the "example-class" ordered class
+							var elements = document.querySelectorAll(`.chat_thread_${point_iid}`);
+							// Get the last element
+							var element = elements[elements.length - 1];
 						}
 						// Create a new element
 						const newElement = document.createElement("div");
 						newElement.innerHTML = `
-							<div class='AI_chat_text AI_text_ai' id='text_book_${new_tag}'>
+							<div class='AI_chat_text AI_text_ai chat_thread_${new_point_id}' id='text_book_${new_tag}'>
 								<div class='AI_text_wrap'>
 									<div class='AI_text_image'>
 										<i class="bi bi-book"></i>
@@ -130,7 +143,7 @@ class controller extends model {
 										</div>
 										<div class='AI_window_typing'>
 												<div style='margin:auto;' id='buttons_container_${new_tag}'>
-											<button class='btn btn-primary' onclick='Controller.C_ask_from_book("text_book_${new_tag}")'>
+											<button class='btn btn-primary' id='ask_button_${new_point_id}' onclick='Controller.C_ask_from_book("text_book_${new_tag}", "${ordered_list_id}", "${new_point_id}")'>
 												Ask
 											</button>
 											</div>
@@ -147,9 +160,9 @@ class controller extends model {
 						<button
 							id='next_point_button_${new_tag}'
 							class='btn btn-success'
-							onclick='Controller.C_next_point("${url}", "${csrf_token}", "next_point_button_${new_tag}", "text_book_${new_tag}", "${course_version_id}","${relevant_part_id}","${new_point_id}")'
+							onclick='Controller.C_next_point("${url}", "${csrf_token}", "next_point_button_${new_tag}", "text_book_${new_tag}", "${course_version_id}","${relevant_part_id}", "${new_point_id}","${new_point_unique}", ${num_next_points},${Number(ordered_list_id) + 1})'
 						>
-							Next point
+							Next point (${num_next_points})
 						</button>
 						`
 						element.insertAdjacentElement("afterend", newElement);
@@ -158,11 +171,9 @@ class controller extends model {
 						document.getElementById('AI_window_chat_id').appendChild(videos_container)
 						document.getElementById('AI_window_chat_id').appendChild(scriptElement);
 						utility.write(`AI_text_introduction_${new_tag}`, html_content)
-						setTimeout(
-							function(){
-								document.getElementById(`buttons_container_${new_tag}`).innerHTML += next_button;
-							}, 7500
-						);
+						if (num_next_points > 0){
+							document.getElementById(`buttons_container_${new_tag}`).innerHTML += next_button;
+						}
 					}else{
 					}
 

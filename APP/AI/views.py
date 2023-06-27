@@ -74,6 +74,7 @@ class AIView(
         previous_chapter = list_chapters[chapter_index-1] if chapter_index -1 >= 0 else None
         next_chapter = list_chapters[chapter_index+1] if chapter_index +1 < len(list_chapters) else None
         #
+        num_next_points = 0
         lesson_parts = []
         last_item = ''
         breaker = False
@@ -89,8 +90,16 @@ class AIView(
                 last_part = lesson_parts[-1] if len(lesson_parts) > 0 else part
                 last_item_index = len(last_part.part_chat) -1 if len(lesson_parts) > 0 else 0
                 last_item = f'{last_part.topic}-{last_item_index}'
+                if len(lesson_parts) > 0:
+                    system_chats_in_part = 0
+                    for chat in lesson_parts[-1].part_chat:
+                        print(lesson_parts[-1].part_chat[chat])
+                        if 'system' in lesson_parts[-1].part_chat[chat].keys():
+                            system_chats_in_part += 1
+                    num_next_points += len(lesson_parts[-1].part_content['content'].keys()) - system_chats_in_part
+            if breaker:
+                num_next_points += len(part.part_content['content'].keys())
             lesson_parts.append(part)
-
         #
         course_subscription = CourseSubscription.objects.filter(
                 user=self.request.user,
@@ -113,6 +122,7 @@ class AIView(
         context['lesson'] = active_lesson
         context['lesson_parts'] = lesson_parts
         context['last_item'] = last_item
+        context['num_next_points'] = num_next_points
         #
         context['module'] = module
         context['previous_chapter'] = previous_chapter
@@ -204,7 +214,8 @@ def _next_point(request):
                         'script_html': script_html,
                         'videos_tags': video_tags,
                         'new_tag': TagGenerator(),
-                        'new_point_id': next_point,
+                        'new_point_id': point_obj.id,
+                        'new_point_unique': next_point,
                         'relevant_part_id': lesson_part.id,
                         'new_topic': new_topic,
                     }

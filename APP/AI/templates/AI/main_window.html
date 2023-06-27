@@ -20,7 +20,7 @@
 				{% definevar part.part_chat|index:chat|index:'system' as point_unique%}
 				{% definevar part.part_chat|index:chat|index:'system'|p_unique_to_id as point_id%}
 				<div id='main_chat_scroll_container'>
-					<div class='AI_chat_text AI_text_ai' id='text_book_{{random_id}}'>
+					<div class='AI_chat_text AI_text_ai chat_thread_{{point_id}}' id='text_book_{{random_id}}'>
 						<div class='AI_text_wrap'>
 							<div class='AI_text_image'>
 								<i class="bi bi-book"></i>
@@ -31,13 +31,13 @@
 								</div>
 								<div class='AI_window_typing'>
 									<div style='margin:auto;'>
-									<button class='btn btn-primary' onclick='Controller.C_ask_from_book("text_book_{{random_id}}")'>
+										<button class='btn btn-primary' id='ask_button_{{point_id}}' onclick='Controller.C_ask_from_book("text_book_{{random_id}}", "{{ forloop.counter }}", "{{point_id}}")'>
 										Ask
 									</button>
 									{% with part.topic|add:'-'|add:chat as item_name%}
 									{%if context.last_item == item_name %}
-									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}","{{point_unique}}")'>
-										Next point
+									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}", "{{point_id}}","{{point_unique}}", {{context.num_next_points}}, "{{ forloop.counter }}")'>
+										Next point ({{context.num_next_points}})
 									</button>
 									{%endif%}
 									{% endwith %}
