@@ -1,7 +1,10 @@
+import time
 import collections
+from cryptography.fernet import Fernet
 from collections import defaultdict
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from braces.views import (
         LoginRequiredMixin,
@@ -93,7 +96,6 @@ class AIView(
                 if len(lesson_parts) > 0:
                     system_chats_in_part = 0
                     for chat in lesson_parts[-1].part_chat:
-                        print(lesson_parts[-1].part_chat[chat])
                         if 'system' in lesson_parts[-1].part_chat[chat].keys():
                             system_chats_in_part += 1
                     num_next_points += len(lesson_parts[-1].part_content['content'].keys()) - system_chats_in_part
@@ -221,6 +223,62 @@ def _next_point(request):
                     }
                 return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
+
+def _ask_from_book(request):
+    if request.method == 'POST':
+        lesson_part_id = request.POST['part_id']
+        point_id = request.POST['point_id']
+        order_id = request.POST['order_id']
+        user_prompt = request.POST['user_prompt']
+        #
+        lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+        point = Point.objects.get(pk=point_id)
+        part_chat = lesson_part.part_chat
+        #
+        if len(user_prompt) < 20:
+            return JsonResponse({'error': 1, 'message': 'A minimum of a 20 character prompt is required.'})
+        message = {
+          "model": "gpt-3.5-turbo",
+          "system": "Youre a helpful assistant for this user",
+          "chat": [
+            {
+              "role": "user",
+              "content": str(user_prompt)
+            }
+          ]
+        }
+        response = {
+                'error': 0,
+                'function_url': settings.CHATGPT_LAMBDA_URL,
+                'message': message,
+                'part_id': lesson_part_id,
+                'point_id': point_id,
+                'order_id': order_id,
+            }
+        return JsonResponse(response)
+    return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
+
+def _catch_chat_completion(request):
+    if request.method == 'POST':
+        lesson_part_id = request.POST['part_id']
+        point_id = request.POST['point_id']
+        order_id = request.POST['order_id']
+        ai_response = request.POST['ai_response']
+        #
+        try:
+            lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+            point = Point.objects.get(pk=point_id)
+            part_chat = lesson_part.part_chat
+        except Exception:
+            pass
+        else:
+            response = {
+                    'status_code': 200,
+                    'message': 'Sucess'
+                }
+        #
+        return JsonResponse(response)
+    return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
 
 def _newgenerationjob(request):
     if request.method == 'POST':

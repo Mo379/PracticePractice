@@ -18,6 +18,16 @@ urlpatterns = [
         name='_next_point'
     ),
     path(
+        '_ask_from_book',
+        views._ask_from_book,
+        name='_ask_from_book'
+    ),
+    path(
+        '_catch_chat_completion',
+        views._catch_chat_completion,
+        name='_catch_chat_completion'
+    ),
+    path(
         '_newgenerationjob',
         views._newgenerationjob,
         name='_newgenerationjob'

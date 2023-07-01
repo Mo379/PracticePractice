@@ -5,6 +5,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
 <script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
 
 <div class='AI_main_window'>
@@ -31,12 +32,12 @@
 								</div>
 								<div class='AI_window_typing'>
 									<div style='margin:auto;'>
-										<button class='btn btn-primary' id='ask_button_{{point_id}}' onclick='Controller.C_ask_from_book("text_book_{{random_id}}", "{{ forloop.counter }}", "{{point_id}}")'>
+										<button class='btn btn-primary' id='ask_button_{{point_id}}' onclick='Controller.C_ask_from_book("{%url "AI:_ask_from_book"%}", "{{csrf_token}}", "text_book_{{random_id}}", "{{ forloop.counter }}", "{{point_id}}", "{{part.id}}")'>
 										Ask
 									</button>
 									{% with part.topic|add:'-'|add:chat as item_name%}
 									{%if context.last_item == item_name %}
-									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}", "{{point_id}}","{{point_unique}}", {{context.num_next_points}}, "{{ forloop.counter }}")'>
+									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{%url "AI:_ask_from_book"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}", "{{point_id}}","{{point_unique}}", {{context.num_next_points}}, "{{ forloop.counter }}")'>
 										Next point ({{context.num_next_points}})
 									</button>
 									{%endif%}

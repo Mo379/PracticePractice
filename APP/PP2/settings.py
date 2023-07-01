@@ -307,3 +307,4 @@ CELERY_RESULT_BACKEND = decouple_config('Celery_Result')
 # Open ai configurations
 OPENAI_ORG = decouple_config('openai_org')
 OPENAI_SECRET = decouple_config('openai_secret')
+CHATGPT_LAMBDA_URL = decouple_config('chatgpt_lambda_url')
