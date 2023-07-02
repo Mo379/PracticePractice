@@ -100,6 +100,52 @@ class controller extends model {
 		}
 		//listen for the repsponse from the server script
 	}
+	C_ask_from_thread(url, csrf_token, book_item_id, random_id, point_id, part_id) {
+		const element = document.getElementById(book_item_id);
+		// Create a new element
+		const newElement = document.createElement("div");
+		if ($(`#ask_${point_id}_${random_id}`).length == 0){
+			newElement.innerHTML = `
+				<div class='AI_chat_text AI_text_user chat_thread_${point_id}' id='ask_${point_id}_${random_id}'>
+					<div class='AI_text_wrap'>
+						<div class='AI_text_image'>
+							<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+						</div>
+						<div class='AI_text_text' id='ask_content_${point_id}_${random_id}'>
+							<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${random_id}'style="color: var(--text-color-1);">Prompt here...</textarea>
+							<p class='d-none' id='display_user_input_${point_id}_${random_id}'></p>
+							<div class='AI_window_typing'>
+								<div style='margin:auto;'>
+								<button 
+									class='btn btn-success'
+									id='submit_${point_id}_${random_id}'
+									onclick='Controller.C_init_prompt("${url}", "${csrf_token}","${random_id}", "${point_id}", "${part_id}", "${random_id}")'
+								>
+									<p id='button_text_${point_id}_${random_id}' style='margin:0;'>Prompt <i class="bi bi-send"></i></p>
+									<div id='spinner_and_wait_${point_id}_${random_id}' class='d-none'>
+										<div class="d-flex justify-content-center">
+										  <div class="spinner-border spinner-border-sm" role="status">
+										    <span class="sr-only">Loading...</span>
+										  </div>
+										</div>
+									</div>
+								</button>
+								<button class='btn btn-secondary' id='cancel_prompt_${point_id}_${random_id}' onclick='Controller.C_cancel_ask("ask_${point_id}_${Number(random_id)}", "ask_button_${point_id}_${Number(random_id)-1}")'>
+									Cancel
+								</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				`;
+
+			// Insert the new element below the specified element
+			element.insertAdjacentElement("afterend", newElement);
+			document.querySelector(`#ask_button_${point_id}_${Number(random_id)-1}`).classList.add("d-none");
+		}
+		//listen for the repsponse from the server script
+	}
 	C_next_point(url, url_prompt, csrf_token, self_element_id, parent_element_id, course_version_id, part_id, point_iid,point_id, num_next_points, ordered_list_id){
 		const utility = this.util
 
@@ -267,7 +313,7 @@ class controller extends model {
 							const element = document.getElementById(`ask_${point_id}_${random_id}`);
 							const newElement = document.createElement("div");
 							newElement.innerHTML = `
-								<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${random_id}'>
+								<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${random_id}'>
 									<div class='AI_text_wrap'>
 										<div class='AI_text_image'>
 											<i class="bi bi-robot"></i>
@@ -277,8 +323,7 @@ class controller extends model {
 											</div>
 											<div class='AI_window_typing'>
 												<div style='margin:auto;'>
-													<button class='btn btn-primary' id='ask_button_${point_id}_${random_id}' onclick='Controller.C_ask_from_book("{%url "AI:_ask_from_book"%}", "{{csrf_token}}", "text_book_{{random_id}}", "{{ forloop.counter }}", "{{point_id}}", "{{part.id}}")'>
-													<button class='btn btn-primary' id='ask_button_${point_id}_${random_id}' onclick='Controller.C_ask_from_book("${url_prompt}", "${csrf_token}", "text_book_${new_tag}", "${ordered_list_id}", "${new_point_id}", "${part_id}")'>
+													<button class='btn btn-primary' id='ask_button_${point_id}_${random_id}' onclick='Controller.C_ask_from_thread("${url}", "${csrf_token}", "ai_response_${point_id}_${random_id}", "${Number(order_id) + 1}", "${point_id}", "${part_id}")'>
 													Ask
 												</button>
 											</div>
