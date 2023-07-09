@@ -418,3 +418,14 @@ def filter_range(start, end):
     return range(start, end+1)
 
 
+@register.filter(name='group_chat_thread')
+def group_chat_thread(array):
+    """Takes the group chat thread and groups it into user assistant response pairts"""
+    def divide_chunks(array, n):
+        # looping till length l
+        for i in range(0, len(array), n):
+            yield array[i:i + n]
+    #
+    grouped_threads = list(divide_chunks(array, 2))
+    return grouped_threads
+

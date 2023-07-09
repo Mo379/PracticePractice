@@ -1,6 +1,5 @@
 {%load static %}
 {%load general%}
-<script src="{%static 'AI/js/controller.js'%}"></script>
 {%include 'content/mathjax.html'%}
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
@@ -8,87 +7,115 @@
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
 <script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
 
+{%include 'AI/scripts/controller.html'%}
 <div class='AI_main_window'>
 	<div class='AI_window_chat' id='AI_window_chat_id'>
 	<div style='height: 0px;' id='main_chat_container'>
+		<h1 id=''class='mt-3 mb-3' style='color: var(--text-color-1); padding: 5px;text-align:center;'>
+		{{context.lesson.course.course_name|field_name_to_label}} - {{context.lesson.moduel|field_name_to_label}}
+		</h1>
 		{%for part in context.lesson_parts%}
-			<h1 id='topic_id_{{part.topic}}'class='mt-3 mb-3' style='color: var(--text-color-1); padding: 5px;text-align:center;'>
+			<h2 id='topic_id_{{part.topic}}'class='mt-3 mb-3' style='color: var(--text-color-1); padding: 5px;text-align:center;'>
 			{{part.topic|field_name_to_label}}
-			</h1>
+			</h2>
 			{%for chat in part.part_chat%}
 				{%if part.part_chat|index:chat|index:'system'%}
-				{% definevar 'random_tag'|TagGenerator as random_id%}
-				{% definevar part.part_chat|index:chat|index:'system' as point_unique%}
-				{% definevar part.part_chat|index:chat|index:'system'|p_unique_to_id as point_id%}
-				<div id='main_chat_scroll_container'>
-					<div class='AI_chat_text AI_text_ai chat_thread_{{point_id}}' id='text_book_{{random_id}}'>
-						<div class='AI_text_wrap'>
-							<div class='AI_text_image'>
-								<i class="bi bi-book"></i>
-							</div>
-							<div class='AI_text_text'>
-								<div class='mb-3' id='AI_text_introduction'>
-									{{point_id|ToMarkdown:point_id|safe}}
+					{% definevar 'random_tag'|TagGenerator as random_id%}
+					{% definevar part.part_chat|index:chat|index:'system' as point_unique%}
+					{% definevar part.part_chat|index:chat|index:'system'|p_unique_to_id as point_id%}
+					<div id='main_chat_scroll_container'>
+						<div class='AI_chat_text AI_text_ai chat_thread_{{point_id}}' id='text_book_{{random_id}}'>
+							<div class='AI_text_wrap'>
+								<div class='AI_text_image'>
+									<i class="bi bi-book"></i>
 								</div>
-								<div class='AI_window_typing'>
-									<div style='margin:auto;'>
-										<button class='btn btn-primary' id='ask_button_{{point_id}}' onclick='Controller.C_ask_from_book("{%url "AI:_ask_from_book"%}", "{{csrf_token}}", "text_book_{{random_id}}", "{{ forloop.counter }}", "{{point_id}}", "{{part.id}}")'>
-										Ask
-									</button>
-									{% with part.topic|add:'-'|add:chat as item_name%}
-									{%if context.last_item == item_name %}
-									<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("{%url "AI:_next_point"%}", "{%url "AI:_ask_from_book"%}", "{{csrf_token}}", "next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}", "{{point_id}}","{{point_unique}}", {{context.num_next_points}}, "{{ forloop.counter }}")'>
-										Next point ({{context.num_next_points}})
-									</button>
-									{%endif%}
-									{% endwith %}
+								<div class='AI_text_text'>
+									<div class='mb-3' id='AI_text_introduction'>
+										{{point_id|ToMarkdown:point_id|safe}}
+									</div>
+									<div class='AI_window_typing'>
+										<div style='margin:auto;'>
+											{%if not part.part_chat|index:chat|index:'thread'%}
+											<button class='btn btn-primary' id='ask_button_{{point_id}}' onclick='Controller.C_ask_from_book("text_book_{{random_id}}", {{forloop.counter}},"0", "{{point_id}}", "{{part.id}}")'>
+											Ask
+											</button>
+											{%endif%}
+										{% with part.topic|add:'-'|add:chat as item_name%}
+										{%if context.last_item == item_name %}
+										<button id='next_point_id' class='btn btn-success' onclick='Controller.C_next_point("next_point_id", "text_book_{{random_id}}", "{{context.course_version.id}}","{{part.id}}", "{{point_id}}","{{point_unique}}", {{context.num_next_points}}, "{{ forloop.counter }}")'>
+											Next point ({{context.num_next_points}})
+										</button>
+										{%endif%}
+										{% endwith %}
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-					<!---
-					<div class='AI_chat_text AI_text_user'>
-						<div class='AI_text_wrap'>
-							<div class='AI_text_image'>
-								<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-							</div>
-							<div class='AI_text_text'>
-								<textarea class="form-control bg-transparent mb-3 AI_user_text_area" style="color: var(--text-color-1);">I have a form and an iframe, the form submits with the iframe as the target, I want to detect when a response is given to the target and get its value reset the chat right here please</textarea>
-								<div class='AI_window_typing'>
-									<div style='margin:auto;'>
-									<button class='btn btn-success'>
-										Save & Submit
-									</button>
-									<button class='btn btn-secondary'>
-										Cancel
-									</button>
+					{%if part.part_chat|index:chat|index:'thread'%}
+						{%for thread_part in part.part_chat|index:chat|index:'thread'|group_chat_thread%}
+							{% definevar thread_part.0 as roleuser_part %}
+							{% definevar thread_part.1 as roleassistant_part %}
+							<div class='AI_chat_text AI_text_user chat_thread_{{point_id}}' id='ask_{{point_id}}_{{forloop.counter0}}'>
+								<div class='AI_text_wrap'>
+									<div class='AI_text_image'>
+										<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+									</div>
+									<div class='AI_text_text' id='ask_content_{{point_id}}_{{forloop.counter0}}'>
+										<textarea class="form-control bg-transparent mb-3 AI_user_text_area d-none" id='user_input_{{point_id}}_{{forloop.counter0}}'style="color: var(--text-color-1);">{{roleuser_part.content}}</textarea>
+										<p class='' id='display_user_input_{{point_id}}_{{forloop.counter0}}'>{{roleuser_part.content}}</p>
+										<div class='AI_window_typing'>
+											<div style='margin:auto;'>
+											<button 
+												class='btn btn-success d-none'
+												id='submit_{{point_id}}_{{forloop.counter0}}'
+												onclick='Controller.C_init_prompt("{{forloop.parentloop.counter}}", "{{point_id}}", "{{part.id}}", "{{forloop.counter0}}")'
+											>
+												<p id='button_text_{{point_id}}_{{forloop.counter0}}' style='margin:0;'>Prompt <i class="bi bi-send"></i></p>
+												<div id='spinner_and_wait_{{point_id}}_{{forloop.counter0}}' class='d-none'>
+													<div class="d-flex justify-content-center">
+													  <div class="spinner-border spinner-border-sm" role="status">
+													    <span class="sr-only">Loading...</span>
+													  </div>
+													</div>
+												</div>
+											</button>
+											<button class='btn btn-secondary d-none' id='cancel_edit_prompt_{{point_id}}_{{forloop.counter0}}' onclick='Controller.C_cancel_edit_prompt("{{point_id}}", "{{forloop.counter0}}")'>
+												Go back
+											</button>
+											<button class='btn btn-secondary d-none' id='cancel_prompt_{{point_id}}_{{forloop.counter0}}' onclick='Controller.C_cancel_ask("ask_{{point_id}}_{{forloop.counter0}}", "ask_button_{{point_id}}")'>
+												Cancel
+											</button>
+											<button class='btn btn-info' style='float:right;' id='edit_prompt_{{point_id}}_{{forloop.counter0}}' onclick='Controller.C_edit_prompt("{{point_id}}", "{{forloop.counter0}}")'>
+												<i class="bi bi-pencil-square"></i>
+											</button>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					</div>
-					<div class='AI_chat_text AI_text_user'>
-						<div class='AI_text_wrap'>
-							<div class='AI_text_image'>
-								<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
-							</div>
-							<div class='AI_text_text'>
-								<div class='AI_window_typing'>
-									<div style='margin:auto;'>
-									<button class='btn btn-primary'>
-										Ask
-									</button>
-									<button class='btn btn-success'>
-										Next point
-									</button>
+							<div class='AI_chat_text AI_text_ai chat_thread_{{point_id}}' id='ai_response_{{point_id}}_{{forloop.counter0}}'>
+								<div class='AI_text_wrap'>
+									<div class='AI_text_image'>
+										<i class="bi bi-robot"></i>
+									</div>
+									<div class='AI_text_text'>
+										<div class='mb-3' id='AI_text_response_{{point_id}}_{{forloop.counter0}}'>
+											{{roleassistant_part.content}}
+										</div>
+										<div class='AI_window_typing'>
+											<div style='margin:auto;'>
+												<button class='btn btn-primary' id='ask_button_{{point_id}}_{{forloop.counter0}}' onclick='Controller.C_ask_from_thread("ai_response_{{point_id}}_{{forloop.counter0}}", "{{forloop.parentloop.counter}}","{{forloop.counter}}", "{{point_id}}", "{{part.id}}")'>
+												Ask
+											</button>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
+						{%endfor%}
+					{%endif%}
 					</div>
-					-->
-				</div>
 				{%endif%}
 			{%endfor%}
 		{%endfor%}

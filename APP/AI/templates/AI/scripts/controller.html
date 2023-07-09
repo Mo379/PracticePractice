@@ -1,0 +1,540 @@
+{%load static %}
+{%load general%}
+<script>
+class util{
+
+	AI_window_error(message){
+		var element = '<button id="loading_spinner" type="button" disabled><i class="bi bi-exclamation-diamond text-danger"></i><br>'+message+'</button>';
+		return element;
+	}
+	scrollToBottom(divId, duration=1500) {
+	//this.util._scrollToBottom('AI_window_chat_id', 1500); 
+	  const div = document.getElementById(divId);
+	  const scrollTop = div.scrollTop;
+	  const scrollHeight = div.scrollHeight;
+	  const distance = scrollHeight - scrollTop;
+	  const startTime = Date.now();
+	  
+	  function easeInOutQuad(t, b, c, d) {
+	    t /= d / 2;
+	    if (t < 1) return c / 2 * t * t + b;
+	    t--;
+	    return -c / 2 * (t * (t - 2) - 1) + b;
+	  }
+	  
+	  function scroll() {
+	    const currentTime = Date.now();
+	    const time = Math.min(1, (currentTime - startTime) / duration);
+	    const ease = easeInOutQuad(time, 0, 1, 1);
+	    div.scrollTop = scrollTop + (distance * ease);
+	    if (time < 1) requestAnimationFrame(scroll);
+	  }
+	  
+	  requestAnimationFrame(scroll);
+	}
+
+
+	createChatTextHtml(who, input, textId) {
+		var blinker = '';
+		var image = 'bi bi-send-fill';
+		if (who == 'ai'){
+			blinker = `<span class='blink' style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'></span>`;
+			image = 'bi bi-robot';
+		}
+		return `<div class='AI_chat_text AI_text_${who}'>
+			    <div class='AI_text_wrap'>
+			      <div class='AI_text_image'>
+				<i class="${image}"></i>
+			      </div>
+			      <div class='AI_text_text' id='${textId}'>
+			      ${blinker}
+			      ${input}
+			      </div>
+			    </div>
+			  </div>`;
+	}
+
+	unwrapChat(chat, introduction) {
+		var output = "";
+		var live = false;
+		var element = '';
+		var text = '';
+		//
+		if (introduction === false){
+		}else{
+			output += this.createChatTextHtml('ai', '', 'AI_text_introduction');
+			live = true;
+			element = 'AI_text_introduction';
+			text += introduction;
+		}
+		return [output, live, element, text]
+	}
+
+	write(elemID, text, delay_lower=50, delay_higher=90, char_lower=6, char_higher=10) {
+	  let element = document.getElementById(elemID);
+	  let i = 0;
+	  function type() {
+	    let charCount = Math.floor(Math.random() * (char_higher - char_lower + 1)) + char_lower;
+	    let delay = Math.floor(Math.random() * (delay_higher - delay_lower + 1)) + delay_lower;
+	    
+	    let shouldPause = Math.random() < 0.1;
+	    if (shouldPause) {
+	      delay += 50;
+	    }
+	    if (i < text.length) {
+	      element.innerHTML = text.slice(0, i + charCount) + `
+	      <span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
+	      </span>`;
+	      i += charCount;
+	      MathJax.typeset()
+	      setTimeout(type, delay);
+	    }
+	  }
+	  type();
+	}
+}
+class xhttp {
+	open_port(url) {
+		this.xhttp = new XMLHttpRequest();
+		this.xhttp.open('POST', url, true);
+		this.xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	}
+}
+//
+
+class view {
+	//loading
+	//
+	constructor(){
+		this.spinner = '<button id="loading_spinner" type="button" disabled><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><br>Loading...</button>';
+	}
+	alert_loading() {
+		alert('loading');
+	};
+	alert_load_lesson() {
+		var s = document.getElementById('main_chat_scroll_container');
+		s.innerHTML = this.spinner; 
+	};
+}
+//coommunicates with server and gets a result to be displayed as a view
+class model extends xhttp {
+	//
+	M_next_point(course_version_id, part_id, point_id) {
+		//opening the port using xhttp
+			this.open_port("{%url 'AI:_next_point'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'course_version_id='+ course_version_id +'&part_id=' + part_id + '&point_id=' + point_id;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+	M_init_prompt(part_id, point_id, order_id, user_prompt){
+		//opening the port using xhttp
+		this.open_port("{%url 'AI:_ask_from_book'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'part_id=' + part_id + '&point_id=' + point_id + '&order_id=' + order_id + '&user_prompt=' + user_prompt;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+	M_catch_chat_completion(
+		part_id,
+		point_id,
+		global_order_id,
+		local_order_id,
+		prompt_tokens,
+		completion_tokens,
+		total_tokens,
+		user_prompt,
+		ai_response,
+	){
+		//opening the port using xhttp
+		this.open_port("{%url 'AI:_catch_chat_completion'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'part_id=' + part_id + '&point_id=' + point_id + '&global_order_id=' + global_order_id 
+			+'&local_order_id=' + local_order_id + '&prompt_tokens=' + prompt_tokens + '&completion_tokens=' 
+			+ completion_tokens + '&total_tokens=' + total_tokens+ 
+		'&user_prompt=' + user_prompt + '&ai_response=' + ai_response;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+}
+
+//used by the user, tells the model to do something. this class is both a controller and a view
+class controller extends model {
+	//construct
+	constructor(util, view) {
+		super();
+		this.util = util;
+		this.view = view;
+	}
+	//add new spec moduel
+	C_ask_from_book(book_item_id, global_order_id, local_order_id, point_id, part_id) {
+		const element = document.getElementById(book_item_id);
+		// Create a new element
+		const newElement = document.createElement("div");
+		if ($(`#ask_${point_id}_${local_order_id}`).length == 0){
+			newElement.innerHTML = `
+				<div class='AI_chat_text AI_text_user chat_thread_${point_id}' id='ask_${point_id}_${local_order_id}'>
+					<div class='AI_text_wrap'>
+						<div class='AI_text_image'>
+							<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+						</div>
+						<div class='AI_text_text' id='ask_content_${point_id}_${local_order_id}'>
+							<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${local_order_id}'style="color: var(--text-color-1);">Hello, can you assist me today ?</textarea>
+							<p class='d-none' id='display_user_input_${point_id}_${local_order_id}'></p>
+							<div class='AI_window_typing'>
+								<div style='margin:auto;'>
+								<button 
+									class='btn btn-success'
+									id='submit_${point_id}_${local_order_id}'
+								     onclick='Controller.C_init_prompt("${global_order_id}", "${point_id}", "${part_id}", "${local_order_id}")'
+								>
+									<p id='button_text_${point_id}_${local_order_id}' style='margin:0;'>Prompt <i class="bi bi-send"></i></p>
+									<div id='spinner_and_wait_${point_id}_${local_order_id}' class='d-none'>
+										<div class="d-flex justify-content-center">
+										  <div class="spinner-border spinner-border-sm" role="status">
+										    <span class="sr-only">Loading...</span>
+										  </div>
+										</div>
+									</div>
+								</button>
+								<button class='btn btn-secondary d-none' id='cancel_edit_prompt_${point_id}_${local_order_id}' onclick='Controller.C_cancel_edit_prompt("${point_id}", "${local_order_id}")'>
+									Go back
+								</button>
+								<button class='btn btn-secondary' id='cancel_prompt_${point_id}_${local_order_id}' onclick='Controller.C_cancel_ask("ask_${point_id}_${local_order_id}", "ask_button_${point_id}")'>
+									Cancel
+								</button>
+								<button class='btn btn-info d-none' style='float:right;' id='edit_prompt_${point_id}_${local_order_id}' onclick='Controller.C_edit_prompt("${point_id}", "${local_order_id}")'>
+									<i class="bi bi-pencil-square"></i>
+								</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				`;
+
+			// Insert the new element below the specified element
+			element.insertAdjacentElement("afterend", newElement);
+			document.querySelector(`#ask_button_${point_id}`).classList.add("d-none");
+		}
+		//listen for the repsponse from the server script
+	}
+	C_ask_from_thread(book_item_id, global_order_id, local_order_id, point_id, part_id) {
+		const element = document.getElementById(book_item_id);
+		// Create a new element
+		const newElement = document.createElement("div");
+		if ($(`#ask_${point_id}_${local_order_id}`).length == 0){
+			newElement.innerHTML = `
+				<div class='AI_chat_text AI_text_user chat_thread_${point_id}' id='ask_${point_id}_${local_order_id}'>
+					<div class='AI_text_wrap'>
+						<div class='AI_text_image'>
+							<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
+						</div>
+						<div class='AI_text_text' id='ask_content_${point_id}_${local_order_id}'>
+							<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${local_order_id}'style="color: var(--text-color-1);">Hello, can you assist me today ?</textarea>
+							<p class='d-none' id='display_user_input_${point_id}_${local_order_id}'></p>
+							<div class='AI_window_typing'>
+								<div style='margin:auto;'>
+								<button 
+									class='btn btn-success'
+									id='submit_${point_id}_${local_order_id}'
+									onclick='Controller.C_init_prompt("${global_order_id}", "${point_id}", "${part_id}", "${local_order_id}")'
+								>
+									<p id='button_text_${point_id}_${local_order_id}' style='margin:0;'>Prompt <i class="bi bi-send"></i></p>
+									<div id='spinner_and_wait_${point_id}_${local_order_id}' class='d-none'>
+										<div class="d-flex justify-content-center">
+										  <div class="spinner-border spinner-border-sm" role="status">
+										    <span class="sr-only">Loading...</span>
+										  </div>
+										</div>
+									</div>
+								</button>
+								<button class='btn btn-secondary d-none' id='cancel_edit_prompt_${point_id}_${local_order_id}' onclick='Controller.C_cancel_edit_prompt("${point_id}", "${local_order_id}")'>
+									Go back
+								</button>
+								<button class='btn btn-secondary' id='cancel_prompt_${point_id}_${local_order_id}' onclick='Controller.C_cancel_ask("ask_${point_id}_${local_order_id}", "ask_button_${point_id}_${Number(local_order_id)-1}")'>
+									Cancel
+								</button>
+								<button class='btn btn-info d-none' style='float:right;' id='edit_prompt_${point_id}_${local_order_id}' onclick='Controller.C_edit_prompt("${point_id}", "${local_order_id}")'>
+									<i class="bi bi-pencil-square"></i>
+								</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				`;
+
+			// Insert the new element below the specified element
+			element.insertAdjacentElement("afterend", newElement);
+			document.querySelector(`#ask_button_${point_id}_${Number(local_order_id)-1}`).classList.add("d-none");
+		}
+		//listen for the repsponse from the server script
+	}
+	C_next_point(self_element_id, parent_element_id, course_version_id, part_id, point_iid,point_id, num_next_points, global_order_id){
+		const utility = this.util
+
+		const next_point_button = document.getElementById(self_element_id);
+		next_point_button.remove()
+		this.M_next_point(course_version_id, part_id, point_id);
+		this.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				setTimeout(function (){
+					if (json.error == 0){
+						var html_content = json.message
+						var html_videos = json.videos_html
+						var script_text = json.script_html
+						var tags_videos = json.videos_tags
+						var new_tag = json.new_tag
+						var relevant_part_id = json.relevant_part_id
+						var new_point_id = json.new_point_id
+						var new_point_unique = json.new_point_unique
+						var new_topic = json.new_topic
+						num_next_points = Number(num_next_points) - 1
+						global_order_id = Number(global_order_id)
+						// 
+						const scriptElement = document.createElement('script');
+						scriptElement.textContent = script_text;
+						//
+						var videos_buttons = ''
+						for(var i = 0; i < tags_videos.length; i++){
+							var vid_unique = tags_videos[i];
+							var button_html = `
+							<button id='link-${vid_unique}' type="button" class="btn btn-primary mb-3"
+								style='display:inline;margin-left:auto;'>
+								<i class="bi bi-caret-right-square-fill"></i>
+							</button>
+							`
+							videos_buttons += button_html
+						}
+						if (new_topic){
+							var element = document.getElementById(`topic_id_${new_topic}`);
+						}else{
+							//var element = document.getElementById(parent_element_id);
+							// Assuming you want to get the last element of the "example-class" ordered class
+							var elements = document.querySelectorAll(`.chat_thread_${point_iid}`);
+							// Get the last element
+							var element = elements[elements.length - 1];
+						}
+						// Create a new element
+						const newElement = document.createElement("div");
+						newElement.innerHTML = `
+							<div class='AI_chat_text AI_text_ai chat_thread_${new_point_id}' id='text_book_${new_tag}'>
+								<div class='AI_text_wrap'>
+									<div class='AI_text_image'>
+										<i class="bi bi-book"></i>
+									</div>
+									<div class='AI_text_text'>
+										${videos_buttons}
+										<div class='mb-3' id='AI_text_introduction_${new_tag}'>
+										</div>
+										<div class='AI_window_typing'>
+												<div style='margin:auto;' id='buttons_container_${new_tag}'>
+       <button class='btn btn-primary' id='ask_button_${new_point_id}' onclick='Controller.C_ask_from_book("text_book_${new_tag}", "${Number(global_order_id)}", "0", "${new_point_id}", "${part_id}")'>
+												Ask
+											</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							`;
+
+						// Insert the new element below the specified element
+						let next_button = `
+						<button
+							id='next_point_button_${new_tag}'
+							class='btn btn-success'
+							onclick='Controller.C_next_point("next_point_button_${new_tag}", "text_book_${new_tag}", "${course_version_id}","${relevant_part_id}", "${new_point_id}","${new_point_unique}", ${num_next_points},${Number(global_order_id) + 1})'
+						>
+							Next point (${num_next_points})
+						</button>
+						`
+						element.insertAdjacentElement("afterend", newElement);
+						const videos_container = document.createElement('span');
+						videos_container.innerHTML = html_videos;
+						document.getElementById('AI_window_chat_id').appendChild(videos_container)
+						document.getElementById('AI_window_chat_id').appendChild(scriptElement);
+						utility.write(`AI_text_introduction_${new_tag}`, html_content)
+						if (num_next_points > 0){
+							document.getElementById(`buttons_container_${new_tag}`).innerHTML += next_button;
+						}
+					}else{
+					}
+
+				}, 1000);
+			}
+		}
+	}
+	C_init_prompt(global_order_id, point_id, part_id, local_order_id){
+		const utility = this.util
+		// Get the textarea element
+		var textarea = document.getElementById(`user_input_${point_id}_${local_order_id}`);
+		var display_textarea = document.getElementById(`display_user_input_${point_id}_${local_order_id}`);
+		// Get the value of the textarea
+		var textareaValue = textarea.value;
+		display_textarea.innerHTML = textareaValue
+		//
+		var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+			document.querySelector(`#submit_${point_id}_${local_order_id}`).disabled = true;
+			document.querySelector(`#user_input_${point_id}_${local_order_id}`).classList.add("d-none");
+			document.querySelector(`#display_user_input_${point_id}_${local_order_id}`).classList.remove("d-none");
+			document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).disabled = true;
+			document.querySelector(`#spinner_and_wait_${point_id}_${local_order_id}`).classList.remove("d-none");
+			document.querySelector(`#button_text_${point_id}_${local_order_id}`).classList.add("d-none");
+			document.querySelector(`#cancel_edit_prompt_${point_id}_${local_order_id}`).classList.add("d-none");
+		      } else {
+			document.querySelector(`#submit_${point_id}_${local_order_id}`).disabled = false;
+			document.querySelector(`#user_input_${point_id}_${local_order_id}`).classList.remove("d-none");
+			document.querySelector(`#display_user_input_${point_id}_${local_order_id}`).classList.add("d-none");
+			document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).disabled = false;
+			document.querySelector(`#spinner_and_wait_${point_id}_${local_order_id}`).classList.add("d-none");
+			document.querySelector(`#button_text_${point_id}_${local_order_id}`).classList.remove("d-none");
+			document.querySelector(`#cancel_edit_prompt_${point_id}_${local_order_id}`).classList.add("d-none");
+		      }
+		};
+		MathJax.typeset()
+		const this_object = this
+
+		this_object.M_init_prompt(part_id, point_id, global_order_id, textareaValue);
+		loading(true)
+		this_object.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				//
+				const request = {
+				  'message': json.message,
+				  'part_id': json.part_id,
+				  'point_id': json.point_id,
+				  'global_order_id': global_order_id,
+				  'local_order_id': local_order_id,
+				  'user_prompt': json.user_prompt
+				};
+				//
+				AWS.config.update({region: 'eu-north-1'});
+				AWS.config.credentials = new AWS.CognitoIdentityCredentials({IdentityPoolId: 'eu-north-1:539f7067-2405-4e41-8aed-a62ee033f30c'});
+
+				var pullReturned = null;
+				var slotResults;
+				var isSpinning = false;
+
+				// Prepare to call Lambda function.
+				var lambda = new AWS.Lambda({region: 'eu-west-2', apiVersion: '2015-03-31'});
+				var pullParams = {
+					FunctionName : 'OpenAI-ChatGPT-Turbo',
+					InvocationType : 'RequestResponse',
+					LogType : 'None',
+					Payload: JSON.stringify(request)
+				};
+				lambda.invoke(pullParams, function(err, data) {
+					if (err) {
+						loading(false)
+					} else {
+						const response = JSON.parse(data.Payload)
+						if (response.StatusCode == 200){
+							const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
+							const newElement = document.createElement("div");
+							newElement.innerHTML = `
+								<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
+									<div class='AI_text_wrap'>
+										<div class='AI_text_image'>
+											<i class="bi bi-robot"></i>
+										</div>
+										<div class='AI_text_text'>
+											<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
+											</div>
+											<div class='AI_window_typing'>
+												<div style='margin:auto;'>
+											<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
+													Ask
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+								`;
+							var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
+							var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
+							elementsToRemove.forEach(function(element) {
+							  element.remove(); // Remove each element
+							});
+							element.insertAdjacentElement("afterend", newElement);
+							document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
+							document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
+							document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
+							utility.write(`AI_text_response_${point_id}_${local_order_id}`, response.body)
+							//
+							if (response.server_records == 0){
+								const prompt_tokens = response.usage.prompt_tokens
+								const completion_tokens = response.usage.completion_tokens
+								const total_tokens = response.usage.total_tokens
+								const ai_response = response.body
+								//
+								this_object.M_catch_chat_completion(
+									part_id,
+									point_id,
+									global_order_id,
+									local_order_id,
+									prompt_tokens,
+									completion_tokens,
+									total_tokens,
+									textareaValue,
+									ai_response,
+								);
+							}
+						}else{
+							loading(false)
+						}
+					}
+				});
+			}
+		}
+	}
+	C_edit_prompt(point_id, local_order_id){
+		document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.remove('d-none')
+		document.querySelector(`#submit_${point_id}_${local_order_id}`).disabled = false;
+		document.querySelector(`#user_input_${point_id}_${local_order_id}`).classList.remove("d-none");
+		document.querySelector(`#display_user_input_${point_id}_${local_order_id}`).classList.add("d-none");
+		document.querySelector(`#spinner_and_wait_${point_id}_${local_order_id}`).classList.add("d-none");
+		document.querySelector(`#button_text_${point_id}_${local_order_id}`).classList.remove("d-none");
+		document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.add("d-none");
+		document.querySelector(`#cancel_edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none");
+	}
+	C_cancel_edit_prompt(point_id, local_order_id){
+		document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add('d-none')
+		document.querySelector(`#submit_${point_id}_${local_order_id}`).disabled = true;
+		document.querySelector(`#user_input_${point_id}_${local_order_id}`).classList.add("d-none");
+		document.querySelector(`#display_user_input_${point_id}_${local_order_id}`).classList.remove("d-none");
+		document.querySelector(`#spinner_and_wait_${point_id}_${local_order_id}`).classList.add("d-none");
+		document.querySelector(`#button_text_${point_id}_${local_order_id}`).classList.add("d-none");
+		document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none");
+		document.querySelector(`#cancel_edit_prompt_${point_id}_${local_order_id}`).classList.add("d-none");
+	}
+	//add new spec moduel
+	C_cancel_ask(ask_item_id, ask_button_id) {
+		const element = document.getElementById(ask_item_id);
+		element.remove();
+		document.querySelector(`#${ask_button_id}`).classList.remove("d-none");
+	}
+}
+
+
+
+
+
+
+
+
+
+util = new util();
+view = new view();
+Controller = new controller(util, view);
+</script>

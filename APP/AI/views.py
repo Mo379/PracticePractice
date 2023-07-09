@@ -1,3 +1,4 @@
+import re
 import time
 import collections
 from cryptography.fernet import Fernet
@@ -34,6 +35,7 @@ from content.util.GeneralUtil import (
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
 from AI.tasks import _generate_course_content
+from management.templatetags.general import ToMarkdownManual
 
 
 
@@ -207,7 +209,6 @@ def _next_point(request):
             except Exception:
                 return JsonResponse({'error': 1, 'message': 'Point does not exits!'})
             else:
-                from management.templatetags.general import ToMarkdownManual
                 content_html, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
                 response = {
                         'error': 0,
@@ -232,28 +233,35 @@ def _ask_from_book(request):
         user_prompt = request.POST['user_prompt']
         #
         lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
-        point = Point.objects.get(pk=point_id)
-        part_chat = lesson_part.part_chat
         #
-        if len(user_prompt) < 20:
-            return JsonResponse({'error': 1, 'message': 'A minimum of a 20 character prompt is required.'})
+        chat_subthread_number = str(int(order_id)-1)
+        part = lesson_part.part_chat[chat_subthread_number]
+        point_obj = Point.objects.get(p_unique_id=part['system'])
+        system_content, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
+        system_content = re.sub('<[^<]+?>', '', system_content)
+        #
+        chat = part['thread'] if 'thread' in part.keys() else []
+        #
         message = {
-          "model": "gpt-3.5-turbo",
-          "system": "Youre a helpful assistant for this user",
+          "model": "gpt-4",
+          "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML (titles, lists, highlighting) and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}",
           "chat": [
+            *chat,
             {
               "role": "user",
               "content": str(user_prompt)
             }
           ]
         }
+        lesson_part.recording_switch = True
+        lesson_part.save()
+        #
         response = {
                 'error': 0,
-                'function_url': settings.CHATGPT_LAMBDA_URL,
                 'message': message,
                 'part_id': lesson_part_id,
                 'point_id': point_id,
-                'order_id': order_id,
+                'user_prompt': user_prompt,
             }
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
@@ -262,15 +270,44 @@ def _catch_chat_completion(request):
     if request.method == 'POST':
         lesson_part_id = request.POST['part_id']
         point_id = request.POST['point_id']
-        order_id = request.POST['order_id']
+        global_order_id = request.POST['global_order_id']
+        local_order_id = request.POST['local_order_id']
+        prompt_tokens = request.POST['prompt_tokens']
+        completion_tokens = request.POST['completion_tokens']
+        total_tokens = request.POST['total_tokens']
+        user_prompt = request.POST['user_prompt']
         ai_response = request.POST['ai_response']
         #
+        user_part = {"role": 'user', "content": user_prompt}
+        ai_part = {"role": 'assistant', "content": ai_response}
+        new_stuff = [user_part, ai_part]
         try:
             lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
-            point = Point.objects.get(pk=point_id)
-            part_chat = lesson_part.part_chat
-        except Exception:
-            pass
+            if lesson_part.recording_switch == False:
+                response = {
+                        'status_code': 200,
+                        'message': 'Sucess'
+                    }
+                return JsonResponse(response)
+            #
+            part_chat = lesson_part.part_chat[str(int(global_order_id) - 1)]
+            #
+            if 'thread' in part_chat.keys():
+                part_chat['thread'] = part_chat['thread'][0: int(local_order_id)*2]
+                part_chat['thread'] += new_stuff
+            else:
+                part_chat['thread'] = new_stuff
+            lesson_part.part_chat[str(int(global_order_id) - 1)] = part_chat
+            lesson_part.recording_switch = False
+            lesson_part.prompt += int(prompt_tokens)
+            lesson_part.completion += int(completion_tokens)
+            lesson_part.total += int(total_tokens)
+            lesson_part.save()
+        except Exception as e:
+            response = {
+                    'status_code': 500,
+                    'message': 'Internal Server Error.'
+                }
         else:
             response = {
                     'status_code': 200,
