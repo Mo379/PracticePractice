@@ -62,8 +62,8 @@
 										<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
 									</div>
 									<div class='AI_text_text' id='ask_content_{{point_id}}_{{forloop.counter0}}'>
-										<textarea class="form-control bg-transparent mb-3 AI_user_text_area d-none" id='user_input_{{point_id}}_{{forloop.counter0}}'style="color: var(--text-color-1);">{{roleuser_part.content}}</textarea>
-										<p class='' id='display_user_input_{{point_id}}_{{forloop.counter0}}'>{{roleuser_part.content}}</p>
+										<textarea class="form-control bg-transparent mb-3 AI_user_text_area d-none" id='user_input_{{point_id}}_{{forloop.counter0}}'style="color: var(--text-color-1);">{{roleuser_part.content|safe}}</textarea>
+										<p class='' id='display_user_input_{{point_id}}_{{forloop.counter0}}'>{{roleuser_part.content|ProcessToMarkdown|safe}}</p>
 										<div class='AI_window_typing'>
 											<div style='margin:auto;'>
 											<button 
@@ -101,7 +101,14 @@
 									</div>
 									<div class='AI_text_text'>
 										<div class='mb-3' id='AI_text_response_{{point_id}}_{{forloop.counter0}}'>
-											{{roleassistant_part.content}}
+											{%if roleassistant_part.name == 'create_a_quiz'%}
+											{{roleassistant_part.content|safe}}
+											<script>
+												document.getElementById('AI_text_response_{{point_id}}_{{forloop.counter0}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse({{roleassistant_part.content|ToJson|safe}}), '{{point_id}}', '{{forloop.counter0}}')
+											</script>
+											{%else%}
+											{{roleassistant_part.content|ProcessToMarkdown|safe}}
+											{%endif%}
 										</div>
 										<div class='AI_window_typing'>
 											<div style='margin:auto;'>

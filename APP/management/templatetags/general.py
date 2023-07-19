@@ -8,6 +8,7 @@ import markdown
 from django.template import Context, Template, loader
 from content.models import Contract
 from PP2.utils import h_encode
+import json
 
 register = template.Library()
 
@@ -156,6 +157,19 @@ def divide(value, arg):
         return int(value) // int(arg)
     except (ValueError, ZeroDivisionError):
         return None
+
+
+@register.filter(name='ToJson')
+def ToJson(content):
+    # setup output
+    content = json.dumps(content)
+    return content
+@register.filter(name='ProcessToMarkdown')
+def ProcessToMarkdown(content):
+    # setup output
+    content_html = markdown.markdown(content, extensions=['tables','admonition', 'fenced_code'])
+    return content
+
 
 
 @register.filter(name='ToMarkdown')

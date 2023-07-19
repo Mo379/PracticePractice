@@ -53,6 +53,70 @@ class util{
 			    </div>
 			  </div>`;
 	}
+	quiz_to_html(quiz, pointId, localOrderId) {
+		var html = '';
+		for (var key in quiz) {
+			if (quiz.hasOwnProperty(key)) {
+				var question = quiz[key].question;
+				var choices = quiz[key].choices;
+				var explanation = quiz[key].answer.answer;
+
+				html += `
+				<div class="question form-check quiz_div p-3 mb-3" style='border-left: 1px dotted var(--text-color-3)'>
+       				<h5 class='quiz_question_indicator'>Question ${key} </h5>
+				<p class='quiz_question_paragraph'>${question}</p>
+				<ul class="quiz_question_choices_ul">`;
+
+				for (var choiceKey in choices) {
+					if (choices.hasOwnProperty(choiceKey)) {
+						var choice = choices[choiceKey];
+						html += `
+						<li class="form-check quiz_question_li">
+						<input class="form-check-input quiz_question_radio" type="radio" name="question_${key}_${pointId}_${localOrderId}" value="${choiceKey}" id='quiz_question_${key}_${pointId}_${localOrderId}'>
+       						<label class="form-check-label quiz_question_label" for="flexRadioDefault1">
+						${choice}
+						</label>
+						</li>`;
+					}
+				}
+				html += `
+				</ul>
+				<button class='btn btn-primary-outline' style='color:var(--text-color-1)'id='' onclick=''>
+					<i class="fa-solid fa-marker"></i> Mark
+				</button>
+       				<div class='quiz_question_solution mt-2'>
+					<h6 class='quiz_question_indicator'>Solution to Q ${key}: </h6>
+					<p class="explanation">${explanation}</p>
+       				</div>
+				</div>`;
+			}
+		}
+		return html;
+	}
+
+	transform_test_object_to_htmlform(function_name, function_response_object, point_id, local_order_id){
+		var my_arguments = function_response_object
+		const q_introduction = my_arguments.quiz_introduction
+		const full_quiz = my_arguments.quiz
+		var quiz_html = this.quiz_to_html(full_quiz, point_id, local_order_id)
+		const quiz_html_form = `
+	       <div id='quiz_form_${point_id}_${local_order_id}'>
+       			<h3>
+				Multiple choice quiz
+       			</h3>
+       			<div>
+       				${q_introduction}
+			       <br><button class='btn btn-secondary mt-3 mb-1' style='color:var(--text-color-1)'id='' onclick=''>
+				       <i class="bi bi-magic"></i> Show/Hide
+				</button>
+       			</div>
+       			<div class='mt-4 p-3' style='border-top: 2px solid var(--text-color-1);'>
+       				${quiz_html}
+       			</div>
+		</div>
+			`;
+		return quiz_html_form;	
+	}
 
 	unwrapChat(chat, introduction) {
 		var output = "";
@@ -70,7 +134,7 @@ class util{
 		return [output, live, element, text]
 	}
 
-	write(elemID, text, delay_lower=50, delay_higher=90, char_lower=6, char_higher=10) {
+	write(elemID, text, delay_lower=30, delay_higher=70, char_lower=10, char_higher=15) {
 	  let element = document.getElementById(elemID);
 	  let i = 0;
 	  function type() {
@@ -79,7 +143,7 @@ class util{
 	    
 	    let shouldPause = Math.random() < 0.1;
 	    if (shouldPause) {
-	      delay += 50;
+	      delay += 40;
 	    }
 	    if (i < text.length) {
 	      element.innerHTML = text.slice(0, i + charCount) + `
@@ -147,6 +211,8 @@ class model extends xhttp {
 		total_tokens,
 		user_prompt,
 		ai_response,
+		ai_function_response,
+		ai_function_name,
 	){
 		//opening the port using xhttp
 		this.open_port("{%url 'AI:_catch_chat_completion'%}");
@@ -155,7 +221,8 @@ class model extends xhttp {
 		var query = 'part_id=' + part_id + '&point_id=' + point_id + '&global_order_id=' + global_order_id 
 			+'&local_order_id=' + local_order_id + '&prompt_tokens=' + prompt_tokens + '&completion_tokens=' 
 			+ completion_tokens + '&total_tokens=' + total_tokens+ 
-		'&user_prompt=' + user_prompt + '&ai_response=' + ai_response;
+		'&user_prompt=' + user_prompt + '&ai_response=' + ai_response +
+		'&ai_function_response=' + ai_function_response +'&ai_function_name=' + ai_function_name;
 		//sending query to model
 		this.xhttp.send(query);
 	}
@@ -470,13 +537,19 @@ class controller extends model {
 							document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
 							document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
 							document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
-							utility.write(`AI_text_response_${point_id}_${local_order_id}`, response.body)
+							var written_output = response.body
+							if (response.function_call){
+								written_output = utility.transform_test_object_to_htmlform(response.function_name, response.function_call, point_id, local_order_id)
+							}
+							utility.write(`AI_text_response_${point_id}_${local_order_id}`, written_output)
 							//
 							if (response.server_records == 0){
 								const prompt_tokens = response.usage.prompt_tokens
 								const completion_tokens = response.usage.completion_tokens
 								const total_tokens = response.usage.total_tokens
 								const ai_response = response.body
+								const ai_function_response = JSON.stringify(response.function_call)
+								const ai_function_name = response.function_name
 								//
 								this_object.M_catch_chat_completion(
 									part_id,
@@ -488,9 +561,12 @@ class controller extends model {
 									total_tokens,
 									textareaValue,
 									ai_response,
+									ai_function_response,
+									ai_function_name
 								);
 							}
 						}else{
+							alert(JSON.stringify(response))
 							loading(false)
 						}
 					}

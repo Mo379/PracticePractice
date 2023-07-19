@@ -243,8 +243,8 @@ def _ask_from_book(request):
         chat = part['thread'] if 'thread' in part.keys() else []
         #
         message = {
-          "model": "gpt-4",
-          "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML (titles, lists, highlighting) and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}",
+          "model": "gpt-4-0613",
+          "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}",
           "chat": [
             *chat,
             {
@@ -277,10 +277,15 @@ def _catch_chat_completion(request):
         total_tokens = request.POST['total_tokens']
         user_prompt = request.POST['user_prompt']
         ai_response = request.POST['ai_response']
+        ai_function_name = request.POST['ai_function_name']
+        ai_function_response = request.POST['ai_function_response']
         #
         user_part = {"role": 'user', "content": user_prompt}
         ai_part = {"role": 'assistant', "content": ai_response}
+        ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_function_response}
         new_stuff = [user_part, ai_part]
+        if ai_function_response != 'null':
+            new_stuff = [user_part, ai_function_part]
         try:
             lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
             if lesson_part.recording_switch == False:

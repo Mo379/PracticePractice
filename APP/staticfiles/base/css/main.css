@@ -3,7 +3,9 @@
 }
 
 
-
+code {
+	color: var(--text-color-1);
+}
 /* rating item*/
 .rating {
   display: flex;

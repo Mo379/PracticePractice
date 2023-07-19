@@ -8,6 +8,7 @@ from AI.models import (
         ContentPromptPoint,
         Lesson,
         Lesson_part,
+        Lesson_quiz,
     )
 
 admin.site.register(Usage)
@@ -17,4 +18,5 @@ admin.site.register(ContentPromptTopic)
 admin.site.register(ContentPromptPoint)
 admin.site.register(Lesson)
 admin.site.register(Lesson_part)
+admin.site.register(Lesson_quiz)
 # Register your models here.
