@@ -34,6 +34,7 @@ RUN chown :www-data /var/www/html/PP2
 RUN chown :www-data /var/www/html/logs
 #requirements
 RUN pip install --upgrade pip
+RUN pip install setuptools
 RUN pip install -r /var/www/html/requirements.txt 
 #expose and run
 EXPOSE 80 3500

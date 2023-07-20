@@ -64,7 +64,7 @@ class util{
 				html += `
 				<div class="question form-check quiz_div p-3 mb-3" style='border-left: 1px dotted var(--text-color-3)'>
        				<h5 class='quiz_question_indicator'>Question ${key} </h5>
-				<p class='quiz_question_paragraph'>${question}</p>
+				<p class='quiz_question_paragraph ml-1'>${question}</p>
 				<ul class="quiz_question_choices_ul">`;
 
 				for (var choiceKey in choices) {
@@ -81,7 +81,7 @@ class util{
 				}
 				html += `
 				</ul>
-				<button class='btn btn-primary-outline' style='color:var(--text-color-1)'id='' onclick=''>
+				<button class='btn btn-primary-outline' style='border: 1px dashed var(--text-color-1); color:var(--text-color-1);' id='' onclick=''>
 					<i class="fa-solid fa-marker"></i> Mark
 				</button>
        				<div class='quiz_question_solution mt-2'>
