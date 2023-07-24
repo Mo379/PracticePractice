@@ -12,13 +12,13 @@ asgiref==3.4.1
 async-timeout==4.0.2
 asyncpg==0.27.0
 attrs==22.2.0
-awscli==1.27.8
+awscli==1.29.9
 beautifulsoup4==4.12.2
 billiard==3.6.4.0
 black @ git+https://github.com/psf/black@80de2372e4ec385c082c38f365414ac3622a4010
 bleach==6.0.0
 boto3==1.26.8
-botocore==1.29.8
+botocore==1.31.9
 cachetools==5.3.0
 celery==5.2.7
 certifi==2021.10.8
@@ -158,7 +158,7 @@ python-slugify==8.0.1
 pytz==2022.1
 pytz-deprecation-shim==0.1.0.post0
 pytzdata==2020.1
-PyYAML==5.4.1
+PyYAML==6.0.1
 rcssmin==1.1.1
 readchar==4.0.5
 redis==4.3.4
