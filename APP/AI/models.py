@@ -151,16 +151,14 @@ class Lesson_quiz(models.Model):
         related_name='AI_lesson_quiz_user'
     )
     lesson_part = models.ForeignKey(
-        Lesson, on_delete=models.CASCADE, db_index=True,
+        Lesson_part, on_delete=models.CASCADE, db_index=True,
         default="", null=False, related_name='AI_lesson_part'
     )
-    point_id = models.IntegerField(default=0, null=True)
-    AI_quiz = models.JSONField(default=dict, null=True)
-    prompt = models.IntegerField(default=0, null=True)
-    completion = models.IntegerField(default=0, null=True)
-    total = models.IntegerField(default=0, null=True)
-    recording_switch = models.BooleanField(default=False, null=True)
+    quiz_id = models.CharField(max_length=25, default="", null=True)
+    quiz = models.JSONField(default=dict, null=True)
+    user_answers = models.JSONField(default=dict, null=True)
+    completed = models.BooleanField(default=False, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username + '-' + self.point_id
+        return self.user.username + '-' + str(self.lesson_part)

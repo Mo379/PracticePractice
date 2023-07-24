@@ -28,6 +28,11 @@ urlpatterns = [
         name='_catch_chat_completion'
     ),
     path(
+        '_mark_quiz_question',
+        views._mark_quiz_question,
+        name='_mark_quiz_question'
+    ),
+    path(
         '_newgenerationjob',
         views._newgenerationjob,
         name='_newgenerationjob'

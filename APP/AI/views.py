@@ -1,6 +1,7 @@
 import re
 import time
 import collections
+import json
 from cryptography.fernet import Fernet
 from collections import defaultdict
 from django.shortcuts import redirect
@@ -23,7 +24,8 @@ from AI.models import (
         ContentPromptTopic,
         ContentPromptPoint,
         Lesson,
-        Lesson_part
+        Lesson_part,
+        Lesson_quiz,
     )
 from user.forms import (
         AppearanceChoiceForm,
@@ -244,7 +246,7 @@ def _ask_from_book(request):
         #
         message = {
           "model": "gpt-4-0613",
-          "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}",
+          "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}.",
           "chat": [
             *chat,
             {
@@ -317,6 +319,108 @@ def _catch_chat_completion(request):
             response = {
                     'status_code': 200,
                     'message': 'Sucess'
+                }
+        #
+        return JsonResponse(response)
+    return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
+
+def _mark_quiz_question(request):
+    if request.method == 'POST':
+        lesson_part_id = request.POST['lesson_part_id']
+        quiz_id = request.POST['quiz_id']
+        quiz_question_number = request.POST['question_number']
+        user_choice = request.POST['user_answer']
+        #
+        try:
+            lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+            lesson_quiz, created = Lesson_quiz.objects.get_or_create(
+                    user=request.user,
+                    lesson_part=lesson_part,
+                    quiz_id=quiz_id,
+                )
+            #
+
+            def reinject_user_response_to_thread(chat, quiz_id, user_answers):
+                """Extract the quiz from the thread using the quiz id"""
+                for part in chat.keys():
+                    if 'thread' in chat[part].keys():
+                        thread = chat[part]['thread']
+                        for idd, item in enumerate(thread):
+                            if item['role'] == 'function':
+                                if item['name'] == 'create_a_quiz':
+                                    content = json.loads(item['content'])
+                                    if content['quiz_id'] == quiz_id:
+                                        content['user_answers'] = user_answers
+                                        chat[part]['thread'][idd]['content'] = json.dumps(content)
+                                        return chat
+            if created:
+                def extract_thread_quiz(chat, quiz_id):
+                    """Extract the quiz from the thread using the quiz id"""
+                    for part in chat.keys():
+                        if 'thread' in chat[part].keys():
+                            thread = chat[part]['thread']
+                            for item in thread:
+                                if item['role'] == 'function':
+                                    if item['name'] == 'create_a_quiz':
+                                        content = json.loads(item['content'])
+                                        if content['quiz_id'] == quiz_id:
+                                            return content
+                extracted_quiz = extract_thread_quiz(
+                        lesson_part.part_chat,
+                        quiz_id
+                    )
+                lesson_quiz.quiz = extracted_quiz
+                lesson_quiz.save()
+
+            if quiz_question_number not in lesson_quiz.user_answers.keys():
+                lesson_quiz.user_answers[quiz_question_number] = user_choice
+                lesson_part.part_chat = reinject_user_response_to_thread(
+                        lesson_part.part_chat,
+                        quiz_id,
+                        lesson_quiz.user_answers
+                    )
+                lesson_part.save()
+            solutions = {}
+            for question in lesson_quiz.quiz['quiz'].keys():
+                solutions[f'{question}'] = lesson_quiz.quiz['quiz'][question]['answer']['correct_choice']
+            lesson_quiz.save()
+        except Exception as e:
+            print(str(e))
+            response = {
+                    'status_code': 500,
+                    'message': 'Internal Server Error.'
+                }
+        else:
+            is_correct = False
+            completed = False
+            percentage_score = False
+            answer = lesson_quiz.quiz['quiz'][quiz_question_number]['answer']['answer']
+            correct_choice = solutions[quiz_question_number]
+            #
+            if len(solutions) == len(lesson_quiz.user_answers):
+                def compare_dictionaries(dict1, dict2):
+                    num_matches = 0
+                    for key in dict1.keys():
+                        if key in dict2:
+                            if dict1[key] == dict2[key]:
+                                num_matches += 1
+                    return num_matches
+                completed = True
+                lesson_quiz.completed = True
+                lesson_quiz.save()
+                percentage_score = 100*(compare_dictionaries(solutions, lesson_quiz.user_answers)/len(solutions))
+            #
+            if solutions[quiz_question_number] == lesson_quiz.user_answers[quiz_question_number]:
+                is_correct = True
+            #
+            response = {
+                    'status_code': 200,
+                    'message': 'Sucess',
+                    'is_correct': is_correct,
+                    'completed': completed,
+                    'percentage_score': percentage_score,
+                    'answer': answer,
+                    'correct_choice': correct_choice,
                 }
         #
         return JsonResponse(response)

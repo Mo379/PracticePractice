@@ -104,7 +104,7 @@
 											{%if roleassistant_part.name == 'create_a_quiz'%}
 											{{roleassistant_part.content|safe}}
 											<script>
-												document.getElementById('AI_text_response_{{point_id}}_{{forloop.counter0}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse({{roleassistant_part.content|ToJson|safe}}), '{{point_id}}', '{{forloop.counter0}}')
+												document.getElementById('AI_text_response_{{point_id}}_{{forloop.counter0}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse({{roleassistant_part.content|ToJson|safe}}), '{{point_id}}', '{{forloop.counter0}}', '{{part.id}}', streamed=false)
 											</script>
 											{%else%}
 											{{roleassistant_part.content|ProcessToMarkdown|safe}}
