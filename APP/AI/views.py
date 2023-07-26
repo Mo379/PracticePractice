@@ -85,6 +85,51 @@ class AIView(
         lesson_parts = []
         last_item = ''
         breaker = False
+        quizzes_states = {}
+
+        def extract_thread_quizes(chat):
+            """Extract the quizs from the thread"""
+            quizzes = {}
+            for part in chat.keys():
+                if 'thread' in chat[part].keys():
+                    thread = chat[part]['thread']
+                    for item in thread:
+                        if item['role'] == 'function':
+                            if item['name'] == 'create_a_quiz':
+                                content = json.loads(item['content'])
+                                content['user_answers'] = content['user_answers'] if 'user_answers' in content.keys() else {}
+                                solutions = {}
+                                answers = {}
+                                for question in content['quiz'].keys():
+                                    solutions[f'{question}'] = content['quiz'][question]['answer']['correct_choice']
+                                    answers[f'{question}'] = content['quiz'][question]['answer']['answer']
+                                completed = False
+                                percentage_score = False
+                                if len(solutions) == len(content['user_answers']):
+                                    def compare_dictionaries(dict1, dict2):
+                                        num_matches = 0
+                                        for key in dict1.keys():
+                                            if key in dict2:
+                                                if dict1[key] == dict2[key]:
+                                                    num_matches += 1
+                                        return num_matches
+                                    completed = True
+                                    percentage_score = 100*(compare_dictionaries(solutions, content['user_answers'])/len(solutions))
+                                questions = {}
+                                for key in solutions.keys():
+                                    user_answer = content['user_answers'][key] if key in content['user_answers'].keys() else None
+                                    questions[key] = {
+                                            "user_answer": user_answer,
+                                            "correct_choice": solutions[key],
+                                            "is_correct": True if user_answer == solutions[key] else False,
+                                            "answer": answers[key],
+                                        }
+                                quizzes[content['quiz_id']] = {
+                                        "quiz": questions,
+                                        "is_completed": completed,
+                                        "percentage_score": percentage_score
+                                    }
+            return quizzes
         for topic in topics:
             part, created = Lesson_part.objects.get_or_create(
                     user=user,
@@ -105,6 +150,7 @@ class AIView(
                     num_next_points += len(lesson_parts[-1].part_content['content'].keys()) - system_chats_in_part
             if breaker:
                 num_next_points += len(part.part_content['content'].keys())
+            quizzes_states.update(extract_thread_quizes(part.part_chat))
             lesson_parts.append(part)
         #
         course_subscription = CourseSubscription.objects.filter(
@@ -127,6 +173,7 @@ class AIView(
         context['course_version'] = latest_course_version
         context['lesson'] = active_lesson
         context['lesson_parts'] = lesson_parts
+        context['quizzes'] = quizzes_states
         context['last_item'] = last_item
         context['num_next_points'] = num_next_points
         #
@@ -231,21 +278,22 @@ def _ask_from_book(request):
     if request.method == 'POST':
         lesson_part_id = request.POST['part_id']
         point_id = request.POST['point_id']
-        order_id = request.POST['order_id']
+        global_order_id = request.POST['global_order_id']
+        local_order_id = request.POST['local_order_id']
         user_prompt = request.POST['user_prompt']
         #
         lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
         #
-        chat_subthread_number = str(int(order_id)-1)
+        chat_subthread_number = str(int(global_order_id)-1)
         part = lesson_part.part_chat[chat_subthread_number]
         point_obj = Point.objects.get(p_unique_id=part['system'])
         system_content, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
         system_content = re.sub('<[^<]+?>', '', system_content)
         #
-        chat = part['thread'] if 'thread' in part.keys() else []
+        chat = part['thread'][0:int(local_order_id)*2] if 'thread' in part.keys() else []
         #
         message = {
-          "model": "gpt-4-0613",
+          "model": "gpt-3.5-turbo-0613",
           "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}.",
           "chat": [
             *chat,
@@ -385,7 +433,6 @@ def _mark_quiz_question(request):
                 solutions[f'{question}'] = lesson_quiz.quiz['quiz'][question]['answer']['correct_choice']
             lesson_quiz.save()
         except Exception as e:
-            print(str(e))
             response = {
                     'status_code': 500,
                     'message': 'Internal Server Error.'

@@ -218,12 +218,15 @@ class model extends xhttp {
 		//sending query to model
 		this.xhttp.send(query);
 	}
-	M_init_prompt(part_id, point_id, order_id, user_prompt){
+	M_init_prompt(part_id, point_id, global_order_id, local_order_id, user_prompt){
 		//opening the port using xhttp
 		this.open_port("{%url 'AI:_ask_from_book'%}");
 		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
 		//prepairing query
-		var query = 'part_id=' + part_id + '&point_id=' + point_id + '&order_id=' + order_id + '&user_prompt=' + user_prompt;
+		var query = 'part_id=' + part_id + '&point_id=' + point_id + 
+				'&global_order_id=' + global_order_id + 
+				'&local_order_id=' + local_order_id + 
+				'&user_prompt=' + user_prompt;
 		//sending query to model
 		this.xhttp.send(query);
 	}
@@ -507,7 +510,7 @@ class controller extends model {
 		MathJax.typeset()
 		const this_object = this
 
-		this_object.M_init_prompt(part_id, point_id, global_order_id, textareaValue);
+		this_object.M_init_prompt(part_id, point_id, global_order_id, local_order_id, textareaValue);
 		loading(true)
 		this_object.xhttp.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
@@ -577,15 +580,20 @@ class controller extends model {
 							var written_output = response.body
 							if (response.function_call){
 								written_output = utility.transform_test_object_to_htmlform(response.function_name, response.function_call, point_id, local_order_id, part_id)
+								utility.write(
+									`AI_text_response_${point_id}_${local_order_id}`,
+									written_output.replace(/\\/g, '\\\\\\'), 
+									5,
+									20,
+									30,
+									50
+								)
+							}else{
+								utility.write(
+									`AI_text_response_${point_id}_${local_order_id}`,
+									written_output, 
+								)
 							}
-							utility.write(
-								`AI_text_response_${point_id}_${local_order_id}`,
-								written_output, 
-								5,
-								20,
-								30,
-								50
-							)
 							//
 							if (response.server_records == 0){
 								const prompt_tokens = response.usage.prompt_tokens
@@ -712,7 +720,7 @@ class controller extends model {
 							}
 							const solution_html = `
 								<h6 class='quiz_question_indicator'>Solution to Q ${question_number}: </h6>
-								<p class="explanation">${json.answer} <br><br> The correct choice is: ${json.correct_choice}</p>
+								<p class="explanation">${json.answer.replace(/\\/g, '\\\\')} <br><br> The correct choice is: ${json.correct_choice}</p>
 							`
 							utility.write(`quiz_solution_${quiz_id}_${question_number}`, solution_html)
 						}else{
@@ -721,6 +729,45 @@ class controller extends model {
 					}, 1000);
 				}
 			}
+		}
+	}
+	C_load_quiz_state(quiz_id, quiz_info){
+		for (let question_number in quiz_info.quiz) {
+			var question = quiz_info.quiz[question_number]
+			if (question.user_answer){
+				document.querySelector(`#markbutton_${quiz_id}_${question_number}`).remove()
+				// Get a reference to the UL element
+				const radioList = document.getElementById(`quiz_question_choices_${quiz_id}_${question_number}`);
+				// Find all the radio inputs within the UL
+				const radioInputs = radioList.querySelectorAll("input[type='radio']");
+				for (const radioInput of radioInputs) {
+					radioInput.disabled=true
+					if (radioInput.value == question.user_answer) {
+						radioInput.disabled=false
+						radioInput.checked=true
+						var label_element = document.querySelector(`#question_label_${quiz_id}_${question_number}_${radioInput.value}`)
+						if (question.is_correct){
+							label_element.style.color='green';
+						}else{
+							label_element.style.color='red';
+						}
+						const solution_html = `
+							<h6 class='quiz_question_indicator'>Solution to Q ${question_number}: </h6>
+							<p class="explanation">${question.answer} <br><br> The correct choice is: ${question.correct_choice}</p>
+						`
+						document.querySelector(`#quiz_solution_${quiz_id}_${question_number}`).innerHTML = solution_html
+					}
+				}
+			}
+		}
+		if (quiz_info.is_completed){
+			var score_hue = this.util.getColor(quiz_info.percentage_score)
+			var score_element = document.querySelector(`#final_score_${quiz_id}`)
+			var score_html = `
+					You have completed this quiz scoring: ${quiz_info.percentage_score}%
+				`
+			score_element.style.color = score_hue
+			document.querySelector(`#final_score_${quiz_id}`).innerHTML = score_html
 		}
 	}
 }

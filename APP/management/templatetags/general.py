@@ -159,10 +159,22 @@ def divide(value, arg):
         return None
 
 
+@register.filter(name='get_quiz_id')
+def get_quiz_id(content):
+    # setup output
+    content = json.loads(content)
+    return content['quiz_id']
 @register.filter(name='ToJson')
 def ToJson(content):
     # setup output
     content = json.dumps(content)
+    print('hello',content)
+    return content
+
+@register.filter(name='GetMathString')
+def GetMathString(content):
+    # setup output
+    content = content.replace('\\', '\\\\')
     return content
 @register.filter(name='ProcessToMarkdown')
 def ProcessToMarkdown(content):

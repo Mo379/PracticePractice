@@ -102,14 +102,18 @@
 									<div class='AI_text_text'>
 										<div class='mb-3' id='AI_text_response_{{point_id}}_{{forloop.counter0}}'>
 											{%if roleassistant_part.name == 'create_a_quiz'%}
-											{{roleassistant_part.content|safe}}
-											<script>
-												document.getElementById('AI_text_response_{{point_id}}_{{forloop.counter0}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse({{roleassistant_part.content|ToJson|safe}}), '{{point_id}}', '{{forloop.counter0}}', '{{part.id}}', streamed=false)
-											</script>
+											{% definevar roleassistant_part.content|get_quiz_id as quiz_id%}
+											{{context.quizzes|index:quiz_id}}
 											{%else%}
 											{{roleassistant_part.content|ProcessToMarkdown|safe}}
 											{%endif%}
 										</div>
+											{%if roleassistant_part.name == 'create_a_quiz'%}
+											<script>
+												document.getElementById('AI_text_response_{{point_id}}_{{forloop.counter0}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse(`{{roleassistant_part.content|GetMathString|safe}}`.replace(/\\/g, '\\\\')), '{{point_id}}', '{{forloop.counter0}}', '{{part.id}}', streamed=false)
+												Controller.C_load_quiz_state('{{quiz_id}}',JSON.parse(`{{context.quizzes|index:quiz_id|ToJson|GetMathString|safe}}`.replace(/\\/g, '\\\\')))
+											</script>
+											{%endif%}
 										<div class='AI_window_typing'>
 											<div style='margin:auto;'>
 												<button class='btn btn-primary' id='ask_button_{{point_id}}_{{forloop.counter0}}' onclick='Controller.C_ask_from_thread("ai_response_{{point_id}}_{{forloop.counter0}}", "{{forloop.parentloop.counter}}","{{forloop.counter}}", "{{point_id}}", "{{part.id}}")'>
