@@ -217,7 +217,7 @@ class controller extends model{
 		}
 		var a = "<div class ='maker_display_option "+class_n+' '+parent_indic+"' id ='disp_"+id+"' data-value='"+value+"'> ";
 		var b = "<p style='display: inline-block;'>"+txt+"</p>";
-		var c = "<a style='display: inline-block;' onclick =controller.C_remove_display_elm('"+id+"')>X</a>";
+		var c = "<a style='display: inline-block;' onclick =controller.C_remove_display_elm('"+id+"')><i class='bi bi-trash' style='color:red;'></i></a>";
 		var d = "</div>";
 		return a+b+c+d;
 	}
@@ -262,11 +262,11 @@ class controller extends model{
 		var tab_elm = document.getElementById(current_tab);
 		var elems = document.getElementsByClassName("maker_tabs");
 		for (var i = 0; i < elems.length; i ++) {
-				elems[i].style.background = 'white';
-				elems[i].style.color = 'black';
+				elems[i].style.background = 'var(--second-bg-color)';
+				elems[i].style.color = 'var(--text-color-3)';
 		}
-		tab_elm.style.background = 'black';
-		tab_elm.style.color = 'white';
+		tab_elm.style.background = 'var(--third-bg-color)';
+		tab_elm.style.color = 'var(--text-color-3)';
 		//
 		//
 		if(tab == 'QStatus'){
@@ -316,11 +316,11 @@ class controller extends model{
 		var tab_elm = document.getElementById(current_tab);
 		var elems = document.getElementsByClassName("maker_tabs");
 		for (var i = 0; i < elems.length; i ++) {
-				elems[i].style.background = 'white';
-				elems[i].style.color = 'black';
+				elems[i].style.background = 'var(--second-bg-color)';
+				elems[i].style.color = 'var(--text-color-3)';
 		}
-		tab_elm.style.background = 'black';
-		tab_elm.style.color = 'white';
+		tab_elm.style.background = 'var(--third-bg-color)';
+		tab_elm.style.color = 'var(--text-color-3)';
 		//moduel => value,display
 		var json = JSON.parse(document.getElementById(moduels).textContent);
 		
@@ -347,11 +347,11 @@ class controller extends model{
 		var tab_elm = document.getElementById(current_tab);
 		var elems = document.getElementsByClassName("maker_tabs");
 		for (var i = 0; i < elems.length; i ++) {
-				elems[i].style.background = 'white';
-				elems[i].style.color = 'black';
+				elems[i].style.background = 'var(--second-bg-color)';
+				elems[i].style.color = 'var(--text-color-3)';
 		}
-		tab_elm.style.background = 'black';
-		tab_elm.style.color = 'white';
+		tab_elm.style.background = 'var(--third-bg-color)';
+		tab_elm.style.color = 'var(--text-color-3)';
 		//
 		var moduels = document.getElementsByClassName("cq_moduel");
 		if(moduels.length > 0){
@@ -375,7 +375,7 @@ class controller extends model{
 			elem.innerHTML = html
 		}else{
 			var elem = document.getElementById("top");
-			elem.innerHTML = "<a style ='color:red;'>Moduel selection is required for chapters.</a>";
+			elem.innerHTML = "<a style ='color:var(--text-color-1);'>Moduel selection is required for chapters.</a>";
 		}
 	}
 	//

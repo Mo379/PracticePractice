@@ -293,7 +293,7 @@ def _ask_from_book(request):
         chat = part['thread'][0:int(local_order_id)*2] if 'thread' in part.keys() else []
         #
         message = {
-          "model": "gpt-3.5-turbo-0613",
+          "model": "gpt-4-0613",
           "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}.",
           "chat": [
             *chat,

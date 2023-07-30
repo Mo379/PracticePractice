@@ -17,6 +17,229 @@
 {%endblock%}
 
 {%block content%}
+<script>
+function write(elemID, text, delay_lower=30, delay_higher=70, char_lower=10, char_higher=15) {
+  let element = document.getElementById(elemID);
+  let i = 0;
+  function type() {
+    let charCount = Math.floor(Math.random() * (char_higher - char_lower + 1)) + char_lower;
+    let delay = Math.floor(Math.random() * (delay_higher - delay_lower + 1)) + delay_lower;
+    
+    let shouldPause = Math.random() < 0.1;
+    if (shouldPause) {
+      delay += 40;
+    }
+    if (i < text.length) {
+      element.innerHTML = text.slice(0, i + charCount) + `
+      <span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
+      </span>`;
+      i += charCount;
+      MathJax.typeset()
+      setTimeout(type, delay);
+    }
+  }
+  type();
+}
+class xhttp {
+	open_port(url) {
+		this.xhttp = new XMLHttpRequest();
+		this.xhttp.open('POST', url, true);
+		this.xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	}
+}
+class view {
+	//loading
+}
+//coommunicates with php and gets a result to be displayed as a view
+class model extends xhttp {
+	M_precieved_difficulty(course_id, question_id,precieved_difficulty){
+		//opening the port using xhttp
+		this.open_port("{%url 'content:_subjective_mark_question'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'course_id=' + course_id + '&question_id=' + question_id + 
+			'&precieved_difficulty=' + precieved_difficulty;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+	M_show_answer(course_id, question_id){
+		//opening the port using xhttp
+		this.open_port("{%url 'content:_show_answer'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'course_id=' + course_id + '&question_id=' + question_id
+		//sending query to model
+		this.xhttp.send(query);
+	}
+	M_mark_question(course_id, question_id, n_marks){
+		//opening the port using xhttp
+		this.open_port("{%url 'content:_mark_question'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'course_id=' + course_id + '&question_id=' + question_id +
+				'&n_marks=' + n_marks 
+
+		//sending query to model
+		this.xhttp.send(query);
+	}
+}
+class controller extends model{
+	//construct
+	constructor(view) {
+		super();
+		this.view = view;
+
+	}
+	C_precieved_difficulty(course_id, question_id, precieved_difficulty){
+		const utility = this.util
+
+		var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+		        document.querySelector(`#markbutton_${question_id}_${precieved_difficulty}`).disabled = true;
+		        document.querySelector(`#marking_view_${question_id}_${precieved_difficulty}`).classList.add('d-none');
+		        document.querySelector(`#spinner_and_wait_${question_id}_${precieved_difficulty}`).classList.remove('d-none');
+		      } else {
+		        document.querySelector(`#markbutton_${question_id}_${precieved_difficulty}`).disabled = false;
+		        document.querySelector(`#marking_view_${question_id}_${precieved_difficulty}`).classList.remove('d-none');
+		        document.querySelector(`#spinner_and_wait_${question_id}_${precieved_difficulty}`).classList.add('d-none');
+		      }
+		};
+		loading(true)
+		this.M_precieved_difficulty(course_id, question_id, precieved_difficulty)
+		this.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				setTimeout(function (){
+					if (json.error){
+						loading(false)
+					}else{
+						loading(false)
+						for (let i = 1; i < 4; i++){
+							document.querySelector(`#markbutton_${question_id}_${i}`).remove();
+						}
+						if (json.video_html){
+							document.querySelector(`body`).innerHTML += json.video_html;
+							document.querySelector(`#vidbutton_information_window_${question_id}`).innerHTML = json.button_html;
+							var scriptElement = document.createElement('script');
+							scriptElement.textContent = json.script_html;
+							document.querySelector(`body`).appendChild(scriptElement);
+						}
+						write(
+							`information_window_${question_id}`,
+							json.answer_html,
+							5,
+							20,
+							30,
+							50
+						)
+
+					}
+				}, 1000);
+			}
+		}
+	}
+	C_show_answer(course_id, question_id){
+		const utility = this.util
+
+		var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+		        document.querySelector(`#showanswer_${question_id}`).disabled = true;
+		        document.querySelector(`#marking_view_${question_id}`).classList.add('d-none');
+		        document.querySelector(`#spinner_and_wait_${question_id}`).classList.remove('d-none');
+		      } else {
+		        document.querySelector(`#showanswer_${question_id}`).disabled = false;
+		        document.querySelector(`#marking_view_${question_id}`).classList.remove('d-none');
+		        document.querySelector(`#spinner_and_wait_${question_id}`).classList.add('d-none');
+		      }
+		};
+		loading(true)
+		this.M_show_answer(course_id, question_id)
+		this.xhttp.onreadystatechange = function () {
+			if (this.readyState == 4 && this.status == 200) {
+				var txt = this.responseText;
+				var json = JSON.parse(txt);
+				setTimeout(function (){
+					if (json.error){
+						loading(false)
+					}else{
+						loading(false)
+						document.querySelector(`#showanswer_${question_id}`).remove();
+						if (json.video_html){
+							document.querySelector(`#vidbutton_information_window_${question_id}`).innerHTML = json.button_html;
+							document.querySelector(`body`).innerHTML += json.video_html;
+							var scriptElement = document.querySelector(`#my_modal_script`);
+							scriptElement.textContent += json.script_html;
+							eval(scriptElement.textContent)
+						}
+						write(
+							`information_window_${question_id}`,
+							json.answer_html,
+							5,
+							20,
+							30,
+							50
+						)
+
+					}
+				}, 1000);
+			}
+		}
+	}
+	C_mark_question(course_id, question_id){
+		const utility = this.util
+
+		var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+		        document.querySelector(`#qmarkanswer_${question_id}`).disabled = true;
+		        document.querySelector(`#q_marking_view_${question_id}`).classList.add('d-none');
+		        document.querySelector(`#marking_spinner_and_wait_${question_id}`).classList.remove('d-none');
+		      } else {
+		        document.querySelector(`#qmarkanswer_${question_id}`).disabled = false;
+		        document.querySelector(`#q_marking_view_${question_id}`).classList.remove('d-none');
+		        document.querySelector(`#marking_spinner_and_wait_${question_id}`).classList.add('d-none');
+		      }
+		};
+		const selectElement = document.getElementById(`marking_selection_menu_${question_id}`);
+		const n_marks = selectElement.value;
+		loading(true)
+		if (n_marks < 0){
+			setTimeout(function (){
+				loading(false)
+			}, 1000);
+		}else{
+			this.M_mark_question(course_id, question_id, n_marks)
+			this.xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					var txt = this.responseText;
+					var json = JSON.parse(txt);
+					setTimeout(function (){
+						if (json.error){
+							loading(false)
+						}else{
+							loading(false)
+							document.querySelector(`#markingwrapper_${question_id}`).remove();
+							write(
+								`marking_information_window_${question_id}`,
+								json.marking_information,
+								5,
+								20,
+								30,
+								50
+							)
+						}
+					}, 1000);
+				}
+			}
+		}
+	}
+}
+view = new view();
+Controller = new controller(view);
+</script>
 {%if context.coursesubscription == False%}
 	{%include 'content/items/course_buy.html'%}
 {%else%}
@@ -86,11 +309,58 @@
 												<div class="container col-9 text-justify" style='border-left:1px solid black;'>
 													<div class='ml-1' style='border-left: 1px solid grey;'>
 													    <div class='ml-1 mb-3' style='border-left: 2px dashed silver; padding-left:5px;'>
-													    {{B.q_content|safe}}
+													    {{B.q_content|ToMarkdownQuestion:B.id|safe}}
+													    {% definevar context.question_tracks|index:B.id as q_track%}
+													    <div style='text-align:right;'>
+															[{{B.q_marks}}] <br>
+															{%if q_track%}
+															Attempts: {{q_track.track_attempt_number}} <br>
+															Last Score: [{{ q_track.track_mark }}/{{ q_track.total_marks}}] 
+															({{q_track.track_mark|get_percent:q_track.total_marks}}%)<br>
+															{%endif%}
+													    </div>
 													    </div>
 													</div>
-													<div style='border-bottom: 1px dashed silver;margin-bottom:5px;'></div>
-													<button class="btn btn-primary">View Solution</button>
+													<div class='mb-3'style='border-bottom: 1px dashed silver;margin-bottom:5px;'></div>
+													{%if context.question_tracks|index:B.id%}
+														<button class='btn btn-primary-outline' style='border: 1px dashed var(--text-color-1); color:var(--text-color-1);' id='showanswer_{{B.id}}' onclick='Controller.C_show_answer("{{context.course.id}}", "{{B.id}}")'>
+														<div id='marking_view_{{B.id}}' class=''>
+																Show Answer
+														</div>
+														<div id='spinner_and_wait_{{B.id}}' class='d-none'>
+															<div class="d-flex justify-content-center">
+															  <div class="spinner-border spinner-border-sm" role="status">
+															    <span class="sr-only">Loading...</span>
+															  </div>
+															</div>
+														</div>
+														</button>
+													{%else%}
+														{% for i in '123'|make_list %}
+														<button class='btn btn-primary-outline' style='border: 1px dashed var(--text-color-1); color:var(--text-color-1);' id='markbutton_{{B.id}}_{{forloop.counter}}' onclick='Controller.C_precieved_difficulty("{{context.course.id}}", "{{B.id}}", "{{forloop.counter}}")'>
+																<div id='marking_view_{{B.id}}_{{forloop.counter}}' class=''>
+																	{%if forloop.counter == 1%}
+																	Easy
+																	{%elif forloop.counter == 2%}
+																	Ok
+																	{%elif forloop.counter == 3%}
+																	Hard
+																	{%endif%}
+																</div>
+																<div id='spinner_and_wait_{{B.id}}_{{forloop.counter}}' class='d-none'>
+																	<div class="d-flex justify-content-center">
+																	  <div class="spinner-border spinner-border-sm" role="status">
+																	    <span class="sr-only">Loading...</span>
+																	  </div>
+																	</div>
+																</div>
+														</button>
+														{% endfor %}
+													{%endif%}
+													<br>
+													<span id='vidbutton_information_window_{{B.id}}'></span>
+													<span id='information_window_{{B.id}}'></span>
+													<span id='marking_information_window_{{B.id}}'></span>
 												</div>
 											</section>
 										</div>
@@ -107,6 +377,7 @@
 			</div>
 		</div>
 	</div>
+<script id='my_modal_script'></script>
 {%endif%}
 
 

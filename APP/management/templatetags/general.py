@@ -159,6 +159,11 @@ def divide(value, arg):
         return None
 
 
+@register.filter(name='get_percent')
+def get_percent(denominator, numerator):
+    return (denominator/numerator)*100
+
+
 @register.filter(name='get_quiz_id')
 def get_quiz_id(content):
     # setup output
@@ -428,6 +433,70 @@ def ToMarkdownAnswer(content, question_id):
         content_html += description
     content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
     return answer_video_html + content_html
+
+@register.filter(name='ToMarkdownAnswerManual')
+def ToMarkdownAnswerManual(content, question_id):
+    # setup output
+    # kw items in content
+    question = Question.objects.get(pk=question_id)
+    description = question.q_answer
+    videos = question.q_videos.all()
+    images = question.q_images.all()
+    #
+    # the description has many numbered elements
+    # the content element is numbered
+    video_html = ''
+    script_html = ''
+    video_tags = []
+    for vid in videos:
+        vid_title = vid.title
+        vid_link = vid.url
+        if vid_link:
+            video_tag = TagGenerator()
+            video_tags.append(video_tag)
+            context = {
+                    'vid_unique': video_tag,
+                    'vid_title': vid_title,
+                    'vid_link': vid_link
+                }
+            template = loader.get_template('content/video_popup_manual.html')
+            script_template = loader.get_template('content/video_popup_manual_script.html')
+            content = template.render(context)
+            script_content = script_template.render(context)
+            video_html += content
+            script_html += script_content
+
+    # the description has many numbered elements
+    content_html = ''
+    if str(type(description)) == "<class 'dict'>":
+        for item in range(len(description)):
+            # to keep the order of the description
+            item = str(item)
+            # each item has a single child either text or img
+            # the text element is direct access
+            if 'text' in description[item]:
+                text = str(description[item]['text'])
+                text = text.replace('\\', '\\\\')
+                content_html += text
+            # the image element is made of two parts, info and file name
+            if 'img' in description[item]:
+                img_element = description[item]['img']
+                img_info = img_element['img_info']
+                img_name = img_element['img_name']
+                if img_name and img_info:
+                    file_path = os.path.join('universal/', f'question_{question.id}_{img_name}')
+                    context = {
+                            'CDN': settings.CDN_URL,
+                            'img_info': img_info,
+                            'file_path': file_path,
+                        }
+                    template = loader.get_template('content/image_main.html')
+                    content = template.render(context)
+                    content_html += content
+    else:
+        content_html += description
+    content_html = markdown.markdown(content_html, extensions=['tables','admonition'])
+    return content_html, video_html, script_html, video_tags
 
 @register.filter(name='DifficultyToLabel')
 def DifficultyToLabel(diff):

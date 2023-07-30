@@ -39,6 +39,7 @@ class Question(models.Model):
     q_number = models.IntegerField(default=0, null=True)
     #
     q_difficulty = models.IntegerField(default=0, null=True)
+    q_marks = models.IntegerField(default=1)
     q_content = models.JSONField(default=dict, null=True)
     q_answer = models.JSONField(default=dict, null=True)
     q_MDcontent = MDTextField(default="", null=True)
@@ -299,8 +300,18 @@ class QuestionTrack(models.Model):
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, db_column="q_unique_id", db_index=True
     )
+    CHOICES_Marks = [
+        ('1', 'Easy'),
+        ('2', 'Ok'),
+        ('3', 'Hard'),
+    ]
+    precieved_difficulty = models.CharField(
+        max_length=1,
+        choices=CHOICES_Marks,
+        null=True
+    )
     track_mark = models.IntegerField(default=0, null=True)
-    track_mark_boolean = models.BooleanField(default=False, null=True)
+    total_marks = models.IntegerField(default=0, null=True)
     track_attempt_number = models.IntegerField(default=0, null=True)
     track_creation_time = models.DateTimeField(
         "date created", auto_now_add=True, blank=True

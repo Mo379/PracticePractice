@@ -320,4 +320,19 @@ urlpatterns = [
         views._saveansweredit,
         name='_saveansweredit'
     ),
+    path(
+        'content/_subjective_mark_question/',
+        views._subjective_mark_question,
+        name='_subjective_mark_question'
+    ),
+    path(
+        'content/_mark_question/',
+        views._mark_question,
+        name='_mark_question'
+    ),
+    path(
+        'content/_show_answer/',
+        views._show_answer,
+        name='_show_answer'
+    ),
 ]

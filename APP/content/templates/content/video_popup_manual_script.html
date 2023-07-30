@@ -2,9 +2,7 @@ $('#link-{{vid_unique}}').click(function () {
         $('#myModal-{{vid_unique}}').modal('show');
 	$('#myModal-{{vid_unique}} iframe').attr('src', '{{vid_link}}');
 });
-	$('#myModal-{{vid_unique}} button').click(function () {
+$('#myModal-{{vid_unique}} button').click(function () {
 	$('#myModal-{{vid_unique}} iframe').removeAttr('src');
 });
-
-
 

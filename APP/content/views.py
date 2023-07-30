@@ -27,6 +27,7 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
 from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MDEditorModleForm
+from management.templatetags.general import ToMarkdownAnswerManual
 from mdeditor.widgets import MDEditorWidget
 from braces.views import (
         LoginRequiredMixin,
@@ -380,6 +381,7 @@ class PracticeView(
         content = order_live_spec_content(content)
         chapter_qs = content[module]['content'][chapter]['questions']
         dic = OrderedDict()
+        all_questions = []
         question = None
         for difficulty in range(5):
             difficulty += 1
@@ -388,13 +390,24 @@ class PracticeView(
                 for question in chapter_qs[d]:
                     if d not in dic:
                         dic[d] = []
-                    dic[d].append(Question.objects.get(q_unique_id=question))
+                    temp_question_object = Question.objects.get(q_unique_id=question)
+                    dic[d].append(temp_question_object)
+                    all_questions.append(temp_question_object)
+        #
+        all_q_tracks = {}
+        question_tracks = QuestionTrack.objects.filter(
+                user=self.request.user,
+                course=course,
+                question__in=all_questions
+            )
+        all_q_tracks = {q.question.id: q for q in question_tracks}
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
         context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['questions'] = dic if question else None
         context['course'] = course
         context['module'] = module
         context['chapter'] = chapter
+        context['question_tracks'] = all_q_tracks
         return context
 
 
@@ -1179,7 +1192,6 @@ def _createpoint(request):
         Template = ContentTemplate.objects.get(
                 name='Point'
             )
-        Template.content['details']['hidden']['0']['point_title'] = new_point
         #
         points = Point.objects.filter(
                 user=request.user,
@@ -1200,7 +1212,7 @@ def _createpoint(request):
         my_point.p_moduel = moduel
         my_point.p_chapter = chapter
         my_point.p_topic = topic
-        my_point.p_title = 'New Point'
+        my_point.p_title = name
         my_point.p_content = Template.content
         my_point.p_unique_id = TagGenerator()
         my_point.save()
@@ -2949,6 +2961,210 @@ def _saveansweredit(request):
                 return JsonResponse({'error': 0, 'message': 'Saved'})
             return JsonResponse({'error': 1, 'message': 'Error'})
         return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+def _subjective_mark_question(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        question_id = request.POST['question_id']
+        precieved_difficulty = request.POST['precieved_difficulty']
+        course = Course.objects.get(pk=course_id)
+        question = Question.objects.get(user=request.user, pk=question_id)
+        questiontrack, created = QuestionTrack.objects.get_or_create(
+                    user=request.user,
+                    course=course,
+                    question=question
+                )
+        try:
+            questiontrack.total_marks = question.q_marks
+            questiontrack.precieved_difficulty = str(precieved_difficulty)
+            questiontrack.save()
+            html, video_html, script_html, video_tags = ToMarkdownAnswerManual('', question.id)
+            video_button_html = ''
+            for vidtag in video_tags:
+                video_button_html += f"""
+                        <button id='link-{vidtag}' type="button" class="btn btn-primary mb-3"
+                            style='display:inline;margin-left:auto;'>
+                            <i class="bi bi-caret-right-square-fill"></i>
+                        </button>
+                """
+            if len(video_tags) < 1:
+                video_html = False
+                script_html = False
+                video_button_html = False
+            mark_options = ''.join([
+                    f"<option value='{mark}'>{mark} Mark$s$</option>"
+                    for mark in range(0, question.q_marks + 1, 1)
+                ])
+            marks_dropdown_html = f"""
+                <div
+                    class="input-group mb-3"
+                    style='width:50%;'
+                    id='markingwrapper_{question.id}'
+                >
+                    <div class="input-group-prepend">
+                        <button
+                            class='btn btn-primary-outline'
+                            style='
+                                border: 1px dashed var(--text-color-1);
+                                color:var(--text-color-1);
+                            '
+                            onclick='Controller.C_mark_question("{course.id}","{question.id}")'
+                            id='qmarkanswer_{question.id}'
+                        >
+                            <div id='q_marking_view_{question.id}' class=''>
+                                Mark Answer
+                            </div>
+                            <div id='marking_spinner_and_wait_{question.id}' class='d-none'>
+                                <div class="d-flex justify-content-center">
+                                  <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                  </div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                    <select class="custom-select" id="marking_selection_menu_{question.id}">
+                        <option selected value='-1'>...</option>
+                        {mark_options}
+                    </select>
+                </div>
+            """
+            html += f"""
+                {marks_dropdown_html}
+            """
+            #
+            return JsonResponse(
+                    {
+                        'error': 0,
+                        'answer_html': html,
+                        'video_html': video_html,
+                        'script_html': script_html,
+                        'button_html': video_button_html,
+                    }
+                )
+        except Exception as e:
+            print(str(e))
+            return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+
+def _mark_question(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        question_id = request.POST['question_id']
+        n_marks = request.POST['n_marks']
+        course = Course.objects.get(pk=course_id)
+        question = Question.objects.get(user=request.user, pk=question_id)
+        questiontrack, created = QuestionTrack.objects.get_or_create(
+                user=request.user,
+                course=course,
+                question=question
+            )
+        try:
+            questiontrack.track_mark = int(n_marks)
+            questiontrack.track_attempt_number += 1
+            questiontrack.save()
+            #
+            marking_information = f"""<br>
+                Attempt Number: {questiontrack.track_attempt_number} <br>
+                Score: {questiontrack.track_mark}/{questiontrack.total_marks};
+                    {(questiontrack.track_mark/questiontrack.total_marks)*100}%<br>
+            """
+            return JsonResponse(
+                    {
+                        'error': 0,
+                        'message': 'Success',
+                        'marking_information': marking_information,
+                    }
+                )
+        except Exception as e:
+            print(str(e))
+            return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+def _show_answer(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        question_id = request.POST['question_id']
+        course = Course.objects.get(pk=course_id)
+        question = Question.objects.get(user=request.user, pk=question_id)
+        questiontrack, created = QuestionTrack.objects.get_or_create(
+                    user=request.user,
+                    course=course,
+                    question=question
+                )
+        try:
+            html, video_html, script_html, video_tags = ToMarkdownAnswerManual('', question.id)
+            video_button_html = ''
+            for vidtag in video_tags:
+                video_button_html += f"""
+                        <button id='link-{vidtag}' type="button" class="btn btn-primary mb-3"
+                            style='display:inline;margin-left:auto;'>
+                            <i class="bi bi-caret-right-square-fill"></i>
+                        </button>
+                """
+            if len(video_tags) < 1:
+                video_html = False
+                script_html = False
+                video_button_html = False
+            # Add the Bootstrap selection menu for marks
+
+            mark_options = ''.join([
+                    f"<option value='{mark}'>{mark} Mark$s$</option>"
+                    for mark in range(0, question.q_marks + 1, 1)
+                ])
+            marks_dropdown_html = f"""
+                <div
+                    class="input-group mb-3"
+                    style='width:50%;'
+                    id='markingwrapper_{question.id}'
+                >
+                    <div class="input-group-prepend">
+                        <button
+                            class='btn btn-primary-outline'
+                            style='
+                                border: 1px dashed var(--text-color-1);
+                                color:var(--text-color-1);
+                            '
+                            onclick='Controller.C_mark_question("{course.id}","{question.id}")'
+                            id='qmarkanswer_{question.id}'
+                        >
+                            <div id='q_marking_view_{question.id}' class=''>
+                                Mark Answer
+                            </div>
+                            <div id='marking_spinner_and_wait_{question.id}' class='d-none'>
+                                <div class="d-flex justify-content-center">
+                                  <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                  </div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                    <select class="custom-select" id="marking_selection_menu_{question.id}">
+                        <option selected value='-1'>...</option>
+                        {mark_options}
+                    </select>
+                </div>
+            """
+            html += f"""
+                {marks_dropdown_html}
+            """
+            #
+            return JsonResponse(
+                    {
+                        'error': 0,
+                        'answer_html': html,
+                        'video_html': video_html,
+                        'script_html': script_html,
+                        'button_html': video_button_html,
+                        'button_html': video_button_html,
+                    }
+                )
+        except Exception as e:
+            print(str(e))
+            return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 

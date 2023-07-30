@@ -169,13 +169,13 @@
 /* Custom practice test maker styling */
 #wrapper_testmaker{
 	display:grid;
-	height: 60vh;
+	height: 80vh;
 }
 #main_body{
 	display:grid;
 	grid-template-columns: 2fr 7fr;
 	grid-template-areas: 'scroll_window select_window';
-	max-height: 60vh;
+	max-height: 80vh;
 }
 #scroll_window{
 	border-right: 1px solid black;
@@ -188,17 +188,18 @@
 #scroll_window .maker_tabs{
 	padding: 10px;	
 	text-align: center;
-	border: 1px solid silver;
+	border: 1px solid var(--main-bg-color);
 }
 #scroll_window .maker_tabs:hover{
-	background: black;	
-	color: white;	
+	background: var(--main-bg-color);	
+	color: var(--text-color-1);	
 	cursor: pointer;
 	transition: 0.3s;
 }
 #select_window{
 	display:grid;
 	grid-template-rows: 9fr 3fr;
+	max-height: 80vh;
 	overflow: scroll;
 }
 #select_window #top{
@@ -272,18 +273,15 @@
 .maker_display_option{
 	display: inline-block;
 	margin: 5px;
-	padding: 5px;
+	padding: 2px;
 	border: 1px solid grey;
 }
 .maker_display_option a{
 	color: red;
 	cursor: pointer;
-	padding: 3px;
+	padding: 2px;
 	font-size: 16px;
-}.maker_display_option a:hover{
-	color: orange;
-}
-.maker_floor{
+}.maker_floor{
 	border-top: 1px solid grey;
 	grid-area: floor;
 	text-align: center;

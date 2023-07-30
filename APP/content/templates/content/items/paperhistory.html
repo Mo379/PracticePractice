@@ -36,8 +36,7 @@
 			            	<table class="table mb-0 my_table_theme">
 			            	    <thead>
 			            		<tr>
-			            		    <th class="">Paper</th>
-			            		    <th class="">Description</th>
+			            		    <th class="">Test</th>
 			            		    <th class="">Completed</th>
 			            		    <th class="">Date</th>
 			            		</tr>
@@ -46,24 +45,6 @@
 						{%for paper in context.paperhistory%}
 			            		<tr>
 							<td><a type="button" class="btn btn-info" href="/study/content/customtest/{{paper.id|hashid}}"> Open</a></td>
-						    <td>
-							<a type="button" class="btn btn-primary" data-toggle="modal" data-target="#customtesthistory_{{paper.id|hashid}}">
-								View
-							</a>
-							<!-- Modal -->
-							<div class="modal fade" id="customtesthistory_{{paper.id|hashid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-							  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-							    <div class="modal-content">
-							      <div class="modal-body" style='padding:0px;'>
-								      Data
-							      </div>
-							      <div class="modal-footer">
-								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-							      </div>
-							    </div>
-							  </div>
-							</div>
-						    </td>
 			            		    <td>
 							    {%if paper.pap_completion%}
 			            			    <i class="bi bi-check-circle-fill" style='color:green;'></i>
