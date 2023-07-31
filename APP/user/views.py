@@ -406,7 +406,7 @@ def _loginUser(request):
                         extra_tags='alert-success dashboard_index'
                     )
                 # Redirect to a success page.
-                return redirect('dashboard:index')
+                return redirect('main:index')
             else:
                 messages.add_message(
                         request,

@@ -3,11 +3,11 @@
 {%load static %}
 
 {%block page_name%}
-	QuestionBank
+	CourseStudy
 {%endblock%}
 
 {%block title%}
-	QuestionBank
+	CourseStudy
 {%endblock%}
 
 {%block content%}
@@ -15,6 +15,9 @@
 	{%include 'content/items/course_buy.html'%}
 {%else%}
 {%definevar context.content as content%}
+<h1 class='mb-2'>
+	{{context.course.course_name|field_name_to_label}}
+</h1>
 <div id='qbank_container'>
 	{%definevar 'questionbank' as alert_loc%}
 	{%include 'base/alert.html'%}

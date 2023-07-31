@@ -63,7 +63,7 @@ class SuperuserMonitorView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ]
 
     def get_queryset(self):
@@ -216,169 +216,6 @@ class SuperuserMonitorView(
         return context
 
 
-class IndexView(
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-
-    template_name = "dashboard/general/index.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("Home", reverse("dashboard:index"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'dashboard/index'
-        return context
-
-
-class MarketPlaceView(
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-
-    template_name = "dashboard/general/marketplace.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("MarketPlace", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
-        context['sidebar_active'] = 'dashboard/marketplace'
-        courses = Course.objects.filter(
-                course_publication=True,
-                deleted=False
-                )
-        #
-        if 'search' in self.request.GET:
-            search_query = self.request.GET['search']
-            vector = SearchVector('course_name')
-            query = SearchQuery(search_query)
-            courses = courses.annotate(
-                    rank=SearchRank(vector, query)
-                ).order_by('-rank')
-        p = Paginator(courses, 9)
-        try:
-            context['courses'] = p.page(current_page)
-        except EmptyPage:
-            context['courses'] = p.page(p.num_pages)
-            current_page = p.num_pages
-        #
-        total_learners = CourseSubscription.objects.filter(
-                course__in=context['courses']
-                ).values('course_id').annotate(count=Count('course'))
-        course_sub_counts = {}
-        for subscription in total_learners:
-            course_sub_counts[int(subscription['course_id'])] = subscription['count']
-        for key in context['courses']:
-            if key.id not in course_sub_counts.keys():
-                course_sub_counts[key.id] = 0
-        #
-        all_reviews = CourseReview.objects.filter(course__in=context['courses'])
-        avg_reviews = all_reviews.values('course_id').annotate(rating=Avg('rating'), count=Count('id'))
-        reviews = collections.defaultdict(list)
-        for review in avg_reviews:
-            reviews[int(subscription['course_id'])] = [review['rating'], review['count']]
-        for key in context['courses']:
-            if key.id not in reviews.keys():
-                reviews[key.id] = [0.0, 0]
-        #
-        context['course_sub_counts'] = course_sub_counts
-        context['reviews'] = reviews
-        context['num_pages'] = p.num_pages
-        context['current_page'] = current_page
-        context['previous_page'] = current_page - 1 if current_page > 1 else None
-        context['next_page'] = current_page + 1 if current_page < p.num_pages else None
-        context['CDN_URL'] = settings.CDN_URL
-        return context
-
-
-class MarketCourseView(
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-
-    template_name = "dashboard/general/marketcourse.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("MarketPlace", reverse("dashboard:marketplace", kwargs={'page':1})),
-                ("Course", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'dashboard/marketcourse'
-        course_id = self.kwargs['course_id']
-        course = Course.objects.get(pk=course_id)
-        versions = CourseVersion.objects.filter(course=course).order_by(
-                    '-version_number'
-                )
-        subscription_status = CourseSubscription.objects.filter(
-                user=self.request.user,
-                course=course
-            ).exists() if self.request.user.is_authenticated else False
-        #
-        total_learners = CourseSubscription.objects.filter(course=course).count()
-        all_reviews = CourseReview.objects.filter(course=course)
-        avg_reviews = list(all_reviews.aggregate(Avg('rating')).values())[0]
-        total_reviews = all_reviews.count()
-        content = order_live_spec_content(versions[0].version_content)
-        context['course'] = course
-        context['avg_reviews'] = avg_reviews if avg_reviews else 0.0
-        context['total_reviews'] = total_reviews
-        context['versions'] = versions
-        context['ordered_content'] = content
-        context['total_learners'] = total_learners
-        context['course_subscription_status'] = subscription_status
-        context['CDN_URL'] = settings.CDN_URL
-        return context
-
-
-class CourseReviewsView(
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-
-    template_name = "dashboard/general/course_reviews.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("dashboard", reverse("dashboard:index")),
-                ("MarketPlace", reverse("dashboard:marketplace")),
-                ("Course", reverse("dashboard:marketcourse", kwargs={'course_id':self.kwargs['course_id']})),
-                ("Reviews", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'dashboard/coursereviews'
-        course_id = self.kwargs['course_id']
-        course = Course.objects.get(pk=course_id)
-        reviews = CourseReview.objects.filter(course=course).order_by(
-                    '-review_created_at'
-                )
-        context['course'] = course
-        context['reviews'] = reviews
-        return context
-
-
 class StudentPerformanceView(
             LoginRequiredMixin,
             GroupRequiredMixin,
@@ -394,7 +231,7 @@ class StudentPerformanceView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("perfromance", reverse("dashboard:student_performance"))
                 ]
 
@@ -419,7 +256,7 @@ class StudentContentManagementView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("content management", reverse("dashboard:student_contentmanagement"))
                 ]
     def get_queryset(self):
@@ -471,7 +308,7 @@ class MyCoursesView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("MyCourses", reverse("dashboard:mycourses"))
                 ]
 
@@ -554,7 +391,7 @@ class MySpecificationsView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("specifications", reverse("dashboard:specifications"))
                 ]
 
@@ -620,7 +457,7 @@ class SpecModuelHandlerView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("specifications", reverse("dashboard:specifications")),
                 ("designer", '')
                 ]
@@ -726,7 +563,7 @@ class SpecTopicHandlerView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("specifications", reverse("dashboard:specifications")),
                 ("designer", '')
                 ]
@@ -899,7 +736,7 @@ class EarningStatisticsView(
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("statistics", reverse("dashboard:earning_statistics"))
                 ]
 
@@ -918,7 +755,7 @@ class BlankView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("blank", reverse("dashboard:blank"))
                 ]
 
@@ -935,7 +772,7 @@ class NotFoundView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     @cached_property
     def crumbs(self):
         return [
-                ("dashboard", reverse("dashboard:index")),
+                ("Home", reverse("main:index")),
                 ("404", reverse("dashboard:404"))
                 ]
 

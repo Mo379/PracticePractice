@@ -5,7 +5,7 @@
 				<div class="card shadow mb-4">
 					<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 						<h5 class="h4 mb-1 text-primary font-weight-bold">
-							Chapter Questions
+							All chapters
 						</h5>
 					</div>
 					{%for module in content%}
@@ -22,8 +22,11 @@
 					    <div id="collapse-{{module}}" class="collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
 					      <div class="card-body" style='padding:10px;'>
 							{%for chapter in content|index:module|index:'content'%}
-							      <div class="card-body" style='padding:10px;'>
-								      <a href='{%url 'content:practice' context.course.id module chapter%}' style='text-decoration:none;'><span class='font-weight-bold ml-1'><i class="bi bi-arrow-bar-right"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}  </span></a><br>
+							      <div class="card-body" style='padding:10px;font-size:12px;'>
+									<a href='{%url 'AI:index' context.course.id module chapter%}' style='text-decoration:none;'><span class='font-weight-bold ml-1'><i class="bi bi-arrow-bar-right"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}  </span></a>
+								    <a type= 'button' class='' href="{%url 'content:notearticle' context.course.id module chapter%}">Raw</a>
+								    <a type= 'button' class='' href="{%url 'content:practice' context.course.id module chapter%}">Qs</a>
+								    <br>
 							      </div>
 							{%endfor%}
 					      </div>

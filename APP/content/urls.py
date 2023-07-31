@@ -14,9 +14,9 @@ urlpatterns = [
         name='notearticle'
     ),
     path(
-        'content/questionbank/<hashid:course_id>/',
-        views.QuestionBankView.as_view(),
-        name='questionbank'
+        'content/coursestudy/<hashid:course_id>/',
+        views.CourseStudyView.as_view(),
+        name='coursestudy'
         ),
     path(
         'content/customtest/<hashid:paper_id>/',
@@ -49,6 +49,10 @@ urlpatterns = [
         views.EditorQuestionView.as_view(),
         name='editorquestion'
     ),
+    path('marketplace/', views.MarketPlaceView.as_view(), name='marketplace'),
+    path('marketplace/<int:page>', views.MarketPlaceView.as_view(), name='marketplace'),
+    path('marketcourse/<hashid:course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
+    path('coursereviews/<hashid:course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
     #
     path(
         'content/_publishcourse/',

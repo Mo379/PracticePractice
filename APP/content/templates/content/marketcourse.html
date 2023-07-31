@@ -1,4 +1,4 @@
-{% extends 'dashboard/base.html'%}
+{% extends 'base/base.html'%}
 {%load static%}
 {%load general%}
 
@@ -58,7 +58,7 @@ Course Page
 					{%endif%}
 					<div class="card-body">
 						<div class="marketcourse_card_bottom">
-							<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.avg_reviews}}/5.0 (<a href='{%url 'dashboard:coursereviews' course.id%}'>{{context.total_reviews}} reviews</a>) {{context.total_learners}} learners
+							<div> <i class="bi bi-star-fill" style='color:gold;'></i> {{context.avg_reviews}}/5.0 (<a href='{%url 'content:coursereviews' course.id%}'>{{context.total_reviews}} reviews</a>) {{context.total_learners}} learners
 							</div>
 							<hr class="sidebar-divider mb-3">
 							{%if user.is_authenticated == False%}

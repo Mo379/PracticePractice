@@ -7,12 +7,6 @@ app_name = 'dashboard'
 urlpatterns = [
     # Superuser
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
-    # general
-    path('', views.IndexView.as_view(), name='index'),
-    path('marketplace/', views.MarketPlaceView.as_view(), name='marketplace'),
-    path('marketplace/<int:page>', views.MarketPlaceView.as_view(), name='marketplace'),
-    path('marketcourse/<hashid:course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
-    path('coursereviews/<hashid:course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
     # student
     path('student-performance', views.StudentPerformanceView.as_view(), name='student_performance'),
     path(
