@@ -2,6 +2,7 @@ import pandas as pd
 import yaml
 from django.conf import settings
 import collections
+from itertools import chain
 from collections import OrderedDict
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -42,6 +43,7 @@ from AI.models import (
         ContentPromptQuestion,
         ContentPromptTopic,
         ContentPromptPoint,
+        Lesson_quiz,
     )
 from notification.tasks import _send_email
 
@@ -295,7 +297,7 @@ class CourseStudyView(
         paper_history = UserPaper.objects.filter(
                 user=self.request.user,
                 pap_course=course
-                ).order_by('-pap_creation_time')[:25]
+                ).order_by('pap_creation_time')[:25]
         #
         content = order_live_spec_content(content)
         moduels = OrderedDict({i: moduel for i, moduel in enumerate(content)})
@@ -307,13 +309,24 @@ class CourseStudyView(
                 user=self.request.user,
                 course=course
                 )
+        lesson_quizes = Lesson_quiz.objects.filter(
+                user=self.request.user,
+                course=course
+                ).order_by('-created_at')[:25]
+        #
+        test_history = sorted(
+                chain(lesson_quizes, paper_history),
+                key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.pap_creation_time,
+                reverse=True
+            )
+        print(test_history[0]._meta.model_name)
         context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['content'] = content
         context['moduels'] = moduels
         context['chapters'] = chapters
         context['course'] = course
         context['questionhistory'] = question_history
-        context['paperhistory'] = paper_history
+        context['testhistory'] = test_history
         return context
 
 
@@ -331,7 +344,8 @@ class CustomTestView(
     def crumbs(self):
         return [
                 ("content", reverse("content:content")),
-                ("custompaper", '')
+                ("coursestudy", reverse("content:coursestudy", kwargs={'course_id':self.kwargs['course_id']})),
+                ("paper", '')
             ]
 
     def get_queryset(self):
@@ -340,6 +354,33 @@ class CustomTestView(
         paper = UserPaper.objects.get(pk=paper_id)
         #
         context['paper'] = paper
+        return context
+
+
+class CourseQuizView(
+        LoginRequiredMixin,
+        BaseBreadcrumbMixin,
+        generic.ListView
+        ):
+    login_url = 'user:login'
+    redirect_field_name = False
+    template_name = 'content/coursequiz.html'
+    context_object_name = 'context'
+
+    @cached_property
+    def crumbs(self):
+        return [
+                ("content", reverse("content:content")),
+                ("coursestudy", reverse("content:coursestudy", kwargs={'course_id':self.kwargs['course_id']})),
+                ("quiz", '')
+            ]
+
+    def get_queryset(self):
+        context = {}
+        quiz_id = self.kwargs['quiz_id']
+        quiz = Lesson_quiz.objects.get(pk=quiz_id)
+        #
+        context['quiz'] = quiz
         return context
 
 
@@ -3181,7 +3222,6 @@ def _subjective_mark_question(request):
                     }
                 )
         except Exception as e:
-            print(str(e))
             return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 
@@ -3216,7 +3256,6 @@ def _mark_question(request):
                     }
                 )
         except Exception as e:
-            print(str(e))
             return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 
@@ -3300,7 +3339,6 @@ def _show_answer(request):
                     }
                 )
         except Exception as e:
-            print(str(e))
             return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 

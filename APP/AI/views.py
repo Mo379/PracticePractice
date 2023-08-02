@@ -383,6 +383,7 @@ def _mark_quiz_question(request):
             lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
             lesson_quiz, created = Lesson_quiz.objects.get_or_create(
                     user=request.user,
+                    course=lesson_part.lesson.course,
                     lesson_part=lesson_part,
                     quiz_id=quiz_id,
                 )
@@ -453,9 +454,10 @@ def _mark_quiz_question(request):
                                 num_matches += 1
                     return num_matches
                 completed = True
-                lesson_quiz.completed = True
-                lesson_quiz.save()
                 percentage_score = 100*(compare_dictionaries(solutions, lesson_quiz.user_answers)/len(solutions))
+                lesson_quiz.completed = True
+                lesson_quiz.percentage_score = percentage_score
+                lesson_quiz.save()
             #
             if solutions[quiz_question_number] == lesson_quiz.user_answers[quiz_question_number]:
                 is_correct = True

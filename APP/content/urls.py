@@ -7,7 +7,6 @@ app_name = 'content'
 urlpatterns = [
     path('content/', views.ContentView.as_view(), name='content'),
     path('content/<int:page>', views.ContentView.as_view(), name='content'),
-    path('content/notes/<hashid:course_id>', views.NotesView.as_view(), name='notes'),
     path(
         'content/note-article/<hashid:course_id>/<module>/<chapter>/',
         views.NoteArticleView.as_view(),
@@ -19,9 +18,14 @@ urlpatterns = [
         name='coursestudy'
         ),
     path(
-        'content/customtest/<hashid:paper_id>/',
+        'content/customtest/<hashid:course_id>/<hashid:paper_id>/',
         views.CustomTestView.as_view(),
         name='customtest'
+        ),
+    path(
+        'content/coursequiz/<hashid:course_id>/<hashid:quiz_id>/',
+        views.CourseQuizView.as_view(),
+        name='coursequiz'
         ),
     path(
         'content/practice/<hashid:course_id>/<module>/<chapter>/',

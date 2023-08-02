@@ -12,6 +12,10 @@ import json
 
 register = template.Library()
 
+@register.filter(name='dbobjmeta')
+def dbobjmeta(obj, attribute):
+    meta = dict(obj._meta)
+    return meta.get(attribute)
 
 @register.filter(name='TagGenerator')
 def Generator(x):
@@ -173,7 +177,6 @@ def get_quiz_id(content):
 def ToJson(content):
     # setup output
     content = json.dumps(content)
-    print('hello',content)
     return content
 
 @register.filter(name='GetMathString')

@@ -133,7 +133,7 @@ class Lesson_part(models.Model):
     )
     topic = models.CharField(max_length=150, default="", null=True)
     part_content = models.JSONField(default=dict, null=True)
-    part_chat = models.JSONField(default=dict, null=True)
+    part_chat = models.JSONField(default=dict)
     prompt = models.IntegerField(default=0, null=True)
     completion = models.IntegerField(default=0, null=True)
     total = models.IntegerField(default=0, null=True)
@@ -150,6 +150,10 @@ class Lesson_quiz(models.Model):
         User, on_delete=models.CASCADE, db_index=True, default="", null=False,
         related_name='AI_lesson_quiz_user'
     )
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, db_index=True,
+        default="", null=True, related_name='AI_quiz_course'
+    )
     lesson_part = models.ForeignKey(
         Lesson_part, on_delete=models.CASCADE, db_index=True,
         default="", null=False, related_name='AI_lesson_part'
@@ -158,6 +162,11 @@ class Lesson_quiz(models.Model):
     quiz = models.JSONField(default=dict, null=True)
     user_answers = models.JSONField(default=dict, null=True)
     completed = models.BooleanField(default=False, null=True)
+    percentage_score = models.DecimalField(
+        default=0.0,
+        max_digits=5,  # Maximum number of digits allowed (including decimals).
+        decimal_places=2,  # Number of decimal places.
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
