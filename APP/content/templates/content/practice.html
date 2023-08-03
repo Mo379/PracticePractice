@@ -134,6 +134,7 @@ class controller extends model{
 							30,
 							50
 						)
+						document.querySelector(`#marking_options_window_${question_id}`).innerHTML = json.marks_dropdown_html
 
 					}
 				}, 1000);
@@ -182,6 +183,7 @@ class controller extends model{
 							30,
 							50
 						)
+						document.querySelector(`#marking_options_window_${question_id}`).innerHTML = json.marks_dropdown_html
 
 					}
 				}, 1000);
@@ -360,6 +362,7 @@ Controller = new controller(view);
 													<br>
 													<span id='vidbutton_information_window_{{B.id}}'></span>
 													<span id='information_window_{{B.id}}'></span>
+													<span id='marking_options_window_{{B.id}}'></span>
 													<span id='marking_information_window_{{B.id}}'></span>
 												</div>
 											</section>

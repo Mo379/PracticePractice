@@ -339,6 +339,11 @@ urlpatterns = [
         name='_mark_question'
     ),
     path(
+        'content/_mark_paper_question/',
+        views._mark_paper_question,
+        name='_mark_paper_question'
+    ),
+    path(
         'content/_show_answer/',
         views._show_answer,
         name='_show_answer'

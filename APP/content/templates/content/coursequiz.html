@@ -11,5 +11,335 @@
 {%endblock%}
 
 {%block content%}
-{{context.paper.pap_info}}
+<script>
+class util{
+	getColor(value) {
+	  // Ensure the input value is within the range of 0 to 100
+	  value = Math.max(0, Math.min(100, value));
+
+	  // Calculate the proportion of green and red based on the input value
+	  let red = 255 - Math.floor(value * 255 / 100);
+	  let green = Math.floor(value * 255 / 100);
+
+	  // Return the RGB values as a string "rgb(R, G, B)"
+	  return `rgb(${red}, ${green}, 0)`;
+	}
+
+	quiz_to_html(quiz, quiz_id, pointId, localOrderId) {
+		var html = '';
+		for (var key in quiz) {
+			if (quiz.hasOwnProperty(key)) {
+				var question = quiz[key].question;
+				var choices = quiz[key].choices;
+				var explanation = quiz[key].answer.answer;
+
+				html += `
+				<div class="question form-check quiz_div p-3 mb-3" style='border-left: 1px dotted var(--text-color-3)'>
+       				<h5 class='quiz_question_indicator'>Question ${key} </h5>
+				<p class='quiz_question_paragraph ml-1'>${question}</p>
+				<ul id="quiz_question_choices_${quiz_id}_${key}">`;
+				for (var choiceKey in choices) {
+					if (choices.hasOwnProperty(choiceKey)) {
+						var choice = choices[choiceKey];
+						html += `
+						<li class="form-check quiz_question_li p-1 mb-1">
+					       <input class="form-check-input quiz_question_radio" type="radio" name="question_${quiz_id}_${key}" value="${choiceKey}" id='question_${quiz_id}_${key}_${choiceKey}'>
+       						<label class="form-check-label quiz_question_label" for="question_${quiz_id}_${key}_${choiceKey}" id='question_label_${quiz_id}_${key}_${choiceKey}'>
+						${choiceKey}) ${choice}
+						</label>
+						</li>`;
+					}
+				}
+				html += `
+				</ul>
+				<button class='btn btn-primary-outline' style='border: 1px dashed var(--text-color-1); color:var(--text-color-1);' id='markbutton_${quiz_id}_${key}' onclick='Controller.C_mark_quiz_question("${quiz_id}", "${key}", "${pointId}")'>
+					<div id='marking_view_${quiz_id}_${key}' class=''>
+						<i class="fa-solid fa-marker"></i> Mark
+					</div>
+					<div id='spinner_and_wait_${quiz_id}_${key}' class='d-none'>
+						<div class="d-flex justify-content-center">
+						  <div class="spinner-border spinner-border-sm" role="status">
+						    <span class="sr-only">Loading...</span>
+						  </div>
+						</div>
+					</div>
+				</button>
+       				<div class='mt-2' id='quiz_solution_${quiz_id}_${key}'>
+       				</div>
+				</div>`;
+					//<h6 class='quiz_question_indicator'>Solution to Q ${key}: </h6>
+					//<p class="explanation">${explanation}</p>
+			}
+		}
+		return html;
+	}
+
+	transform_test_object_to_htmlform(function_name, function_response_object, point_id, local_order_id, part_id, streamed=true){
+		var hide_questions = 'd-none'
+		if (streamed){
+			hide_questions = ''
+		}
+		var my_arguments = function_response_object
+		const q_introduction = my_arguments.quiz_introduction
+		const quiz_id = my_arguments.quiz_id
+		const full_quiz = my_arguments.quiz
+		var quiz_html = this.quiz_to_html(full_quiz, quiz_id, part_id, local_order_id)
+		const quiz_html_form = `
+	       <div id='quiz_form_${point_id}_${local_order_id}'>
+       			<h3>
+				Multiple choice quiz
+       			</h3>
+       			<div>
+			       <div class= 'mb-2' id='final_score_${quiz_id}'>
+       				</div>
+       				${q_introduction}
+			       <br><button class='btn btn-secondary mt-3 mb-1' style='color:var(--text-color-1)'id='' onclick='Controller.C_toggle_quiz("quiz_container_${point_id}_${local_order_id}")'>
+				       <i class="bi bi-magic"></i> Show/Hide
+				</button>
+       			</div>
+		       <div class='mt-4 p-3 ${hide_questions}' style='border-top: 2px solid var(--text-color-1);' id='quiz_container_${point_id}_${local_order_id}'>
+       				${quiz_html}
+       			</div>
+		</div>
+			`;
+		return quiz_html_form;	
+	}
+
+	write(elemID, text, delay_lower=30, delay_higher=70, char_lower=10, char_higher=15) {
+	  let element = document.getElementById(elemID);
+	  let i = 0;
+	  function type() {
+	    let charCount = Math.floor(Math.random() * (char_higher - char_lower + 1)) + char_lower;
+	    let delay = Math.floor(Math.random() * (delay_higher - delay_lower + 1)) + delay_lower;
+	    
+	    let shouldPause = Math.random() < 0.1;
+	    if (shouldPause) {
+	      delay += 40;
+	    }
+	    if (i < text.length) {
+	      element.innerHTML = text.slice(0, i + charCount) + `
+	      <span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
+	      </span>`;
+	      i += charCount;
+	      MathJax.typeset()
+	      setTimeout(type, delay);
+	    }
+	  }
+	  type();
+	}
+
+}
+class xhttp {
+	open_port(url) {
+		this.xhttp = new XMLHttpRequest();
+		this.xhttp.open('POST', url, true);
+		this.xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	}
+}
+//
+
+class view {
+}
+//coommunicates with server and gets a result to be displayed as a view
+class model extends xhttp {
+	//
+	M_mark_quiz_question(lesson_part_id, quiz_id, question_number, selectedValue){
+		//opening the port using xhttp
+		this.open_port("{%url 'AI:_mark_quiz_question'%}");
+		this.xhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");    
+		//prepairing query
+		var query = 'lesson_part_id=' + lesson_part_id + 
+			'&quiz_id=' + quiz_id + '&question_number=' + question_number 
+			+ '&user_answer=' + selectedValue;
+		//sending query to model
+		this.xhttp.send(query);
+	}
+}
+
+//used by the user, tells the model to do something. this class is both a controller and a view
+class controller extends model {
+	//construct
+	constructor(util, view) {
+		super();
+		this.util = util;
+		this.view = view;
+	}
+	C_toggle_quiz(container_id){
+		const container = document.querySelector(`#${container_id}`);
+		container.classList.toggle("d-none");
+	}
+	C_mark_quiz_question(quiz_id, question_number, lesson_part_id){
+		const utility = this.util
+
+		var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+		        document.querySelector(`#markbutton_${quiz_id}_${question_number}`).disabled = true;
+		        document.querySelector(`#marking_view_${quiz_id}_${question_number}`).classList.add('d-none');
+		        document.querySelector(`#spinner_and_wait_${quiz_id}_${question_number}`).classList.remove('d-none');
+		      } else {
+		        document.querySelector(`#markbutton_${quiz_id}_${question_number}`).disabled = false;
+		        document.querySelector(`#marking_view_${quiz_id}_${question_number}`).classList.remove('d-none');
+		        document.querySelector(`#spinner_and_wait_${quiz_id}_${question_number}`).classList.add('d-none');
+		      }
+		};
+		// Get a reference to the UL element
+		const radioList = document.getElementById(`quiz_question_choices_${quiz_id}_${question_number}`);
+		// Find all the radio inputs within the UL
+		const radioInputs = radioList.querySelectorAll("input[type='radio']");
+		// Loop through the radio inputs to find the selected one
+		let selectedValue = null;
+		for (const radioInput of radioInputs) {
+			if (radioInput.checked) {
+				selectedValue = radioInput.value;
+				break; // Exit the loop once the selected radio input is found
+			}
+		}
+		loading(true)
+		if (selectedValue == null){
+			setTimeout(function (){
+				loading(false)
+			}, 1000);
+		}else{
+			this.M_mark_quiz_question(lesson_part_id, quiz_id, question_number, selectedValue)
+			this.xhttp.onreadystatechange = function () {
+				if (this.readyState == 4 && this.status == 200) {
+					var txt = this.responseText;
+					var json = JSON.parse(txt);
+					setTimeout(function (){
+						if (json.status_code == 200){
+							document.querySelector(`#markbutton_${quiz_id}_${question_number}`).remove()
+							for (const radioInput of radioInputs) {
+								if (radioInput.checked == false) {
+									radioInput.disabled=true
+								}else{
+									var label_element = document.querySelector(`#question_label_${quiz_id}_${question_number}_${radioInput.value}`)
+									if (json.is_correct){
+										label_element.style.color='green';
+									}else{
+										label_element.style.color='red';
+									}
+								}
+							}
+							if (json.completed){
+								var score_hue = utility.getColor(json.percentage_score)
+								var score_element = document.querySelector(`#final_score_${quiz_id}`)
+								var score_html = `
+										You have completed this quiz scoring: ${json.percentage_score}%
+									`
+								score_element.style.color = score_hue
+								utility.write(`final_score_${quiz_id}`, score_html)
+							}
+							const solution_html = `
+								<h6 class='quiz_question_indicator'>Solution to Q ${question_number}: </h6>
+								<p class="explanation">${json.answer.replace(/\\/g, '\\\\')} <br><br> The correct choice is: ${json.correct_choice}</p>
+							`
+							utility.write(`quiz_solution_${quiz_id}_${question_number}`, solution_html)
+						}else{
+							loading(false)
+						}
+					}, 1000);
+				}
+			}
+		}
+	}
+	C_load_quiz_state(quiz_id, quiz_info){
+		for (let question_number in quiz_info.quiz) {
+			var question = quiz_info.quiz[question_number]
+			if (question.user_answer){
+				document.querySelector(`#markbutton_${quiz_id}_${question_number}`).remove()
+				// Get a reference to the UL element
+				const radioList = document.getElementById(`quiz_question_choices_${quiz_id}_${question_number}`);
+				// Find all the radio inputs within the UL
+				const radioInputs = radioList.querySelectorAll("input[type='radio']");
+				for (const radioInput of radioInputs) {
+					radioInput.disabled=true
+					if (radioInput.value == question.user_answer) {
+						radioInput.disabled=false
+						radioInput.checked=true
+						var label_element = document.querySelector(`#question_label_${quiz_id}_${question_number}_${radioInput.value}`)
+						if (question.is_correct){
+							label_element.style.color='green';
+						}else{
+							label_element.style.color='red';
+						}
+						const solution_html = `
+							<h6 class='quiz_question_indicator'>Solution to Q ${question_number}: </h6>
+							<p class="explanation">${question.answer} <br><br> The correct choice is: ${question.correct_choice}</p>
+						`
+						document.querySelector(`#quiz_solution_${quiz_id}_${question_number}`).innerHTML = solution_html
+					}
+				}
+			}
+		}
+		if (quiz_info.is_completed){
+			var score_hue = this.util.getColor(quiz_info.percentage_score)
+			var score_element = document.querySelector(`#final_score_${quiz_id}`)
+			var score_html = `
+					You have completed this quiz scoring: ${quiz_info.percentage_score}%
+				`
+			score_element.style.color = score_hue
+			document.querySelector(`#final_score_${quiz_id}`).innerHTML = score_html
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+util = new util();
+view = new view();
+Controller = new controller(util, view);
+</script>
+{%if context.coursesubscription == False%}
+	{%include 'content/items/course_buy.html'%}
+{%else%}
+	{%include 'content/mathjax.html'%}
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
+
+	{%definevar context.questions as information%}
+	{%definevar 'Question' as A_tag%}
+	{%definevar context.quiz.quiz as full_quiz%}
+	{%definevar context.quiz.quiz.quiz as quiz%}
+	{%definevar context.quiz.quiz.quiz_introduction as quiz_introduction%}
+	{%definevar context.quiz.quiz.quiz_id as quiz_id%}
+
+	<div class="mb-4">
+		<div class="card-body">
+			<div class="card shadow mb-4">
+				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+					<h5 class="h4 mb-1 text-primary font-weight-bold">
+						Quiz
+					</h5>
+				</div>
+				<section class="py-5 " style='margin-bottom:10px;'>
+				    <div class="container">
+					<h1 class="text-center pb-3 mb-4" style='font-size:24px;'>
+						{{context.quiz.course.course_name|field_name_to_label}}
+					</h1>
+					<p class="text-center pb-3 mb-1" style='font-size:12px;'>
+						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:coursestudy' context.course.id%}"> Go back</a><br><br>
+					</p>
+					<section class="py-5 ">
+						<div class='mb-3' id='quiz_question_{{forloop.counter}}'>
+						</div>
+						<script>
+							document.getElementById('quiz_question_{{forloop.counter}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse(`{{full_quiz|ToJson|GetMathString|safe}}`.replace(/\\/g, '\\\\')), '1', '1', '{{context.quiz.lesson_part.id}}', streamed=false)
+							Controller.C_load_quiz_state('{{quiz_id}}',JSON.parse(`{{context.quiz_state|ToJson|GetMathString|safe}}`.replace(/\\/g, '\\\\')))
+						</script>
+					</section>
+				    </div>
+				</section>
+			</div>
+		</div>
+	</div>
+<script id='my_modal_script'></script>
+{%endif%}
 {%endblock%}

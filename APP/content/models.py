@@ -330,7 +330,13 @@ class UserPaper(models.Model):
     pap_creation_time = models.DateTimeField(
         "date created", auto_now_add=True, blank=True
     )
+    pap_q_marks = models.JSONField(default=dict, null=True)
     pap_completion = models.BooleanField(default=False, null=True)
+    percentage_score = models.DecimalField(
+        default=0.0,
+        max_digits=5,  # Maximum number of digits allowed (including decimals).
+        decimal_places=1,  # Number of decimal places.
+    )
     deleted = models.BooleanField(default=False, null=True)
 
     def __str__(self):

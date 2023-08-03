@@ -7,8 +7,28 @@
       </div>
 
       <div class="modal-footer">
+	<span id='test_maker_updates'></span>
 	<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-	<button type="button" class="btn btn-primary" onclick= "controller.C_get_practice_paper()">Create</button>
+	<button
+	    class='btn btn-primary-outline'
+	    style='
+		border: 1px dashed var(--text-color-1);
+		color:var(--text-color-1);
+	    '
+	    onclick='controller.C_get_practice_paper()'
+	    id='test_maker_button'
+	>
+	    <div id='test_maker_text' class=''>
+		    Create
+	    </div>
+	    <div id='test_maker_spinner_and_wait' class='d-none'>
+		<div class="d-flex justify-content-center">
+		  <div class="spinner-border spinner-border-sm" role="status">
+		    <span class="sr-only">Loading...</span>
+		  </div>
+		</div>
+	    </div>
+	</button>
       </div>
     </div>
   </div>
@@ -48,7 +68,7 @@
 								<td><a type="button" class="btn btn-info" href="/study/content/customtest/{{context.course.id|hashid}}/{{test.id|hashid}}"> Paper</a></td>
 							    <td>
 								    {%if test.pap_completion%}
-								    <i class="bi bi-check-circle-fill" style='color:green;'></i>
+								    <i class="bi bi-check-circle-fill" style='color:green;'></i> {{test.percentage_score}}%
 								    {%else%}
 								    <i class="bi bi-x-circle-fill" style='color:red;'></i>
 								    {%endif%}

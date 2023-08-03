@@ -319,7 +319,6 @@ class CourseStudyView(
                 key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.pap_creation_time,
                 reverse=True
             )
-        print(test_history[0]._meta.model_name)
         context['coursesubscription'] = course_subscription if len(course_subscription) else False
         context['content'] = content
         context['moduels'] = moduels
@@ -350,10 +349,26 @@ class CustomTestView(
 
     def get_queryset(self):
         context = {}
+        course_id = self.kwargs['course_id']
         paper_id = self.kwargs['paper_id']
         paper = UserPaper.objects.get(pk=paper_id)
         #
-        context['paper'] = paper
+        ordered_paper = []
+        paper_questions = list(paper.pap_info.values())
+        question_objects = Question.objects.filter(id__in=paper_questions)
+        for q in sorted(paper.pap_info.keys()):
+            question_id = paper.pap_info[q]
+            ordered_paper.append(question_objects.filter(id=question_id)[0])
+        #
+        question_tracks = QuestionTrack.objects.filter(
+                question__in=paper_questions
+            )
+        all_q_tracks = {q.question.id: q for q in question_tracks}
+        #
+        context['paper_obj'] = paper
+        context['paper'] = ordered_paper
+        context['course'] = Course.objects.get(id=course_id)
+        context['question_tracks'] = all_q_tracks
         return context
 
 
@@ -377,10 +392,35 @@ class CourseQuizView(
 
     def get_queryset(self):
         context = {}
+        course_id = self.kwargs['course_id']
         quiz_id = self.kwargs['quiz_id']
         quiz = Lesson_quiz.objects.get(pk=quiz_id)
         #
+        solutions = {}
+        answers = {}
+        for question in quiz.quiz['quiz'].keys():
+            solutions[f'{question}'] = quiz.quiz['quiz'][question]['answer']['correct_choice']
+            answers[f'{question}'] = quiz.quiz['quiz'][question]['answer']['answer']
+        #
+        quizzes_states = {}
+        questions = {}
+        for key in answers.keys():
+            user_answer = quiz.user_answers[key] if key in quiz.user_answers.keys() else None
+            questions[key] = {
+                    "user_answer": user_answer,
+                    "correct_choice": solutions[key],
+                    "is_correct": True if user_answer == solutions[key] else False,
+                    "answer": answers[key],
+                }
+        quiz_state = {
+                "quiz": questions,
+                "is_completed": quiz.completed,
+                "percentage_score": float(quiz.percentage_score)
+            }
+        #
         context['quiz'] = quiz
+        context['quiz_state'] = quiz_state
+        context['course'] = Course.objects.get(id=course_id)
         return context
 
 
@@ -1437,7 +1477,6 @@ def _createcustomtest(request):
         # question pool
         question_pool = Question.objects.filter(
                     user=creator,
-                    q_level=specification.spec_level,
                     q_subject=specification.spec_subject,
                 )
         #
@@ -1462,15 +1501,18 @@ def _createcustomtest(request):
             question_pool = question_pool.filter(
                     q_difficulty__in=difficulty_array,
                 )
-        final_selection = question_pool[:10]
+        final_selection = question_pool[:5]
         paper_content = {i: question.id for i, question in enumerate(final_selection)}
-        paper = UserPaper.objects.create(
-                user=request.user,
-                pap_course=course,
-                pap_info=paper_content
+        if len(paper_content) == 5:
+            paper = UserPaper.objects.create(
+                    user=request.user,
+                    pap_course=course,
+                    pap_info=paper_content
                 )
+        else:
+            return JsonResponse({'res': 0})
         #
-        return JsonResponse({'res': 1, 'paper_id': h_encode(paper.id)})
+        return JsonResponse({'res': 1, 'course_id': h_encode(course.id), 'paper_id': h_encode(paper.id)})
     else:
         return JsonResponse({'res': 0})
 
@@ -3171,7 +3213,7 @@ def _subjective_mark_question(request):
                 script_html = False
                 video_button_html = False
             mark_options = ''.join([
-                    f"<option value='{mark}'>{mark} Mark$s$</option>"
+                    f"<option value='{mark}'>{mark} Mark(s)</option>"
                     for mark in range(0, question.q_marks + 1, 1)
                 ])
             marks_dropdown_html = f"""
@@ -3208,9 +3250,6 @@ def _subjective_mark_question(request):
                     </select>
                 </div>
             """
-            html += f"""
-                {marks_dropdown_html}
-            """
             #
             return JsonResponse(
                     {
@@ -3219,6 +3258,7 @@ def _subjective_mark_question(request):
                         'video_html': video_html,
                         'script_html': script_html,
                         'button_html': video_button_html,
+                        'marks_dropdown_html': marks_dropdown_html,
                     }
                 )
         except Exception as e:
@@ -3241,6 +3281,59 @@ def _mark_question(request):
         try:
             questiontrack.track_mark = int(n_marks)
             questiontrack.track_attempt_number += 1
+            questiontrack.save()
+            #
+            marking_information = f"""<br>
+                Attempt Number: {questiontrack.track_attempt_number} <br>
+                Score: {questiontrack.track_mark}/{questiontrack.total_marks};
+                    {(questiontrack.track_mark/questiontrack.total_marks)*100}%<br>
+            """
+            return JsonResponse(
+                    {
+                        'error': 0,
+                        'message': 'Success',
+                        'marking_information': marking_information,
+                    }
+                )
+        except Exception as e:
+            return JsonResponse({'error': 1, 'message': 'Error'})
+    return JsonResponse({'error': 1, 'message': 'Error'})
+
+def _mark_paper_question(request):
+    if request.method == 'POST':
+        course_id = request.POST['course_id']
+        paper_id = request.POST['paper_id']
+        question_id = request.POST['question_id']
+        n_marks = request.POST['n_marks']
+        #
+        course = Course.objects.get(pk=course_id)
+        paper = UserPaper.objects.get(pk=paper_id)
+        question = Question.objects.get(user=request.user, pk=question_id)
+        questiontrack, created = QuestionTrack.objects.get_or_create(
+                user=request.user,
+                course=course,
+                question=question
+            )
+        #
+        inverted_paper = {v: k for k, v in paper.pap_info.items()}
+        question_number = inverted_paper[question.id]
+        paper_questions = Question.objects.filter(id__in=inverted_paper.keys())
+        try:
+            questiontrack.track_mark = int(n_marks)
+            questiontrack.track_attempt_number += 1
+            if question_number not in paper.pap_q_marks:
+                paper.pap_q_marks[question_number] = int(n_marks)
+            if len(paper.pap_q_marks) == len(inverted_paper):
+                paper.pap_completion = True
+                #
+                total_marks = sum(paper.pap_q_marks.values())
+                max_total_marks = sum([q.q_marks for q in paper_questions])
+                percentage_score = 0.0
+                if max_total_marks > 0:
+                    percentage_score = (total_marks / max_total_marks) * 100
+                paper.percentage_score = percentage_score
+            #
+            paper.save()
             questiontrack.save()
             #
             marking_information = f"""<br>
@@ -3287,7 +3380,7 @@ def _show_answer(request):
             # Add the Bootstrap selection menu for marks
 
             mark_options = ''.join([
-                    f"<option value='{mark}'>{mark} Mark$s$</option>"
+                    f"<option value='{mark}'>{mark} Mark(s)</option>"
                     for mark in range(0, question.q_marks + 1, 1)
                 ])
             marks_dropdown_html = f"""
@@ -3324,9 +3417,6 @@ def _show_answer(request):
                     </select>
                 </div>
             """
-            html += f"""
-                {marks_dropdown_html}
-            """
             #
             return JsonResponse(
                     {
@@ -3335,7 +3425,7 @@ def _show_answer(request):
                         'video_html': video_html,
                         'script_html': script_html,
                         'button_html': video_button_html,
-                        'button_html': video_button_html,
+                        'marks_dropdown_html': marks_dropdown_html,
                     }
                 )
         except Exception as e:

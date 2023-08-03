@@ -9,184 +9,6 @@ class xhttp {
 	}
 }
 class view {
-	//loading
-	alert_loading() {
-		swal.fire({
-			text: 'loading...',
-			showConfirmButton: false,
-		});
-	};
-	//Processing
-	alert_processing() {
-		swal.fire({
-			text: 'Processing...',
-			showConfirmButton: false,
-		});
-	};
-	//
-	alert_popup(msg) {
-		swal.fire({
-			text: msg,
-			type: 'success',
-			timer: 900,
-			showConfirmButton: false,
-		});
-	};
-	///popup_info
-	alert_popup_info(msg) {
-		swal.fire({
-			html: msg,
-			type: 'info',
-			showConfirmButton: true,
-		});
-	};
-	//popup info refresh
-	alert_popup_info_fresh(msg) {
-		swal.fire({
-			html: msg,
-			type: 'info',
-			showConfirmButton: true,
-		}).then(function () {
-
-			location.reload();
-		});
-	};
-	//popup with refresh
-	alert_popup_fresh(msg) {
-		swal.fire({
-			text: msg,
-			type: 'success',
-			timer: 1300,
-			showConfirmButton: false,
-		}).then(function () {
-			location.reload();
-		});
-	};
-	//popup with refresh
-	alert_popup_freshome(msg) {
-		swal.fire({
-			text: msg,
-			type: 'success',
-			timer: 1300,
-			showConfirmButton: false,
-		}).then(function () {
-			window.location.href = "//PracticePractice.net";
-		});
-	};
-	//
-	//popup with refresh
-	headder_redirect(link) {
-		swal.fire({
-			text: 'redirecting...',
-			timer: 800,
-			showConfirmButton: false,
-		}).then(function () {
-			window.location.href = link;
-		});
-	};
-	//
-	new_headder_redirect(link) {
-		swal.fire({
-			text: 'redirecting...',
-			timer: 500,
-			showConfirmButton: false,
-		}).then(function () {
-			window.open(link,'_blank');
-		});
-	};
-	//
-	straight_headder_redirect(link) {
-		window.location.href = link;
-	};
-	//
-	alert_warning(msg) {
-		swal.fire({
-			text: msg,
-			type: 'warning',
-			showConfirmButton: true,
-		});
-	};
-	//warning to confirm action
-	alert_warning_orCancel(msg, func) {
-		swal.fire({
-			title: msg,
-			text: "You won't be able to revert this!",
-			type: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Delete it!',
-			cancelButtonText: 'No, cancel!',
-			reverseButtons: true
-		}).then((result) => {
-			if (result.value) {
-				swal.fire({
-					text: msg,
-					type: 'info',
-					timer: 800,
-					showConfirmButton: false
-				})
-				func();
-			} else if (
-				// Read more about handling dismissals
-				result.dismiss === Swal.DismissReason.cancel
-			) {
-
-				swal.fire(
-					'Cancelled',
-					'Nothing was done :)',
-					'info'
-				)
-			}
-		})
-	}
-	//warning to confirm action
-	alert_warning_orCancel_go(msg, func) {
-		swal.fire({
-			title: msg,
-			text: "You won't be able to revert this!",
-			type: 'warning',
-			showCancelButton: true,
-			confirmButtonText: 'Do it!',
-			cancelButtonText: 'No, cancel!',
-			reverseButtons: true
-		}).then((result) => {
-			if (result.value) {
-				swal.fire({
-					text: msg,
-					type: 'info',
-					timer: 800,
-					showConfirmButton: false
-				})
-				func();
-			} else if (
-				// Read more about handling dismissals
-				result.dismiss === Swal.DismissReason.cancel
-			) {
-
-				swal.fire(
-					'Cancelled',
-					'Nothing was done :)',
-					'info'
-				)
-			}
-		})
-	}
-	alert_error(msg) {
-		swal.fire({
-			text: msg,
-			type: 'error',
-			showConfirmButton: true,
-		});
-	};
-	//display error and return to previous page
-	alert_error_previous_page(msg) {
-		swal.fire({
-			text: msg,
-			type: 'error',
-			showConfirmButton: true,
-		}).then(function () {
-			history.back();
-		})
-	};
 }
 //coommunicates with php and gets a result to be displayed as a view
 class model extends xhttp {}
@@ -272,12 +94,12 @@ class controller extends model{
 		if(tab == 'QStatus'){
 			var elem = document.getElementById("top");
 			var html = '';
-			var html = html + this.C_make_window_elm('ALl','All','All','cq_status');
+			//var html = html + this.C_make_window_elm('ALl','All','All','cq_status');
 			var html = html + this.C_make_window_elm('Seen','Seen','Seen','cq_status');
 			var html = html + this.C_make_window_elm('Unseen','Unseen','Unseen','cq_status');
-			var html = html + this.C_make_window_elm('Unanswered','Unanswered','Unanswered','cq_status');
-			var html = html + this.C_make_window_elm('Incorrect','Incorrect','Incorrect','cq_status');
-			var html = html + this.C_make_window_elm('Correct','Correct','Correct','cq_status');
+			//var html = html + this.C_make_window_elm('Unanswered','Unanswered','Unanswered','cq_status');
+			//var html = html + this.C_make_window_elm('Incorrect','Incorrect','Incorrect','cq_status');
+			//var html = html + this.C_make_window_elm('Correct','Correct','Correct','cq_status');
 			elem.innerHTML = html;
 		}if(tab == 'type'){
 			var elem = document.getElementById("top");
@@ -285,7 +107,7 @@ class controller extends model{
 			var html = html +  this.C_make_window_elm('type_short','Short','Short','cq_type');
 			var html = html +  this.C_make_window_elm('type_medium','Medium','Medium','cq_type');
 			var html = html +  this.C_make_window_elm('type_long','Long','long','cq_type');
-			var html = html +  this.C_make_window_elm('type_MultipleChoice','MultipleChoice','MultiplceChoice','cq_type');
+			//var html = html +  this.C_make_window_elm('type_MultipleChoice','MultipleChoice','MultiplceChoice','cq_type');
 			elem.innerHTML = html;
 		}if(tab == 'difficulty'){
 			var elem = document.getElementById("top");
@@ -433,6 +255,19 @@ class controller extends model{
 		var view = this.view;
 		var model = this;
 		//
+		var loading = function(isLoading) {
+		      if (isLoading) {
+			// Disable the button and show a spinner
+		        document.querySelector(`#test_maker_button`).disabled = true;
+		        document.querySelector(`#test_maker_text`).classList.add('d-none');
+		        document.querySelector(`#test_maker_spinner_and_wait`).classList.remove('d-none');
+		      } else {
+		        document.querySelector(`#test_maker_button`).disabled = false;
+		        document.querySelector(`#test_maker_text`).classList.remove('d-none');
+		        document.querySelector(`#test_maker_spinner_and_wait`).classList.add('d-none');
+		      }
+		};
+		//
 		var q_status = model.C_fetch_class_items('cq_status');
 		var q_type = model.C_fetch_class_items('cq_type');
 		var q_moduel = model.C_fetch_class_items('cq_moduel');
@@ -440,8 +275,8 @@ class controller extends model{
 		var q_difficulty = model.C_fetch_class_items('cq_difficulty');
 		//
 		var formdata = new FormData();
-		//formdata.append('q_status_array', q_status);
-		//formdata.append('q_type_array', q_type);
+		formdata.append('q_status_array', q_status);
+		formdata.append('q_type_array', q_type);
 		formdata.append('q_moduel_array', q_moduel);
 		formdata.append('q_chapter_array', q_chapter);
 		formdata.append('q_difficulty_array', q_difficulty);
@@ -457,22 +292,28 @@ class controller extends model{
 				var json_arr = JSON.parse(txt)
 				//
 				if(json_arr['res'] == 1){
-					view.headder_redirect("/study/content/customtest/"+json_arr['paper_id']);
+					setTimeout(function (){
+						loading(false)
+						var message = 'Something went wrong: cannot create paper, add more options';
+						window.location.replace(`/study/content/customtest/${json_arr['course_id']}/${json_arr['paper_id']}`);
+					}, 1000);
 				}else{
-					view.alert_warning('Something went wrong: cannot create paper, add more options');
+					setTimeout(function (){
+						loading(false)
+						var message = 'Something went wrong: cannot create paper, add more options';
+						document.querySelector(`#test_maker_updates`).innerHTML = message
+					}, 1000);
 				}
 				
-			}else{
-				view.alert_warning('Our servers are having trouble, please try again later.');
 			}
-
 		}
 		//
 		var url = document.getElementById('create_test_url').textContent
 		ajax.open("POST", url);
 		ajax.setRequestHeader("X-CSRFToken", csrf_token);
 		ajax.send(formdata);
-		view.alert_loading();
+		document.querySelector(`#test_maker_updates`).innerHTML = ''
+		loading(true)
 	}
 }
 view = new view();
@@ -490,10 +331,8 @@ controller = new controller(view);
 	<div id='main_body'>
 		<div id='scroll_window'>
 			<ul>
-				<!---
 				<li class ='maker_tabs' id='QStatus_tab' onclick = controller.C_maker_catagories('QStatus','QStatus_tab')>View Status</li>
 				<li class ='maker_tabs' id='type_tab' onclick = controller.C_maker_catagories('type','type_tab')>Question Types</li>
-				-->
 				<li class ='maker_tabs' id='moduels_tab' onclick = "controller.C_maker_catagories_moduels('moduels_json_var','moduels_tab')">Moduels</li>
 				<li class ='maker_tabs' id='chapters_tab' onclick = "controller.C_maker_catagories_chapters('moduels_json_var','chapters_json_var','chapters_tab')">Chapters</li>
 				<li class ='maker_tabs' id='difficulty_tab' onclick = controller.C_maker_catagories('difficulty','difficulty_tab')>Difficulty</li>

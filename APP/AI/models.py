@@ -165,7 +165,7 @@ class Lesson_quiz(models.Model):
     percentage_score = models.DecimalField(
         default=0.0,
         max_digits=5,  # Maximum number of digits allowed (including decimals).
-        decimal_places=2,  # Number of decimal places.
+        decimal_places=1,  # Number of decimal places.
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
