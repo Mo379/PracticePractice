@@ -104,9 +104,9 @@ class controller extends model{
 		}if(tab == 'type'){
 			var elem = document.getElementById("top");
 			var html = '';
-			var html = html +  this.C_make_window_elm('type_short','Short','Short','cq_type');
-			var html = html +  this.C_make_window_elm('type_medium','Medium','Medium','cq_type');
-			var html = html +  this.C_make_window_elm('type_long','Long','long','cq_type');
+			var html = html +  this.C_make_window_elm('type_short','Short','Short <= 3','cq_type');
+			var html = html +  this.C_make_window_elm('type_medium','Medium','Medium <= 7','cq_type');
+			var html = html +  this.C_make_window_elm('type_long','Long','long >= 8','cq_type');
 			//var html = html +  this.C_make_window_elm('type_MultipleChoice','MultipleChoice','MultiplceChoice','cq_type');
 			elem.innerHTML = html;
 		}if(tab == 'difficulty'){

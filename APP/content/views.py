@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.views import generic
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, F
 from content.util.GeneralUtil import (
         TagGenerator,
         ChapterQuestionGenerator,
@@ -1465,8 +1465,8 @@ def _createcustomtest(request):
             string = string.replace(',', ' ')
             return string.split(' ')
         course_id = h_decode(clean(request.POST['course_id'])[0])
-        #status_array = clean(request.POST['q_status_array'])
-        #type_array = clean(request.POST['q_type_array'])
+        status_array = clean(request.POST['q_status_array'])
+        type_array = clean(request.POST['q_type_array'])
         moduel_array = clean(request.POST['q_moduel_array'])
         chapter_array = clean(request.POST['q_chapter_array'])
         difficulty_array = clean(request.POST['q_difficulty_array'])
@@ -1480,15 +1480,33 @@ def _createcustomtest(request):
                     q_subject=specification.spec_subject,
                 )
         #
-        #if status_array[0] != '0':
-        #    all_tracked_questions = QuestionTrack.objects.filter(
-        #                user=request.user,
-        #                course=course,
-        #            )
-        #if type_array[0] != '0':
-        #    question_pool = question_pool.filter(
-        #            q_type__in=type_array
-        #        )
+        if status_array[0] != '0':
+            all_tracked_questions = QuestionTrack.objects.filter(
+                    user=request.user,
+                    course=course,
+                ).values('question__id')
+            if 'Seen' in status_array and 'Unseen' in status_array:
+                pass
+            else:
+                if 'Seen' in status_array:
+                    question_pool = question_pool.filter(id__in=all_tracked_questions)
+                elif 'Unseen' in status_array:
+                    question_pool = question_pool.exclude(id__in=all_tracked_questions)
+        #
+        if type_array[0] != '0':
+            allowed_marks = []
+            for q_type in type_array:
+                if q_type == 'Short':
+                    allowed_marks += [1, 2, 3]
+                if q_type == 'Medium':
+                    allowed_marks += [4, 5, 6, 7]
+                if q_type == 'Long':
+                    allowed_marks += [i for i in range(8,26,1)]
+            #
+            if len(allowed_marks) > 0:
+                question_pool = question_pool.filter(
+                        q_marks__in=allowed_marks
+                    )
         if moduel_array[0] != '0':
             question_pool = question_pool.filter(
                     q_moduel__in=moduel_array,

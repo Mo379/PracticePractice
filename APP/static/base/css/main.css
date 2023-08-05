@@ -2,6 +2,18 @@
 	background: var(--main-bg-color);
 }
 
+.card-img-top{
+	aspect-ratio:16/9;
+}
+
+.card-body{
+    display: flex;
+    flex-direction: column;
+}
+
+.card-body > * {
+    margin-top: auto;
+}
 
 /* rating item*/
 .rating {
