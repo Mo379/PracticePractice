@@ -6,12 +6,12 @@
 	aspect-ratio:16/9;
 }
 
-.card-body{
+.my_course_card > .card-body{
     display: flex;
     flex-direction: column;
 }
 
-.card-body > * {
+.my_course_card > .card-body > * {
     margin-top: auto;
 }
 

@@ -23,9 +23,9 @@
 					      <div class="card-body" style='padding:10px;'>
 							{%for chapter in content|index:module|index:'content'%}
 							      <div class="card-body" style='padding:10px;font-size:12px;'>
-									<a href='{%url 'AI:index' context.course.id module chapter%}' style='text-decoration:none;'><span class='font-weight-bold ml-1'><i class="bi bi-arrow-bar-right"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}  </span></a>
-								    <a type= 'button' class='' href="{%url 'content:notearticle' context.course.id module chapter%}">Raw</a>
-								    <a type= 'button' class='' href="{%url 'content:practice' context.course.id module chapter%}">Qs</a>
+									<a href='{%url 'AI:index' context.course.id module chapter%}' style='text-decoration:none;'><span class='font-weight-bold ml-1'><i class="bi bi-arrow-bar-right"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} <i class="fa fa-duotone fa-robot" name="GPT" unselectable="on" aria-hidden="true"></i></span></a>
+								    <a type= 'button' class='text-warning' href="{%url 'content:notearticle' context.course.id module chapter%}">Raw</a>
+								    <a type= 'button' class='text-success' href="{%url 'content:practice' context.course.id module chapter%}">Qs</a>
 								    <br>
 							      </div>
 							{%endfor%}
