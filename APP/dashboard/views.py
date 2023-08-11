@@ -232,12 +232,12 @@ class StudentPerformanceView(
     def crumbs(self):
         return [
                 ("Home", reverse("main:index")),
-                ("perfromance", reverse("dashboard:student_performance"))
+                ("perfromance", '')
                 ]
 
     def get_queryset(self):
         context = {}
-        context['sidebar_active'] = 'student/performance'
+        course_id = self.kwargs['course_id']
         return context
 
 

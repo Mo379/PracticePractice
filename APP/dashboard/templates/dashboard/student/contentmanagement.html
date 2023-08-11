@@ -38,6 +38,9 @@ Content Management
 				<a type= 'button' class='' href='{%url 'content:marketcourse' course.id%}'> View Course</a>
 				<div class="" style=''>
 					<hr class="sidebar-divider mb-3">
+					<a type="button" class="btn btn-success mb-2" href="{%url 'dashboard:student_performance' course.id %}">
+						MyPerformance
+					</a>
 					<a type="button" class="btn btn-info mb-2" data-toggle="modal" data-target="#Manage_course_{{course.id|hashid}}">
 						Manage
 					</a>

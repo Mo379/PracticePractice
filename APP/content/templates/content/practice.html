@@ -272,8 +272,8 @@ Controller = new controller(view);
 					</h1>
 					<p class="text-center pb-3 mb-4" style='font-size:12px;'>
 					{{context.sampl_object.q_level|field_name_to_label}} Chapter questions, on {{context.sampl_object.q_moduel|field_name_to_label}}.<br><br>
+						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:coursestudy' context.course.id%}">Go back</a>
 						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:notearticle' context.course.id context.module context.chapter%}"> Chapter Notes</a>
-						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:coursestudy' context.course.id%}"> More Questions</a>
 					</p>
 					<div id='error-message' style='text-align:center; color:red;'></div>
 

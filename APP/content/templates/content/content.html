@@ -50,7 +50,10 @@ Find the revision notes, questions and past papers you want, all in one place!
 	</div>
 			<div class="">
 				<hr class="sidebar-divider mb-3">
-				<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:coursestudy' course.id%}">Study</a>
+				<a type= 'button' class='btn btn-info' href="{%url 'content:coursestudy' course.id%}">Study</a>
+				<a type="button" class="btn btn-success" style='margin:auto;'href="{%url 'dashboard:student_performance' course.id %}">
+				MyPerformance
+				</a>
 			</div>
 		</div>
 	</div>

@@ -8,7 +8,7 @@ urlpatterns = [
     # Superuser
     path('monitor', views.SuperuserMonitorView.as_view(), name='superuser_monitor'),
     # student
-    path('student-performance', views.StudentPerformanceView.as_view(), name='student_performance'),
+    path('student-performance/<hashid:course_id>', views.StudentPerformanceView.as_view(), name='student_performance'),
     path(
         'student-contentmanagement',
         views.StudentContentManagementView.as_view(),

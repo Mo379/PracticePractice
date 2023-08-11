@@ -45,6 +45,8 @@ code {
 	background: var(--third-bg-color);
 	grid-template-rows: 8fr auto;
 	grid-template-areas:'chat' 'typing';
+	max-height: 100vh;
+	min-height: 100vh;
 }
 .AI_window_chat{
 	grid-area: chat;
@@ -92,12 +94,13 @@ code {
 	grid-area: typing;
 }
 .AI_text_wrap{
-	width: 80%;
+	width: 90%;
 	height:auto;
 	margin:auto;
 	display:grid;
 	grid-template-columns: auto 1fr;
 	grid-template-areas: 'image text'; 
+	overflow: scroll;
 }
 .AI_text_image{
 	grid-area: image;
