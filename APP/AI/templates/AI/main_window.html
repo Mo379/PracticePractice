@@ -132,37 +132,41 @@
 		{%endfor%}
 	</div>
 	</div>
-	<div style='margin: auto;'>
-		<a 
-			class='sidebar_button lesson_button mt-2'
-			id='previous_topic_button'
-			style='width:auto; padding:10px;display:inline-block;'
-	     {%if context.previous_chapter%}
-	     		href="{%url 'AI:index' context.course.id context.module context.previous_chapter%}"
-		>
-			<i class="bi bi-arrow-bar-left"></i> Previous Chapter
-	    {%else%}
-		>
-			End
-	    {%endif%}
-		</a>
-		<button class='sidebar_button lesson_button mt-2 ml-3 mr-3' id='toggle-sidebar-btn' style='width:auto; padding:10px;display:inline-block;'>
-			<i class="bi bi-arrows-fullscreen mr-2"></i> Show menu	
-		</button>
-		<a 
-			class='sidebar_button lesson_button mt-2'
-			id='next_topic_button'
-			style='width:auto; padding:10px;display:inline-block;'
-	     {%if context.next_chapter%}
-	     		href="{%url 'AI:index' context.course.id context.module context.next_chapter%}"
-		>
-			Next Chapter <i class="bi bi-arrow-bar-right"></i>
-	    {%else%}
-		>
-			End
-	    {%endif%}
-		</a >
-	</div>
+</div>
+
+
+
+
+<div id='sticky_options_menu' style='margin: auto;'>
+	<a 
+		class='sidebar_button lesson_button mt-2'
+		id='previous_topic_button'
+		style='width:auto; padding:10px;display:inline-block;'
+     {%if context.previous_chapter%}
+		href="{%url 'AI:index' context.course.id context.module context.previous_chapter%}"
+	>
+		<i class="bi bi-arrow-bar-left"></i> Previous Chapter
+    {%else%}
+	>
+		End
+    {%endif%}
+	</a>
+	<button class='sidebar_button lesson_button mt-2 ml-3 mr-3' id='toggle-sidebar-btn' style='width:auto; padding:10px;display:inline-block;'>
+		<i class="bi bi-arrows-fullscreen mr-2"></i> Show menu	
+	</button>
+	<a 
+		class='sidebar_button lesson_button mt-2'
+		id='next_topic_button'
+		style='width:auto; padding:10px;display:inline-block;'
+     {%if context.next_chapter%}
+		href="{%url 'AI:index' context.course.id context.module context.next_chapter%}"
+	>
+		Next Chapter <i class="bi bi-arrow-bar-right"></i>
+    {%else%}
+	>
+		End
+    {%endif%}
+	</a >
 </div>
 <script>
 	const toggleSidebarBtn = document.querySelector('#toggle-sidebar-btn');
