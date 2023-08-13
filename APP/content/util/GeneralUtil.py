@@ -8,6 +8,10 @@ import markdown
 import ruamel.yaml
 from content.models import Question
 
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncMonth
 
 
 def TagGenerator():
@@ -195,3 +199,156 @@ def is_valid_youtube_embed(link):
     if re.match(embed_pattern, link):
         return True
     return False
+
+
+current_month = datetime.now().date()
+n_months = 6
+
+def monthly_sum_data_list(
+            Model,
+            labels,
+            time_field='date_joined',
+            n_months=n_months,
+            count_fn=Count('id')
+        ):
+    data = [0 for _ in range(n_months)]
+    data_aggr = Model.objects.annotate(
+            month=TruncMonth(time_field)
+        ).values(
+            'month'
+        ).annotate(
+            count=count_fn
+            ).values('month', 'count')[0:n_months]
+    for count in data_aggr:
+        month = count['month'].strftime('%b %y')
+        user_count = count['count']
+        if month in labels:
+            idd = labels.index(month)
+            data[idd] = user_count
+    return data
+
+def usage_monthly_sum_data_list(
+            models, labels, time_field='created_at', n_months=n_months
+        ):
+    Prompt = [0 for _ in range(n_months)]
+    Completion = [0 for _ in range(n_months)]
+    Total = [0 for _ in range(n_months)]
+    for model in models:
+        for field in ['prompt', 'completion', 'total']:
+            data_set = monthly_sum_data_list(model, labels, time_field, n_months, Sum(field))
+            if field == 'prompt':
+                Prompt = [sum(x) for x in zip(Prompt, data_set)]
+            if field == 'completion':
+                Completion = [sum(x) for x in zip(Completion, data_set)]
+            if field == 'total':
+                Total = [sum(x) for x in zip(Total, data_set)]
+    datasets = []
+    for field in [
+            ('prompt', Prompt, '#f6c23e'),
+            ('completion', Completion, '#1cc88a'),
+            ('total', Total, '#36b9cc')
+        ]:
+        datasets.append({
+            "label": field[0].upper(),
+            "lineTension": 0.2,
+            "backgroundColor": "",
+            "borderColor": field[2],
+            "pointRadius": 3,
+            "pointBackgroundColor": field[2],
+            "pointBorderColor": field[2],
+            "pointHoverRadius": 3,
+            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
+            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
+            "pointHitRadius": 10,
+            "pointBorderWidth": 2,
+            "data":  field[1]
+        })
+    return datasets
+
+def user_course_monthly_sum_data_list(
+            Model,
+            labels,
+            lessons,
+            time_field='date_joined',
+            n_months=n_months,
+            count_fn=Count('id')
+        ):
+    data = [0 for _ in range(n_months)]
+    data_aggr = Model.objects.filter(lesson__in=lessons).annotate(
+            month=TruncMonth(time_field)
+        ).values(
+            'month'
+        ).annotate(
+            count=count_fn
+            ).values('month', 'count')[0:n_months]
+    for count in data_aggr:
+        month = count['month'].strftime('%b %y')
+        user_count = count['count']
+        if month in labels:
+            idd = labels.index(month)
+            data[idd] = user_count
+    return data
+
+def user_course_usage_monthly_sum_data_list(
+            models, labels, lessons, time_field='created_at', n_months=n_months
+        ):
+    Prompt = [0 for _ in range(n_months)]
+    Completion = [0 for _ in range(n_months)]
+    Total = [0 for _ in range(n_months)]
+    for model in models:
+        for field in ['prompt', 'completion', 'total']:
+            data_set = user_course_monthly_sum_data_list(model, labels, lessons, time_field, n_months, Sum(field))
+            if field == 'prompt':
+                Prompt = [sum(x) for x in zip(Prompt, data_set)]
+            if field == 'completion':
+                Completion = [sum(x) for x in zip(Completion, data_set)]
+            if field == 'total':
+                Total = [sum(x) for x in zip(Total, data_set)]
+    datasets = []
+    for field in [
+            ('prompt', Prompt, '#f6c23e'),
+            ('completion', Completion, '#1cc88a'),
+            ('total', Total, '#36b9cc')
+        ]:
+        datasets.append({
+            "label": field[0].upper(),
+            "lineTension": 0.2,
+            "backgroundColor": "",
+            "borderColor": field[2],
+            "pointRadius": 3,
+            "pointBackgroundColor": field[2],
+            "pointBorderColor": field[2],
+            "pointHoverRadius": 3,
+            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
+            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
+            "pointHitRadius": 10,
+            "pointBorderWidth": 2,
+            "data":  field[1]
+        })
+    return datasets
+
+
+def performance_index_monthly_sum_data_list(
+            Model,
+            labels,
+            user,
+            course,
+            time_field='date_joined',
+            n_months=n_months,
+            count_fn=Count('id')
+        ):
+    data = [0 for _ in range(n_months)]
+    data_aggr = Model.objects.filter(user=user, course=course, track_attempt_number__gt=0).annotate(
+            month=TruncMonth(time_field)
+        ).values(
+            'month'
+        ).annotate(
+            count=count_fn
+            ).values('month', 'count')[0:n_months]
+    for count in data_aggr:
+        month = count['month'].strftime('%b %y')
+        user_count = count['count']
+        if month in labels:
+            idd = labels.index(month)
+            data[idd] = user_count
+    return data

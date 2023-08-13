@@ -1,5 +1,6 @@
 {% extends 'dashboard/base.html'%}
 {%load static%}
+{%load general%}
 {%block page_name%}
 Performance
 {%endblock%}
@@ -9,25 +10,6 @@ Performance
 
 	<!-- Content Row -->
 	<div class="row">
-
-		<!-- Earnings (Monthly) Card Example -->
-		<div class="col-xl-3 col-md-6 mb-4">
-			<div class="card border-left-primary shadow h-100 py-2">
-				<div class="card-body">
-					<div class="row no-gutters align-items-center">
-						<div class="col mr-2">
-							<div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-								Earnings (Monthly)</div>
-							<div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-						</div>
-						<div class="col-auto">
-							<i class="fas fa-calendar fa-2x text-gray-300"></i>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- Earnings (Monthly) Card Example -->
 		<div class="col-xl-3 col-md-6 mb-4">
 			<div class="card border-left-success shadow h-100 py-2">
@@ -35,39 +17,19 @@ Performance
 					<div class="row no-gutters align-items-center">
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-								Earnings (Annual)</div>
-							<div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
+								# Course Study
+							</div>
+							<div class="h5 mb-0 font-weight-bold text-white-800">
+								<a type= 'button' class='btn btn-success' href="{%url 'content:coursestudy' context.course.id%}">Study</a>
+							</div>
 						</div>
 						<div class="col-auto">
-							<i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+							<i class="fa-solid fa-book-open-reader fa-2x"></i>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-
-		<!-- Earnings (Monthly) Card Example -->
-		<div class="col-xl-3 col-md-6 mb-4">
-			<div class="card border-left-info shadow h-100 py-2">
-				<div class="card-body">
-					<div class="row no-gutters align-items-center">
-						<div class="col mr-2">
-							<div class="text-xs font-weight-bold text-info text-uppercase mb-1"># Students
-							</div>
-							<div class="row no-gutters align-items-center">
-								<div class="col-auto">
-									<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-auto">
-							<i class="fas fa-user-graduate fa-2x text-gray-300"></i>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- Pending Requests Card Example -->
 		<div class="col-xl-3 col-md-6 mb-4">
 			<div class="card border-left-warning shadow h-100 py-2">
@@ -75,11 +37,57 @@ Performance
 					<div class="row no-gutters align-items-center">
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-								Pending Requests</div>
-							<div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+								# Questions Answered & Average Score
+							</div>
+							<div class="h5 mb-0 font-weight-bold text-white-800">{{context.total_q_tracks}}/{{context.total_n_questions}} | {{context.all_questions_percentage}}%</div>
 						</div>
 						<div class="col-auto">
-							<i class="fas fa-comments fa-2x text-gray-300"></i>
+							<i class="fa-solid fa-check-double"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xl-3 col-md-6 mb-4">
+			<div class="card border-left-info shadow h-100 py-2">
+				<div class="card-body">
+					<div class="row no-gutters align-items-center">
+						<div class="col mr-2">
+							<div class="text-xs font-weight-bold text-info text-uppercase mb-1"># Completed Papers + Quizzes & Average Score
+							</div>
+							<div class="row no-gutters align-items-center">
+								<div class="col-auto">
+									<div class="h5 mb-0 mr-3 font-weight-bold text-white-800">
+										{{context.total_completed_tests}}/{{context.total_tests}} | {{context.total_average_score}}%<br>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-auto">
+							<i class="fa-solid fa-percent fa-2x"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Earnings (Monthly) Card Example -->
+
+		<div class="col-xl-3 col-md-6 mb-4">
+			<div class="card border-left-info shadow h-100 py-2">
+				<div class="card-body">
+					<div class="row no-gutters align-items-center">
+						<div class="col mr-2">
+							<div class="text-xs font-weight-bold text-info text-uppercase mb-1"># Total ChatGPT Usage/Tokens
+							</div>
+							<div class="row no-gutters align-items-center">
+								<div class="col-auto">
+									<div class="h5 mb-0 mr-3 font-weight-bold text-white-800">{{context.total_tokens}}</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-auto">
+							<i class="fa-solid fa-coins fa-2x"></i>
 						</div>
 					</div>
 				</div>
@@ -88,53 +96,74 @@ Performance
 	</div>
 
 	<!-- Content Row -->
-
 	<div class="row">
-
-		<!-- Area Chart -->
-		<div class="col-xl-8 col-lg-7">
+		<!-- Pie Chart -->
+		<div class="col-xl-6 col-lg-5">
 			<div class="card shadow mb-4">
 				<!-- Card Header - Dropdown -->
 				<div
 					class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-					<h6 class="m-0 font-weight-bold text-primary">Performance Index</h6>
+					<h6 class="m-0 font-weight-bold text-primary">Number Of Questions Answered: By Difficulty</h6>
 				</div>
 				<!-- Card Body -->
 				<div class="card-body">
 					<div class="chart-area">
-						<canvas id="myAreaChart"></canvas>
+						<canvas id="break_by_diff_pie"></canvas>
+						{%definevar 'break_by_diff_pie' as canvas_id %}
+						{%definevar context.q_diff_pie_labels as plot_labels %}
+						{%definevar context.q_diff_dataset as plot_data %}
+						{%include 'dashboard/plots/plot_pie.html'%}
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<!-- Pie Chart -->
-		<div class="col-xl-4 col-lg-5">
+		<div class="col-xl-6 col-lg-5">
 			<div class="card shadow mb-4">
 				<!-- Card Header - Dropdown -->
 				<div
 					class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-					<h6 class="m-0 font-weight-bold text-primary">Question</h6>
+					<h6 class="m-0 font-weight-bold text-primary">Questions % Score: By Difficulty</h6>
 				</div>
 				<!-- Card Body -->
-				<div class="card-body">
-					<div class="chart-pie pt-4 pb-2">
-						<canvas id="myPieChart"></canvas>
-					</div>
-					<div class="mt-4 text-center small">
-						<span class="mr-2">
-							<i class="fas fa-circle text-primary"></i> Direct
-						</span>
-						<span class="mr-2">
-							<i class="fas fa-circle text-success"></i> Social
-						</span>
-						<span class="mr-2">
-							<i class="fas fa-circle text-info"></i> Referral
-						</span>
+				<div class="card-body" style='background:white;'>
+					<div class="chart-area">
+						<canvas id="break_by_diff_polar"></canvas>
+						{%definevar 'break_by_diff_polar' as canvas_id %}
+						{%definevar context.q_diff_polar_labels as plot_labels %}
+						{%definevar context.q_diff_polar_dataset as plot_data %}
+						{%include 'dashboard/plots/plot_polar.html'%}
 					</div>
 				</div>
 			</div>
 		</div>
+
+	</div>
+
+	<div class="row">
+
+		<!-- Area Chart -->
+		<div class="col-xl-12 col-lg-7">
+			<div class="card shadow mb-4">
+				<!-- Card Header - Dropdown -->
+				<div
+					class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+					<h6 class="m-0 font-weight-bold text-primary">Questions Answeres</h6>
+				</div>
+				<!-- Card Body -->
+				<div class="card-body">
+					<div class="chart-area">
+						<canvas id="performance_index_chart"></canvas>
+						{%definevar 'performance_index_chart' as canvas_id %}
+						{%definevar context.labels as plot_labels %}
+						{%definevar context.datasets as plot_data %}
+						{%include 'dashboard/plots/plot_line.html'%}
+					</div>
+				</div>
+			</div>
+		</div>
+
 	</div>
 	<div class="row">
 
@@ -149,7 +178,11 @@ Performance
 				<!-- Card Body -->
 				<div class="card-body">
 					<div class="chart-area">
-						<canvas id="myAreaChart"></canvas>
+						<canvas id="user_token_usage_chart"></canvas>
+						{%definevar 'user_token_usage_chart' as canvas_id %}
+						{%definevar context.labels as plot_labels %}
+						{%definevar context.usage_dataset as plot_data %}
+						{%include 'dashboard/plots/plot_line.html'%}
 					</div>
 				</div>
 			</div>

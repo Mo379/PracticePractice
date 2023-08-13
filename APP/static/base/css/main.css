@@ -104,12 +104,11 @@
 
 /* styling for marketcourse */
 .my_course_card{
-	width: 20em;
+	width: 25em;
 	height: auto;
 	margin: 5px;
 }
 .my_course_card:hover{
-	transform: scale(1.01, 1.01);
 	transition: transform 0.3s ease-in-out;
 	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 	transition: box-shadow 0.3s ease-in-out;

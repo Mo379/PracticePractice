@@ -21,14 +21,17 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from user.models import User
 from AI.models import (
         ContentGenerationJob,
         ContentPromptQuestion,
         ContentPromptTopic,
         ContentPromptPoint,
         Usage,
+        Lesson,
+        Lesson_part,
+        Lesson_quiz
     )
-from user.models import User
 from content.models import (
         Question,
         Point,
@@ -39,12 +42,19 @@ from content.models import (
         Course,
         CourseVersion,
         CourseSubscription,
-        CourseReview
+        CourseReview,
+        QuestionTrack,
+        UserPaper
     )
 from content.util.GeneralUtil import (
         filter_drag_drop_selection,
         order_full_spec_content,
-        order_live_spec_content
+        order_live_spec_content,
+        monthly_sum_data_list,
+        usage_monthly_sum_data_list,
+        user_course_monthly_sum_data_list,
+        user_course_usage_monthly_sum_data_list,
+        performance_index_monthly_sum_data_list,
     )
 
 
@@ -79,74 +89,13 @@ class SuperuserMonitorView(
         datasets = []
 
         current_month = datetime.now().date()
-        n_months = 12
+        n_months = 6
         labels = []
         for i in range(n_months):
             month = current_month - relativedelta(months=i)
             formatted_month = month.strftime('%b %y')
             labels.append(formatted_month)
         labels.reverse()
-
-        def monthly_sum_data_list(
-                    Model,
-                    labels,
-                    time_field='date_joined',
-                    n_months=n_months,
-                    count_fn=Count('id')
-                ):
-            data = [0 for _ in range(n_months)]
-            data_aggr = Model.objects.annotate(
-                    month=TruncMonth(time_field)
-                ).values(
-                    'month'
-                ).annotate(
-                    count=count_fn
-                    ).values('month', 'count')[0:n_months]
-            for count in data_aggr:
-                month = count['month'].strftime('%b %y')
-                user_count = count['count']
-                if month in labels:
-                    idd = labels.index(month)
-                    data[idd] = user_count
-            return data
-
-        def usage_monthly_sum_data_list(
-                    models, labels, time_field='created_at', n_months=n_months
-                ):
-            Prompt = [0 for _ in range(n_months)]
-            Completion = [0 for _ in range(n_months)]
-            Total = [0 for _ in range(n_months)]
-            for model in models:
-                for field in ['prompt', 'completion', 'total']:
-                    data_set = monthly_sum_data_list(model, labels, time_field, n_months, Sum(field))
-                    if field == 'prompt':
-                        Prompt = [sum(x) for x in zip(Prompt, data_set)]
-                    if field == 'completion':
-                        Completion = [sum(x) for x in zip(Completion, data_set)]
-                    if field == 'total':
-                        Total = [sum(x) for x in zip(Total, data_set)]
-            datasets = []
-            for field in [
-                    ('prompt', Prompt, '#f6c23e'),
-                    ('completion', Completion, '#1cc88a'),
-                    ('total', Total, '#36b9cc')
-                ]:
-                datasets.append({
-                    "label": field[0].upper(),
-                    "lineTension": 0.2,
-                    "backgroundColor": "",
-                    "borderColor": field[2],
-                    "pointRadius": 3,
-                    "pointBackgroundColor": field[2],
-                    "pointBorderColor": field[2],
-                    "pointHoverRadius": 3,
-                    "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
-                    "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
-                    "pointHitRadius": 10,
-                    "pointBorderWidth": 2,
-                    "data":  field[1]
-                })
-            return datasets
 
         user_data = monthly_sum_data_list(
                 User, labels, 'date_joined', n_months
@@ -158,10 +107,11 @@ class SuperuserMonitorView(
                 CourseSubscription, labels, 'subscription_created_at', n_months
             )
         usage_dataset = usage_monthly_sum_data_list(
-                [ContentGenerationJob, Usage], labels, 'created_at', n_months
+                [ContentGenerationJob, Usage, Lesson_part], labels, 'created_at', n_months
             )
         total_tokens = ContentGenerationJob.objects.aggregate(Sum('total'))['total__sum']
         total_tokens += Usage.objects.aggregate(Sum('total'))['total__sum']
+        total_tokens += Lesson_part.objects.aggregate(Sum('total'))['total__sum']
         context['total_tokens'] = total_tokens
 
         #
@@ -231,13 +181,111 @@ class StudentPerformanceView(
     @cached_property
     def crumbs(self):
         return [
-                ("Home", reverse("main:index")),
+                ("content management", reverse("dashboard:student_contentmanagement")),
                 ("perfromance", '')
                 ]
 
     def get_queryset(self):
         context = {}
         course_id = self.kwargs['course_id']
+        course = Course.objects.get(id=course_id)
+        version = CourseVersion.objects.filter(course=course).order_by('-version_number')[0]
+        #
+        question_tracks = QuestionTrack.objects.filter(user=self.request.user, course=course)
+        total_q_tracks = len(question_tracks.filter(track_attempt_number__gt=0))
+        #
+
+        #
+        total_chapters = len(version.version_content)
+        total_n_questions = 25 * total_chapters
+        #
+        difficulty_statistics = []
+        attempted_questions = question_tracks.filter(track_attempt_number__gt=0)
+        all_question_marks = attempted_questions.aggregate(total_sum=Sum('total_marks'))['total_sum']
+        all_attempt_marks = attempted_questions.aggregate(total_sum=Sum('track_mark'))['total_sum']
+        all_questions_percentage = round(100*(all_attempt_marks/all_question_marks)) if all_attempt_marks and all_question_marks else 0
+        #
+        for difficulty in range(1, 6, 1):
+            target_questions = attempted_questions.filter(question__q_difficulty=difficulty)
+            #
+            total_difficulty_answers = len(target_questions)
+            total_question_marks = target_questions.aggregate(total_sum=Sum('total_marks'))['total_sum']
+            total_attempt_marks = target_questions.aggregate(total_sum=Sum('track_mark'))['total_sum']
+            #
+            difficulty_statistics.append(
+                (
+                    difficulty,
+                    total_difficulty_answers,
+                    total_chapters*5,
+                    round(100*(total_attempt_marks/total_question_marks)) if total_attempt_marks and total_question_marks else 0
+                )
+            )
+        #
+        lessons = Lesson.objects.filter(user=self.request.user, course=course)
+        lesson_parts = Lesson_part.objects.filter(user=self.request.user, lesson__in=lessons)
+        total_tokens = lesson_parts.aggregate(total_sum=Sum('total'))['total_sum']
+        #
+        quizzes = Lesson_quiz.objects.filter(user=self.request.user, course=course)
+        completed_quizzes = quizzes.filter(completed=True)
+        papers = UserPaper.objects.filter(user=self.request.user, pap_course=course)
+        completed_papers = papers.filter(pap_completion=True)
+        #
+        total_tests = len(papers) + len(quizzes)
+        total_completed_tests = len(completed_quizzes) + len(completed_papers)
+        #
+        quizzes_average_score = completed_quizzes.aggregate(total_sum=Sum('percentage_score'))['total_sum']/len(completed_quizzes) if completed_quizzes else 0
+        papers_average_score = completed_papers.aggregate(total_sum=Sum('percentage_score'))['total_sum']/len(completed_papers) if completed_quizzes else 0
+        total_average_score = (quizzes_average_score+papers_average_score)/2
+        #
+        context['course'] = course
+        context['total_n_questions'] = total_n_questions
+        context['total_q_tracks'] = total_q_tracks
+        context['difficulty_statistics'] = difficulty_statistics
+        context['total_tokens'] = total_tokens if total_tokens else 0
+        context['total_tests'] = total_tests
+        context['total_completed_tests'] = total_completed_tests
+        context['total_average_score'] = round(total_average_score)
+        context['all_questions_percentage'] = all_questions_percentage
+
+        
+        datasets = []
+        current_month = datetime.now().date()
+        n_months = 6
+        labels = []
+        for i in range(n_months):
+            month = current_month - relativedelta(months=i)
+            formatted_month = month.strftime('%b %y')
+            labels.append(formatted_month)
+        labels.reverse()
+        usage_dataset = user_course_usage_monthly_sum_data_list(
+                [Lesson_part], labels, lessons,'created_at', n_months
+            )
+        performance_index_data = performance_index_monthly_sum_data_list(
+                QuestionTrack, labels, self.request.user, course, 'track_creation_time', n_months
+            )
+        datasets.append({
+            "label": "Questions Answered",
+            "lineTension": 0.2,
+            "backgroundColor": "",
+            "borderColor": "#f6c23e",
+            "pointRadius": 3,
+            "pointBackgroundColor": "#f6c23e",
+            "pointBorderColor": "#f6c23e",
+            "pointHoverRadius": 3,
+            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
+            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
+            "pointHitRadius": 10,
+            "pointBorderWidth": 2,
+            "data": performance_index_data
+        })
+        context['labels'] = labels
+        context['datasets'] = datasets
+        context['usage_dataset'] = usage_dataset
+        #
+        context['q_diff_pie_labels'] = [f"Difficulty {i}" for i in range(1, 6, 1)]
+        context['q_diff_polar_labels'] = [f"Difficulty {i}" for i in range(1, 6, 1)]
+        context['q_diff_dataset'] = [diff[1] for diff in difficulty_statistics]
+        context['q_diff_polar_dataset'] = [diff[3] for diff in difficulty_statistics]
         return context
 
 

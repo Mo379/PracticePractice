@@ -16,7 +16,9 @@ code {
 	max-height: 100vh;
 	height: 100vh;
 	padding: 0px;
+	margin: 0;
 	position: relative;
+	top: 0px;
 }	
 .AI_side_bar{
 	display:grid;
