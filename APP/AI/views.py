@@ -32,7 +32,8 @@ from user.forms import (
     )
 from content.util.GeneralUtil import (
         order_live_spec_content,
-        TagGenerator
+        TagGenerator,
+        increment_course_subscription_significant_click
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
@@ -226,6 +227,14 @@ def _next_point(request):
         content = ordered_content[lesson_part.lesson.moduel]['content'][lesson_part.lesson.chapter]['content']
         topics = list(content.keys())
         #
+        try:
+            significant_click_name = 'ai_next_point'
+            increment_course_subscription_significant_click(
+                    request.user, lesson_part.lesson.course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
+        #
         next_point = None
         new_topic = None
         if previous_point_pos >= len(part_content)-1:
@@ -283,6 +292,13 @@ def _ask_from_book(request):
         user_prompt = request.POST['user_prompt']
         #
         lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+        try:
+            significant_click_name = 'ai_ask_from_book'
+            increment_course_subscription_significant_click(
+                    request.user, lesson_part.lesson.course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
         #
         chat_subthread_number = str(int(global_order_id)-1)
         part = lesson_part.part_chat[chat_subthread_number]
@@ -379,8 +395,17 @@ def _mark_quiz_question(request):
         quiz_question_number = request.POST['question_number']
         user_choice = request.POST['user_answer']
         #
+        lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+        #
         try:
-            lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+            significant_click_name = 'ai_mark_quiz_question'
+            increment_course_subscription_significant_click(
+                    request.user, lesson_part.lesson.course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
+        #
+        try:
             lesson_quiz, created = Lesson_quiz.objects.get_or_create(
                     user=request.user,
                     course=lesson_part.lesson.course,

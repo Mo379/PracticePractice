@@ -3,7 +3,7 @@ import re
 import random
 import string
 import collections
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import markdown
 import ruamel.yaml
 from content.models import Question
@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 
+from content.models import CourseSubscription
 
 def TagGenerator():
     x = ''.join(
@@ -352,3 +353,22 @@ def performance_index_monthly_sum_data_list(
             idd = labels.index(month)
             data[idd] = user_count
     return data
+
+
+def increment_course_subscription_significant_click(user, course, significant_click_name):
+    current_month = datetime.now().strftime('%Y%m')
+    course_subscription = CourseSubscription.objects.get(user=user, course=course)
+    # check and add current month dictionary
+    if current_month not in course_subscription.monthly_significant_clicks.keys():
+        course_subscription.monthly_significant_clicks[current_month] = {}
+    # check and add significant click field
+    if significant_click_name not in course_subscription.monthly_significant_clicks[current_month].keys():
+        course_subscription.monthly_significant_clicks[current_month][significant_click_name] = 0
+    # increment click
+    course_subscription.monthly_significant_clicks[current_month][significant_click_name] += 1
+    course_subscription.save()
+
+def author_user_subscription_data_list():
+    pass
+
+

@@ -21,6 +21,69 @@
     {%include 'base/alert.html'%}
     {%definevar 'billing' as active_link%}
     {%include 'user/parts/_navigation.html'%}
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <!-- Billing card 3-->
+            <div class="card h-100 border-start-lg border-start-success">
+                <div class="card-body">
+                    <div class="small text-muted">Current plan</div>
+		    {%if context.cancel_later%}
+		    <div class="h3 d-flex align-items-center">{{context.plan_name|field_name_to_label}}</div>
+		    <a class="text-arrow-icon small" href="{%url 'user:_reactivatemembership'%}">
+                        Reactivate subscription
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+		    {%elif context.plan_name%}
+		    <div class="h3 d-flex align-items-center">{{context.plan_name|field_name_to_label}}</div>
+		    <a class="text-arrow-icon small" href="{%url 'user:cancelsubscription'%}">
+                        Cancel Subscription
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+		    {%else%}
+		    -
+		    {%endif%}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <!-- Billing card 1-->
+            <div class="card h-100 border-start-lg border-start-primary">
+                <div class="card-body">
+		    {%if context.cancel_later%}
+		    <div class="small text-muted">Current {{context.billing_interval}}ly bill</div>
+		    -
+		    {%elif context.billing_interval%}
+			<div class="small text-muted">Current {{context.billing_interval}}ly bill</div>
+			<div class="h3">£ {{context.billing_amount}}</div>
+		    {%else%}
+			<div class="small text-muted">Current bill</div>
+		    -
+		    {%endif%}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <!-- Billing card 2-->
+            <div class="card h-100 border-start-lg border-start-secondary">
+                <div class="card-body">
+		    {%if context.cancel_later%}
+                    <div class="small text-muted">Membership benefits end:</div>
+                    <div class="h3">{{context.billing_next|date:'Y-m-d'}}</div>
+		    {%elif context.billing_next%}
+                    <div class="small text-muted">Next payment due</div>
+                    <div class="h3">{{context.billing_next|date:'Y-m-d'}}</div>
+                    <a class="text-arrow-icon small text-secondary" href="#billing_history">
+                        View billing history
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+		    {%else%}
+                    <div class="small text-muted">Next payment due</div>
+		    -
+		    {%endif%}
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Payment methods card-->
     <div class="card card-header-actions mb-4">
         <div class="card-header">

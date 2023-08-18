@@ -1,3 +1,4 @@
+import datetime
 import pandas as pd
 import yaml
 from django.conf import settings
@@ -27,6 +28,7 @@ from content.util.GeneralUtil import (
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
+from content.util.GeneralUtil import increment_course_subscription_significant_click
 from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MDEditorModleForm
 from management.templatetags.general import ToMarkdownAnswerManual
 from mdeditor.widgets import MDEditorWidget
@@ -1479,6 +1481,13 @@ def _createcustomtest(request):
                     user=creator,
                     q_subject=specification.spec_subject,
                 )
+        try:
+            significant_click_name = 'create_custom_test'
+            increment_course_subscription_significant_click(
+                    request.user, course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
         #
         if status_array[0] != '0':
             all_tracked_questions = QuestionTrack.objects.filter(
@@ -3214,6 +3223,13 @@ def _subjective_mark_question(request):
                     question=question
                 )
         try:
+            significant_click_name = 'subjective_mark_question'
+            increment_course_subscription_significant_click(
+                    request.user, course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
+        try:
             questiontrack.total_marks = question.q_marks
             questiontrack.precieved_difficulty = str(precieved_difficulty)
             questiontrack.save()
@@ -3297,6 +3313,13 @@ def _mark_question(request):
                 question=question
             )
         try:
+            significant_click_name = 'mark_question'
+            increment_course_subscription_significant_click(
+                    request.user, course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
+        try:
             questiontrack.track_mark = int(n_marks)
             questiontrack.track_attempt_number += 1
             questiontrack.save()
@@ -3319,6 +3342,7 @@ def _mark_question(request):
 
 def _mark_paper_question(request):
     if request.method == 'POST':
+        #
         course_id = request.POST['course_id']
         paper_id = request.POST['paper_id']
         question_id = request.POST['question_id']
@@ -3332,6 +3356,14 @@ def _mark_paper_question(request):
                 course=course,
                 question=question
             )
+        # Add a course subscription month click
+        try:
+            significant_click_name = 'mark_paper_question'
+            increment_course_subscription_significant_click(
+                    request.user, course, significant_click_name
+            )
+        except Exception as e:
+            print(str(e))
         #
         inverted_paper = {v: k for k, v in paper.pap_info.items()}
         question_number = inverted_paper[question.id]

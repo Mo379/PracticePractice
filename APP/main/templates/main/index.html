@@ -1,5 +1,6 @@
 {% extends 'base/base.html'%}
 {%load static%}
+{%load general%}
 
 {%block page_name%}
 	Home
@@ -92,36 +93,144 @@ PracticePractice, you personalised study hub.
 	</div>
 	<hr class='sidebar-divider' style='border-width:2px;'>
 	 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-      <h1 class="display-4">Course Type Pricing</h1>
-      <p class="lead">Each course on PracticePractice follows one of the following pricing standards, once you buy a course you own it forever! <br>Note: <a href='{%url 'user:billing'%}'><strong class='text-primary'>ChatGPT monthly charge depends on your usage, you can see your usage and our current rate here.</strong></a></p>
-    </div>
+		{%if user.is_authenticated%}
+			{%if context.user_is_subscribed%}
+				<h1 class="display-4">Manage Your subscription</h1>
+				<form method="POST" action="{%url 'user:_create_customer_portal_session'%}">
+				  {% csrf_token %}
+				  <button class='btn btn-success p-4' type="submit">Manage billing</button>
+				</form>
+			{%else%}
+				<h1 class="display-4">Join Now</h1>
+				<div class='col-8 mx-auto' style='margin-bottom:30px;'>
+					Unlock a world of learning possibilities with our premium membership: access exclusive self-practice tools, harness AI assistance, and delve into enriching video content. For free users, enjoy limitless reading across all courses. Elevate your study experience today!
+				</div>
+			      <p>A membership gives you access to all of our courses, with or without our Artificial Intelligence features depending on your choice.</p>
+			      <div class='pt-5 pb-5 mt-3' style='border: 1px solid var(--text-color-3); border-radius:10px; padding: 25px; background:black;box-shadow:0 15px 25px var(--text-color-2);'>
 
-    <div class="container">
-      <div class="card-deck mb-3 text-center">
-        <div class="card mb-4 box-shadow">
-          <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Basic</h4>
-          </div>
-          <div class="card-body">
-            <h1 class="card-title pricing-card-title">£10</h1>
-          </div>
-        </div>
-        <div class="card mb-4 box-shadow">
-          <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Intermediate</h4>
-          </div>
-          <div class="card-body">
-            <h1 class="card-title pricing-card-title">£20</h1>
-          </div>
-        </div>
-        <div class="card mb-4 box-shadow">
-          <div class="card-header">
-            <h4 class="my-0 font-weight-normal">Advanced</h4>
-          </div>
-          <div class="card-body">
-            <h1 class="card-title pricing-card-title">£30</h1>
-          </div>
-        </div>
+			      <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+				<stripe-pricing-table 
+					pricing-table-id="prctbl_1Nf0wJCUEyV7FMWeAvtivll7"
+					publishable-key="{{context.publishable_key}}"
+					client-reference-id="{{user.id}}"
+					customer-session-client-secret="{{context.client_secret}}"
+				>
+				</stripe-pricing-table>
+			{%endif%}
+		{%else%}
+		<section class="py-5">
+            <div class="container">
+                <h2 class="text-center pb-3 mb-4">Pricing</h2>
+		<div class='col-12 mx-auto' style='margin-bottom:30px;'>
+			Unlock a world of learning possibilities with our premium membership: access exclusive self-practice tools, harness AI assistance, and delve into enriching video content. For free users, enjoy limitless reading across all courses. Elevate your study experience today!
+		</div>
+		<div id='error-message' style='text-align:center; color:red;'></div>
+                <nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
+                    <a class="nav-item nav-link active" data-toggle="tab" href="#monthlypricing" id="monthlypricingtab">1 Month</a>
+                    <a class="nav-item nav-link" data-toggle="tab" href="#threemonthpricing" id="threemonthpricingtab">3 Months</a>
+                    <a class="nav-item nav-link" data-toggle="tab" href="#sixmonthpricing" id="sixmonthpricingtab">6 Months</a>
+                </nav>
+                <div class="tab-content" id="pricingTab">
+                    <div class="tab-pane fade active show" id="monthlypricing" role="tabpanel" aria-labelledby="monthlypricingtab">
+                        <div class="row">
+				<div class="container">
+					<div class="">
+						<table class="table table-striped pricing-table">
+							<thead>
+								<tr style='display:grid; grid-template-columns:1fr 1fr 1fr;'>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">Free</h6>
+										<p class="font-weight-bold pricing-plan-amount"> <span class="h1">-</span></p>
+										<p class="small pricing-plan-allotment"><i class="bi bi-check-circle-fill" style='color:green;'></i></p>
+										<a id='monthly_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">Without AI</h6>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.with_ai_monthly_plan.unit_amount|divide:100}}</span></p>
+										<p class="small pricing-plan-allotment">Per user, per month</p>
+										<a id='monthly_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">With AI</h6>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.without_ai_monthly_plan.unit_amount|divide:100}}</span></p>
+										<p class="small pricing-plan-allotment">Per user, per month</p>
+										<a id='monthly_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+                    </div>
+                    <div class="tab-pane fade" id="threemonthpricing" role="tabpanel" aria-labelledby="threemonthpricingtab">
+                        <div class="row">
+				<div class="container">
+					<div class="">
+						<table class="table table-striped pricing-table">
+							<thead>
+								<tr style='display:grid; grid-template-columns:1fr 1fr 1fr;'>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">Free</h6>
+										<p class="font-weight-bold pricing-plan-amount"> <span class="h1">-</span></p>
+										<p class="small pricing-plan-allotment"><i class="bi bi-check-circle-fill" style='color:green;'></i></p>
+										<a id='3month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">Without AI</h6>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.without_ai_threemonth_plan.unit_amount|divide:100}}</span></p>
+										<p class="small pricing-plan-allotment">Per user, per month</p>
+										<a id='3month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">With AI</h6>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.with_ai_threemonth_plan.unit_amount|divide:100}}</span></p>
+										<p class="small pricing-plan-allotment">Per user, </p>
+										<a id='3month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+                    </div>
+                    <div class="tab-pane fade" id="sixmonthpricing" role="tabpanel" aria-labelledby="sixmonthpricingtab">
+                        <div class="row">
+				<div class="container">
+					<div class="">
+						<table class="table table-striped pricing-table">
+							<thead>
+								<tr style='display:grid; grid-template-columns:1fr 1fr 1fr;'>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">Free</h6>
+										<p class="font-weight-bold pricing-plan-amount"> <span class="h1">-</span></p>
+										<p class="small pricing-plan-allotment"><i class="bi bi-check-circle-fill" style='color:green;'></i></p>
+										<a id='6month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">Without AI</h6>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.without_ai_sixmonth_plan.unit_amount|divide:100}}</span></p>
+										<p class="small pricing-plan-allotment">Per user, per month</p>
+										<a id='6month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+									<th class="text-center border-0 pb-5">
+										<h6 class="lead font-weight-bold pricing-plan-title">With AI</h6>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.with_ai_sixmonth_plan.unit_amount|divide:100}}</span></p>
+										<p class="small pricing-plan-allotment">Per user, per month</p>
+										<a id='6month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
+									</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+		{%endif%}
       </div>
     </div>
 

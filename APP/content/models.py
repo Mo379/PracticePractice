@@ -269,6 +269,7 @@ class CourseSubscription(models.Model):
     owned = models.BooleanField(default=False, null=True)
     subscription_created_at = models.DateTimeField(auto_now_add=True)
     subscription_ended_at = models.DateTimeField(null=True, default=None, blank=True)
+    monthly_significant_clicks = models.JSONField(default=OrderedDict, null=True)
 
     def __str__(self):
         return (

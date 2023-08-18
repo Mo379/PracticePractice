@@ -1,4 +1,7 @@
+import requests
+import stripe
 from django.http import HttpResponse, HttpResponseRedirect
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import generic
@@ -7,6 +10,11 @@ from view_breadcrumbs import BaseBreadcrumbMixin
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.views.decorators.http import require_GET
+from djstripe.models import (
+        Customer,
+        Subscription,
+        Price,
+    )
 
 
 
@@ -30,7 +38,49 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
         #        'This is the top of the home page',
         #        extra_tags='alert-danger top_homepage'
         #    )
-        return "base_index"
+        context = {}
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                Customer.objects.get(id=user.id)
+            except:
+                stripe.api_key = settings.STRIPE_SECRET_KEY
+                stripe.Customer.create(
+                        email=user.email,
+                        name=user.first_name+' '+user.last_name,
+                        id=user.id,
+                        metadata={'username':user.username}
+                    )
+            #
+            if Subscription.objects.filter(customer=user.id, status__in=['active','trialing']).exists() is False:
+                auth_key = settings.STRIPE_SECRET_KEY
+                url = "https://api.stripe.com/v1/customer_sessions"
+                data = {
+                    "customer": user.id
+                }
+
+                headers = {
+                    "Authorization": f"Bearer {auth_key}",
+                }
+
+                response = requests.post(url, data=data, headers=headers)
+                client_secret = response.json()['client_secret']
+
+                context['client_secret'] = client_secret
+                context['user_is_subscribed'] = False
+            else:
+                context['client_secret'] = None
+                context['user_is_subscribed'] = True
+        #
+        context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
+        context['without_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0s1CUEyV7FMWeH5sz68Hw')
+        context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1Nf0s1CUEyV7FMWe0YJ1jXNX')
+        context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1Nf0s1CUEyV7FMWeqSyB5D8T')
+        #
+        context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
+        context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeKLYogkM2')
+        context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeUr0fHRaW')
+        return context
 
 
 

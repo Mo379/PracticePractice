@@ -87,4 +87,9 @@ urlpatterns = [
         views._create_checkout_session,
         name='_create_checkout_session'
     ),
+    path(
+        '_create_customer_portal_session',
+        views._create_customer_portal_session,
+        name='_create_customer_portal_session'
+    ),
 ]

@@ -229,6 +229,14 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         #
         payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
         context['paymentmethods'] = payment_methods
+        if Subscription.objects.filter(customer=user.id, status='active').exists():
+            subscription = Subscription.objects.get(customer=user.id, status='active')
+            context['subscription_status'] = subscription.status
+            context['billing_interval'] = subscription.plan.interval
+            context['billing_amount'] = subscription.plan.amount
+            context['billing_next'] = subscription.current_period_end
+            context['plan_name'] = subscription.plan.nickname
+            context['cancel_later'] = subscription.cancel_at_period_end
         #
         return context
 
@@ -291,7 +299,9 @@ class SettingsView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
 
 
 # Join view
-class JoinView(BaseBreadcrumbMixin, generic.ListView):
+class JoinView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name = None
 
     template_name = "user/join.html"
     context_object_name = 'context'
@@ -306,15 +316,6 @@ class JoinView(BaseBreadcrumbMixin, generic.ListView):
     def get_queryset(self):
         context = {}
         context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
-        context['student_monthly_plan'] = Price.objects.get(nickname='student_monthly_plan')
-        context['student_yearly_plan'] = Price.objects.get(nickname='student_yearly_plan')
-        #
-        context['educator_monthly_plan'] = Price.objects.get(nickname='Educator_monthly_plan')
-        context['educator_yearly_plan'] = Price.objects.get(nickname='Educator_yearly_plan')
-        #
-        context['organisation_monthly_limited_plan'] = Price.objects.get(nickname='Organisation_monthly_limited_plan')
-        context['organisation_monthly_plan'] = Price.objects.get(nickname='Organisation_monthly_plan')
-        context['organisation_yearly_plan'] = Price.objects.get(nickname='Organisation_yearly_plan')
         return context
 
 
@@ -1215,3 +1216,16 @@ def _create_checkout_session(request):
         return JsonResponse({'error': 'Invalid Request Method.'})
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
+def _create_customer_portal_session(request):
+    if request.method == 'POST':
+        user = request.user
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        customer = Customer.objects.get(id=user.id)
+        # Authenticate your user.
+        session = stripe.billing_portal.Session.create(
+            customer=f'{customer.id}',
+            return_url='https://practicepractice.net',
+        )
+        return redirect(session.url)
+    return render(request, 'main/index.html')

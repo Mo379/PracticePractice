@@ -55,6 +55,16 @@ from content.util.GeneralUtil import (
         user_course_monthly_sum_data_list,
         user_course_usage_monthly_sum_data_list,
         performance_index_monthly_sum_data_list,
+        author_user_subscription_data_list,
+    )
+from djstripe.models import (
+        Customer,
+        PaymentMethod,
+        Price,
+        Plan,
+        Subscription,
+        Charge,
+        Session
     )
 
 
@@ -791,6 +801,27 @@ class EarningStatisticsView(
     def get_queryset(self):
         context = {}
         context['sidebar_active'] = 'earning/statistics'
+        author_courses = Course.objects.filter(user=self.request.user)
+        # Relevant locally
+        all_course_subscriptions = CourseSubscription.objects.filter(course__in=author_courses)
+        all_unique_students = all_course_subscriptions.values('user').distinct()
+        # Relevant for stripe
+        all_customers = Customer.objects.filter(
+                id__in=list(all_unique_students.values_list('user__id', flat=True))
+            )
+        all_customer_memberships = Subscription.objects.filter(customer__in=all_customers)
+        # Total sums
+        total_course_subscriptions = len(all_course_subscriptions)
+        total_unique_subscriptions = len(all_unique_students)
+        # Monthly data
+        (
+        monthly_free_subscritions,
+        monthly_withoutai_subscriptions,
+        monthly_withai_subscriptions,
+        ) = author_user_subscription_data_list()
+        #
+        context['total_course_subscriptions'] = total_course_subscriptions
+        context['total_unique_students'] = total_unique_subscriptions
         return context
 
 
