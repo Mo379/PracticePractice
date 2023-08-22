@@ -18,9 +18,9 @@ Earning
 					<div class="row no-gutters align-items-center">
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-								Estimated Earnings This Month
+								Estimated Earnings This Month:
 							</div>
-							<div class="h5 mb-0 font-weight-bold text-white-800">£</div>
+							<div class="h5 mb-0 font-weight-bold text-white-800">£ {{context.estimated_earnings}}</div>
 						</div>
 						<div class="col-auto">
 							<i class="fas fa-calendar fa-2x text-white-300"></i>
@@ -35,11 +35,11 @@ Earning
 					<div class="row no-gutters align-items-center">
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-								Number of Unique Students
+								Number of active coure subscriptions this month
 							</div>
 							<div class="row no-gutters align-items-center">
 								<div class="col-auto">
-									<div class="h5 mb-0 mr-3 font-weight-bold text-white-800">{{context.total_unique_students}}</div>
+									<div class="h5 mb-0 mr-3 font-weight-bold text-white-800">{{context.total_month_active_course_subscriptions}}</div>
 								</div>
 							</div>
 						</div>
@@ -57,7 +57,7 @@ Earning
 					<div class="row no-gutters align-items-center">
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-								Number Of Course Subscriptions
+								Total Number Of Course Subscriptions
 							</div>
 							<div class="row no-gutters align-items-center">
 								<div class="col-auto">
@@ -103,12 +103,16 @@ Earning
 				<!-- Card Header - Dropdown -->
 				<div
 					class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-					<h6 class="m-0 font-weight-bold text-primary">Student Counts</h6>
+					<h6 class="m-0 font-weight-bold text-primary">Significant Clicks</h6>
 				</div>
 				<!-- Card Body -->
 				<div class="card-body">
 					<div class="chart-area">
-						<canvas id="myAreaChart"></canvas>
+						<canvas id="clicks_chart"></canvas>
+						{%definevar 'clicks_chart' as canvas_id %}
+						{%definevar context.labels as plot_labels %}
+						{%definevar context.clicks_dataset as plot_data %}
+						{%include 'dashboard/plots/plot_multi_line.html'%}
 					</div>
 				</div>
 			</div>
@@ -120,23 +124,16 @@ Earning
 				<!-- Card Header - Dropdown -->
 				<div
 					class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-					<h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+					<h6 class="m-0 font-weight-bold text-primary">Coruse CLicks</h6>
 				</div>
 				<!-- Card Body -->
 				<div class="card-body">
 					<div class="chart-pie pt-4 pb-2">
-						<canvas id="myPieChart"></canvas>
-					</div>
-					<div class="mt-4 text-center small">
-						<span class="mr-2">
-							<i class="fas fa-circle text-primary"></i> Direct
-						</span>
-						<span class="mr-2">
-							<i class="fas fa-circle text-success"></i> Social
-						</span>
-						<span class="mr-2">
-							<i class="fas fa-circle text-info"></i> Referral
-						</span>
+						<canvas id="brak_by_course_pie"></canvas>
+						{%definevar 'brak_by_course_pie' as canvas_id %}
+						{%definevar context.total_course_clicks|index:0 as plot_labels %}
+						{%definevar context.total_course_clicks|index:1 as plot_data %}
+						{%include 'dashboard/plots/plot_pie.html'%}
 					</div>
 				</div>
 			</div>

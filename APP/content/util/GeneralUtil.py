@@ -14,6 +14,9 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 
 from content.models import CourseSubscription
+from djstripe.models import (
+        Subscription,
+    )
 
 def TagGenerator():
     x = ''.join(
@@ -361,14 +364,53 @@ def increment_course_subscription_significant_click(user, course, significant_cl
     # check and add current month dictionary
     if current_month not in course_subscription.monthly_significant_clicks.keys():
         course_subscription.monthly_significant_clicks[current_month] = {}
+    if current_month not in user.monthly_significant_clicks.keys():
+        user.monthly_significant_clicks[current_month] = 0
     # check and add significant click field
     if significant_click_name not in course_subscription.monthly_significant_clicks[current_month].keys():
         course_subscription.monthly_significant_clicks[current_month][significant_click_name] = 0
     # increment click
+    user.monthly_significant_clicks[current_month] += 1
     course_subscription.monthly_significant_clicks[current_month][significant_click_name] += 1
     course_subscription.save()
+    user.save()
 
-def author_user_subscription_data_list():
-    pass
+
+def author_user_clicks_data_list(month_keys, subscriptions, courses):
+    aggrigate_monthly_sum = OrderedDict({key:0 for key in month_keys})
+    aggrigate_user_monthly_engagement = OrderedDict({key:defaultdict(float) for key in month_keys})
+    course_aggrigate_monthly_clicks = []
+    month_active_subscriptions = 0
+    #
+    course_labels = []
+    total_courses_clicks = []
+    total_estimated_earning = 0
+    for course in courses:
+        course_subscriptions = subscriptions.filter(course=course)
+        total_course_clicks = 0
+        for sub in course_subscriptions:
+            # Get the total course clicks
+            for key in month_keys:
+                if key in sub.monthly_significant_clicks.keys():
+                    aggrigate_monthly_sum[key] += sum(sub.monthly_significant_clicks[key].values())
+                    aggrigate_user_monthly_engagement[key][sub.user.id] += sum(sub.monthly_significant_clicks[key].values())/sub.user.monthly_significant_clicks[key]
+            if month_keys[-1] in sub.monthly_significant_clicks.keys():
+                month_active_subscriptions += 1
+                # Calculate earings for this course clicks
+                total_user_clicks = sub.user.monthly_significant_clicks[month_keys[-1]]
+                last_month_user_course_clicks = sum(sub.monthly_significant_clicks[month_keys[-1]].values())
+                course_clicks_fraction = last_month_user_course_clicks/total_user_clicks
+                #
+                student_current_subscription = Subscription.objects.get(customer__id=sub.user.id, status='active')
+                student_plan = student_current_subscription.plan
+                total_amount = student_plan.amount/student_plan.interval_count
+                total_estimated_earning += (0.3*float(total_amount))*course_clicks_fraction
+            # get the total clicks for each course
+            by_month_clicks = [sum(list(value.values())) for value in sub.monthly_significant_clicks.values()]
+            total_course_clicks += sum(by_month_clicks)
+        course_labels.append(course.course_name)
+        total_courses_clicks.append(total_course_clicks)
+    course_aggrigate_monthly_clicks = (course_labels, total_courses_clicks)
+    return aggrigate_monthly_sum, course_aggrigate_monthly_clicks, month_active_subscriptions, total_estimated_earning, aggrigate_user_monthly_engagement
 
 

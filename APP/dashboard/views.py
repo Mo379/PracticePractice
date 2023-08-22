@@ -1,3 +1,4 @@
+import statistics
 import collections
 import pandas as pd
 from django.conf import settings
@@ -14,7 +15,7 @@ from django.db.models import CharField, Count, Avg
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db.models.functions import TruncMonth
 from django.db.models import Count, Sum
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from braces.views import (
         LoginRequiredMixin,
@@ -55,7 +56,7 @@ from content.util.GeneralUtil import (
         user_course_monthly_sum_data_list,
         user_course_usage_monthly_sum_data_list,
         performance_index_monthly_sum_data_list,
-        author_user_subscription_data_list,
+        author_user_clicks_data_list,
     )
 from djstripe.models import (
         Customer,
@@ -807,21 +808,84 @@ class EarningStatisticsView(
         all_unique_students = all_course_subscriptions.values('user').distinct()
         # Relevant for stripe
         all_customers = Customer.objects.filter(
-                id__in=list(all_unique_students.values_list('user__id', flat=True))
-            )
-        all_customer_memberships = Subscription.objects.filter(customer__in=all_customers)
-        # Total sums
-        total_course_subscriptions = len(all_course_subscriptions)
-        total_unique_subscriptions = len(all_unique_students)
-        # Monthly data
+            id__in=list(all_unique_students.values_list('user__id', flat=True))
+        )
+        # Get the current date
+        current_date = datetime.now().replace(day=1)
+
+        # Initialize a list to store the last 6 months
+        last_six_months = []
+        presentable_last_six_months = []
+        filterable_last_six_months = []
+
+        # Calculate the last 6 months and add them to the list
+        for i in range(6):
+            current_date = current_date.replace(day=1)
+            last_six_months.append(current_date.strftime('%Y%m'))
+            presentable_last_six_months.append(current_date.strftime('%y %b'))
+            filterable_last_six_months.append(current_date.strftime('%Y-%m-%d'))
+            current_date -= timedelta(days=30)  # Approximate 30 days per month
+
         (
-        monthly_free_subscritions,
-        monthly_withoutai_subscriptions,
-        monthly_withai_subscriptions,
-        ) = author_user_subscription_data_list()
+            aggrigate_monthly_clicks,
+            courge_aggrigate_monthly_clicks,
+            month_active_subscriptions,
+            estimated_earnings,
+            aggrigate_user_monthly_engagement
+        ) = author_user_clicks_data_list(
+                last_six_months[::-1],
+                all_course_subscriptions,
+                author_courses,
+            )
+        datasets = []
+        aggrigate_monthly_clicks_value = list(aggrigate_monthly_clicks.values())
+        datasets.append({
+            "label": "Clicks (N)",
+            "lineTension": 0.2,
+            "backgroundColor": "",
+            "borderColor": "#f6c23e",
+            "pointRadius": 3,
+            "pointBackgroundColor": "#f6c23e",
+            "pointBorderColor": "#f6c23e",
+            "pointHoverRadius": 3,
+            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
+            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
+            "pointHitRadius": 10,
+            "pointBorderWidth": 2,
+            "yAxisID": 'y',
+            "data": aggrigate_monthly_clicks_value
+        })
+        aggrigate_user_monthly_engagement = [
+                aggrigate_user_monthly_engagement[month].values()
+                for month in aggrigate_user_monthly_engagement
+            ]
+        aggrigate_user_monthly_engagement = [100*statistics.mean(array) if len(array) > 0 else 0.0 for array in aggrigate_user_monthly_engagement]
+        datasets.append({
+            "label": "Average User Engagement (%)",
+            "lineTension": 0.2,
+            "backgroundColor": "",
+            "borderColor": "#00ff22",
+            "pointRadius": 3,
+            "pointBackgroundColor": "#00ff22",
+            "pointBorderColor": "#00ff22",
+            "pointHoverRadius": 3,
+            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
+            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
+            "pointHitRadius": 10,
+            "pointBorderWidth": 2,
+            "yAxisID": 'y1',
+            "data": aggrigate_user_monthly_engagement
+        })
         #
-        context['total_course_subscriptions'] = total_course_subscriptions
-        context['total_unique_students'] = total_unique_subscriptions
+        context['labels'] = presentable_last_six_months[::-1]
+        context['clicks_dataset'] = datasets
+        #
+        per_click_rate = 0.001
+        context['per_click_rate'] = per_click_rate
+        context['estimated_earnings'] = round(estimated_earnings, 3)
+        context['total_course_clicks'] = courge_aggrigate_monthly_clicks
+        context['total_month_active_course_subscriptions'] = month_active_subscriptions
+        context['total_course_subscriptions'] = len(all_course_subscriptions)
         return context
 
 

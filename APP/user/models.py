@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from django.conf import settings
 from django.utils import timezone
 from django.db import models
@@ -16,7 +17,8 @@ class User(AbstractUser):
     bio = models.TextField(max_length=500, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     profile_pic_ext = models.CharField(max_length=50, default='', null=True)
-    profile_pic_status = models.BooleanField(default=False) 
+    profile_pic_status = models.BooleanField(default=False)
+    monthly_significant_clicks = models.JSONField(default=OrderedDict, null=True)
     profile_upload = models.FileField(
             upload_to='uploads/profile_picture',
             blank=True
