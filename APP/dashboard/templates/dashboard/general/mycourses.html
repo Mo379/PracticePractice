@@ -12,44 +12,31 @@ Courses
 {%include 'base/alert.html'%}
 
 <div class="mb-4">
-	<div class="card-body">
-		<div class="card shadow mb-1">
-			<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-				<h5 class="h4 mb-1 text-primary font-weight-bold">
-					Courses
-				</h5>
-					
-				<div class="dropdown no-arrow">
-					<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-						data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="fas fa-ellipsis-v fa-sm fa-fw text-primary-400"></i>
-					</a>
-					<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-						aria-labelledby="dropdownMenuLink">
-						<div class="dropdown-header">Course Actions:</div>
-						<a type="button" class="dropdown-item" data-toggle="modal" data-target="#CrateCourseModal">
-							Create New Course
-						</a>
-						<a type="button" class="dropdown-item text-danger" data-toggle="modal" data-target="#DeleteCourseModal">
-							Delete Course
-						</a>
-					</div>
-				</div>
-			</div>
+	<div style='display:flex;align-items:center;'>
+		<div style='margin:auto;display:inline-block;'>
+	<a type="button" class="btn btn-primary" data-toggle="modal" data-target="#CrateCourseModal">
+		Create Course
+	</a>
+	<a type="button" class="btn btn-danger" data-toggle="modal" data-target="#DeleteCourseModal">
+		Delete Course
+	</a>
 		</div>
-	<form action="{%url 'dashboard:mycourses' page=1%}" method="GET" role="form">
-	<div class="input-group mb-3 mt-3">
-	  <input type="text" name='search' class="form-control" placeholder="Search Courses" aria-label="Search Courses" aria-describedby="basic-addon2">
-	  <div class="input-group-append">
-	    <button class="btn btn-outline-success" type="submit">Search</button>
-	  </div>
 	</div>
-	</form>
+	<div class="card-body">
+		<form action="{%url 'dashboard:mycourses' page=1%}" method="GET" role="form">
+		<div class="input-group mb-3 mt-3">
+		  <input type="text" name='search' class="form-control" placeholder="Search Courses" aria-label="Search Courses" aria-describedby="basic-addon2">
+		  <div class="input-group-append">
+		    <button class="btn btn-outline-success" type="submit">Search</button>
+		  </div>
+		</div>
+		</form>
 
 	<div class='courseplace_wrapper' id='courseplace_wrapper' style='width:95%;margin:auto;'>
 		{%for course in context.courses%}
 			{%definevar course.0 as courseversions%}
 			{%definevar course.1 as course%}
+			{%definevar course.specification as spec%}
 		<div class="my_course_card card" style="width: 100%;height: auto; margin: 5px;">
 			{%if course.course_pic_status%}
 			<img class="card-img-top" src="{{context.CDN_URL}}users/{{course.user.id}}/courses/{{course.id}}/course_thumbnail_{{course.course_pic_ext}}" alt="Card image cap">
@@ -67,7 +54,7 @@ Courses
 				</div>
 				<div class="" style='font-size: 12px;'><strong>Specification:</strong> {{course.specification.spec_name}}</div>
 				<div class="" style='font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
-				<div class="" style='font-size: 12px;'><strong>Course Versions (last 3 version):</strong> 
+				<div class="" style='font-size: 12px;'><strong>Course Versions (last 3 versions):</strong> 
 					<div>
 					{%for version in courseversions%}
 					<span class='ml-2'>- {{version.version_name}}</span><br>
@@ -79,6 +66,7 @@ Courses
 				<a type= 'button' class='' href='{%url 'content:marketcourse' course.id%}'> View Course</a>
 				<div class="" >
 					<hr class="sidebar-divider mb-3">
+					<a class="btn btn-primary mb-1" href="{%url 'dashboard:specmoduel' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name%}">Write</a>
 					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course</a>
 				</div>
 			</div>

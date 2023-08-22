@@ -11,19 +11,7 @@
       <div class="modal-body">
 		<form class="px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
 			{%csrf_token%}
-			<label for="Specifications">Choose a Completed Specification:</label>
-			<select name="spec_id" id="Specifications" class='form-control mb-3'>
-			  {%for spec in context.specs%}
-			  <option value="{{spec.id}}">
-				{{spec.spec_level}} -
-				{{spec.spec_subject}} -
-				{{spec.spec_board}} -
-				{{spec.spec_name}}
-			  </option>
-			  {%endfor%}
-			</select>
-
-			<label for="course_name">Choose a course name:</label>
+			<label for="course_name">Name (Anything):</label>
 			<input 
 				type='text' 
 				name='course_name' 
@@ -31,7 +19,31 @@
 			        id='course_name'
 				placeholder='Course Name'
 			/>
-			<label for="version_name">Choose a version name:</label>
+			<label for="course_name">Level (HighSchool, PreUniversity, University):</label>
+			<input 
+				type='text' 
+				name='spec_level' 
+			        class='form-control mb-3'
+			        id='spec_level'
+				placeholder='Level'
+			/>
+			<label for="course_name">Subject (Maths, Biology, Physics):</label>
+			<input 
+				type='text' 
+				name='spec_subject' 
+			        class='form-control mb-3'
+			        id='spec_subject'
+				placeholder='Subject'
+			/>
+			<label for="course_name">Code Name (Anything, H230, A230, P101):</label>
+			<input 
+				type='text' 
+				name='spec_name' 
+			        class='form-control mb-3'
+			        id='spec_name'
+				placeholder='Code Name'
+			/>
+			<label for="version_name">Version name (Anything):</label>
 			<input 
 				type='text' 
 				name='version_name' 
@@ -40,7 +52,7 @@
 				placeholder='Version Name'
 			        value='Initial'
 			/>
-			<label for="version_note">Give a version Note:</label>
+			<label for="version_note">Give a version Note (Anything):</label>
 	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the initial course version.</textarea>
 
 			<br><br>

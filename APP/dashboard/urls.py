@@ -23,11 +23,6 @@ urlpatterns = [
     path('mycourses', views.MyCoursesView.as_view(), name='mycourses'),
     path('mycourses/<int:page>', views.MyCoursesView.as_view(), name='mycourses'),
     path(
-        'specifications',
-        views.MySpecificationsView.as_view(),
-        name='specifications'
-    ),
-    path(
         'specmodule/<level>/<subject>/<board>/<name>',
         views.SpecModuelHandlerView.as_view(),
         name='specmoduel'

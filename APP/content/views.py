@@ -1056,52 +1056,53 @@ def _management_options(request):
 def _createcourse(request):
     if request.method == 'POST':
         course_name = request.POST['course_name']
-        spec_id = request.POST['spec_id']
         version_name = request.POST['version_name']
         version_note = request.POST['version_note']
-        specs = Specification.objects.filter(
-                pk=spec_id
-            )
         #
-        if len(specs) == 1:
-            try:
-                new_course = Course.objects.create(
-                            user=request.user,
-                            course_name=course_name,
-                            specification=specs[0]
-                        )
-                CourseVersion.objects.create(
-                            course=new_course,
-                            version_number=1,
-                            version_name=version_name,
-                            version_content=specs[0].spec_content,
-                            version_note=version_note,
-                        )
-            except Exception:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong could not create spec',
-                        extra_tags='alert-warning course'
+        spec_level = request.POST['spec_level']
+        spec_subject = request.POST['spec_subject']
+        spec_board = 'Universal'
+        spec_name = request.POST['spec_name']
+        #
+        try:
+            spec = Specification.objects.create(
+                    user=request.user,
+                    spec_level=spec_level,
+                    spec_subject=spec_subject,
+                    spec_board=spec_board,
+                    spec_name=spec_name,
+                )
+            new_course = Course.objects.create(
+                        user=request.user,
+                        course_name=course_name,
+                        specification=spec
                     )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Your course was created.',
-                        extra_tags='alert-success course'
+            CourseVersion.objects.create(
+                        course=new_course,
+                        version_number=1,
+                        version_name=version_name,
+                        version_content=spec.spec_content,
+                        version_note=version_note,
                     )
+        except Exception as e:
+            print(str(e))
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong could not create spec',
+                    extra_tags='alert-warning course'
+                )
         else:
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Input can only be alphanumeric!',
-                    extra_tags='alert-warning course'
+                    'Your course was created.',
+                    extra_tags='alert-success course'
                 )
-        #
-        return redirect(
-                'dashboard:mycourses',
-            )
+    #
+    return redirect(
+            'dashboard:mycourses',
+        )
 
 
 def _createversion(request):
@@ -1153,62 +1154,6 @@ def _createversion(request):
         #
         return redirect(
                 'dashboard:mycourses',
-            )
-
-
-def _createspec(request):
-    if request.method == 'POST':
-        spec_level = request.POST['spec_level']
-        spec_subject = request.POST['spec_subject']
-        spec_board = 'Universal'
-        spec_name = request.POST['spec_name']
-        #
-        if spec_level.isalnum() and spec_subject.isalnum() and \
-                spec_board.isalnum() and spec_name.isalnum():
-            try:
-                specs = Specification.objects.filter(
-                        user=request.user,
-                        spec_level=spec_level,
-                        spec_subject=spec_subject,
-                        spec_board=spec_board,
-                        spec_name=spec_name,
-                    )
-                if len(specs) == 0:
-                    Specification.objects.create(
-                            user=request.user,
-                            spec_level=spec_level,
-                            spec_subject=spec_subject,
-                            spec_board=spec_board,
-                            spec_name=spec_name,
-                        )
-                else:
-                    spec = specs[0]
-                    spec.deleted = False
-                    spec.save()
-            except Exception:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong could not create spec',
-                        extra_tags='alert-warning specification'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Specification Was Created',
-                        extra_tags='alert-success specification'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Input can only be alphanumeric!',
-                    extra_tags='alert-warning specification'
-                )
-        #
-        return redirect(
-                'dashboard:specifications',
             )
 
 
@@ -2727,37 +2672,6 @@ def _deletecourse(request):
         #
         return redirect(
                 'dashboard:mycourses',
-            )
-
-
-def _deletespec(request):
-    if request.method == 'POST':
-        spec_id = request.POST['spec_id']
-        #
-        try:
-            spec = Specification.objects.get(
-                    user=request.user,
-                    pk=spec_id
-                )
-            spec.deleted = True
-            spec.save()
-        except Exception:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something went wrong could not delete spec',
-                    extra_tags='alert-warning specification'
-                )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Specification was binned but not permanently deleted.',
-                    extra_tags='alert-success specification'
-                )
-        #
-        return redirect(
-                'dashboard:specifications',
             )
 
 

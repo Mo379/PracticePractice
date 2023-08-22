@@ -376,17 +376,12 @@ class MyCoursesView(
         context['sidebar_active'] = 'writer/mycourses'
         current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
         #
-        specs = Specification.objects.filter(
-                    user=self.request.user,
-                    deleted=False
-                )
         courses = Course.objects.filter(
                     user=self.request.user,
                     deleted=False
                 ).order_by(
                         '-course_created_at'
                     )
-        specs = specs.exclude(pk__in=[course.specification.pk for course in courses])
         if 'search' in self.request.GET:
             search_query = self.request.GET['search']
             vector = SearchVector('course_name')
@@ -431,78 +426,11 @@ class MyCoursesView(
         context['current_page'] = current_page
         context['previous_page'] = current_page - 1 if current_page > 1 else None
         context['next_page'] = current_page + 1 if current_page < p.num_pages else None
-        context['specs'] = specs
         context['CDN_URL'] = settings.CDN_URL
         return context
 
 
 # Admin views
-class MySpecificationsView(
-            LoginRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/general/specifications.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("Home", reverse("main:index")),
-                ("specifications", reverse("dashboard:specifications"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'writer/specifications'
-        #
-        Notes = Specification.objects.filter(
-                    user=self.request.user,
-                    deleted=False
-                ).values(
-                    'spec_level',
-                    'spec_subject',
-                    'spec_board',
-                    'spec_name',
-                    'id',
-                ).distinct().order_by(
-                    'spec_level',
-                    'spec_subject',
-                    'spec_board',
-                    'spec_name',
-                )
-        Notes_objs = [obj for obj in Notes]
-        df = pd.DataFrame(Notes_objs)
-        def process_specs(df):
-            dic = {}
-            raw_specs = []
-            if len(Notes_objs) > 0:
-                for le, s, m, c, idd in zip(
-                        list(df['spec_level']),
-                        list(df['spec_subject']),
-                        list(df['spec_board']),
-                        list(df['spec_name']),
-                        list(df['id']),
-                        ):
-                    if le not in dic:
-                        dic[le] = {}
-                    if s not in dic[le]:
-                        dic[le][s] = {}
-                    if m not in dic[le][s]:
-                        dic[le][s][m] = []
-                    spec = Specification.objects.get(pk=idd)
-                    dic[le][s][m].append(spec)
-                    raw_specs.append(spec)
-            return dic, raw_specs
-        spec_dic, spec_raw_specs = process_specs(df)
-        #
-        context['specifications'] = spec_dic
-        context['raw_specs'] = spec_raw_specs
-        return context
-
-
 class SpecModuelHandlerView(
             LoginRequiredMixin,
             BaseBreadcrumbMixin,
@@ -517,7 +445,7 @@ class SpecModuelHandlerView(
     def crumbs(self):
         return [
                 ("Home", reverse("main:index")),
-                ("specifications", reverse("dashboard:specifications")),
+                ("mycourses", reverse("dashboard:mycourses")),
                 ("designer", '')
                 ]
 
@@ -623,7 +551,7 @@ class SpecTopicHandlerView(
     def crumbs(self):
         return [
                 ("Home", reverse("main:index")),
-                ("specifications", reverse("dashboard:specifications")),
+                ("mycourses", reverse("dashboard:mycourses")),
                 ("designer", '')
                 ]
 

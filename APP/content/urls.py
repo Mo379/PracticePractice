@@ -94,11 +94,6 @@ urlpatterns = [
         name='_createversion'
     ),
     path(
-        'content/_createspec/',
-        views._createspec,
-        name='_createspec'
-    ),
-    path(
         'content/_createmoduel/',
         views._createmoduel,
         name='_createmoduel'
@@ -267,11 +262,6 @@ urlpatterns = [
         'content/_deletecourse/',
         views._deletecourse,
         name='_deletecourse'
-    ),
-    path(
-        'content/_deletespec/',
-        views._deletespec,
-        name='_deletespec'
     ),
     path(
         'content/_deletemoduel/',

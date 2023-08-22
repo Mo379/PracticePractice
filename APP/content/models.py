@@ -231,7 +231,6 @@ class Course(models.Model):
     course_summary = models.TextField(max_length=1000, default="", null=True)
     course_skills = models.JSONField(default=OrderedDict, null=True)
     course_learning_objectives = models.JSONField(default=OrderedDict, null=True)
-    course_contributors = models.JSONField(default=OrderedDict, null=True)
     course_level = models.CharField(max_length=150, default="", null=True)
     #
     course_created_at = models.DateTimeField(auto_now_add=True)
