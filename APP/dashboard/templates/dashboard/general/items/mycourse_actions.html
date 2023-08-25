@@ -58,41 +58,34 @@
 			  	Advanced
 			  </option>
 			</select>
+
 			<div class="mt-4 custom-control custom-switch">
 				<input name='regenerate_summary' type="checkbox" class="custom-control-input" id="customSwitch1_{{course.id|hashid}}" 
 			  >
-			  <label class="custom-control-label" for="customSwitch1_{{course.id|hashid}}">Toggle to regenrate course summary using AI.</label>
-			</div><br> 
-			<button type= 'submit' class='btn btn-primary mb-2' > Update </button><br><br>
-		</form>
-		<a class="btn btn-info mb-1" data-toggle="modal" data-target="#PublishVersionModal_{{course.id}}">Create a new version</a><br>
-		<a class="btn btn-success mb-1" data-toggle="modal" data-target="#PublishCourseModal_{{course.id}}">Publish course</a><br>
-		<a class="btn btn-danger mb-1" data-toggle="modal" data-target="#UnPublishCourseModal_{{course.id}}">Unpublish course</a>
-      </div>
-    </div>
-  </div>
-</div>
+			  <label class="custom-control-label" for="customSwitch1_{{course.id|hashid}}">Toggle to regenerate course summary using AI.</label>
+			</div>
 
-
-
-<div class="modal fade" id="PublishVersionModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Create a new course Version</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-		<form class="px-3 py-3"  action="{%url 'content:_createversion'%}" method="POST" role="form">
-			{%csrf_token%}
-			<input 
-				type='hidden' 
-				name='course_id' 
-				value='{{course.id}}'
-			/>
-			<label for="version_name">Choose a version name:</label>
+			<div class="mt-4 custom-control custom-switch">
+				<input name='publication_status' type="checkbox" class="custom-control-input" id="customSwitch2_{{course.id|hashid}}"
+				{%if course.course_publication%}
+				checked
+				{%endif%}
+			  >
+			  <label class="custom-control-label" for="customSwitch2_{{course.id|hashid}}">
+				{%if course.course_publication%}
+				<a class="text-success">Published</a>
+				{%else%}
+				<a class="text-danger">Unpublished</a>
+				{%endif%}
+			  </label>
+			</div>
+			{%if course.course_up_to_date%}
+			<label for="">Latest updates: </label>
+			<a class="text-success">Up to date</a><br>
+			{%else%}
+			<br><label for="">Latest updates: </label>
+			<a class="text-warning">New changes made (course update needed)</a><br>
+			<label for="version_name">Version name (Anything):</label>
 			<input 
 				type='text' 
 				name='version_name' 
@@ -101,61 +94,10 @@
 				placeholder='Version Name'
 			        value='New Update'
 			/>
-			<label for="version_note">Give a version Note:</label>
-	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the initial course verion.</textarea>
-			<br><br>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
-		</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="modal fade" id="PublishCourseModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Publish course</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-		<form class="px-3 py-3"  action="{%url 'content:_publishcourse'%}" method="POST" role="form">
-			{%csrf_token%}
-			<input 
-				type='hidden' 
-				name='course_id' 
-				value='{{course.id}}'
-			/>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Publish Now!</button>
-		</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<div class="modal fade" id="UnPublishCourseModal_{{course.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">UnPublish course</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-		<form class="px-3 py-3"  action="{%url 'content:_unpublishcourse'%}" method="POST" role="form">
-			{%csrf_token%}
-			<input 
-				type='hidden' 
-				name='course_id' 
-				value='{{course.id}}'
-			/>
-			<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> UnPublish Now!</button>
+			<label for="version_note">Give a version Note (Anything):</label>
+	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the new updates.</textarea>
+			{%endif%}
+			<button type= 'submit' class='btn btn-primary mb-2' > Update </button><br><br>
 		</form>
       </div>
     </div>

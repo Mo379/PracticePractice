@@ -75,6 +75,27 @@ var object_type = "Point";
 {%include 'content/items/auto_save.html'%}
 
 <div style='padding:10px;border:1px dashed grey;'>
+<div class="center-div" style='display:flex;justify-content:center;align-items:center;'>
+	<form class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_point'%}">
+		    {% csrf_token %}
+		    <input type="hidden" name="spec_id" value="{{ context.spec.id }}">
+		    <input type="hidden" name="point_id" value="{{ context.point.id }}">
+		    <div class="mb-3">
+			<label>
+			    <input type="checkbox" id="confirmationToggle" name="confirmationToggle" class="form-check-input"
+				{%if context.point.author_confirmation%}
+					checked
+				{%endif%}
+			    >
+			    The content below is correct and has been cleared of any errors.
+			</label>
+		    </div>
+
+		    <!-- Your other form fields can go here -->
+
+		    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button>
+	</form>
+</div>
 {{context.point.p_content|ToMarkdown:context.point.id|safe}}
 </div>
 

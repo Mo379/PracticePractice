@@ -8,20 +8,20 @@ Courses
 
 {%block content%}
 {%include 'dashboard/general/items/courses_actions.html'%}
-{%definevar 'course' as alert_loc%}
-{%include 'base/alert.html'%}
 
 <div class="mb-4">
-	<div style='display:flex;align-items:center;'>
+	<div style='display:flex;align-items:center;' class='mb-3'>
 		<div style='margin:auto;display:inline-block;'>
-	<a type="button" class="btn btn-primary" data-toggle="modal" data-target="#CrateCourseModal">
-		Create Course
-	</a>
-	<a type="button" class="btn btn-danger" data-toggle="modal" data-target="#DeleteCourseModal">
-		Delete Course
-	</a>
+			<a type="button" class="btn btn-primary" data-toggle="modal" data-target="#CrateCourseModal">
+				Create Course
+			</a>
+			<a type="button" class="btn btn-danger" data-toggle="modal" data-target="#DeleteCourseModal">
+				Delete Course
+			</a>
 		</div>
 	</div>
+	{%definevar 'course' as alert_loc%}
+	{%include 'base/alert.html'%}
 	<div class="card-body">
 		<form action="{%url 'dashboard:mycourses' page=1%}" method="GET" role="form">
 		<div class="input-group mb-3 mt-3">
@@ -49,7 +49,14 @@ Courses
 					{%if course.course_publication%}
 					<a class="text-success">Published</a>
 					{%else%}
-					<a class="text-warning">Unpublished</a>
+					<a class="text-danger">Unpublished</a>
+					{%endif%}
+				</div>
+				<div class="" style='font-size: 12px;'><strong>Latest updates:</strong> 
+					{%if course.course_up_to_date%}
+					<a class="text-success">Up to date</a>
+					{%else%}
+					<a class="text-warning">New changes made (course update needed)</a>
 					{%endif%}
 				</div>
 				<div class="" style='font-size: 12px;'><strong>Specification:</strong> {{course.specification.spec_name}}</div>
@@ -66,8 +73,8 @@ Courses
 				<a type= 'button' class='' href='{%url 'content:marketcourse' course.id%}'> View Course</a>
 				<div class="" >
 					<hr class="sidebar-divider mb-3">
-					<a class="btn btn-primary mb-1" href="{%url 'dashboard:specmoduel' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name%}">Write</a>
 					<a class="btn btn-info mb-1" data-toggle="modal" data-target="#CourseInformationModal_{{course.id}}">Update Course</a>
+					<a class="btn btn-primary mb-1" href="{%url 'dashboard:specmoduel' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name%}">Write</a>
 				</div>
 			</div>
 		</div>

@@ -181,6 +181,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </script>
 <div class='mt-5' style='border:1px solid var(--text-color-1); padding: 10px;'>
+<div class="center-div" style='display:flex;justify-content:center;align-items:center;'>
+	<form class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_question'%}">
+		    {% csrf_token %}
+		    <input type="hidden" name="spec_id" value="{{ context.spec.id }}">
+		    <input type="hidden" name="question_id" value="{{ context.question.id }}">
+		    <div class="mb-3">
+			<label>
+			    <input type="checkbox" id="confirmationToggle" name="confirmationToggle" class="form-check-input"
+				{%if context.question.author_confirmation%}
+					checked
+				{%endif%}
+			    >
+			    The content below is correct and has been cleared of any errors.
+			</label>
+		    </div>
+
+		    <!-- Your other form fields can go here -->
+
+		    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button>
+	</form>
+</div>
 Question: <br><br>
 {{context.question.q_content|ToMarkdownQuestion:context.question.id|safe}}
 <br><br>Answer: <br><br>

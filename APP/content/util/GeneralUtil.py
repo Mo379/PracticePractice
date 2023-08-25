@@ -4,6 +4,7 @@ import random
 import string
 import collections
 from collections import defaultdict, OrderedDict
+from itertools import chain
 import markdown
 import ruamel.yaml
 from content.models import Question
@@ -95,6 +96,52 @@ def insert_new_spec_order(ordered_items, content, item_name):
             content[item]['position'] = -1
             content[item]['active'] = False
     return content
+
+
+def extract_active_spec_content(spec_content):
+    points = []
+    questions = []
+    for module in spec_content.keys():
+        module_content = spec_content[module]['content']
+        if spec_content[module]['active'] is True:
+            for chapter in module_content.keys():
+                chapter_questions = spec_content[module]['content'][chapter]['questions']
+                if spec_content[module]['content'][chapter]['active'] is True:
+                    list_chapter_questions = [arr for arr in chapter_questions.values()]
+                    flattened_list = list(chain(*list_chapter_questions))
+                    questions += flattened_list
+                    chapter_content = spec_content[module]['content'][chapter]['content']
+                    for topic in chapter_content.keys():
+                        if chapter_content[topic]['active'] is True:
+                            for point in chapter_content[topic]['content'].keys():
+                                if chapter_content[topic]['content'][point]['active'] is True:
+                                    points.append(point)
+    return points, questions
+
+
+def detect_empty_content(spec_content):
+    empty_invalid_content = defaultdict(dict)
+    for module in spec_content.keys():
+        module_content = spec_content[module]['content']
+        if spec_content[module]['active'] is True:
+            if len(spec_content[module]['content']) == 0:
+                empty_invalid_content[module] = {}
+                continue
+            for chapter in module_content.keys():
+                if spec_content[module]['content'][chapter]['active'] is True:
+                    if len(spec_content[module]['content'][chapter]['content']) == 0:
+                        empty_invalid_content[module] = {}
+                        empty_invalid_content[module][chapter] = {}
+                        continue
+                    chapter_content = spec_content[module]['content'][chapter]['content']
+                    for topic in chapter_content.keys():
+                        if chapter_content[topic]['active'] is True:
+                            if len(spec_content[module]['content'][chapter]['content'][topic]['content']) == 0:
+                                empty_invalid_content[module] = {}
+                                empty_invalid_content[module][chapter] = {}
+                                empty_invalid_content[module][chapter][topic] = True
+                                continue
+    return empty_invalid_content
 
 
 def order_full_spec_content(content):

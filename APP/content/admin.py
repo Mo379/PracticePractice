@@ -7,12 +7,7 @@ from content.models import (
         QuestionTrack,
         UserPaper,
         Point,
-        Keyword,
         Specification,
-        Collaborator,
-        ContributionTask,
-        Contribution,
-        Contract,
         ContentTemplate,
         Course,
         CourseVersion,
@@ -28,12 +23,7 @@ admin.site.register(Question)
 admin.site.register(QuestionTrack)
 admin.site.register(UserPaper)
 admin.site.register(Point)
-admin.site.register(Keyword)
 admin.site.register(Specification)
-admin.site.register(Collaborator)
-admin.site.register(ContributionTask)
-admin.site.register(Contribution)
-admin.site.register(Contract)
 admin.site.register(ContentTemplate)
 admin.site.register(Course)
 admin.site.register(CourseVersion)

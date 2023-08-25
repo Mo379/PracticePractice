@@ -11,6 +11,30 @@
       <div class="modal-body">
 		<form class="px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
 			{%csrf_token%}
+			<label for="course_level">Course difficulty:</label>
+			<select name="course_level" id="course_level" class='form-control mb-3'>
+			  <option value="Beginner"
+				  {%if course.course_level == 'Beginner'%}
+				  selected
+				  {%endif%}
+			  >
+			  	Beginner
+			  </option>
+			  <option value="Intermediate"
+				  {%if course.course_level == 'Intermediate'%}
+				  selected
+				  {%endif%}
+			  >
+			  	Intermediate
+			  </option>
+			  <option value="Advanced"
+				  {%if course.course_level == 'Advanced'%}
+				  selected
+				  {%endif%}
+			  >
+			  	Advanced
+			  </option>
+			</select>
 			<label for="course_name">Name (Anything):</label>
 			<input 
 				type='text' 

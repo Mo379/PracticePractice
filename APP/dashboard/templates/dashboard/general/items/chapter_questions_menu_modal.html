@@ -19,7 +19,14 @@
 			  <div class="card course_outline_card">
 			    <div class="card-header course_outline_cell" id="heading-{{level}}" style=''>
 					<button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{level}}" aria-expanded="true" aria-controls="collapse-{{level}}">
-						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Difficulty - {{level}}</span>
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>
+							Difficulty - {{level}}
+							{%if level in context.author_confirmed_chapter_questions%}
+							<i class="bi bi-x-circle text-warning"></i>
+							{%else%}
+							<i class="bi bi-check-circle text-success"></i>
+							{%endif%}
+						</span>
 					</button>
 					<button class="btn text-left text-success" type="button" data-toggle="modal" data-target="#PromptQuestionModal_{{level}}">
 						Prompt
@@ -31,7 +38,17 @@
 				      <ol id='question_list_{{level}}'>
 						{%for question in context.questions|index:level%}
 						<div class='' style='cursor:pointer;' id='level_question_{{level}}_{{question}}'>
-							<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:editorquestion' spec.id question.id%}">Question - {{question.q_number}}</a></span>
+							<span class='font-weight-bold ml-2' id='course_outline_span'>
+								<i class="bi bi-arrow-bar-right course_outline_icon"></i>
+								<a href="{%url 'content:editorquestion' spec.id question.id%}">
+									Question - {{question.q_number}}
+								</a>
+								{%if question.q_number in context.author_confirmed_chapter_questions|index:level%}
+								<i class="bi bi-x-circle text-warning"></i>
+								{%else%}
+								<i class="bi bi-check-circle text-success"></i>
+								{%endif%}
+							</span>
 						</div>
 						{%endfor%}
 					</ol>

@@ -37,9 +37,6 @@ from content.models import (
         Question,
         Point,
         Specification,
-        Collaborator,
-        ContributionTask,
-        Contribution,
         Course,
         CourseVersion,
         CourseSubscription,
@@ -51,6 +48,8 @@ from content.util.GeneralUtil import (
         filter_drag_drop_selection,
         order_full_spec_content,
         order_live_spec_content,
+        extract_active_spec_content,
+        detect_empty_content,
         monthly_sum_data_list,
         usage_monthly_sum_data_list,
         user_course_monthly_sum_data_list,
@@ -207,8 +206,10 @@ class StudentPerformanceView(
         #
 
         #
-        total_chapters = len(version.version_content)
-        total_n_questions = 25 * total_chapters
+        all_chapters = 0
+        _, all_questions = extract_active_spec_content(version.version_content)
+        total_n_questions = len(all_questions)
+        all_chapters = total_n_questions//25
         #
         difficulty_statistics = []
         attempted_questions = question_tracks.filter(track_attempt_number__gt=0)
@@ -227,7 +228,7 @@ class StudentPerformanceView(
                 (
                     difficulty,
                     total_difficulty_answers,
-                    total_chapters*5,
+                    all_chapters*5,
                     round(100*(total_attempt_marks/total_question_marks)) if total_attempt_marks and total_question_marks else 0
                 )
             )
@@ -465,7 +466,23 @@ class SpecModuelHandlerView(
                 spec_board=board,
                 spec_name=name,
             )
+        empty_content = detect_empty_content(spec.spec_content)
         # get moduels from db
+        author_confirmed_questions = Question.objects.values(
+                    'q_subject',
+                    'q_moduel',
+                    'q_chapter',
+                ).distinct().order_by(
+                    'q_subject',
+                    'q_moduel',
+                    'q_chapter',
+                ).filter(
+                        user=self.request.user,
+                        q_subject=subject,
+                        erased=False,
+                        deleted=False,
+                        author_confirmation=False,
+                )
         all_chapters = Point.objects.values(
                     'p_level',
                     'p_subject',
@@ -483,6 +500,7 @@ class SpecModuelHandlerView(
                         erased=False,
                 )
         chapters = all_chapters.filter(deleted=False, erased=False)
+        author_confirmed_chapters = all_chapters.filter(deleted=False, erased=False, author_confirmation=False)
         deleted_chapters = all_chapters.exclude(id__in=chapters.values_list('id'))
         moduels = chapters.values(
                     'p_level',
@@ -514,6 +532,13 @@ class SpecModuelHandlerView(
         for key in keys:
             module_chapters[key] = list(ordered_spec[key]['content'].keys())
         #
+        author_confirmed_module_chapters = collections.defaultdict(list)
+        for confirmed_chapter in author_confirmed_chapters:
+            author_confirmed_module_chapters[confirmed_chapter['p_moduel']].append(confirmed_chapter['p_chapter'])
+        author_confirmed_chapter_questions = collections.defaultdict(list)
+        for confirmed_q_chapters in author_confirmed_questions:
+            author_confirmed_chapter_questions[confirmed_q_chapters['q_moduel']].append(confirmed_q_chapters['q_chapter'])
+        #
         deleted_module_chapters = collections.defaultdict(list)
         for d_mod in deleted_chapters:
             deleted_module_chapters[d_mod['p_moduel']].append(d_mod['p_chapter'])
@@ -531,7 +556,10 @@ class SpecModuelHandlerView(
         context['deleted_moduels'] = deleted_objs
         context['removed_items'] = left_over
         #
+        context['empty_content'] = empty_content
         context['module_chapters'] = module_chapters
+        context['author_confirmed_module_chapters'] = author_confirmed_module_chapters
+        context['author_confirmed_chapter_questions'] = author_confirmed_chapter_questions
         context['deleted_module_chapters'] = deleted_module_chapters
         context['removed_module_chapters'] = removed_module_chapters
         return context
@@ -573,6 +601,7 @@ class SpecTopicHandlerView(
                 spec_board=board,
                 spec_name=name,
             )
+        empty_content = detect_empty_content(spec.spec_content)
         # get chapter questions
         questions = spec.spec_content[moduel]['content'][chapter]['questions']
         question_prompts = collections.defaultdict(list)
@@ -590,6 +619,24 @@ class SpecTopicHandlerView(
             question_prompts[q_level].append(q_prompts)
 
         # get moduels from db
+        author_confirmed_questions = Question.objects.values(
+                    'q_subject',
+                    'q_moduel',
+                    'q_chapter',
+                    'q_difficulty',
+                    'q_number',
+                ).distinct().order_by(
+                    'q_subject',
+                    'q_moduel',
+                    'q_chapter',
+                ).filter(
+                        user=self.request.user,
+                        q_subject=subject,
+                        q_moduel=moduel,
+                        erased=False,
+                        deleted=False,
+                        author_confirmation=False,
+                )
         all_points = Point.objects.values(
                     'p_level',
                     'p_subject',
@@ -613,6 +660,7 @@ class SpecTopicHandlerView(
                         erased=False,
                 )
         points = all_points.filter(deleted=False, erased=False)
+        author_confirmed_points = points.filter(author_confirmation=False)
         deleted_points = all_points.exclude(id__in=points.values_list('id'))
         topics = points.values(
                     'p_level',
@@ -657,6 +705,13 @@ class SpecTopicHandlerView(
                 )
             topic_prompts[key].append(t_prompt)
         #
+        author_confirmed_topic_points = collections.defaultdict(list)
+        for confirmed_points in author_confirmed_points:
+            author_confirmed_topic_points[confirmed_points['p_topic']].append(confirmed_points['p_unique_id'])
+        author_confirmed_chapter_questions = collections.defaultdict(list)
+        for confirmed_q_chapters in author_confirmed_questions:
+            author_confirmed_chapter_questions[str(confirmed_q_chapters['q_difficulty'])].append(confirmed_q_chapters['q_number'])
+        #
         deleted_topic_points = collections.defaultdict(list)
         for d_points in deleted_points:
             deleted_topic_points[d_points['p_topic']].append(d_points['p_unique_id'])
@@ -696,10 +751,13 @@ class SpecTopicHandlerView(
         context['chapter'] = chapter
         #
         context['topics'] = topic_objs
+        context['empty_content'] = empty_content
         context['deleted_topics'] = deleted_objs
         context['removed_items'] = left_over
         #
         context['topic_points'] = topic_points
+        context['author_confirmed_topic_points'] = author_confirmed_topic_points
+        context['author_confirmed_chapter_questions'] = author_confirmed_chapter_questions if len(author_confirmed_chapter_questions) > 0 else None
         context['deleted_topic_points'] = deleted_topic_points
         context['removed_topic_points'] = removed_topic_points
         #

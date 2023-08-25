@@ -48,7 +48,25 @@ Bin
 </button>
 </div>
 <br>
+<div>
+<i class="bi bi-x-circle text-warning"></i> Means either some content is unconfirmed or there is some empty section, none of this is allowed and it should be fixed. <br>
+<i class="bi bi-check-circle text-success"></i> Means that the content is completed and is ready to be published.
+</div>
+<br>
 
+<a class="chapter_nav_link" 
+   data-toggle="modal" data-target="#BrowseQuestionsModal"
+	style='cursor:pointer;'>
+	<i class="bi bi-star-fill"></i>
+	Chapter Practice Questions
+	{%if context.author_confirmed_chapter_questions%}
+	<i class="bi bi-x-circle text-warning"></i>
+	{%else%}
+	<i class="bi bi-check-circle text-success"></i>
+	{%endif%}
+</a>
+<br>
+<br>
 
 <ol id='topic_list'>
 {%for topic in all_topics%}
@@ -63,7 +81,15 @@ Bin
 			</span>
 		</span>
 	        <button class="btn text-left" style='display:inline-block;' type="button" data-toggle="collapse" data-target="#collapse-{{topic}}" aria-expanded="true" aria-controls="collapse-{{topic}}">
-			<i class="bi bi-arrow-bar-right course_outline_icon"></i> <span id='course_outline_span'>Topic - {{topic|field_name_to_label}}</span>
+			<i class="bi bi-arrow-bar-right course_outline_icon"></i>
+			<span id='course_outline_span'>
+				Topic - {{topic|field_name_to_label}}
+				{%if topic in context.author_confirmed_topic_points or topic in context.empty_content|index:context.module|index:chapter%}
+				<i class="bi bi-x-circle text-warning"></i>
+				{%else%}
+				<i class="bi bi-check-circle text-success"></i>
+				{%endif%}
+			</span>
 		</button>
 		<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RenameTopicModal_{{topic}}">
 			Rename
@@ -100,7 +126,15 @@ Bin
 					<span class='point_handle mr-2 ml-5'style='font-size:25px;'>
 						+
 					</span>
-					<span class='font-weight-bold ml-2' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a href="{%url 'content:editorpoint' spec.id point|p_unique_to_id%}">Point - {{point|p_unique_to_title|field_name_to_label}}</a></span>
+					<span class='font-weight-bold ml-2' id='course_outline_span'>
+						<i class="bi bi-arrow-bar-right course_outline_icon"></i> 
+						<a href="{%url 'content:editorpoint' spec.id point|p_unique_to_id%}">Point - {{point|p_unique_to_title|field_name_to_label}}</a>
+						{%if point in context.author_confirmed_topic_points|index:topic%}
+						<i class="bi bi-x-circle text-warning"></i>
+						{%else%}
+						<i class="bi bi-check-circle text-success"></i>
+						{%endif%}
+					</span>
 
 					<button class="btn text-left text-primary" type="button" data-toggle="modal" data-target="#RenamePointModal_{{topic}}_{{point}}">
 						Rename

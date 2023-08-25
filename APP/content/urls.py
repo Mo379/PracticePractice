@@ -59,16 +59,6 @@ urlpatterns = [
     path('coursereviews/<hashid:course_id>', views.CourseReviewsView.as_view(), name='coursereviews'),
     #
     path(
-        'content/_publishcourse/',
-        views._publishcourse,
-        name='_publishcourse'
-    ),
-    path(
-        'content/_unpublishcourse/',
-        views._unpublishcourse,
-        name='_unpublishcourse'
-    ),
-    path(
         'content/_course_subscribe/',
         views._course_subscribe,
         name='_course_subscribe'
@@ -84,14 +74,19 @@ urlpatterns = [
         name='_management_options'
     ),
     path(
+        'content/_author_confirmation_question',
+        views._author_confirmation_question,
+        name='_author_confirmation_question'
+    ),
+    path(
+        'content/_author_confirmation_point',
+        views._author_confirmation_point,
+        name='_author_confirmation_point'
+    ),
+    path(
         'content/_createcourse/',
         views._createcourse,
         name='_createcourse'
-    ),
-    path(
-        'content/_createversion/',
-        views._createversion,
-        name='_createversion'
     ),
     path(
         'content/_createmoduel/',

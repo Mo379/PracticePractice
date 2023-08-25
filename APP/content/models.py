@@ -50,6 +50,7 @@ class Question(models.Model):
     q_unique_id = models.CharField(
         max_length=11, db_index=True, default="", null=True, unique=True
     )
+    author_confirmation = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
     erased = models.BooleanField(default=False, null=True)
 
@@ -77,6 +78,7 @@ class Point(models.Model):
     )
     is_completed_content = models.BooleanField(default=False, null=True)
     is_completed_questions = models.BooleanField(default=False, null=True)
+    author_confirmation = models.BooleanField(default=False, null=True)
     deleted = models.BooleanField(default=False, null=True)
     erased = models.BooleanField(default=False, null=True)
 
@@ -114,105 +116,6 @@ class Specification(models.Model):
         )
 
 
-class Collaborator(models.Model):
-    orchistrator = models.ForeignKey(
-        User, on_delete=models.CASCADE, db_index=True, default="", null=True,
-        related_name='orchistrator'
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, db_index=True, default="", null=True
-    )
-    specification = models.ForeignKey(
-        Specification, on_delete=models.CASCADE,db_index=True, default="", null=True
-    )
-    type_choices = [
-        ('1', 'Freelancer'),
-        ('2', 'Partner'),
-        ('3', 'Volenteer'),
-    ]
-    collaborator_type = models.CharField(
-        max_length=1,
-        choices=type_choices,
-        default='Volenteer',
-    )
-    rate_per_point = models.DecimalField(max_digits=6, decimal_places=2, null=True)
-    rate_per_question = models.DecimalField(max_digits=6, decimal_places=2, null=True)
-    percentage_split = models.IntegerField(default=-1, null=True)
-    initial_invite_acceptance = models.BooleanField(default=False, null=True)
-    condition_created = models.BooleanField(default=False, null=True)
-    condition_acceptance = models.BooleanField(default=False, null=True)
-    active = models.BooleanField(default=False, null=True)
-    deleted = models.BooleanField(default=False, null=True)
-
-    def __str__(self):
-        return self.user.username + " helping -> " + self.orchistrator.username
-
-
-class ContributionTask(models.Model):
-    collaboration = models.ForeignKey(
-        Collaborator, on_delete=models.CASCADE, db_index=True, default="", null=True,
-        related_name='collaboration_contribution'
-    )
-    task_moduel = models.CharField(max_length=255, default="", null=True)
-    task_chapter = models.CharField(max_length=255, default="", null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    submitted = models.BooleanField(default=False, null=True)
-    approved = models.BooleanField(default=False, null=True)
-    ended = models.BooleanField(default=False, null=True)
-
-    def __str__(self):
-        return str(self.collaboration.id) + "-" + str(self.id)
-
-
-class Contribution(models.Model):
-    task = models.ForeignKey(
-        ContributionTask, on_delete=models.CASCADE, db_index=True, default="", null=True,
-        related_name='task_contribution'
-    )
-    point = models.ForeignKey(
-        Point, on_delete=models.CASCADE, db_index=True, default="", null=True,
-        related_name='contribution_point'
-    )
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE, db_index=True, default="", null=True,
-        related_name='contribution_question'
-    )
-    is_point = models.BooleanField(default=False, null=True)
-    is_question = models.BooleanField(default=False, null=True)
-    new_content = models.JSONField(default=dict, null=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    approved = models.BooleanField(default=False, null=True)
-
-    def __str__(self):
-        return str(self.task.collaboration.id) + "-" + str(self.id)
-
-
-class Contract(models.Model):
-    collaboration = models.ForeignKey(
-        Collaborator, on_delete=models.CASCADE, db_index=True, default="", null=False,
-        related_name='collaboration_contract'
-    )
-    conditions = models.JSONField(default=dict, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    terminated_at = models.DateTimeField(null=True, default=None, blank=True)
-
-    def __str__(self):
-        return self.collaboration.user.username + \
-                " helping -> " + self.collaboration.orchistrator.username
-
-
-class Keyword(models.Model):
-    specification = models.ForeignKey(
-        Specification, on_delete=models.SET_NULL, db_index=True, null=True
-    )
-    kw_word = models.CharField(max_length=50, null=True)
-    kw_definition = models.CharField(max_length=255, null=True)
-
-    def __str__(self):
-        return self.specification + "-" + self.kw_word
-
-
 class ContentTemplate(models.Model):
     name = models.CharField(max_length=50, default="", null=True)
     content = models.JSONField(default=OrderedDict, null=True)
@@ -235,6 +138,7 @@ class Course(models.Model):
     #
     course_created_at = models.DateTimeField(auto_now_add=True)
     course_updated_at = models.DateTimeField(auto_now=True)
+    course_up_to_date = models.BooleanField(default=False, null=True)
     course_publication = models.BooleanField(default=False, null=True)
     course_pic_ext = models.CharField(max_length=150, default="", null=True)
     course_pic_status = models.BooleanField(default=False)

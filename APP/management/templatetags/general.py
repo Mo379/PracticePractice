@@ -6,7 +6,6 @@ from content.util.GeneralUtil import TagGenerator
 from content.models import Point, Question
 import markdown
 from django.template import Context, Template, loader
-from content.models import Contract
 from PP2.utils import h_encode
 import json
 
@@ -21,11 +20,6 @@ def dbobjmeta(obj, attribute):
 def Generator(x):
     """Returns the contract for the contribution"""
     return TagGenerator()
-
-@register.filter(name='getcontract')
-def getcontract(collaboration):
-    """Returns the contract for the contribution"""
-    return Contract.objects.get_or_create(collaboration=collaboration)[0]
 
 @register.filter(name='hashid')
 def hashid(id):

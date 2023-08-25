@@ -28,7 +28,11 @@ from content.util.GeneralUtil import (
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
 from content.models import *
-from content.util.GeneralUtil import increment_course_subscription_significant_click
+from content.util.GeneralUtil import (
+        increment_course_subscription_significant_click,
+        detect_empty_content,
+        extract_active_spec_content,
+    )
 from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MDEditorModleForm
 from management.templatetags.general import ToMarkdownAnswerManual
 from mdeditor.widgets import MDEditorWidget
@@ -852,86 +856,6 @@ class CourseReviewsView(
         return context
 
 
-def _publishcourse(request):
-    if request.method == 'POST':
-        course_id = request.POST['course_id']
-        courses = Course.objects.filter(
-                user=request.user,
-                pk=course_id
-            )
-        #
-        if len(courses) == 1:
-            try:
-                course = courses[0]
-                course.course_publication = True
-                course.save()
-            except Exception:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong could not publish course.',
-                        extra_tags='alert-warning course'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Your course was successfully published, it can now be found in the CoursePlace.',
-                        extra_tags='alert-success course'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something went wrong, could not find course',
-                    extra_tags='alert-warning course'
-                )
-        #
-        return redirect(
-                'dashboard:mycourses',
-            )
-
-
-def _unpublishcourse(request):
-    if request.method == 'POST':
-        course_id = request.POST['course_id']
-        courses = Course.objects.filter(
-                user=request.user,
-                pk=course_id
-            )
-        #
-        if len(courses) == 1:
-            try:
-                course = courses[0]
-                course.course_publication = False
-                course.save()
-            except Exception:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Something went wrong could not unpublish course.',
-                        extra_tags='alert-warning course'
-                    )
-            else:
-                messages.add_message(
-                        request,
-                        messages.INFO,
-                        'Your course was successfully unpublished, it will no longer be found in the CoursePlace.',
-                        extra_tags='alert-success course'
-                    )
-        else:
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Something went wrong, could not find course',
-                    extra_tags='alert-warning course'
-                )
-        #
-        return redirect(
-                'dashboard:mycourses',
-            )
-
-
 def _course_subscribe(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -1053,9 +977,79 @@ def _management_options(request):
         )
 
 
+def _author_confirmation_question(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        question_id = request.POST['question_id']
+        confirmation = True if 'confirmationToggle' in request.POST else False
+        #
+        question = Question.objects.get(
+                id=question_id
+            )
+        question.author_confirmation=confirmation
+        question.save()
+        spec = Specification.objects.get(
+                id=spec_id
+            )
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Successfully confirmed question content.',
+                extra_tags='alert-success spectopic'
+            )
+        kwargs = {
+            'level': spec.spec_level,
+            'subject': question.q_subject,
+            'module': question.q_moduel,
+            'chapter': question.q_chapter,
+            'board': spec.spec_board,
+            'name': spec.spec_name
+        }
+        return redirect(
+                'dashboard:spectopic',
+                **kwargs
+            )
+
+
+def _author_confirmation_point(request):
+    if request.method == 'POST':
+        spec_id = request.POST['spec_id']
+        point_id = request.POST['point_id']
+        confirmation = True if 'confirmationToggle' in request.POST else False
+        #
+        point = Point.objects.get(
+                id=point_id
+            )
+        point.author_confirmation=confirmation
+        point.save()
+        spec = Specification.objects.get(
+                id=spec_id
+            )
+        #
+        messages.add_message(
+                request,
+                messages.INFO,
+                'Successfully confirmed point content.',
+                extra_tags='alert-success spectopic'
+            )
+        kwargs = {
+            'level': spec.spec_level,
+            'subject': point.p_subject,
+            'module': point.p_moduel,
+            'chapter': point.p_chapter,
+            'board': spec.spec_board,
+            'name': spec.spec_name
+        }
+        return redirect(
+                'dashboard:spectopic',
+                **kwargs
+            )
+
+
 def _createcourse(request):
     if request.method == 'POST':
         course_name = request.POST['course_name']
+        course_level = request.POST['course_level']
         version_name = request.POST['version_name']
         version_note = request.POST['version_note']
         #
@@ -1064,6 +1058,35 @@ def _createcourse(request):
         spec_board = 'Universal'
         spec_name = request.POST['spec_name']
         #
+        if len(course_name) < 3 and len(version_name) < 3 and \
+            len(spec_level) < 3 and len(spec_subject) < 3 and \
+            len(spec_board) < 3 and len(version_note) < 3:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Something went wrong could not create course',
+                    extra_tags='alert-warning course'
+                )
+            return redirect(
+                    'dashboard:mycourses',
+                )
+        if Specification.objects.filter(
+                user=request.user,
+                spec_level=spec_level,
+                spec_subject=spec_subject,
+                spec_board=spec_board,
+                spec_name=spec_name,
+                ).exists():
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'A course with similar specifications exists, please make the names are unique.',
+                    extra_tags='alert-warning course'
+                )
+            return redirect(
+                    'dashboard:mycourses',
+                )
+
         try:
             spec = Specification.objects.create(
                     user=request.user,
@@ -1075,6 +1098,7 @@ def _createcourse(request):
             new_course = Course.objects.create(
                         user=request.user,
                         course_name=course_name,
+                        course_level=course_level,
                         specification=spec
                     )
             CourseVersion.objects.create(
@@ -1089,7 +1113,7 @@ def _createcourse(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong could not create spec',
+                    'Something went wrong could not create course',
                     extra_tags='alert-warning course'
                 )
         else:
@@ -1495,8 +1519,13 @@ def _updatecourseinformation(request):
         course_name = request.POST['new_name']
         course_upload_image = request.FILES.get("course_thmbnail", None)
         course_level = request.POST['course_level']
+        #
+        version_name = request.POST['version_name'] if 'version_name' in request.POST else 'Automatic update'
+        version_note = request.POST['version_note'] if 'version_note' in request.POST else 'Automatic update'
+        #
         regenerate_summary = True if 'regenerate_summary' in request.POST else None
-        # AI created 
+        publication_status = True if 'publication_status' in request.POST else None
+        # AI created
         courses = Course.objects.filter(
                 user=request.user,
                 pk=course_id
@@ -1551,6 +1580,109 @@ def _updatecourseinformation(request):
                                     'Could not store your profile image.',
                                     extra_tags='alert-warning course'
                                 )
+                if publication_status:
+                    # do course item checks
+                    spec_content = course.specification.spec_content
+                    active_points, active_questions = extract_active_spec_content(spec_content)
+                    all_questions = Question.objects.filter(q_unique_id__in=active_questions)
+                    all_points = Point.objects.filter(p_unique_id__in=active_points)
+                    unconfirmed_questions = all_questions.filter(author_confirmation=False)
+                    unconfirmed_points = all_points.filter(author_confirmation=False)
+                    #
+                    empty_content = detect_empty_content(spec_content)
+                    empty_content_str = ''
+                    for module in empty_content.keys():
+                        empty_content_str += f'&ensp; Module: {module} <br>'
+                        if len(empty_content[module])>0:
+                            for chapter in empty_content[module].keys():
+                                empty_content_str += f'&ensp; &ensp;Chapter: {chapter}<br>'
+                                if len(empty_content[module][chapter])>0:
+                                    for topic in empty_content[module][chapter].keys():
+                                        empty_content_str += f"&ensp; &ensp; &ensp; Topic: {topic} <br><br>"
+                    if len(empty_content) > 0:
+                        messages.add_message(
+                                request,
+                                messages.INFO,
+                                f"""
+                                The following content sections are empty, please
+                                add at least a single point:<br>
+                                {empty_content_str}
+                                """,
+                                extra_tags='alert-danger course'
+                            )
+                        return redirect(
+                                'dashboard:mycourses',
+                            )
+                    #
+                    if len(all_questions) < 100 or len(all_points) < 20:
+                        publication_status = False
+                        course.course_publication = publication_status
+                        course.save()
+                        messages.add_message(
+                                request,
+                                messages.INFO,
+                                f"""
+                                To publish your course you need at least 100
+                                questions and 20 points, currently you only have
+                                {len(all_questions)} questions and
+                                {len(all_points)} points, please add more content.
+                                """,
+                                extra_tags='alert-danger course'
+                            )
+                        return redirect(
+                                'dashboard:mycourses',
+                            )
+                    #
+                    if len(unconfirmed_questions) + len(unconfirmed_points) == 0:
+                        publication_status = True
+                        course.course_publication = publication_status
+                        # Create a new course version
+                        if course.course_up_to_date is not True:
+                            versions = CourseVersion.objects.filter(
+                                course=course
+                            ).order_by(
+                                    '-version_number'
+                                )
+                            latest_version = versions[0]
+                            CourseVersion.objects.create(
+                                course=course,
+                                version_number=latest_version.version_number + 1,
+                                version_name=version_name,
+                                version_content=course.specification.spec_content,
+                                version_note=version_note,
+                            )
+                            course.course_up_to_date = True
+                        course.save()
+                    else:
+                        publication_status = False
+                        course.course_publication = publication_status
+                        course.save()
+                        q_link = ""
+                        p_link = ""
+                        for q in unconfirmed_questions[:5]:
+                            kwargs = {"spec_id": course.specification.id, "question_id": q.id}
+                            url = reverse('content:editorquestion', kwargs=kwargs)
+                            q_link += f"<a class='ml-2' href='{url}'>Question: {q}</a><br>"
+                        for p in unconfirmed_points[:5]:
+                            kwargs = {"spec_id": course.specification.id, "point_id": p.id}
+                            url = reverse('content:editorpoint', kwargs=kwargs)
+                            p_link += f"<a class='ml-2' href='{url}'>Point: {p}</a><br>"
+                        messages.add_message(
+                                request,
+                                messages.INFO,
+                                f"""
+                                There is a total of {len(unconfirmed_questions)} and {len(unconfirmed_points)} unconfirmed questions and points,
+                                please go back, check and confirm that the content is correct and free of errors, use those links to make quick confirmations: <br><br>
+                                Questions:<br>{q_link}<br>
+                                Points:<br>{p_link}
+                                """,
+                                extra_tags='alert-danger course'
+                            )
+                        return redirect(
+                                'dashboard:mycourses',
+                            )
+                else:
+                    course.course_publication = publication_status
                 course.save()
                 if regenerate_summary:
                     _generate_course_introductions.delay(request.user.id, course.id)
@@ -1909,6 +2041,7 @@ def _renamemodule(request):
                 specification=spec,
                 moduel=module
                 )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(p_moduel=new_name)
             questions.update(q_moduel=new_name)
@@ -1994,6 +2127,7 @@ def _renamechapter(request):
                 moduel=module,
                 chapter=chapter,
                 )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(p_chapter=new_name)
             questions.update(q_chapter=new_name)
@@ -2082,6 +2216,7 @@ def _renametopic(request):
                 chapter=chapter,
                 topic=topic,
                 )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(p_topic=new_name)
             t_prmpts.update(topic=new_name)
@@ -2200,6 +2335,7 @@ def _ordermoduels(request):
                 user=request.user,
                 pk=int(spec_id[0])
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         content = spec.spec_content.copy()
         new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
         content = new_information
@@ -2236,6 +2372,7 @@ def _orderchapters(request):
             )
         content[module]['content'] = module_content
         #
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2260,6 +2397,7 @@ def _ordertopics(request):
                 'topic'
             )
         content[moduel]['content'][chapter]['content'] = new_information
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2286,6 +2424,7 @@ def _orderpoints(request):
             )
         content[moduel]['content'][chapter]['content'][topic]['content'] = new_information
         content = order_full_spec_content(content)
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2305,6 +2444,7 @@ def _removemodule(request):
         content[module]['active'] = False
         content[module]['position'] = -1
         # Update the values
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2325,6 +2465,7 @@ def _removechapter(request):
         content[module]['content'][chapter]['active'] = False
         content[module]['content'][chapter]['position'] = -1
         # Update the values
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2346,6 +2487,7 @@ def _removetopic(request):
         content[module]['content'][chapter]['content'][topic]['active'] = False
         content[module]['content'][chapter]['content'][topic]['position'] = -1
         # Update the values
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2368,6 +2510,7 @@ def _removepoint(request):
         content[module]['content'][chapter]['content'][topic]['content'][point]['active'] = False
         content[module]['content'][chapter]['content'][topic]['content'][point]['position'] = -1
         # Update the values
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = content
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2394,6 +2537,7 @@ def _restoremodule(request):
         new_information = insert_new_spec_order(ordered_moduels, content, 'moduel')
         new_information[module]['content'] = save_content
         # Update the values
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         spec.spec_content = new_information
         spec.save()
         return JsonResponse({'error': 0, 'message': 'Saved'})
@@ -2410,6 +2554,7 @@ def _restorechapter(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         content = spec.spec_content.copy()
         if chapter in content[module]['content'].keys():
             save_content = content[module]['content'][chapter]['content']
@@ -2447,6 +2592,7 @@ def _restoretopic(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         content = spec.spec_content.copy()
         if topic in content[module]['content'][chapter]['content'].keys():
             save_content = content[module]['content'][chapter]['content'][topic]['content']
@@ -2477,6 +2623,7 @@ def _restorepoint(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         content = spec.spec_content.copy()
         # Update the values
         ordered_points = list(order_live_spec_content(content)[module]['content'][chapter]['content'][topic]['content'].keys())
@@ -2499,6 +2646,7 @@ def _undeletemodule(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         points = Point.objects.filter(
                 user=request.user,
                 p_level=spec.spec_level,
@@ -2533,6 +2681,7 @@ def _undeletechapter(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         points = Point.objects.filter(
                 user=request.user,
                 p_level=spec.spec_level,
@@ -2578,6 +2727,7 @@ def _undeletetopic(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         points = Point.objects.filter(
                 user=request.user,
                 p_level=spec.spec_level,
@@ -2617,6 +2767,7 @@ def _undeletepoint(request):
                 user=request.user,
                 pk=int(spec_id)
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         points = Point.objects.filter(
                 user=request.user,
                 p_unique_id=point,
@@ -2695,6 +2846,7 @@ def _deletemoduel(request):
                 spec_board=board,
                 spec_name=name,
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(deleted=True)
             content = spec.spec_content
@@ -2752,6 +2904,7 @@ def _deletechapter(request):
                 spec_board=board,
                 spec_name=name,
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(deleted=True)
             content = spec.spec_content
@@ -2812,6 +2965,7 @@ def _deletetopic(request):
                 spec_board=board,
                 spec_name=name,
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(deleted=True)
             content = spec.spec_content
@@ -2878,6 +3032,7 @@ def _deletepoint(request):
                 spec_board=board,
                 spec_name=name,
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(deleted=True)
             content = spec.spec_content
@@ -2932,6 +3087,7 @@ def _erasemodule(request):
                 p_subject=spec.spec_subject,
                 p_moduel=deleted_moduel,
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(deleted=True, erased=True)
             content = spec.spec_content
@@ -2954,6 +3110,7 @@ def _erasechapter(request):
                 user=request.user,
                 pk=spec_id
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         points = Point.objects.filter(
                 user=request.user,
                 p_level=spec.spec_level,
@@ -2992,6 +3149,7 @@ def _erasetopic(request):
                 p_chapter=deleted_chapter,
                 p_topic=deleted_topic,
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         if len(points) > 0:
             points.update(deleted=True, erased=True)
             content = spec.spec_content
@@ -3016,6 +3174,7 @@ def _erasepoint(request):
                 user=request.user,
                 pk=spec_id
             )
+        Course.objects.filter(specification=spec).update(course_up_to_date=False)
         points = Point.objects.filter(
                 user=request.user,
                 p_unique_id=deleted_point,
