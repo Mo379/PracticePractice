@@ -148,6 +148,7 @@ def _generate_course_content(job_id):
             #
             q = await sync_to_async(Question.objects.get)(pk=key)
             q.q_answer = response_content
+            q.author_confirmation = False
             await sync_to_async(q.save)()
         return responses
 
@@ -172,6 +173,7 @@ def _generate_course_content(job_id):
             for question, out in zip(_questions, output):
                 q = await sync_to_async(Question.objects.get)(q_unique_id=question)
                 q.q_content = output[out]
+                q.author_confirmation = False
                 await sync_to_async(q.save)()
         return responses
     async def _get_points(points_prompts, spec):
@@ -197,6 +199,7 @@ def _generate_course_content(job_id):
                 full_result[str(idd)] = {'text': str(result)}
             p = await sync_to_async(Point.objects.get)(p_unique_id=key)
             p.p_content = full_result
+            p.author_confirmation = False
             await sync_to_async(p.save)()
         return responses
     #

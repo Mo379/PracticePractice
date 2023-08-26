@@ -30,7 +30,7 @@ def ChapterQuestionGenerator(user, subject, module, module_content):
     for chapter in module_content.keys():
         chapter_qs = module_content[chapter]['questions']
         for diff_level in difficulty_levels:
-            if str(diff_level) not in chapter_qs.keys():
+            if str(diff_level) not in list(map(str, chapter_qs.keys())):
                 chapter_qs[str(diff_level)] = []
         for level in chapter_qs.keys():
             level_qs = chapter_qs[level]
@@ -124,23 +124,42 @@ def detect_empty_content(spec_content):
     for module in spec_content.keys():
         module_content = spec_content[module]['content']
         if spec_content[module]['active'] is True:
-            if len(spec_content[module]['content']) == 0:
+            #
+            module_condition = True
+            for item in spec_content[module]['content']:
+                if spec_content[module]['content'][item]['active'] is True:
+                    module_condition = False
+            if module_condition:
                 empty_invalid_content[module] = {}
                 continue
+            #
             for chapter in module_content.keys():
                 if spec_content[module]['content'][chapter]['active'] is True:
-                    if len(spec_content[module]['content'][chapter]['content']) == 0:
-                        empty_invalid_content[module] = {}
+                    #
+                    chapter_condition = True
+                    for item in spec_content[module]['content'][chapter]['content']:
+                        if spec_content[module]['content'][chapter]['content'][item]['active'] is True:
+                            chapter_condition = False
+                    if chapter_condition:
+                        if module not in empty_invalid_content:
+                            empty_invalid_content[module] = {}
                         empty_invalid_content[module][chapter] = {}
                         continue
+                    #
                     chapter_content = spec_content[module]['content'][chapter]['content']
                     for topic in chapter_content.keys():
                         if chapter_content[topic]['active'] is True:
-                            if len(spec_content[module]['content'][chapter]['content'][topic]['content']) == 0:
-                                empty_invalid_content[module] = {}
-                                empty_invalid_content[module][chapter] = {}
+                            #
+                            topic_condition = True
+                            for item in spec_content[module]['content'][chapter]['content'][topic]['content']:
+                                if spec_content[module]['content'][chapter]['content'][topic]['content'][item]['active'] is True:
+                                    topic_condition = False
+                            if topic_condition:
+                                if module not in empty_invalid_content:
+                                    empty_invalid_content[module] = {}
+                                if chapter not in empty_invalid_content[module]:
+                                    empty_invalid_content[module][chapter] = {}
                                 empty_invalid_content[module][chapter][topic] = True
-                                continue
     return empty_invalid_content
 
 

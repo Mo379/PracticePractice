@@ -1,3 +1,4 @@
+import copy
 import datetime
 import pandas as pd
 import yaml
@@ -2555,24 +2556,31 @@ def _restorechapter(request):
                 pk=int(spec_id)
             )
         Course.objects.filter(specification=spec).update(course_up_to_date=False)
-        content = spec.spec_content.copy()
-        if chapter in content[module]['content'].keys():
-            save_content = content[module]['content'][chapter]['content']
-        else:
-            save_content = {}
+        content = copy.deepcopy(spec.spec_content)
+        #
+        ordered_chapters_raw = list(order_live_spec_content(copy.deepcopy(content))[module]['content'].keys())
+        save_contents = {}
+        save_questions = {}
+        for _chapter in spec.spec_content[module]['content'].keys():
+            if _chapter not in ordered_chapters_raw:
+                save_contents[_chapter] = content[module]['content'][_chapter]['content']
+                save_questions[_chapter] = content[module]['content'][_chapter]['questions']
         # Update the values
-        ordered_chapters = list(order_live_spec_content(content)[module]['content'].keys())
-        ordered_chapters = [chapter] + ordered_chapters
-        new_information = insert_new_spec_order(ordered_chapters, content[module]['content'], 'chapter')
-        new_information[chapter]['content'] = save_content
+        ordered_chapters = [chapter] + ordered_chapters_raw
+        new_information = insert_new_spec_order(ordered_chapters, copy.deepcopy(content)[module]['content'], 'chapter')
+        for _chapter in content[module]['content'].keys():
+            if _chapter not in ordered_chapters_raw:
+                new_information[_chapter]['content'] = save_contents[_chapter]
+                new_information[_chapter]['questions'] = save_questions[_chapter]
         # Update the values
         content[module]['content'] = new_information
+        print(content[module]['content'][chapter]['content'], new_information[chapter]['questions'])
         # Check and insert questions
         module_content = ChapterQuestionGenerator(
                 request.user,
                 spec.spec_subject,
                 module,
-                content[module]['content'].copy()
+                copy.deepcopy(content[module]['content'])
             )
         content[module]['content'] = module_content
         spec.spec_content = content
@@ -2593,17 +2601,21 @@ def _restoretopic(request):
                 pk=int(spec_id)
             )
         Course.objects.filter(specification=spec).update(course_up_to_date=False)
-        content = spec.spec_content.copy()
-        if topic in content[module]['content'][chapter]['content'].keys():
-            save_content = content[module]['content'][chapter]['content'][topic]['content']
-        else:
-            save_content = {}
+        content = copy.deepcopy(spec.spec_content)
+        #
+        ordered_topics_raw = list(order_live_spec_content(copy.deepcopy(content))[module]['content'][chapter]['content'].keys())
+        save_contents = {}
+        for _topic in content[module]['content'][chapter]['content'].keys():
+            if _topic not in ordered_topics_raw:
+                save_contents[_topic] = content[module]['content'][chapter]['content'][_topic]['content']
         # Update the values
-        ordered_topics = list(order_live_spec_content(content)[module]['content'][chapter]['content'].keys())
-        ordered_topics = [topic] + ordered_topics
-        new_information = insert_new_spec_order(ordered_topics, content[module]['content'][chapter]['content'], 'topic')
+        ordered_topics = [topic] + ordered_topics_raw
+        new_information = insert_new_spec_order(ordered_topics, copy.deepcopy(content)[module]['content'][chapter]['content'], 'topic')
         # Update the values
-        new_information[topic]['content'] = save_content
+        for _topic in content[module]['content'][chapter]['content'].keys():
+            if _topic not in ordered_topics_raw:
+                new_information[_topic]['content'] = save_contents[_topic]
+        #
         content[module]['content'][chapter]['content'] = new_information
         spec.spec_content = content
         spec.save()

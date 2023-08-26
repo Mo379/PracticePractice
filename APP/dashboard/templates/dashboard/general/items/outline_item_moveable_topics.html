@@ -84,7 +84,7 @@ Bin
 			<i class="bi bi-arrow-bar-right course_outline_icon"></i>
 			<span id='course_outline_span'>
 				Topic - {{topic|field_name_to_label}}
-				{%if topic in context.author_confirmed_topic_points or topic in context.empty_content|index:context.module|index:chapter%}
+				{%if topic in context.author_confirmed_topic_points or topic in context.empty_content|index:context.module|index:context.chapter%}
 				<i class="bi bi-x-circle text-warning"></i>
 				{%else%}
 				<i class="bi bi-check-circle text-success"></i>

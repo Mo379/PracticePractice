@@ -74,7 +74,8 @@ var object_type = "Point";
 {%include 'content/items/smart_save.html'%}
 {%include 'content/items/auto_save.html'%}
 
-<div style='padding:10px;border:1px dashed grey;'>
+<div style='padding:10px;border:1px dashed grey; margin-top: 50px;'>
+{{context.point.p_content|ToMarkdown:context.point.id|safe}}
 <div class="center-div" style='display:flex;justify-content:center;align-items:center;'>
 	<form class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_point'%}">
 		    {% csrf_token %}
@@ -87,7 +88,7 @@ var object_type = "Point";
 					checked
 				{%endif%}
 			    >
-			    The content below is correct and has been cleared of any errors.
+			    The content above is correct and has been cleared of any errors.
 			</label>
 		    </div>
 
@@ -96,7 +97,6 @@ var object_type = "Point";
 		    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button>
 	</form>
 </div>
-{{context.point.p_content|ToMarkdown:context.point.id|safe}}
 </div>
 
 {%endblock%}

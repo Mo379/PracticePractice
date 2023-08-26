@@ -49,6 +49,7 @@ from content.util.GeneralUtil import (
         order_full_spec_content,
         order_live_spec_content,
         extract_active_spec_content,
+        ChapterQuestionGenerator,
         detect_empty_content,
         monthly_sum_data_list,
         usage_monthly_sum_data_list,
@@ -466,6 +467,18 @@ class SpecModuelHandlerView(
                 spec_board=board,
                 spec_name=name,
             )
+        content = spec.spec_content.copy()
+        for module in content.keys():
+            module_content = ChapterQuestionGenerator(
+                    self.request.user,
+                    spec.spec_subject,
+                    module,
+                    content[module]['content'].copy()
+                )
+            content[module]['content'] = module_content
+        spec.spec_content = content
+        spec.save()
+        #
         empty_content = detect_empty_content(spec.spec_content)
         # get moduels from db
         author_confirmed_questions = Question.objects.values(
