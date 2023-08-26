@@ -10,38 +10,37 @@ A website for delivering A-level content directly to student, with great feature
 - [ ] Everything is super simple ? 
 - [ ] Everything is super super simple ? 
 - [ ] Everything is super super super simple ? 
-
+- [ ] Infrastructure beast CICD and stuff
 
 
 
 ## Atomic tasks
-- [ ] Allow anyone to create any course
-- [ ] Check for the number of moduels
-- [ ] Check for the number of chapters
-- [ ] Check for the number of questions per chapter
-- [ ] Review course and check quality before approval
-
 - [ ] Create Email templates
-- [ ] Can mark questions
-- [ ] Can see statistics
-- [ ] Display paper question and give ability to print
-- [ ] Question marking
-- [ ] Elo performance tracking
 - [ ] Reporting feature for content improvement
-- [ ] Give an experince review
-- [ ] Manage collaborators
-- [ ] View question history
-- [ ] Make payment
-- [ ] Change site appearance
-- [ ] Mark Question
-- [ ] View question paper
-- [ ] View Statistics
-- [ ] View history
-- [ ] View balance
 - [ ] Recieve payment
+- [ ] lock stuff up and add content confirmation checks
+- [ ] stream lining prompts and making it efficent
+- [ ] manual use of gpt-4 for test creation and token efficeny
 
 ## Completed Tasks
-
+- [x] Allow anyone to create any course
+- [x] Check for the number of moduels
+- [x] Check for the number of chapters
+- [x] Check for the number of questions per chapter
+- [x] Review course and check quality before approval
+- [x] Can mark questions
+- [x] Can see statistics
+- [x] Display paper question
+- [x] Question marking
+- [x] Give an experince review
+- [x] View question history
+- [x] Make payment
+- [x] Change site appearance
+- [x] Mark Question
+- [x] View question paper
+- [x] View Statistics
+- [x] View history
+- [x] View balance
 - [x] Write content
 - [x] add .env file
 - [x] Mount SMTP
