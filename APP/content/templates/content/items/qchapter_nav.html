@@ -8,16 +8,30 @@
 							All chapters
 							<a type="button" class="btn btn-success" style='margin:auto;'href="{%url 'dashboard:student_performance' context.course.id %}">
 							MyPerformance
-							</a>
+							</a><br>
 						</h5>
+						<br>
 					</div>
+					<span class='mb-3 mt-1'>
+						<i class="bi bi-check-circle text-success mr-1 ml-2"></i>(Content/Question page is viewed)<br>
+						<i class="bi bi-dash-circle text-primary mr-1 ml-2"></i>(Content/Question page is not viewed)
+					</span>
 					{%for module in content%}
 					<div class="accordion mb-1" id="Module_{{module}}" style='padding:5px;'>
 					  <div class="card">
 						  <div class="card-header" id="heading-{{module}}" style='background:#000000;color:white;'>
 					      <h2 class="mb-0">
-							<button class="btn btn-block text-left" style='color:white;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
-							<i class="bi bi-arrow-bar-right"></i> Module {{forloop.counter}} - {{module|field_name_to_label}}
+							<button class="btn btn-block text-left" style='padding:2px;color:white;' type="button" data-toggle="collapse" data-target="#collapse-{{module}}" aria-expanded="true" aria-controls="collapse-{{module}}">
+							{%definevar context.coursesubscription.progress_track|index:module as track_module_content%}
+							{%definevar context.content|index:module|index:'content' as module_content%}
+							{%if track_module_content|check_student_module_progress_content:module_content and track_module_content|check_student_module_progress_questions:module_content%}
+							<i class="bi bi-check-circle text-success"></i>
+							{%else%}
+							<i class="bi bi-dash-circle text-primary"></i>
+							{%endif%}
+
+							<i class="bi bi-arrow-bar-right"></i> 
+							Module {{forloop.counter}} - {{module|field_name_to_label}}
 						</button>
 					      </h2>
 					    </div>
@@ -26,9 +40,27 @@
 					      <div class="card-body" style='padding:10px;'>
 							{%for chapter in content|index:module|index:'content'%}
 							      <div class="card-body" style='padding:10px;font-size:12px;'>
-								      <a href='{%url 'AI:index' context.course.id module chapter%}' style='text-decoration:none;'><span class='font-weight-bold ml-1'><i class="bi bi-arrow-bar-right"></i> Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} <i class="fa fa-duotone fa-robot" name="GPT" unselectable="on" aria-hidden="true"></i></span></a><br>
-								      <a type= 'button' class='text-success' href="{%url 'content:practice' context.course.id module chapter%}">Questions</a><br>
-								    <a type= 'button' class='text-warning' href="{%url 'content:notearticle' context.course.id module chapter%}">Raw</a>
+								      <a href='{%url 'AI:index' context.course.id module chapter%}' style='text-decoration:none;'>
+									      <span class='font-weight-bold'>
+											{%if context.coursesubscription.progress_track|index:module|index:chapter|index:'content'%}
+											<i class="bi bi-check-circle text-success"></i>
+											{%else%}
+											<i class="bi bi-dash-circle text-primary"></i>
+											{%endif%}
+										      <i class="bi bi-book-fill"></i>
+										      Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}
+											<a type= 'button' class='text-secondary' href="{%url 'content:notearticle' context.course.id module chapter%}">Raw</a>
+									      </span>
+								      </a><br>
+								      <a type= 'button' class='text-info' href="{%url 'content:practice' context.course.id module chapter%}">
+										{%if context.coursesubscription.progress_track|index:module|index:chapter|index:'questions'%}
+										<i class="bi bi-check-circle text-success"></i>
+										{%else%}
+										<i class="bi bi-dash-circle text-primary"></i>
+										{%endif%}
+									      <i class="bi bi-patch-question-fill"></i>
+									      Questions
+								      </a><br>
 								    <br>
 							      </div>
 							{%endfor%}

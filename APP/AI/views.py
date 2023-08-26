@@ -60,8 +60,22 @@ class AIView(
         chapter = self.kwargs['chapter']
         user = User.objects.get(pk=self.request.user.id)
         appearancechoiceform = AppearanceChoiceForm(instance=user)
-        # Get course modules and chapters
+        #
         course = Course.objects.get(pk=course_id)
+        course_subscription = CourseSubscription.objects.filter(
+                user=self.request.user,
+                course=course
+            )
+        course_subscription = course_subscription[0]
+        #
+        if module not in course_subscription.progress_track.keys():
+            course_subscription.progress_track[module] = {}
+        if chapter not in course_subscription.progress_track[module].keys():
+            course_subscription.progress_track[module][chapter] = {}
+        if 'content' not in course_subscription.progress_track[module][chapter].keys():
+            course_subscription.progress_track[module][chapter]['content'] = True
+        course_subscription.save()
+        # Get course modules and chapters
         latest_course_version = CourseVersion.objects.filter(
                     course=course
                 ).order_by('-version_number')[0]
@@ -154,10 +168,6 @@ class AIView(
             quizzes_states.update(extract_thread_quizes(part.part_chat))
             lesson_parts.append(part)
         #
-        course_subscription = CourseSubscription.objects.filter(
-                user=self.request.user,
-                course=course
-            )
         #
         if len(lesson_parts[0].part_chat.keys()) == 0:
             first_point = list(lesson_parts[0].part_content['content'].keys())[0]
@@ -168,7 +178,7 @@ class AIView(
                 }
             lesson_parts[0].save()
         #
-        context['coursesubscription'] = course_subscription if len(course_subscription) == 1 else False
+        context['coursesubscription'] = course_subscription
         context['form_appearancechoice'] = appearancechoiceform
         context['course'] = course
         context['course_version'] = latest_course_version

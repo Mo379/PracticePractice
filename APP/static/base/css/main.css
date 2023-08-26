@@ -151,7 +151,7 @@
 #qbank_container{
 	width: inherit;
 	display:grid;
-	grid-template-columns: 6fr 4fr;
+	grid-template-columns: 4fr 6fr;
 	grid-template-areas: 'left right';
 }
 #right_container{

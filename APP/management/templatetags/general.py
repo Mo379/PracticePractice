@@ -157,6 +157,32 @@ def divide(value, arg):
         return None
 
 
+@register.filter(name='check_student_module_progress_content')
+def check_student_module_progress_content(tracks, course_content):
+    if tracks:
+        for course_chapter in course_content.keys():
+            if course_chapter not in tracks.keys():
+                return False
+            elif 'content' not in tracks[course_chapter].keys():
+                return False
+        return True
+    else:
+        return False
+
+
+@register.filter(name='check_student_module_progress_questions')
+def check_student_module_progress_questions(tracks, course_content):
+    if tracks:
+        for course_chapter in course_content.keys():
+            if course_chapter not in tracks.keys():
+                return False
+            elif 'questions' not in tracks[course_chapter].keys():
+                return False
+        return True
+    else:
+        return False
+
+
 @register.filter(name='get_percent')
 def get_percent(denominator, numerator):
     return (denominator/numerator)*100

@@ -44,7 +44,7 @@
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between border">
 					<h5 class="h4 mb-1 text-primary font-weight-bold">
 					Custom Tests:
-					<button type="button" class="ml-2 btn btn-primary" data-toggle="modal" data-target="#customtest_modal">
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#customtest_modal">
 						Create Custom Test
 					</button>
 					</h5>
@@ -70,7 +70,7 @@
 								    {%if test.pap_completion%}
 								    <i class="bi bi-check-circle-fill" style='color:green;'></i> {{test.percentage_score}}%
 								    {%else%}
-								    <i class="bi bi-x-circle-fill" style='color:red;'></i>
+								    <i class="bi bi-dash-circle-fill"></i> -.-
 								    {%endif%}
 							    </td>
 							    <td>{{test.pap_creation_time|date:'d-m-Y'}}</td>
@@ -82,7 +82,7 @@
 								    {%if test.completed%}
 								    <i class="bi bi-check-circle-fill" style='color:green;'></i> {{test.percentage_score}}%
 								    {%else%}
-								    <i class="bi bi-x-circle-fill" style='color:red;'></i>
+								    <i class="bi bi-dash-circle-fill"></i> -.-
 								    {%endif%}
 							    </td>
 							    <td>{{test.created_at|date:'d-m-Y'}}</td>

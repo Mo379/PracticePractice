@@ -219,6 +219,20 @@ class NoteArticleView(
         course = Course.objects.get(
                     pk=course_id
                 )
+        course_subscription = CourseSubscription.objects.get(
+                user=self.request.user,
+                course=course
+            )
+        #
+        if module not in course_subscription.progress_track.keys():
+            course_subscription.progress_track[module] = {}
+        if chapter not in course_subscription.progress_track[module].keys():
+            course_subscription.progress_track[module][chapter] = {}
+        if 'content' not in course_subscription.progress_track[module][chapter].keys():
+            course_subscription.progress_track[module][chapter]['content'] = True
+        course_subscription.save()
+        #
+        course_subscription.progress_track[module][chapter]
         source_spec = course.specification
         content = CourseVersion.objects.filter(
                 course=course
@@ -293,9 +307,10 @@ class CourseStudyView(
         course = Course.objects.get(
                     pk=course_id
                 )
-        content = CourseVersion.objects.filter(
-                course=course
-            ).order_by('-version_number')[0].version_content
+        latest_course_version = CourseVersion.objects.filter(
+                    course=course
+                ).order_by('-version_number')[0]
+        content = latest_course_version.version_content
         #
         question_history = QuestionTrack.objects.filter(
                 user=self.request.user,
@@ -326,7 +341,7 @@ class CourseStudyView(
                 key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.pap_creation_time,
                 reverse=True
             )
-        context['coursesubscription'] = course_subscription if len(course_subscription) else False
+        context['coursesubscription'] = course_subscription[0] if len(course_subscription)== 1 else False
         context['content'] = content
         context['moduels'] = moduels
         context['chapters'] = chapters
@@ -463,9 +478,18 @@ class PracticeView(
                 user=self.request.user,
                 course=course
                 )
+        course_subscription = course_subscription[0]
         content = CourseVersion.objects.filter(
                 course=course
             ).order_by('-version_number')[0].version_content
+        #
+        if module not in course_subscription.progress_track.keys():
+            course_subscription.progress_track[module] = {}
+        if chapter not in course_subscription.progress_track[module].keys():
+            course_subscription.progress_track[module][chapter] = {}
+        if 'questions' not in course_subscription.progress_track[module][chapter].keys():
+            course_subscription.progress_track[module][chapter]['questions'] = True
+        course_subscription.save()
         #
         content = order_live_spec_content(content)
         chapter_qs = content[module]['content'][chapter]['questions']
@@ -491,7 +515,7 @@ class PracticeView(
             )
         all_q_tracks = {q.question.id: q for q in question_tracks}
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
-        context['coursesubscription'] = course_subscription if len(course_subscription) else False
+        context['coursesubscription'] = course_subscription
         context['questions'] = dic if question else None
         context['course'] = course
         context['module'] = module
@@ -3307,6 +3331,7 @@ def _subjective_mark_question(request):
                     course=course,
                     question=question
                 )
+        #
         try:
             significant_click_name = 'subjective_mark_question'
             increment_course_subscription_significant_click(
@@ -3397,6 +3422,7 @@ def _mark_question(request):
                 course=course,
                 question=question
             )
+        #
         try:
             significant_click_name = 'mark_question'
             increment_course_subscription_significant_click(
@@ -3433,6 +3459,7 @@ def _mark_paper_question(request):
         question_id = request.POST['question_id']
         n_marks = request.POST['n_marks']
         #
+        #
         course = Course.objects.get(pk=course_id)
         paper = UserPaper.objects.get(pk=paper_id)
         question = Question.objects.get(user=request.user, pk=question_id)
@@ -3441,6 +3468,7 @@ def _mark_paper_question(request):
                 course=course,
                 question=question
             )
+        #
         # Add a course subscription month click
         try:
             significant_click_name = 'mark_paper_question'

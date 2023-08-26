@@ -173,6 +173,7 @@ class CourseSubscription(models.Model):
     subscription_created_at = models.DateTimeField(auto_now_add=True)
     subscription_ended_at = models.DateTimeField(null=True, default=None, blank=True)
     monthly_significant_clicks = models.JSONField(default=OrderedDict, null=True)
+    progress_track = models.JSONField(default=dict, null=True)
 
     def __str__(self):
         return (
