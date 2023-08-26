@@ -4,25 +4,28 @@ A website for delivering A-level content directly to student, with great feature
 
 ## General Development process
 - [ ] good content creation process
-- [ ] The payment framework ? 
-- [ ] Good commercial model ? 
-- [ ] Good user experince ?
 - [ ] Everything is super simple ? 
 - [ ] Everything is super super simple ? 
 - [ ] Everything is super super super simple ? 
 - [ ] Infrastructure beast CICD and stuff
+- [ ] A very attractive free package
+- [ ] Bug huntdown
+- [ ] User feedback loop
 
 
 
 ## Atomic tasks
-- [ ] Create Email templates
-- [ ] Reporting feature for content improvement
-- [ ] Recieve payment
 - [ ] lock stuff up and add content confirmation checks
 - [ ] stream lining prompts and making it efficent
 - [ ] manual use of gpt-4 for test creation and token efficeny
+- [ ] Create Email templates
+- [ ] Reporting feature for content improvement
+- [ ] Author Recieves payment
 
 ## Completed Tasks
+- [x] The payment framework ? 
+- [x] Good commercial model ? 
+- [x] Good user experince ?
 - [x] Allow anyone to create any course
 - [x] Check for the number of moduels
 - [x] Check for the number of chapters
