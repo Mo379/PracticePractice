@@ -11,18 +11,21 @@ A website for delivering A-level content directly to student, with great feature
 - [ ] A very attractive free package
 - [ ] Bug huntdown
 - [ ] User feedback loop
-
+- [ ] Handle item deletion and garbage collection database and s3 buckets
 
 
 ## Atomic tasks
-- [ ] lock stuff up and add content confirmation checks
-- [ ] stream lining prompts and making it efficent
-- [ ] manual use of gpt-4 for test creation and token efficeny
+- [ ] Lock stuff up 
+- [ ] Stream lining prompts and making it efficent
+- [ ] Manual use of gpt-4 for test creation and token efficeny
 - [ ] Create Email templates
-- [ ] Reporting feature for content improvement
+- [ ] Reporting feature for content improvement with punishment to author
+- [ ] Affiliate code functionality
+- [ ] Phone screen CSS margins
 - [ ] Author Recieves payment
 
 ## Completed Tasks
+- [x] Add content confirmation checks
 - [x] The payment framework ? 
 - [x] Good commercial model ? 
 - [x] Good user experince ?

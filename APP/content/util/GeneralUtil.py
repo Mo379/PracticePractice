@@ -18,6 +18,8 @@ from content.models import CourseSubscription
 from djstripe.models import (
         Subscription,
     )
+current_month = datetime.now().date()
+n_months = 6
 
 def TagGenerator():
     x = ''.join(
@@ -271,8 +273,6 @@ def is_valid_youtube_embed(link):
     return False
 
 
-current_month = datetime.now().date()
-n_months = 6
 
 def monthly_sum_data_list(
             Model,
@@ -478,5 +478,36 @@ def author_user_clicks_data_list(month_keys, subscriptions, courses):
         total_courses_clicks.append(total_course_clicks)
     course_aggrigate_monthly_clicks = (course_labels, total_courses_clicks)
     return aggrigate_monthly_sum, course_aggrigate_monthly_clicks, month_active_subscriptions, total_estimated_earning, aggrigate_user_monthly_engagement
+
+
+def confirm_question_checks(question):
+    message = ''
+    status = True
+    if len(str(question.q_content)) < 50:
+        message = f'Failed to pass the minimum question length requirement of at least 50 characters.'
+        status = False
+        return message, status
+    if len(str(question.q_answer)) < 50:
+        message = f'Failed to pass the minimum question length requirement of at least 50 characters.'
+        status = False
+        return message, status
+    return message, status 
+
+
+def confirm_point_checks(point):
+    message = ''
+    status = True
+    if len(str(point.p_content)) < 100:
+        message = f'Failed to pass the minimum question length requirement of at least 100 characters.'
+        status = False
+        return message, status
+    return message, status 
+
+
+
+
+
+
+
 
 

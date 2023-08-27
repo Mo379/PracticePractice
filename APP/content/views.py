@@ -33,6 +33,8 @@ from content.util.GeneralUtil import (
         increment_course_subscription_significant_click,
         detect_empty_content,
         extract_active_spec_content,
+        confirm_question_checks,
+        confirm_point_checks,
     )
 from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MDEditorModleForm
 from management.templatetags.general import ToMarkdownAnswerManual
@@ -1011,29 +1013,51 @@ def _author_confirmation_question(request):
         question = Question.objects.get(
                 id=question_id
             )
-        question.author_confirmation=confirmation
-        question.save()
-        spec = Specification.objects.get(
-                id=spec_id
-            )
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully confirmed question content.',
-                extra_tags='alert-success spectopic'
-            )
-        kwargs = {
-            'level': spec.spec_level,
-            'subject': question.q_subject,
-            'module': question.q_moduel,
-            'chapter': question.q_chapter,
-            'board': spec.spec_board,
-            'name': spec.spec_name
-        }
-        return redirect(
-                'dashboard:spectopic',
-                **kwargs
-            )
+        confirmation_message, confirmation_status = confirm_question_checks(question)
+        if confirmation_status:
+            question.author_confirmation=confirmation
+            question.save()
+            spec = Specification.objects.get(
+                    id=spec_id
+                )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successfully confirmed question content.',
+                    extra_tags='alert-success spectopic'
+                )
+            kwargs = {
+                'level': spec.spec_level,
+                'subject': question.q_subject,
+                'module': question.q_moduel,
+                'chapter': question.q_chapter,
+                'board': spec.spec_board,
+                'name': spec.spec_name
+            }
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
+                )
+        else:
+            question.author_confirmation=False
+            question.save()
+            spec = Specification.objects.get(
+                    id=spec_id
+                )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    confirmation_message,
+                    extra_tags='alert-warning editorquestion'
+                )
+            kwargs = {
+                'spec_id': spec.id,
+                'question_id': question.id
+            }
+            return redirect(
+                    'content:editorquestion',
+                    **kwargs
+                )
 
 
 def _author_confirmation_point(request):
@@ -1045,30 +1069,53 @@ def _author_confirmation_point(request):
         point = Point.objects.get(
                 id=point_id
             )
-        point.author_confirmation=confirmation
-        point.save()
-        spec = Specification.objects.get(
-                id=spec_id
-            )
-        #
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Successfully confirmed point content.',
-                extra_tags='alert-success spectopic'
-            )
-        kwargs = {
-            'level': spec.spec_level,
-            'subject': point.p_subject,
-            'module': point.p_moduel,
-            'chapter': point.p_chapter,
-            'board': spec.spec_board,
-            'name': spec.spec_name
-        }
-        return redirect(
-                'dashboard:spectopic',
-                **kwargs
-            )
+        confirmation_message, confirmation_status = confirm_point_checks(point)
+        if confirmation_status:
+            point.author_confirmation=confirmation
+            point.save()
+            spec = Specification.objects.get(
+                    id=spec_id
+                )
+            #
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Successfully confirmed point content.',
+                    extra_tags='alert-success spectopic'
+                )
+            kwargs = {
+                'level': spec.spec_level,
+                'subject': point.p_subject,
+                'module': point.p_moduel,
+                'chapter': point.p_chapter,
+                'board': spec.spec_board,
+                'name': spec.spec_name
+            }
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
+                )
+        else:
+            point.author_confirmation=False
+            point.save()
+            spec = Specification.objects.get(
+                    id=spec_id
+                )
+            #
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    confirmation_message,
+                    extra_tags='alert-warning editorpoint'
+                )
+            kwargs = {
+                'spec_id': spec.id,
+                'point_id': point.id
+            }
+            return redirect(
+                    'content:editorpoint',
+                    **kwargs
+                )
 
 
 def _createcourse(request):

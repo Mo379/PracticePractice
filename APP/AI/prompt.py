@@ -5,9 +5,10 @@ import json
 import aiohttp
 from AI import prompts
 
+
 class Prompter:
     def __init__(self, model='gpt-3.5-turbo'):
-        self.model = "gpt-3.5-turbo"
+        self.model = model
         self.OPENAI_ORG = decouple_config('openai_org')
         self.OPENAI_SECRET = decouple_config('openai_secret')
         openai.organization = self.OPENAI_ORG
