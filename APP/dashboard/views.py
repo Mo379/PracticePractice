@@ -22,6 +22,18 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from PP2.mixin import (
+        AnySubscriptionRequiredMixin,
+        AnySubscriptionRequiredDec,
+        AISubscriptionRequiredMixin,
+        AISubscriptionRequiredDec,
+        AuthorRequiredMixin,
+        AuthorRequiredDec,
+        AffiliateRequiredMixin,
+        AffiliateRequiredDec,
+        TrusteeRequiredMixin,
+        TrusteeRequiredDec
+    )
 from user.models import User
 from AI.models import (
         ContentGenerationJob,
@@ -357,6 +369,7 @@ class StudentContentManagementView(
 
 class MyCoursesView(
             LoginRequiredMixin,
+            AuthorRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -435,6 +448,7 @@ class MyCoursesView(
 # Admin views
 class SpecModuelHandlerView(
             LoginRequiredMixin,
+            AuthorRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -580,6 +594,7 @@ class SpecModuelHandlerView(
 
 class SpecTopicHandlerView(
             LoginRequiredMixin,
+            AuthorRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -783,6 +798,7 @@ class SpecTopicHandlerView(
 
 class EarningStatisticsView(
             LoginRequiredMixin,
+            TrusteeRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -888,7 +904,7 @@ class EarningStatisticsView(
         return context
 
 
-class BlankView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class BlankView(BaseBreadcrumbMixin, generic.ListView):
     login_url = 'user:login'
     redirect_field_name = None
     template_name = "dashboard/blank.html"
@@ -905,7 +921,7 @@ class BlankView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         return "user_index"
 
 
-class NotFoundView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+class NotFoundView(BaseBreadcrumbMixin, generic.ListView):
     login_url = 'user:login'
     redirect_field_name = None
     template_name = "dashboard/404.html"

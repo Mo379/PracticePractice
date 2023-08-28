@@ -13,6 +13,18 @@ from braces.views import (
         GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
+from PP2.mixin import (
+        AnySubscriptionRequiredMixin,
+        AnySubscriptionRequiredDec,
+        AISubscriptionRequiredMixin,
+        AISubscriptionRequiredDec,
+        AuthorRequiredMixin,
+        AuthorRequiredDec,
+        AffiliateRequiredMixin,
+        AffiliateRequiredDec,
+        TrusteeRequiredMixin,
+        TrusteeRequiredDec
+    )
 from django.views import generic
 from content.models import Course, CourseSubscription, CourseVersion, Specification, Point
 from user.models import (
@@ -41,10 +53,9 @@ from AI.tasks import _generate_course_content
 from management.templatetags.general import ToMarkdownManual
 
 
-
 # Create your views here.
 class AIView(
-        LoginRequiredMixin,
+        AISubscriptionRequiredMixin,
         generic.ListView
         ):
     login_url = 'user:login'
@@ -194,7 +205,7 @@ class AIView(
         return context
 
 
-@login_required(login_url='/user/login', redirect_field_name=None)
+@AISubscriptionRequiredDec
 def _load_lesson(request):
     if request.method == 'POST':
         user = request.user
@@ -218,6 +229,7 @@ def _load_lesson(request):
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
 
+@AISubscriptionRequiredDec
 def _next_point(request):
     if request.method == 'POST':
         course_version_id = request.POST['course_version_id']
@@ -293,6 +305,8 @@ def _next_point(request):
                 return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
+
+@AISubscriptionRequiredDec
 def _ask_from_book(request):
     if request.method == 'POST':
         lesson_part_id = request.POST['part_id']
@@ -342,6 +356,8 @@ def _ask_from_book(request):
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
+
+@AISubscriptionRequiredDec
 def _catch_chat_completion(request):
     if request.method == 'POST':
         lesson_part_id = request.POST['part_id']
@@ -398,6 +414,8 @@ def _catch_chat_completion(request):
         return JsonResponse(response)
     return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
 
+
+@AISubscriptionRequiredDec
 def _mark_quiz_question(request):
     if request.method == 'POST':
         lesson_part_id = request.POST['lesson_part_id']
@@ -510,6 +528,8 @@ def _mark_quiz_question(request):
         return JsonResponse(response)
     return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
 
+
+@AuthorRequiredDec
 def _newgenerationjob(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -596,6 +616,7 @@ def _newgenerationjob(request):
         )
 
 
+@AuthorRequiredDec
 def _savepromptquestion(request):
     if request.method == 'POST':
         q_prompt_id = request.POST['q_prompt_id']
@@ -610,6 +631,7 @@ def _savepromptquestion(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _saveprompttopic(request):
     if request.method == 'POST':
         t_prompt_id = request.POST['t_prompt_id']
@@ -622,6 +644,7 @@ def _saveprompttopic(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _savepromptpoint(request):
     if request.method == 'POST':
         p_prompt_id = request.POST['p_prompt_id']

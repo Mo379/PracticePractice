@@ -15,6 +15,18 @@ from djstripe.models import (
         Subscription,
         Price,
     )
+from PP2.mixin import (
+        AnySubscriptionRequiredMixin,
+        AnySubscriptionRequiredDec,
+        AISubscriptionRequiredMixin,
+        AISubscriptionRequiredDec,
+        AuthorRequiredMixin,
+        AuthorRequiredDec,
+        AffiliateRequiredMixin,
+        AffiliateRequiredDec,
+        TrusteeRequiredMixin,
+        TrusteeRequiredDec
+    )
 
 
 
@@ -220,12 +232,6 @@ class PrivacyView(BaseBreadcrumbMixin, generic.ListView):
                 "TeamContact":"Contact@practicepractice.com",
                 }
         return context
-
-
-
-
-
-
 
 
 class SiteMapView(BaseBreadcrumbMixin, generic.ListView):

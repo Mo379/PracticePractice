@@ -39,10 +39,23 @@ from content.util.GeneralUtil import (
 from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MDEditorModleForm
 from management.templatetags.general import ToMarkdownAnswerManual
 from mdeditor.widgets import MDEditorWidget
+from django.contrib.auth.decorators import login_required
 from braces.views import (
         LoginRequiredMixin,
         GroupRequiredMixin,
         SuperuserRequiredMixin,
+    )
+from PP2.mixin import (
+        AnySubscriptionRequiredMixin,
+        AnySubscriptionRequiredDec,
+        AISubscriptionRequiredMixin,
+        AISubscriptionRequiredDec,
+        AuthorRequiredMixin,
+        AuthorRequiredDec,
+        AffiliateRequiredMixin,
+        AffiliateRequiredDec,
+        TrusteeRequiredMixin,
+        TrusteeRequiredDec
     )
 from mdeditor.configs import MDConfig
 from io import BytesIO
@@ -65,7 +78,7 @@ class ContentView(
         LoginRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
-        ):
+    ):
     login_url = 'user:login'
     redirect_field_name = False
     template_name = 'content/content.html'
@@ -354,7 +367,7 @@ class CourseStudyView(
 
 
 class CustomTestView(
-        LoginRequiredMixin,
+        AnySubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -397,7 +410,7 @@ class CustomTestView(
 
 
 class CourseQuizView(
-        LoginRequiredMixin,
+        AISubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -450,6 +463,7 @@ class CourseQuizView(
 
 class PracticeView(
         LoginRequiredMixin,
+        AnySubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -527,7 +541,7 @@ class PracticeView(
 
 
 class NoteEditView(
-        LoginRequiredMixin,
+        AuthorRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -598,7 +612,7 @@ class NoteEditView(
 
 
 class QuestionEditView(
-        LoginRequiredMixin,
+        AuthorRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -641,7 +655,7 @@ class QuestionEditView(
 
 
 class EditorPointView(
-        LoginRequiredMixin,
+        AuthorRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -690,7 +704,7 @@ class EditorPointView(
 
 
 class EditorQuestionView(
-        LoginRequiredMixin,
+        AuthorRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -883,6 +897,7 @@ class CourseReviewsView(
         return context
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _course_subscribe(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -924,6 +939,7 @@ def _course_subscribe(request):
             )
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _new_review(request):
     if request.method == 'POST':
         user = request.user
@@ -944,7 +960,7 @@ def _new_review(request):
                 review.review = course_review
                 review.rating = course_rating
                 review.save()
-            except Exception as e :
+            except Exception as e:
                 messages.add_message(
                         request,
                         messages.INFO,
@@ -971,6 +987,7 @@ def _new_review(request):
             )
 
 
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _management_options(request):
     if request.method == 'POST':
         subscription_id = h_decode(request.POST['subscription_id'])
@@ -1004,6 +1021,7 @@ def _management_options(request):
         )
 
 
+@AuthorRequiredDec
 def _author_confirmation_question(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -1060,6 +1078,7 @@ def _author_confirmation_question(request):
                 )
 
 
+@AuthorRequiredDec
 def _author_confirmation_point(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -1118,6 +1137,7 @@ def _author_confirmation_point(request):
                 )
 
 
+@AuthorRequiredDec
 def _createcourse(request):
     if request.method == 'POST':
         course_name = request.POST['course_name']
@@ -1201,6 +1221,7 @@ def _createcourse(request):
         )
 
 
+@AuthorRequiredDec
 def _createversion(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -1253,6 +1274,7 @@ def _createversion(request):
             )
 
 
+@AuthorRequiredDec
 def _createmoduel(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1318,6 +1340,7 @@ def _createmoduel(request):
             )
 
 
+@AuthorRequiredDec
 def _createchapter(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1376,6 +1399,7 @@ def _createchapter(request):
             )
 
 
+@AuthorRequiredDec
 def _createtopic(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1439,6 +1463,7 @@ def _createtopic(request):
             )
 
 
+@AuthorRequiredDec
 def _createpoint(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -1499,6 +1524,7 @@ def _createpoint(request):
             )
 
 
+@AuthorRequiredDec
 def _createcustomtest(request):
     if request.method == 'POST':
         def clean(string):
@@ -1585,6 +1611,7 @@ def _createcustomtest(request):
         return JsonResponse({'res': 0})
 
 
+@AuthorRequiredDec
 def _updatecourseinformation(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -1785,6 +1812,7 @@ def _updatecourseinformation(request):
             )
 
 
+@AuthorRequiredDec
 def _updatepointvideos(request):
     if request.method == 'POST':
         point_id = request.POST['point_id']
@@ -1817,6 +1845,7 @@ def _updatepointvideos(request):
     return JsonResponse({'error': 1, 'message': 'Error c'})
 
 
+@AuthorRequiredDec
 def _updatequestionvideos(request):
     if request.method == 'POST':
         question_id = request.POST['question_id']
@@ -1852,6 +1881,7 @@ def _updatequestionvideos(request):
     return JsonResponse({'error': 1, 'message': 'Error c'})
 
 
+@AuthorRequiredDec
 def _updatepointimages(request):
     if request.method == 'POST':
         point_id = request.POST['point_id']
@@ -1876,6 +1906,7 @@ def _updatepointimages(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _updatequestionimages(request):
     if request.method == 'POST':
         question_id = request.POST['question_id']
@@ -1903,6 +1934,7 @@ def _updatequestionimages(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _uploadquestionimage(request):
     if request.method == 'POST':
         question_id = request.POST['question_id']
@@ -1958,6 +1990,9 @@ def _uploadquestionimage(request):
             return JsonResponse({'error': 0,
                                  'message': "File uploaded!",
                                  })
+
+
+@AuthorRequiredDec
 def _uploadpointimage(request):
     if request.method == 'POST':
         point_id = request.POST['point_id']
@@ -2010,6 +2045,9 @@ def _uploadpointimage(request):
             return JsonResponse({'error': 0,
                                  'message': "File uploaded!",
                                  })
+
+
+@AuthorRequiredDec
 def _renamespec(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2072,6 +2110,7 @@ def _renamespec(request):
             )
 
 
+@AuthorRequiredDec
 def _renamemodule(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2151,6 +2190,7 @@ def _renamemodule(request):
             )
 
 
+@AuthorRequiredDec
 def _renamechapter(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2248,6 +2288,7 @@ def _renamechapter(request):
             )
 
 
+@AuthorRequiredDec
 def _renametopic(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2340,6 +2381,7 @@ def _renametopic(request):
             )
 
 
+@AuthorRequiredDec
 def _renamepoint(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2398,6 +2440,7 @@ def _renamepoint(request):
             )
 
 
+@AuthorRequiredDec
 def _ordermoduels(request):
     if request.method == 'POST':
         spec_id = request.POST.getlist('spec_id')
@@ -2418,6 +2461,7 @@ def _ordermoduels(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _orderchapters(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2451,6 +2495,7 @@ def _orderchapters(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _ordertopics(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2476,6 +2521,7 @@ def _ordertopics(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _orderpoints(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2503,6 +2549,7 @@ def _orderpoints(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _removemodule(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2523,6 +2570,7 @@ def _removemodule(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _removechapter(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2544,6 +2592,7 @@ def _removechapter(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _removetopic(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2566,6 +2615,7 @@ def _removetopic(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _removepoint(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2589,6 +2639,7 @@ def _removepoint(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _restoremodule(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2616,6 +2667,7 @@ def _restoremodule(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _restorechapter(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2660,6 +2712,7 @@ def _restorechapter(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _restoretopic(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2694,6 +2747,7 @@ def _restoretopic(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _restorepoint(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2720,6 +2774,7 @@ def _restorepoint(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _undeletemodule(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2754,6 +2809,7 @@ def _undeletemodule(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _undeletechapter(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2799,6 +2855,7 @@ def _undeletechapter(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _undeletetopic(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2838,6 +2895,7 @@ def _undeletetopic(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _undeletepoint(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -2869,6 +2927,7 @@ def _undeletepoint(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _deletecourse(request):
     if request.method == 'POST':
         course_id = request.POST['Course_id']
@@ -2909,6 +2968,7 @@ def _deletecourse(request):
             )
 
 
+@AuthorRequiredDec
 def _deletemoduel(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -2964,6 +3024,7 @@ def _deletemoduel(request):
             )
 
 
+@AuthorRequiredDec
 def _deletechapter(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -3023,6 +3084,7 @@ def _deletechapter(request):
             )
 
 
+@AuthorRequiredDec
 def _deletetopic(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -3088,6 +3150,7 @@ def _deletetopic(request):
             )
 
 
+@AuthorRequiredDec
 def _deletepoint(request):
     if request.method == 'POST':
         level = request.POST['level']
@@ -3156,6 +3219,7 @@ def _deletepoint(request):
             )
 
 
+@AuthorRequiredDec
 def _erasemodule(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -3184,6 +3248,7 @@ def _erasemodule(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _erasechapter(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -3214,6 +3279,7 @@ def _erasechapter(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _erasetopic(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -3246,6 +3312,7 @@ def _erasetopic(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _erasepoint(request):
     if request.method == 'POST':
         spec_id = request.POST['spec_id']
@@ -3275,6 +3342,7 @@ def _erasepoint(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _savepointedit(request):
     if request.method == 'POST':
         point_id = request.POST['point_id']
@@ -3307,6 +3375,7 @@ def _savepointedit(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _savequestionedit(request):
     if request.method == 'POST':
         question_id = request.POST['question_id']
@@ -3337,6 +3406,7 @@ def _savequestionedit(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AuthorRequiredDec
 def _saveansweredit(request):
     if request.method == 'POST':
         question_id = request.POST['question_id']
@@ -3366,6 +3436,8 @@ def _saveansweredit(request):
         return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 
+
+@AnySubscriptionRequiredDec
 def _subjective_mark_question(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -3457,6 +3529,7 @@ def _subjective_mark_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
+@AnySubscriptionRequiredDec
 def _mark_question(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -3498,6 +3571,8 @@ def _mark_question(request):
             return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 
+
+@AnySubscriptionRequiredDec
 def _mark_paper_question(request):
     if request.method == 'POST':
         #
@@ -3562,6 +3637,8 @@ def _mark_paper_question(request):
             return JsonResponse({'error': 1, 'message': 'Error'})
     return JsonResponse({'error': 1, 'message': 'Error'})
 
+
+@AnySubscriptionRequiredDec
 def _show_answer(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
