@@ -7,6 +7,7 @@ style='color:white;'
 	Author
 </div>
 <li class="nav-item">
+	{%if user.author_permissions%}
 	<a class="nav-link" href="{%url 'dashboard:mycourses'%}">
 		<i class="bi bi-book" 
 		     {%if sidebar_active == 'writer/mycourses'%}
@@ -19,6 +20,7 @@ style='color:white;'
 		     {%endif%}
 		>MyCourses</span>
 	</a>
+	{%endif%}
 	<a class="nav-link" href="{%url 'dashboard:earning_statistics'%}">
 		<i class="fas fa-fw fa-chart-area" 
 		     {%if sidebar_active == 'earning/statistics'%}

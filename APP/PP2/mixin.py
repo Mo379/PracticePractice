@@ -7,6 +7,7 @@ from djstripe.models import (
         Subscription,
         Price,
     )
+from content.models import Course, CourseSubscription
 
 
 class AnySubscriptionRequiredMixin:
@@ -96,6 +97,27 @@ def AISubscriptionRequiredDec(f):
         else:
             return HttpResponseRedirect(reverse('user:login'))
     return dispatch
+
+
+class CourseSubscriptionRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            # Assuming you have a subscription model named Subscription
+            course = Course.objects.get(pk=kwargs['course_id'])
+            if CourseSubscription.objects.filter(user=request.user, course=course).exists:
+                return super().dispatch(request, *args, **kwargs)
+            else:
+                # Redirect to a page indicating subscription is required
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'You need to enroll for this course first!',
+                        extra_tags='alert-warning top_homepage'
+                    )
+                return HttpResponseRedirect(reverse('marketcourse', args=[course.id]))
+        else:
+            # Redirect to login page if user is not authenticated
+            return HttpResponseRedirect(reverse('user:login'))
 
 
 class AuthorRequiredMixin:

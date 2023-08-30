@@ -13,9 +13,10 @@
 {%include 'dashboard/sidebar/student.html'%}
 <hr class="sidebar-divider">
 
-
-{%include 'dashboard/sidebar/writer.html'%}
-<hr class="sidebar-divider">
+{%if user.author_permissions or user.affiliate_permissions%}
+	{%include 'dashboard/sidebar/writer.html'%}
+	<hr class="sidebar-divider">
+	{%endif%}
 {%endif%}
 
 {% comment %}

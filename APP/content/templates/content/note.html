@@ -125,7 +125,7 @@
 	{%endif%}
 	<br>
 	<a class="chapter_nav_link" 
-		href="#" 
+	   href="{% url 'content:practice' context.course.id sample.p_moduel sample.p_chapter%}" 
 		style=''>
 		<i class="bi bi-star-fill"></i> Practice Questions
 	</a>

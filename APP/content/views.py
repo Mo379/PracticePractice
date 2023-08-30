@@ -50,6 +50,7 @@ from PP2.mixin import (
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
         AISubscriptionRequiredDec,
+        CourseSubscriptionRequiredMixin,
         AuthorRequiredMixin,
         AuthorRequiredDec,
         AffiliateRequiredMixin,
@@ -66,6 +67,11 @@ from AI.models import (
         ContentPromptTopic,
         ContentPromptPoint,
         Lesson_quiz,
+    )
+from djstripe.models import (
+        Customer,
+        Subscription,
+        Price,
     )
 from notification.tasks import _send_email
 
@@ -234,20 +240,22 @@ class NoteArticleView(
         course = Course.objects.get(
                     pk=course_id
                 )
-        course_subscription = CourseSubscription.objects.get(
-                user=self.request.user,
-                course=course
-            )
+        if self.request.user.is_authenticated:
+            course_subscription = CourseSubscription.objects.filter(
+                    user=self.request.user,
+                    course=course
+                )
+            if len(course_subscription) > 0:
+                course_subscription = course_subscription[0]
+                #
+                if module not in course_subscription.progress_track.keys():
+                    course_subscription.progress_track[module] = {}
+                if chapter not in course_subscription.progress_track[module].keys():
+                    course_subscription.progress_track[module][chapter] = {}
+                if 'content' not in course_subscription.progress_track[module][chapter].keys():
+                    course_subscription.progress_track[module][chapter]['content'] = True
+                course_subscription.save()
         #
-        if module not in course_subscription.progress_track.keys():
-            course_subscription.progress_track[module] = {}
-        if chapter not in course_subscription.progress_track[module].keys():
-            course_subscription.progress_track[module][chapter] = {}
-        if 'content' not in course_subscription.progress_track[module][chapter].keys():
-            course_subscription.progress_track[module][chapter]['content'] = True
-        course_subscription.save()
-        #
-        course_subscription.progress_track[module][chapter]
         source_spec = course.specification
         content = CourseVersion.objects.filter(
                 course=course
@@ -300,6 +308,7 @@ class NoteArticleView(
 
 class CourseStudyView(
         LoginRequiredMixin,
+        CourseSubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -356,6 +365,13 @@ class CourseStudyView(
                 key=lambda obj: obj.created_at if hasattr(obj, 'created_at') else obj.pap_creation_time,
                 reverse=True
             )
+        if self.request.user.is_authenticated:
+            if Subscription.objects.filter(customer__id=self.request.user.id, status='active').exists():
+                context['is_member'] = True
+            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status='active')
+            plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
+            if 'with ai' in plan_description.lower():
+                context['is_AI_member'] = True
         context['coursesubscription'] = course_subscription[0] if len(course_subscription)== 1 else False
         context['content'] = content
         context['moduels'] = moduels
@@ -463,7 +479,6 @@ class CourseQuizView(
 
 class PracticeView(
         LoginRequiredMixin,
-        AnySubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -490,29 +505,22 @@ class PracticeView(
         course = Course.objects.get(
                     pk=course_id
                 )
-        course_subscription = CourseSubscription.objects.filter(
-                user=self.request.user,
-                course=course
-                )
-        course_subscription = course_subscription[0]
         content = CourseVersion.objects.filter(
                 course=course
             ).order_by('-version_number')[0].version_content
         #
-        if module not in course_subscription.progress_track.keys():
-            course_subscription.progress_track[module] = {}
-        if chapter not in course_subscription.progress_track[module].keys():
-            course_subscription.progress_track[module][chapter] = {}
-        if 'questions' not in course_subscription.progress_track[module][chapter].keys():
-            course_subscription.progress_track[module][chapter]['questions'] = True
-        course_subscription.save()
+        difficulties = 1
+        if self.request.user.is_authenticated:
+            if Subscription.objects.filter(customer__id=self.request.user.id, status='active').exists():
+                difficulties = 5
+                context['is_member'] = True
         #
         content = order_live_spec_content(content)
         chapter_qs = content[module]['content'][chapter]['questions']
         dic = OrderedDict()
         all_questions = []
         question = None
-        for difficulty in range(5):
+        for difficulty in range(difficulties):
             difficulty += 1
             d = str(difficulty)
             if len(chapter_qs[d]) > 0:
@@ -523,20 +531,35 @@ class PracticeView(
                     dic[d].append(temp_question_object)
                     all_questions.append(temp_question_object)
         #
-        all_q_tracks = {}
-        question_tracks = QuestionTrack.objects.filter(
-                user=self.request.user,
-                course=course,
-                question__in=all_questions
-            )
-        all_q_tracks = {q.question.id: q for q in question_tracks}
+        if self.request.user.is_authenticated:
+            course_subscription = CourseSubscription.objects.filter(
+                    user=self.request.user,
+                    course=course
+                    )
+            if len(course_subscription) > 0:
+                course_subscription = course_subscription[0]
+                #
+                if module not in course_subscription.progress_track.keys():
+                    course_subscription.progress_track[module] = {}
+                if chapter not in course_subscription.progress_track[module].keys():
+                    course_subscription.progress_track[module][chapter] = {}
+                if 'questions' not in course_subscription.progress_track[module][chapter].keys():
+                    course_subscription.progress_track[module][chapter]['questions'] = True
+                course_subscription.save()
+                context['coursesubscription'] = course_subscription
+                all_q_tracks = {}
+                question_tracks = QuestionTrack.objects.filter(
+                        user=self.request.user,
+                        course=course,
+                        question__in=all_questions
+                    )
+                all_q_tracks = {q.question.id: q for q in question_tracks}
+                context['question_tracks'] = all_q_tracks
         context['sampl_object'] = Question.objects.get(q_unique_id=question) if question else None
-        context['coursesubscription'] = course_subscription
         context['questions'] = dic if question else None
         context['course'] = course
         context['module'] = module
         context['chapter'] = chapter
-        context['question_tracks'] = all_q_tracks
         return context
 
 
@@ -1524,7 +1547,7 @@ def _createpoint(request):
             )
 
 
-@AuthorRequiredDec
+@AnySubscriptionRequiredDec
 def _createcustomtest(request):
     if request.method == 'POST':
         def clean(string):
@@ -3437,14 +3460,14 @@ def _saveansweredit(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@AnySubscriptionRequiredDec
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _subjective_mark_question(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
         question_id = request.POST['question_id']
         precieved_difficulty = request.POST['precieved_difficulty']
         course = Course.objects.get(pk=course_id)
-        question = Question.objects.get(user=request.user, pk=question_id)
+        question = Question.objects.get(pk=question_id)
         questiontrack, created = QuestionTrack.objects.get_or_create(
                     user=request.user,
                     course=course,
@@ -3529,14 +3552,14 @@ def _subjective_mark_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@AnySubscriptionRequiredDec
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _mark_question(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
         question_id = request.POST['question_id']
         n_marks = request.POST['n_marks']
         course = Course.objects.get(pk=course_id)
-        question = Question.objects.get(user=request.user, pk=question_id)
+        question = Question.objects.get(pk=question_id)
         questiontrack, created = QuestionTrack.objects.get_or_create(
                 user=request.user,
                 course=course,
@@ -3572,7 +3595,7 @@ def _mark_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@AnySubscriptionRequiredDec
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _mark_paper_question(request):
     if request.method == 'POST':
         #
@@ -3584,7 +3607,7 @@ def _mark_paper_question(request):
         #
         course = Course.objects.get(pk=course_id)
         paper = UserPaper.objects.get(pk=paper_id)
-        question = Question.objects.get(user=request.user, pk=question_id)
+        question = Question.objects.get(pk=question_id)
         questiontrack, created = QuestionTrack.objects.get_or_create(
                 user=request.user,
                 course=course,
@@ -3638,13 +3661,13 @@ def _mark_paper_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@AnySubscriptionRequiredDec
+@login_required(login_url='/user/login', redirect_field_name=None)
 def _show_answer(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
         question_id = request.POST['question_id']
         course = Course.objects.get(pk=course_id)
-        question = Question.objects.get(user=request.user, pk=question_id)
+        question = Question.objects.get(pk=question_id)
         questiontrack, created = QuestionTrack.objects.get_or_create(
                     user=request.user,
                     course=course,

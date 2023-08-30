@@ -274,6 +274,11 @@ Controller = new controller(view);
 					{{context.sampl_object.q_level|field_name_to_label}} Chapter questions, on {{context.sampl_object.q_moduel|field_name_to_label}}.<br><br>
 						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:coursestudy' context.course.id%}">Go back</a>
 						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:notearticle' context.course.id context.module context.chapter%}"> Chapter Notes</a>
+						{%if context.is_member is false%}
+						<br><span>
+						    <i class="bi bi-file-lock2 text-secondary"></i> Any subscription is required to unlock all content
+						</span>
+						{%endif%}
 					</p>
 					<div id='error-message' style='text-align:center; color:red;'></div>
 
@@ -281,6 +286,12 @@ Controller = new controller(view);
 					    {%for A in information%}
 					    <a class="nav-item nav-link" data-toggle="tab" href="#ref-{{A}}" id="id-{{A}}">{{A|DifficultyToLabel|safe}}</a>
 					    {%endfor%}
+					    {%if context.is_member is false%}
+					    <a class="nav-item nav-link text-secondary">{{2|DifficultyToLabel|safe}} <i class="bi bi-file-lock2"></i></a>
+					    <a class="nav-item nav-link text-secondary">{{3|DifficultyToLabel|safe}} <i class="bi bi-file-lock2"></i></a>
+					    <a class="nav-item nav-link text-secondary">{{4|DifficultyToLabel|safe}} <i class="bi bi-file-lock2"></i></a>
+					    <a class="nav-item nav-link text-secondary">{{5|DifficultyToLabel|safe}} <i class="bi bi-file-lock2"></i></a>
+					    {%endif%}
 					</nav>
 
 					<div class="tab-content" id="pricingTab">
@@ -324,7 +335,7 @@ Controller = new controller(view);
 													    </div>
 													</div>
 													<div class='mb-3'style='border-bottom: 1px dashed silver;margin-bottom:5px;'></div>
-													{%if context.question_tracks|index:B.id%}
+													{%if context.question_tracks|index:B.id and context.coursesubscription%}
 														<button class='btn btn-primary-outline' style='border: 1px dashed var(--text-color-1); color:var(--text-color-1);' id='showanswer_{{B.id}}' onclick='Controller.C_show_answer("{{context.course.id}}", "{{B.id}}")'>
 														<div id='marking_view_{{B.id}}' class=''>
 																Show Answer
@@ -337,7 +348,7 @@ Controller = new controller(view);
 															</div>
 														</div>
 														</button>
-													{%else%}
+													{%elif context.coursesubscription%}
 														{% for i in '123'|make_list %}
 														<button class='btn btn-primary-outline' style='border: 1px dashed var(--text-color-1); color:var(--text-color-1);' id='markbutton_{{B.id}}_{{forloop.counter}}' onclick='Controller.C_precieved_difficulty("{{context.course.id}}", "{{B.id}}", "{{forloop.counter}}")'>
 																<div id='marking_view_{{B.id}}_{{forloop.counter}}' class=''>
@@ -358,6 +369,12 @@ Controller = new controller(view);
 																</div>
 														</button>
 														{% endfor %}
+													{%else%}
+														<form class="px-3 py-3"  action="{%url 'content:_course_subscribe'%}" method="POST" role="form">
+															{%csrf_token%}
+															<input name='course_id' value='{{context.course.id}}' type='hidden'>
+															<button type= 'submit' class='btn btn-info mb-2' > Enroll free for solutions</button>
+														</form>
 													{%endif%}
 													<br>
 													<span id='vidbutton_information_window_{{B.id}}'></span>

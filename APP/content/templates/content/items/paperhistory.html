@@ -1,4 +1,5 @@
 {%load general %}
+{%if context.is_member%}
 <div class="modal fade" id="customtest_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -33,6 +34,7 @@
     </div>
   </div>
 </div>
+{%endif%}
 
 
 
@@ -44,9 +46,16 @@
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between border">
 					<h5 class="h4 mb-1 text-primary font-weight-bold">
 					Custom Tests:
+					{%if context.is_member%}
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#customtest_modal">
 						Create Custom Test
 					</button>
+					{%else%}
+					<button type="button" class="btn btn-secondary">
+						Create Custom Test
+						<i class="bi bi-file-lock2"></i>
+					</button>
+					{%endif%}
 					</h5>
 				</div>
 			        <div class="card mb-4" id='billing_history'>
