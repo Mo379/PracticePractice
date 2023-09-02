@@ -55,7 +55,8 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
         if user.is_authenticated:
             try:
                 Customer.objects.get(id=user.id)
-            except:
+            except Exception as e:
+                print(str(e))
                 stripe.api_key = settings.STRIPE_SECRET_KEY
                 stripe.Customer.create(
                         email=user.email,
@@ -64,7 +65,7 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
                         metadata={'username':user.username}
                     )
             #
-            if Subscription.objects.filter(customer=user.id, status__in=['active','trialing']).exists() is False:
+            if Subscription.objects.filter(customer=user.id, status__in=['active', 'trialing']).exists() is False:
                 auth_key = settings.STRIPE_SECRET_KEY
                 url = "https://api.stripe.com/v1/customer_sessions"
                 data = {

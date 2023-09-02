@@ -16,6 +16,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db.models.functions import TruncMonth
 from django.db.models import Count, Sum
 from datetime import datetime, timedelta
+import stripe
 from dateutil.relativedelta import relativedelta
 from braces.views import (
         LoginRequiredMixin,
@@ -27,6 +28,8 @@ from PP2.mixin import (
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
         AISubscriptionRequiredDec,
+        CourseSubscriptionRequiredMixin,
+        CourseSubscriptionRequiredDec,
         AuthorRequiredMixin,
         AuthorRequiredDec,
         AffiliateRequiredMixin,
@@ -191,7 +194,7 @@ class SuperuserMonitorView(
 
 class StudentPerformanceView(
             LoginRequiredMixin,
-            GroupRequiredMixin,
+            CourseSubscriptionRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
@@ -259,7 +262,8 @@ class StudentPerformanceView(
         total_completed_tests = len(completed_quizzes) + len(completed_papers)
         #
         quizzes_average_score = completed_quizzes.aggregate(total_sum=Sum('percentage_score'))['total_sum']/len(completed_quizzes) if completed_quizzes else 0
-        papers_average_score = completed_papers.aggregate(total_sum=Sum('percentage_score'))['total_sum']/len(completed_papers) if completed_quizzes else 0
+        papers_average_score = completed_papers.aggregate(total_sum=Sum('percentage_score'))['total_sum']/len(completed_papers) if completed_papers else 0
+        #
         total_average_score = (quizzes_average_score+papers_average_score)/2
         #
         context['course'] = course
@@ -818,6 +822,29 @@ class EarningStatisticsView(
         context = {}
         context['sidebar_active'] = 'earning/statistics'
         author_courses = Course.objects.filter(user=self.request.user)
+        #
+        coupon_id = settings.AFFILIATE_COUPON
+        discount_code_id = str(self.request.user.username.lower())+str(20)
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        if self.request.user.affiliate_permissions:
+            try:
+                promo_code = stripe.PromotionCode.create(
+                  coupon=coupon_id,
+                  code=discount_code_id
+                )
+                promo_code_id = promo_code['id']
+            except Exception:
+                promo_code = stripe.PromotionCode.list(
+                  code=discount_code_id
+                )
+                if len(promo_code['data']) == 1:
+                    promo_code_id = promo_code['data'][0]['id']
+                else:
+                    promo_code_id = ''
+            if promo_code_id:
+                self.request.user.affiliate_promotion_code = promo_code_id
+                self.request.user.save()
+            context['affiliate_code'] = discount_code_id
         # Relevant locally
         all_course_subscriptions = CourseSubscription.objects.filter(course__in=author_courses)
         all_unique_students = all_course_subscriptions.values('user').distinct()
@@ -848,6 +875,7 @@ class EarningStatisticsView(
             estimated_earnings,
             aggrigate_user_monthly_engagement
         ) = author_user_clicks_data_list(
+                self.request.user,
                 last_six_months[::-1],
                 all_course_subscriptions,
                 author_courses,
@@ -897,7 +925,7 @@ class EarningStatisticsView(
         #
         per_click_rate = 0.001
         context['per_click_rate'] = per_click_rate
-        context['estimated_earnings'] = round(estimated_earnings, 3)
+        context['estimated_earnings'] = round(estimated_earnings, 2)
         context['total_course_clicks'] = courge_aggrigate_monthly_clicks
         context['total_month_active_course_subscriptions'] = month_active_subscriptions
         context['total_course_subscriptions'] = len(all_course_subscriptions)

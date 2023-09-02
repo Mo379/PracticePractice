@@ -18,6 +18,8 @@ from PP2.mixin import (
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
         AISubscriptionRequiredDec,
+        CourseSubscriptionRequiredMixin,
+        CourseSubscriptionRequiredDec,
         AuthorRequiredMixin,
         AuthorRequiredDec,
         AffiliateRequiredMixin,
@@ -56,6 +58,7 @@ from management.templatetags.general import ToMarkdownManual
 # Create your views here.
 class AIView(
         AISubscriptionRequiredMixin,
+        CourseSubscriptionRequiredMixin,
         generic.ListView
         ):
     login_url = 'user:login'
@@ -205,6 +208,7 @@ class AIView(
         return context
 
 
+@CourseSubscriptionRequiredDec
 @AISubscriptionRequiredDec
 def _load_lesson(request):
     if request.method == 'POST':
@@ -229,6 +233,7 @@ def _load_lesson(request):
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
 
+@CourseSubscriptionRequiredDec
 @AISubscriptionRequiredDec
 def _next_point(request):
     if request.method == 'POST':

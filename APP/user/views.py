@@ -91,7 +91,7 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         accountdetailsform = AccountDetailsForm(instance=user)
         context['AccountDetailsForm'] = accountdetailsform
         # checking if billing information exists
-        context['user_member_bool'] = Subscription.objects.filter(customer=user.id, status='active').exists()
+        context['user_member_bool'] = Subscription.objects.filter(customer=user.id, status__in=['trialing', 'active']).exists()
         context['user_billing_bool'] = PaymentMethod.objects.filter(customer=user.id).exists()
         context['profile_picture_url'] = os.path.join(
                 settings.CDN_URL,
@@ -229,13 +229,20 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         #
         payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
         context['paymentmethods'] = payment_methods
-        if Subscription.objects.filter(customer=user.id, status='active').exists():
-            subscription = Subscription.objects.get(customer=user.id, status='active')
+        if Subscription.objects.filter(customer=user.id, status__in=['trialing', 'active']).exists():
+            subscription = Subscription.objects.get(customer=user.id, status__in=['trialing', 'active'])
             context['subscription_status'] = subscription.status
             context['billing_interval'] = subscription.plan.interval
-            context['billing_amount'] = subscription.plan.amount
+            if subscription.discount is not None:
+                if 'coupon' in subscription.discount.keys():
+                    discount_amount = float(subscription.plan.amount) * float(subscription.discount['coupon']['percent_off']/100)
+                else:
+                    discount_amount = 0
+            else:
+                discount_amount = 0
+            context['billing_amount'] = round(float(subscription.plan.amount) - discount_amount, 2)
             context['billing_next'] = subscription.current_period_end
-            context['plan_name'] = subscription.plan.nickname
+            context['plan_name'] = str(subscription.plan)
             context['cancel_later'] = subscription.cancel_at_period_end
         #
         return context
@@ -1185,7 +1192,7 @@ def _create_checkout_session(request):
         if Price.objects.filter(id=price_id).exists():
             # See if subscription exists or not
             if Subscription.objects.filter(
-                        customer=request.user.id, status='active'
+                        customer=request.user.id, status__in=['trialing', 'active']
                     ).exists() == False:
                 # Set Stripe API key
                 stripe.api_key = settings.STRIPE_SECRET_KEY

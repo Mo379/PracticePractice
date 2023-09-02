@@ -3,6 +3,7 @@ import re
 import random
 import string
 import collections
+from django.conf import settings
 from collections import defaultdict, OrderedDict
 from itertools import chain
 import markdown
@@ -17,6 +18,7 @@ from django.db.models.functions import TruncMonth
 from content.models import CourseSubscription
 from djstripe.models import (
         Subscription,
+        Discount,
     )
 current_month = datetime.now().date()
 n_months = 6
@@ -119,6 +121,20 @@ def extract_active_spec_content(spec_content):
                                 if chapter_content[topic]['content'][point]['active'] is True:
                                     points.append(point)
     return points, questions
+
+
+def extract_active_spec_questions(spec_content):
+    questions = []
+    for module in spec_content.keys():
+        module_content = spec_content[module]['content']
+        if spec_content[module]['active'] is True:
+            for chapter in module_content.keys():
+                chapter_questions = spec_content[module]['content'][chapter]['questions']
+                if spec_content[module]['content'][chapter]['active'] is True:
+                    list_chapter_questions = [arr for arr in chapter_questions.values()]
+                    flattened_list = list(chain(*list_chapter_questions))
+                    questions += flattened_list
+    return questions
 
 
 def detect_empty_content(spec_content):
@@ -442,15 +458,35 @@ def increment_course_subscription_significant_click(user, course, significant_cl
     user.save()
 
 
-def author_user_clicks_data_list(month_keys, subscriptions, courses):
+def author_user_clicks_data_list(user, month_keys, subscriptions, courses):
     aggrigate_monthly_sum = OrderedDict({key:0 for key in month_keys})
     aggrigate_user_monthly_engagement = OrderedDict({key:defaultdict(float) for key in month_keys})
     course_aggrigate_monthly_clicks = []
     month_active_subscriptions = 0
+    creator_percentage_split = settings.CREATOR_PERCENTAGE_SPLIT
+    affiliate_percentage_split = settings.AFFILIATE_PERCENTAGE_SPLIT
     #
     course_labels = []
     total_courses_clicks = []
     total_estimated_earning = 0
+    # Get all affiliate earnings
+    affiliate_promotion_code_id = user.affiliate_promotion_code
+    if affiliate_promotion_code_id:
+        affiliate_discounted_subscriptions = Discount.objects.filter(promotion_code=affiliate_promotion_code_id, subscription__status__in=['active'])
+        for _discounted_subscription in affiliate_discounted_subscriptions:
+            discounted_subscription = _discounted_subscription.subscription
+            if 'coupon' in discounted_subscription.discount:
+                discount_amount = float(discounted_subscription.plan.amount) * float(discounted_subscription.discount['coupon']['percent_off']/100)
+            else:
+                discount_amount = 0
+            #
+            student_plan = discounted_subscription.plan
+            total_amount = round(
+                    (float(discounted_subscription.plan.amount) - discount_amount)/student_plan.interval_count,
+                    2
+                )
+            total_estimated_earning += (affiliate_percentage_split*float(total_amount))
+    # Get all course click earnings
     for course in courses:
         course_subscriptions = subscriptions.filter(course=course)
         total_course_clicks = 0
@@ -467,10 +503,21 @@ def author_user_clicks_data_list(month_keys, subscriptions, courses):
                 last_month_user_course_clicks = sum(sub.monthly_significant_clicks[month_keys[-1]].values())
                 course_clicks_fraction = last_month_user_course_clicks/total_user_clicks
                 #
-                student_current_subscription = Subscription.objects.get(customer__id=sub.user.id, status='active')
+                student_current_subscription = Subscription.objects.get(customer__id=sub.user.id, status__in=['active'])
+                if student_current_subscription.discount is not None:
+                    if 'coupon' in student_current_subscription.discount:
+                        discount_amount = float(student_current_subscription.plan.amount) * float(student_current_subscription.discount['coupon']['percent_off']/100)
+                    else:
+                        discount_amount = 0
+                else:
+                    discount_amount = 0
+                #
                 student_plan = student_current_subscription.plan
-                total_amount = student_plan.amount/student_plan.interval_count
-                total_estimated_earning += (0.3*float(total_amount))*course_clicks_fraction
+                total_amount = round(
+                        (float(student_current_subscription.plan.amount) - discount_amount)/student_plan.interval_count,
+                        2
+                    )
+                total_estimated_earning += (creator_percentage_split*float(total_amount))*course_clicks_fraction
             # get the total clicks for each course
             by_month_clicks = [sum(list(value.values())) for value in sub.monthly_significant_clicks.values()]
             total_course_clicks += sum(by_month_clicks)

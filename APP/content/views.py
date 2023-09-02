@@ -33,6 +33,7 @@ from content.util.GeneralUtil import (
         increment_course_subscription_significant_click,
         detect_empty_content,
         extract_active_spec_content,
+        extract_active_spec_questions,
         confirm_question_checks,
         confirm_point_checks,
     )
@@ -51,6 +52,7 @@ from PP2.mixin import (
         AISubscriptionRequiredMixin,
         AISubscriptionRequiredDec,
         CourseSubscriptionRequiredMixin,
+        CourseSubscriptionRequiredDec,
         AuthorRequiredMixin,
         AuthorRequiredDec,
         AffiliateRequiredMixin,
@@ -366,9 +368,9 @@ class CourseStudyView(
                 reverse=True
             )
         if self.request.user.is_authenticated:
-            if Subscription.objects.filter(customer__id=self.request.user.id, status='active').exists():
+            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active']).exists():
                 context['is_member'] = True
-            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status='active')
+            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status__in=['trialing', 'active'])
             plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
             if 'with ai' in plan_description.lower():
                 context['is_AI_member'] = True
@@ -383,7 +385,7 @@ class CourseStudyView(
 
 
 class CustomTestView(
-        AnySubscriptionRequiredMixin,
+        CourseSubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -426,7 +428,7 @@ class CustomTestView(
 
 
 class CourseQuizView(
-        AISubscriptionRequiredMixin,
+        CourseSubscriptionRequiredMixin,
         BaseBreadcrumbMixin,
         generic.ListView
         ):
@@ -511,7 +513,7 @@ class PracticeView(
         #
         difficulties = 1
         if self.request.user.is_authenticated:
-            if Subscription.objects.filter(customer__id=self.request.user.id, status='active').exists():
+            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active']).exists():
                 difficulties = 5
                 context['is_member'] = True
         #
@@ -1547,6 +1549,7 @@ def _createpoint(request):
             )
 
 
+@CourseSubscriptionRequiredDec
 @AnySubscriptionRequiredDec
 def _createcustomtest(request):
     if request.method == 'POST':
@@ -1566,10 +1569,19 @@ def _createcustomtest(request):
         course = Course.objects.get(pk=course_id)
         creator = course.user
         specification = course.specification
+        #
+        versions = CourseVersion.objects.filter(
+            course=course
+        ).order_by(
+                '-version_number'
+            )
+        latest_version = versions[0]
         # question pool
+        question_list = extract_active_spec_questions(latest_version.version_content)
         question_pool = Question.objects.filter(
                     user=creator,
-                    q_subject=specification.spec_subject,
+                    q_unique_id__in=question_list,
+                    author_confirmation=True
                 )
         try:
             significant_click_name = 'create_custom_test'
@@ -3460,7 +3472,7 @@ def _saveansweredit(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@login_required(login_url='/user/login', redirect_field_name=None)
+@CourseSubscriptionRequiredDec
 def _subjective_mark_question(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -3552,7 +3564,7 @@ def _subjective_mark_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@login_required(login_url='/user/login', redirect_field_name=None)
+@CourseSubscriptionRequiredDec
 def _mark_question(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']
@@ -3595,7 +3607,7 @@ def _mark_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@login_required(login_url='/user/login', redirect_field_name=None)
+@CourseSubscriptionRequiredDec
 def _mark_paper_question(request):
     if request.method == 'POST':
         #
@@ -3661,7 +3673,7 @@ def _mark_paper_question(request):
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
-@login_required(login_url='/user/login', redirect_field_name=None)
+@CourseSubscriptionRequiredDec
 def _show_answer(request):
     if request.method == 'POST':
         course_id = request.POST['course_id']

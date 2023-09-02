@@ -77,6 +77,7 @@ Earning
 
 
 
+		{%if user.affiliate_permissions%}
 		<!-- Pending Requests Card Example -->
 		<div class="col-xl-3 col-md-6 mb-4">
 			<div class="card border-left-warning shadow h-100 py-2">
@@ -85,7 +86,7 @@ Earning
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
 								My Affiliate Code</div>
-							<div class="h5 mb-0 font-weight-bold text-white-800">{{user.id|hashid}}</div>
+							<div class="h5 mb-0 font-weight-bold text-white-800">{{context.affiliate_code}}</div>
 						</div>
 						<div class="col-auto">
 							<i class="bi bi-megaphone"></i>
@@ -94,6 +95,7 @@ Earning
 				</div>
 			</div>
 		</div>
+		{%endif%}
 	</div>
 	<!-- Content Row -->
 

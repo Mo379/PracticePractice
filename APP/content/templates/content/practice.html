@@ -373,7 +373,7 @@ Controller = new controller(view);
 														<form class="px-3 py-3"  action="{%url 'content:_course_subscribe'%}" method="POST" role="form">
 															{%csrf_token%}
 															<input name='course_id' value='{{context.course.id}}' type='hidden'>
-															<button type= 'submit' class='btn btn-info mb-2' > Enroll free for solutions</button>
+															<button type= 'submit' class='btn btn-info mb-2' > Enroll for solutions</button>
 														</form>
 													{%endif%}
 													<br>

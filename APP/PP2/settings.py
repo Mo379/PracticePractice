@@ -235,12 +235,17 @@ STRIPE_TEST_Publishable_KEY = decouple_config('Stripe_test_publishable')
 
 # Change to True in production
 STRIPE_LIVE_MODE = decouple_config('Stripe_live_mode', cast=bool)
+CREATOR_PERCENTAGE_SPLIT = decouple_config('Creator_percentage_split', cast=float)
+AFFILIATE_PERCENTAGE_SPLIT = decouple_config('Affiliate_percentage_split', cast=float)
+#
 if STRIPE_LIVE_MODE:
     STRIPE_SECRET_KEY = decouple_config('Stripe_live_secret')
     STRIPE_PUBLISHABLE_KEY = decouple_config('Stripe_live_publishable')
+    AFFILIATE_COUPON = decouple_config('Affiliate_coupon_test')
 else:
     STRIPE_SECRET_KEY = decouple_config('Stripe_test_secret')
     STRIPE_PUBLISHABLE_KEY = decouple_config('Stripe_test_publishable')
+    AFFILIATE_COUPON = decouple_config('Affiliate_coupon_live')
 
 # Get it from the section in the Stripe dashboard where
 # you added the webhook endpoint

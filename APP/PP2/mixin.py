@@ -1,3 +1,4 @@
+from PP2.utils import h_encode, h_decode
 from functools import wraps
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -7,7 +8,7 @@ from djstripe.models import (
         Subscription,
         Price,
     )
-from content.models import Course, CourseSubscription
+from content.models import Course, CourseSubscription, CourseVersion
 
 
 class AnySubscriptionRequiredMixin:
@@ -15,7 +16,7 @@ class AnySubscriptionRequiredMixin:
         if request.user.is_authenticated:
             # Assuming you have a subscription model named Subscription
             admin_customer = Customer.objects.get(id=request.user.id)
-            if Subscription.objects.filter(customer=admin_customer, status='active').exists():
+            if Subscription.objects.filter(customer=admin_customer, status__in=['trialing', 'active']).exists():
                 return super().dispatch(request, *args, **kwargs)
             else:
                 # Redirect to a page indicating subscription is required
@@ -37,7 +38,7 @@ def AnySubscriptionRequiredDec(f):
         if request.user.is_authenticated:
             # Assuming you have a subscription model named Subscription
             admin_customer = Customer.objects.get(id=request.user.id)
-            if Subscription.objects.filter(customer=admin_customer, status='active').exists():
+            if Subscription.objects.filter(customer=admin_customer, status__in=['trialing', 'active']).exists():
                 return f(request, *args, **kwargs)
             else:
                 # Redirect to a page indicating subscription is required
@@ -59,7 +60,7 @@ class AISubscriptionRequiredMixin:
         if request.user.is_authenticated:
             # Assuming you have a subscription model named Subscription
             admin_customer = Customer.objects.get(id=request.user.id)
-            active_subscriptions = Subscription.objects.filter(customer=admin_customer, status='active')
+            active_subscriptions = Subscription.objects.filter(customer=admin_customer, status__in=['trialing', 'active'])
             plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
             if 'with ai' in plan_description.lower():
                 return super().dispatch(request, *args, **kwargs)
@@ -82,7 +83,7 @@ def AISubscriptionRequiredDec(f):
     def dispatch(request, *args, **kwargs):
         if request.user.is_authenticated:
             admin_customer = Customer.objects.get(id=request.user.id)
-            active_subscriptions = Subscription.objects.filter(customer=admin_customer, status='active')
+            active_subscriptions = Subscription.objects.filter(customer=admin_customer, status__in=['trialing', 'active'])
             plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
             if 'with ai' in plan_description.lower():
                 return f(request, *args, **kwargs)
@@ -104,20 +105,53 @@ class CourseSubscriptionRequiredMixin:
         if request.user.is_authenticated:
             # Assuming you have a subscription model named Subscription
             course = Course.objects.get(pk=kwargs['course_id'])
-            if CourseSubscription.objects.filter(user=request.user, course=course).exists:
+            if CourseSubscription.objects.filter(user=request.user, course=course).exists():
                 return super().dispatch(request, *args, **kwargs)
             else:
                 # Redirect to a page indicating subscription is required
                 messages.add_message(
                         request,
                         messages.INFO,
-                        'You need to enroll for this course first!',
+                        'You need to enroll for this course first!, you can do this for *free* by clicking the enroll button.',
                         extra_tags='alert-warning top_homepage'
                     )
-                return HttpResponseRedirect(reverse('marketcourse', args=[course.id]))
+                return HttpResponseRedirect(reverse('content:marketcourse', args=[course.id]))
         else:
             # Redirect to login page if user is not authenticated
             return HttpResponseRedirect(reverse('user:login'))
+
+
+def CourseSubscriptionRequiredDec(f):
+    @wraps(f)
+    def dispatch(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            # Assuming you have a subscription model named Subscription
+            if 'course_id' in request.POST:
+                course_id = request.POST['course_id']
+                try:
+                    course_id = int(course_id)
+                except Exception:
+                    course_id = h_decode(course_id)
+                course = Course.objects.get(pk=course_id)
+            elif 'course_version_id' in request.POST:
+                version = CourseVersion.objects.get(pk=request.POST['course_version_id'])
+                course = version.course
+            #
+            if CourseSubscription.objects.filter(user=request.user, course=course).exists():
+                return f(request, *args, **kwargs)
+            else:
+                # Redirect to a page indicating subscription is required
+                messages.add_message(
+                        request,
+                        messages.INFO,
+                        'You need to enroll for this course first!, you can do this for *free* by clicking the enroll button.',
+                        extra_tags='alert-warning top_homepage'
+                    )
+                return HttpResponseRedirect(reverse('content:marketcourse', args=[course.id]))
+        else:
+            # Redirect to login page if user is not authenticated
+            return HttpResponseRedirect(reverse('user:login'))
+    return dispatch
 
 
 class AuthorRequiredMixin:

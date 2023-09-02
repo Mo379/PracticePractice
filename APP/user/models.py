@@ -20,6 +20,7 @@ class User(AbstractUser):
     profile_pic_status = models.BooleanField(default=False)
     author_permissions = models.BooleanField(default=False)
     affiliate_permissions = models.BooleanField(default=False)
+    affiliate_promotion_code = models.CharField(max_length=100, default='', null=True)
     monthly_significant_clicks = models.JSONField(default=OrderedDict, null=True)
     profile_upload = models.FileField(
             upload_to='uploads/profile_picture',

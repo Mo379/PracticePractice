@@ -11,9 +11,6 @@
 {%endblock%}
 
 {%block content%}
-{%if context.coursesubscription == False%}
-	{%include 'content/items/course_buy.html'%}
-{%else%}
 {%definevar context.content as content%}
 <h1 class='mb-2'>
 	{{context.course.course_name|field_name_to_label}}
@@ -31,5 +28,4 @@
 	{%include 'content/items/qchapter_nav.html'%}
 	</div>
 </div>
-{%endif%}
 {%endblock%}

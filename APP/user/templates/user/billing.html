@@ -29,19 +29,15 @@
                     <div class="small text-muted">Current plan</div>
 		    {%if context.cancel_later%}
 		    <div class="h3 d-flex align-items-center">{{context.plan_name|field_name_to_label}}</div>
-		    <a class="text-arrow-icon small" href="{%url 'user:_reactivatemembership'%}">
-                        Reactivate subscription
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </a>
 		    {%elif context.plan_name%}
 		    <div class="h3 d-flex align-items-center">{{context.plan_name|field_name_to_label}}</div>
-		    <a class="text-arrow-icon small" href="{%url 'user:cancelsubscription'%}">
-                        Cancel Subscription
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </a>
 		    {%else%}
 		    -
 		    {%endif%}
+			<form method="POST" action="{%url 'user:_create_customer_portal_session'%}">
+			  {% csrf_token %}
+			  <button class='btn btn-success p-4' type="submit">Manage billing</button>
+			</form>
                 </div>
             </div>
         </div>
@@ -53,8 +49,8 @@
 		    <div class="small text-muted">Current {{context.billing_interval}}ly bill</div>
 		    -
 		    {%elif context.billing_interval%}
-			<div class="small text-muted">Current {{context.billing_interval}}ly bill</div>
-			<div class="h3">£ {{context.billing_amount}}</div>
+			<div class="small text-muted">Current Interval Bill</div>
+			<div class="h3">~ £ {{context.billing_amount}}</div>
 		    {%else%}
 			<div class="small text-muted">Current bill</div>
 		    -
@@ -88,10 +84,6 @@
     <div class="card card-header-actions mb-4">
         <div class="card-header">
             Payment Methods
-	    <form ass="ml-2"  action="{%url 'user:addpaymentmethod'%}" 
-		    method="GET" role="form" style='display:inline-block;'>
-            	<button class="btn btn-sm btn-primary" type="submit">Add Payment Method</button>
-	    </form>
         </div>
         <div class="card-body px-0">
 	    {%for paymethod in context.paymentmethods%}
