@@ -15,7 +15,6 @@ A website for delivering A-level content directly to student, with great feature
 
 
 ## Atomic tasks
-- [ ] Lock stuff up 
 - [ ] Stream lining prompts and making it efficent
 - [ ] Manual use of gpt-4 for test creation and token efficeny
 - [ ] Create Email templates
@@ -25,6 +24,7 @@ A website for delivering A-level content directly to student, with great feature
 - [ ] Author Recieves payment
 
 ## Completed Tasks
+- [x] Lock stuff up 
 - [x] Add content confirmation checks
 - [x] The payment framework ? 
 - [x] Good commercial model ? 
