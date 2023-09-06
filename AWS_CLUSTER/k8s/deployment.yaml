@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: website
-  namespace: kubernetes-github-actions
+  namespace: eks-practicepractice
   labels:
     app: website
 spec:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: website
-        image: amazonaws.com/kubernetes-github-actions
+        image: amazonaws.com/eks-practicepractice
         ports:
         - containerPort: 80
           name: website

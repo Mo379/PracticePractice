@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-    name: kubernetes-github-actions
+    name: eks-practicepractice
