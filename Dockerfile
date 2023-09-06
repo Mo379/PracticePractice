@@ -38,5 +38,3 @@ RUN pip install setuptools
 RUN pip install -r /var/www/html/requirements.txt 
 #expose and run
 EXPOSE 80 3500
-CMD ["apache2ctl", "-D", "FOREGROUND"]
-
