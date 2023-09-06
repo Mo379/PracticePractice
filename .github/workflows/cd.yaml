@@ -33,6 +33,9 @@ jobs:
     - name: Clone
       uses: actions/checkout@v4
 
+    - name: Run Create .env Workflow
+      uses: ./.github/workflows/create-env-file.yml
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
