@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
         #- name: Test
         #  run: |
@@ -28,6 +28,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - run-tests
+
     steps:
     - name: Clone
       uses: actions/checkout@v4
