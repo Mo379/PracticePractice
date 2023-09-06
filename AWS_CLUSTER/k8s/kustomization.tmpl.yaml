@@ -6,4 +6,4 @@ resources:
 images:
 - name: image-eks-practicepractice
   newName: ${ECR_REPOSITORY}
-  newTag: ${IMAGE_TAG}:latest
+  newTag: ${IMAGE_TAG}
