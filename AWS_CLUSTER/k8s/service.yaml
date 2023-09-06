@@ -11,6 +11,6 @@ spec:
     selector:
         app: website
     ports:
-    - port: 80
+    - port: 81
       protocol: TCP  
-      targetPort: 500
+      targetPort: 82
