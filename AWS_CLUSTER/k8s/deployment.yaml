@@ -20,5 +20,5 @@ spec:
       - name: website
         image: amazonaws.com/kubernetes-github-actions
         ports:
-        - containerPort: 3000
+        - containerPort: 80
           name: website
