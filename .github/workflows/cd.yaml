@@ -16,7 +16,6 @@ jobs:
     steps:
     - name: Clone
       uses: actions/checkout@v4
-
         #- name: Test
         #  run: |
         #    cd site
@@ -32,6 +31,17 @@ jobs:
     steps:
     - name: Clone
       uses: actions/checkout@v4
+
+     - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
     - name: Create .env File
       run: |
@@ -93,17 +103,6 @@ jobs:
         echo "SES_EMAIL_main=${{secrets.SES_EMAIL_main}}" >> .env
         echo "SES_EMAIL_info=${{secrets.SES_EMAIL_info}}" >> .env
         echo "Site_domain=${{secrets.Site_domain}}" >> .env
-      
-     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
