@@ -1,7 +1,9 @@
 name: Create .env File
 
 on:
-  workflow_call:
+  push:
+    branches:
+      - main
 
 jobs:
   create-env:
@@ -71,3 +73,8 @@ jobs:
         echo "SES_EMAIL_main=${{secrets.SES_EMAIL_main}}" >> .env
         echo "SES_EMAIL_info=${{secrets.SES_EMAIL_info}}" >> .env
         echo "Site_domain=${{secrets.Site_domain}}" >> .env
+    - name: Upload .env as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: env-artifact
+        path: .env
