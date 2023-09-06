@@ -3,3 +3,4 @@
 /extras/data
 /venv/
 /new_env/
+**/logs
