@@ -45,13 +45,7 @@ jobs:
         curl -o aws-iam-authenticator https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/latest/download/aws-iam-authenticator
         chmod +x aws-iam-authenticator
         sudo mv aws-iam-authenticator /usr/local/bin/
-    - name: Authenticate with AWS
-      run: aws-iam-authenticator help
-    - name: Install AWS CLI
-      run: |
-        curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
+        aws-iam-authenticator help
 
     - name: Login to Amazon ECR
       id: login-ecr
