@@ -10,20 +10,20 @@ env:
   ECR_REPOSITORY: eks-practicepractice
   SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-8)
 
-
 jobs:
   run-tests:
     runs-on: ubuntu-latest
     steps:
-    - name: Clone
-      uses: actions/checkout@v4
+      - name: Clone
+        uses: actions/checkout@v4
+      # The steps should be properly indented under the "steps" key.
 
-        #- name: Test
-        #  run: |
-        #    cd site
-        #    npm install
-        #    npm test
-
+      # Uncomment the following lines if you want to include these steps in the job.
+      # - name: Test
+      #   run: |
+      #     cd site
+      #     npm install
+      #     npm test
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
