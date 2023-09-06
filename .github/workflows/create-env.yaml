@@ -30,7 +30,6 @@ jobs:
         echo "CSRF_TRUSTED_ORIGINS=${{secrets.CSRF_TRUSTED_ORIGINS}}" >> .env
         echo "django_secret=${{secrets.django_secret}}" >> .env
         echo "django_debug_state=${{secrets.django_debug_state}}" >> .env
-        echo "django_debug_state=${{secrets.django_debug_state}}" >> .env
         echo "DB_ENGINE=${{secrets.DB_ENGINE}}" >> .env
         echo "DB_NAME=${{secrets.DB_NAME}}" >> .env
         echo "DB_USER=${{secrets.DB_USER}}" >> .env
