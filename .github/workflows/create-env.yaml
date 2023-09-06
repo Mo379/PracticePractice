@@ -1,13 +1,16 @@
 name: Create .env File
 
 on:
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   create-env:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Clone
+      uses: actions/checkout@v4
+
     - name: Create .env File
       run: |
         echo "HasdIdsSalt=${{secrets.HasdIdsSalt}}" > .env
