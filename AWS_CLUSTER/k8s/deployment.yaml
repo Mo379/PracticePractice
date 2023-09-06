@@ -21,6 +21,5 @@ spec:
         image: image-eks-practicepractice
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
-          name: website
+        - containerPort: 8300
         command: ["apache2ctl", "-D", "FOREGROUND"]
