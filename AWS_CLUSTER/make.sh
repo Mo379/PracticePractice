@@ -201,7 +201,7 @@ cluster-create() {
         --name $PROJECT_NAME \
         --region $AWS_REGION \
         --managed \
-        --node-type t2.micro \
+        --node-type t2.small\
         --nodes 1 \
         --profile $AWS_PROFILE
 }
