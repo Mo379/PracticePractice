@@ -19,8 +19,15 @@ spec:
       containers:
       - name: website
         image: image-eks-practicepractice
+        resources:
+          requests:
+            memory: "256Mi"   # Minimum memory required
+            cpu: "100m"       # Minimum CPU required
+          limits:
+            memory: "512Mi"   # Maximum memory allowed
+            cpu: "500m"       # Maximum CPU allowed
         imagePullPolicy: Always
         ports:
-          - containerPort: 80
+        - containerPort: 80
           name: website
         command: ["apache2ctl", "-D", "FOREGROUND"]
