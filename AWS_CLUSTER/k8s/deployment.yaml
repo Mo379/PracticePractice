@@ -19,7 +19,15 @@ spec:
       containers:
       - name: website
         image: image-eks-practicepractice
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
         imagePullPolicy: Always
         ports:
           - containerPort: 80
+          name: website
         command: ["apache2ctl", "-D", "FOREGROUND"]
