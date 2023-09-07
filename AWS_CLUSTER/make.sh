@@ -203,6 +203,7 @@ cluster-create() {
         --managed \
         --node-type t2.small\
         --nodes 1 \
+	--node-volume-size 25
         --profile $AWS_PROFILE
 }
 
