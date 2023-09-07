@@ -7,7 +7,7 @@ metadata:
   labels:
     app: website
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: website
@@ -21,11 +21,11 @@ spec:
         image: image-eks-practicepractice
         resources:
           requests:
-            memory: "64Mi"
-            cpu: "250m"
+            memory: "256Mi"   # Minimum memory required
+            cpu: "100m"       # Minimum CPU required
           limits:
-            memory: "128Mi"
-            cpu: "500m"
+            memory: "512Mi"   # Maximum memory allowed
+            cpu: "500m"       # Maximum CPU allowed
         imagePullPolicy: Always
         ports:
           - containerPort: 80
