@@ -1,10 +1,10 @@
 version: "3.3"
 services: 
   PP2DB:
-    image: postgres:14-alpine
+    image: postgres:15.4-alpine
     restart: always
     environment:
-      POSTGRES_USER: django_db_user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Password123
     volumes:
       - ./extras/data/postgres/:/var/lib/postgresql/data:rw
@@ -21,20 +21,6 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
       - PP2_network
-
-  practicepractice:
-    build: .
-    depends_on: 
-      - PP2DB
-      - PP2RDS
-    container_name: container_pp2
-    networks: 
-      - PP2_network 
-    ports:
-      - '8005:80'
-    extra_hosts:
-        - "practicepractice.net:54.78.240.123" #host and ip
-        - "www.practicepractice.net:54.78.240.123" #host and ip
 
 networks:
   PP2_network:

@@ -113,8 +113,8 @@ jobs:
         echo "SES_EMAIL_info=${{secrets.SES_EMAIL_info}}" >> .env
         echo "Site_domain=${{secrets.Site_domain}}" >> .env
 
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-image
+    - name: Build and tag image and push image to ECR
+      id: push image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
@@ -124,6 +124,21 @@ jobs:
         .
         docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
         docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.SHORT_SHA }}
+
+    - name: Run Django makemigrations
+      id: django migrations
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        # Run the Django makemigrations command within a Docker container
+        docker run \
+          --rm \
+          -v $(pwd):/app \
+          -w /app \
+          ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.SHORT_SHA }} \
+          sh -c "
+          python3 manage.py makemigrations && python3 manage.py migrate
+          "
 
     - name: Install and configure kubectl
       run: |
