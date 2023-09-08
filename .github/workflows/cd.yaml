@@ -114,7 +114,7 @@ jobs:
         echo "Site_domain=${{secrets.Site_domain}}" >> .env
 
     - name: Build and tag image and push image to ECR
-      id: push image
+      id: push-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |

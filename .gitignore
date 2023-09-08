@@ -3,3 +3,4 @@ venv
 extras/data/
 .env
 APP/dump.rdb
+docker-compose.yaml
