@@ -2,6 +2,11 @@ body{
 	margin: 0px;
 	background: var(--third-bg-color);
 }
+code {
+	color: var(--text-color-1) !important;
+	inline-size: 150px;
+	overflow-wrap: break-word;
+}
 .AI_main_container{
 	border-top: 1px solid var(--second-bg-color);
 	display:grid;
@@ -11,7 +16,9 @@ body{
 	max-height: 100vh;
 	height: 100vh;
 	padding: 0px;
+	margin: 0;
 	position: relative;
+	top: 0px;
 }	
 .AI_side_bar{
 	display:grid;
@@ -38,14 +45,27 @@ body{
 	display:grid;
 	grid-area: window;
 	background: var(--third-bg-color);
-	grid-template-rows: 8fr auto;
-	grid-template-areas:'chat' 'typing';
+	grid-template-rows: 1fr;
+	grid-template-areas:'chat';
+	max-height: 100vh;
+	min-height: 100vh;
 }
 .AI_window_chat{
 	grid-area: chat;
-	max-height: 100% !important;
+	max-height: 100vh !important;
 	overflow-y:scroll;
 	position: relative;
+}
+#sticky_options_menu{
+	position: absolute;
+	bottom: -1px;
+	margin: auto;
+	display: flex;
+	width: 100%;
+	padding: 15px;
+	align-items: center;
+	justify-content: center;
+	background: var(--third-bg-color);
 }
 #main_chat_container{
 }
@@ -84,15 +104,15 @@ body{
 	text-align: center;
 }
 .AI_window_typing{
-	grid-area: typing;
 }
 .AI_text_wrap{
-	width: 80%;
+	width: 90%;
 	height:auto;
 	margin:auto;
 	display:grid;
 	grid-template-columns: auto 1fr;
 	grid-template-areas: 'image text'; 
+	overflow: scroll;
 }
 .AI_text_image{
 	grid-area: image;

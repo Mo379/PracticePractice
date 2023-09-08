@@ -2,10 +2,19 @@
 	background: var(--main-bg-color);
 }
 
-
-code {
-	color: var(--text-color-1);
+.card-img-top{
+	aspect-ratio:16/9;
 }
+
+.my_course_card > .card-body{
+    display: flex;
+    flex-direction: column;
+}
+
+.my_course_card > .card-body > * {
+    margin-top: auto;
+}
+
 /* rating item*/
 .rating {
   display: flex;
@@ -95,12 +104,11 @@ code {
 
 /* styling for marketcourse */
 .my_course_card{
-	width: 20em;
+	width: 25em;
 	height: auto;
 	margin: 5px;
 }
 .my_course_card:hover{
-	transform: scale(1.01, 1.01);
 	transition: transform 0.3s ease-in-out;
 	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 	transition: box-shadow 0.3s ease-in-out;
@@ -143,7 +151,7 @@ code {
 #qbank_container{
 	width: inherit;
 	display:grid;
-	grid-template-columns: 2fr 1fr;
+	grid-template-columns: 4fr 6fr;
 	grid-template-areas: 'left right';
 }
 #right_container{
@@ -172,13 +180,13 @@ code {
 /* Custom practice test maker styling */
 #wrapper_testmaker{
 	display:grid;
-	height: 60vh;
+	height: 80vh;
 }
 #main_body{
 	display:grid;
 	grid-template-columns: 2fr 7fr;
 	grid-template-areas: 'scroll_window select_window';
-	max-height: 60vh;
+	max-height: 80vh;
 }
 #scroll_window{
 	border-right: 1px solid black;
@@ -191,17 +199,18 @@ code {
 #scroll_window .maker_tabs{
 	padding: 10px;	
 	text-align: center;
-	border: 1px solid silver;
+	border: 1px solid var(--main-bg-color);
 }
 #scroll_window .maker_tabs:hover{
-	background: black;	
-	color: white;	
+	background: var(--main-bg-color);	
+	color: var(--text-color-1);	
 	cursor: pointer;
 	transition: 0.3s;
 }
 #select_window{
 	display:grid;
 	grid-template-rows: 9fr 3fr;
+	max-height: 80vh;
 	overflow: scroll;
 }
 #select_window #top{
@@ -275,18 +284,15 @@ code {
 .maker_display_option{
 	display: inline-block;
 	margin: 5px;
-	padding: 5px;
+	padding: 2px;
 	border: 1px solid grey;
 }
 .maker_display_option a{
 	color: red;
 	cursor: pointer;
-	padding: 3px;
+	padding: 2px;
 	font-size: 16px;
-}.maker_display_option a:hover{
-	color: orange;
-}
-.maker_floor{
+}.maker_floor{
 	border-top: 1px solid grey;
 	grid-area: floor;
 	text-align: center;

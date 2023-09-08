@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# https://medium.com/@jerome.decoster/kubernetes-eks-github-actions-a874321fb9b4
 # AWS variables
 AWS_PROFILE=default
 AWS_REGION=eu-west-2
