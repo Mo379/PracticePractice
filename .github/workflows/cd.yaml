@@ -137,6 +137,7 @@ jobs:
           -w /app \
           ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.SHORT_SHA }} \
           sh -c "
+          cd /var/www/html
           python3 manage.py makemigrations && python3 manage.py migrate
           "
 
