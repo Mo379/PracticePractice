@@ -114,7 +114,6 @@ jobs:
         echo "Site_domain=${{secrets.Site_domain}}" >> .env
         cat .env
 
-
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
