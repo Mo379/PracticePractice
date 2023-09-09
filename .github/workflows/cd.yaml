@@ -140,7 +140,6 @@ jobs:
           cd /var/www/html
           python3 manage.py makemigrations && python3 manage.py migrate
           "
-
     - name: Install and configure kubectl
       run: |
         VERSION=$(curl --silent https://storage.googleapis.com/kubernetes-release/release/stable.txt)
