@@ -29,6 +29,7 @@ class ContentGenerationJob(models.Model):
         related_name='AI_contentjob'
     )
     moduel = models.CharField(max_length=255, default="", null=True)
+    test= models.CharField(max_length=255, default="", null=True)
     chapter = models.CharField(max_length=255, default="", null=True)
     #
     model = models.CharField(max_length=150, default="", null=True)
