@@ -598,24 +598,38 @@ def _newgenerationjob(request):
                     'dashboard:spectopic',
                     **kwargs
                 )
-        job = ContentGenerationJob.objects.create(
-                user=request.user,
-                specification=spec,
-                moduel=module,
-                chapter=chapter,
-            )
-        _generate_course_content.delay(job.id)
-        #
-        messages.add_message(
-                request,
-                messages.INFO,
-                f'Your job will begin shortly please check back after a few minutes!',
-                extra_tags='alert-info spectopic'
-            )
-        return redirect(
-                'dashboard:spectopic',
-                **kwargs
-            )
+        try:
+            job = ContentGenerationJob.objects.create(
+                    user=request.user,
+                    specification=spec,
+                    moduel=module,
+                    chapter=chapter,
+                )
+            _generate_course_content.delay(job.id)
+        except Exception:
+            #
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Something went wrong, the job cannot be created.',
+                    extra_tags='alert-info spectopic'
+                )
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
+                )
+        else:
+            #
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    f'Your job will begin shortly please check back after a few minutes!',
+                    extra_tags='alert-info spectopic'
+                )
+            return redirect(
+                    'dashboard:spectopic',
+                    **kwargs
+                )
     return redirect(
             'dashboard:specifications',
         )
