@@ -24,7 +24,6 @@ spec:
         env:
         - name: ALLOW_EMPTY_PASSWORD
           value: "yes"
-
       - name: website
         image: image-eks-practicepractice
         resources:
