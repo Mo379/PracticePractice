@@ -37,4 +37,4 @@ spec:
         ports:
         - containerPort: 80
           name: website
-        command: ["source", "/var/www/html/entrypoint.sh"]
+        command: ["apache2ctl", "-D", "FOREGROUND"]
