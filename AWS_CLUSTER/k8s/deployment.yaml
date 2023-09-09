@@ -30,4 +30,4 @@ spec:
         ports:
         - containerPort: 80
           name: website
-        command: ["sh", "/var/www/html/entrypoint.sh"]
+        command: ["/bin/bash", "/var/www/html/entrypoint.sh"]
