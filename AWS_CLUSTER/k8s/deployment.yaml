@@ -37,4 +37,4 @@ spec:
         ports:
         - containerPort: 80
           name: website
-        command: ["source", "entrypoint.sh"]
+        command: ["source", "/var/www/html/entrypoint.sh"]

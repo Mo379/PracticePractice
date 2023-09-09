@@ -25,6 +25,7 @@ ADD ./APP/ /var/www/html
 ADD ./.env /var/www/html/
 ADD ./extras/includes/APP_apache.conf /etc/apache2/sites-available/000-default.conf 
 ADD ./extras/includes/requirements.txt /var/www/html 
+ADD ./extras/includes/entrypoint.sh /var/www/html 
 #Groups, Permissions and Ownership
 WORKDIR /var/www/html 
 RUN mkdir logs
