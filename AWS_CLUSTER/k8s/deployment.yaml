@@ -17,7 +17,7 @@ spec:
         app: website
     spec:
       containers:
-      - name: PP2RDS
+      - name: pp2rds
         image: redis:7.0-alpine
         ports:
         - containerPort: 6379
