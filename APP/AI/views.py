@@ -52,6 +52,7 @@ from content.util.GeneralUtil import (
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
 from AI.tasks import _generate_course_content
+from AI.functions import create_quiz_function
 from management.templatetags.general import ToMarkdownManual
 
 
@@ -335,12 +336,16 @@ def _ask_from_book(request):
         system_content, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
         system_content = re.sub('<[^<]+?>', '', system_content)
         #
+        function_url = settings.CHATGPT_LAMBDA_URL
+        #
         chat = part['thread'][0:int(local_order_id)*2] if 'thread' in part.keys() else []
         #
         message = {
-          "model": "gpt-4-0613",
-          "system": f"Youre a helpful tutor for this user, you personate in an impressive way the style of richard feynam his enthusiasm and humour to make the lessons fun, when helping you produce a step by step guide to be clear. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}.",
           "chat": [
+            {
+              "role": "system",
+              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}.",
+            },
             *chat,
             {
               "role": "user",
@@ -351,12 +356,23 @@ def _ask_from_book(request):
         lesson_part.recording_switch = True
         lesson_part.save()
         #
+        functions = False
+        function_call = False
+        #
+        quiz_function = create_quiz_function(5)
+        quiz_tag = TagGenerator()
+        functions = [quiz_function[0]]
+        function_call = {"name": quiz_function[1]}
+        #
         response = {
                 'error': 0,
                 'message': message,
+                'functions': functions,
+                'function_call': function_call,
                 'part_id': lesson_part_id,
                 'point_id': point_id,
                 'user_prompt': user_prompt,
+                'function_url': function_url,
             }
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})

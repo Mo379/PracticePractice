@@ -519,110 +519,128 @@ class controller extends model {
 				//
 				const request = {
 				  'message': json.message,
+				  'functions': json.functions,
+				  'function_call': json.function_call,
 				  'part_id': json.part_id,
 				  'point_id': json.point_id,
 				  'global_order_id': global_order_id,
 				  'local_order_id': local_order_id,
-				  'user_prompt': json.user_prompt
+				  'function_url': json.function_url
 				};
-				//
-				AWS.config.update({region: 'eu-north-1'});
-				AWS.config.credentials = new AWS.CognitoIdentityCredentials({IdentityPoolId: 'eu-north-1:539f7067-2405-4e41-8aed-a62ee033f30c'});
+				let chatLogs = [];
+				function setChatLogs(newChatLogs) {
+				  chatLogs = newChatLogs;
+				}
+				const handleSubmit = async () => {
+				  const chatRequest = {
+				    chatLog: request.message.chat,
+				  };
+				  setChatLogs(chatRequest.chatLog);
+				alert(JSON.stringify(chatRequest))
 
-				var pullReturned = null;
-				var slotResults;
-				var isSpinning = false;
+				  const response = await fetch(json.function_url, {
+				    method: "POST",
+				    headers: {
+				      "Content-Type": "application/json",
+				    },
+				    body: JSON.stringify(request),
+				  });
 
-				// Prepare to call Lambda function.
-				var lambda = new AWS.Lambda({region: 'eu-west-2', apiVersion: '2015-03-31'});
-				var pullParams = {
-					FunctionName : 'OpenAI-ChatGPT-Turbo',
-					InvocationType : 'RequestResponse',
-					LogType : 'None',
-					Payload: JSON.stringify(request)
+				  const streamResponse = response.body;
+				  if (!streamResponse) {
+				    return;
+				  }
+
+				  const reader = streamResponse.getReader();
+				  const decoder = new TextDecoder();
+				  let done = false;
+				  let content = "";
+
+				  let streamingChat = {
+				    chatLog: [...chatRequest.chatLog],
+				  };
+				  while (!done) {
+				    const { value, done: doneReading } = await reader.read();
+				    done = doneReading;
+				    const chunkValue = decoder.decode(value);
+				    content = content + chunkValue;
+						  alert(chunkValue);
+				    streamingChat = {
+				      chatLog: [
+					...chatRequest.chatLog,
+					{ role: "assistant", content: content },
+				      ],
+				    };
+				    setChatLogs(streamingChat.chatLog);
+				  }
 				};
-				lambda.invoke(pullParams, function(err, data) {
-					if (err) {
-						loading(false)
-					} else {
-						const response = JSON.parse(data.Payload)
-						if (response.StatusCode == 200){
-							const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
-							const newElement = document.createElement("div");
-							newElement.innerHTML = `
-								<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
-									<div class='AI_text_wrap'>
-										<div class='AI_text_image'>
-											<i class="bi bi-robot"></i>
-										</div>
-										<div class='AI_text_text'>
-											<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
-											</div>
-											<div class='AI_window_typing'>
-												<div style='margin:auto;'>
-											<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
-													Ask
-												</button>
-											</div>
-										</div>
-									</div>
-								</div>
-								`;
-							var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
-							var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
-							elementsToRemove.forEach(function(element) {
-							  element.remove(); // Remove each element
-							});
-							element.insertAdjacentElement("afterend", newElement);
-							document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
-							document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
-							document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
-							var written_output = response.body
-							if (response.function_call){
-								written_output = utility.transform_test_object_to_htmlform(response.function_name, response.function_call, point_id, local_order_id, part_id)
-								utility.write(
-									`AI_text_response_${point_id}_${local_order_id}`,
-									written_output.replace(/\\/g, '\\\\\\'), 
-									5,
-									20,
-									30,
-									50
-								)
-							}else{
-								utility.write(
-									`AI_text_response_${point_id}_${local_order_id}`,
-									written_output, 
-								)
-							}
-							//
-							if (response.server_records == 0){
-								const prompt_tokens = response.usage.prompt_tokens
-								const completion_tokens = response.usage.completion_tokens
-								const total_tokens = response.usage.total_tokens
-								const ai_response = response.body
-								const ai_function_response = JSON.stringify(response.function_call)
-								const ai_function_name = response.function_name
-								//
-								this_object.M_catch_chat_completion(
-									part_id,
-									point_id,
-									global_order_id,
-									local_order_id,
-									prompt_tokens,
-									completion_tokens,
-									total_tokens,
-									textareaValue,
-									ai_response,
-									ai_function_response,
-									ai_function_name
-								);
-							}
-						}else{
-							//alert(JSON.stringify(response))
-							loading(false)
-						}
-					}
-				});
+				async function run() {
+				  try {
+				    await handleSubmit();
+				  } catch (error) {
+				    console.error('An error occurred:', error);
+				  }
+				}
+				run()
+//				lambda.invoke(pullParams, function(err, data) {
+//					if (err) {
+//						loading(false)
+//					} else {
+//						const response = JSON.parse(data.Payload)
+//						if (response.StatusCode == 200){
+//							const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
+//							const newElement = document.createElement("div");
+//							newElement.innerHTML = `
+//								<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
+//									<div class='AI_text_wrap'>
+//										<div class='AI_text_image'>
+//											<i class="bi bi-robot"></i>
+//										</div>
+//										<div class='AI_text_text'>
+//											<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
+//											</div>
+//											<div class='AI_window_typing'>
+//												<div style='margin:auto;'>
+//											<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
+//													Ask
+//												</button>
+//											</div>
+//										</div>
+//									</div>
+//								</div>
+//								`;
+//							var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
+//							var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
+//							elementsToRemove.forEach(function(element) {
+//							  element.remove(); // Remove each element
+//							});
+//							element.insertAdjacentElement("afterend", newElement);
+//							document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
+//							document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
+//							document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
+//							var written_output = response.body
+//							if (response.function_call){
+//								written_output = utility.transform_test_object_to_htmlform(response.function_name, response.function_call, point_id, local_order_id, part_id)
+//								utility.write(
+//									`AI_text_response_${point_id}_${local_order_id}`,
+//									written_output.replace(/\\/g, '\\\\\\'), 
+//									5,
+//									20,
+//									30,
+//									50
+//								)
+//							}else{
+//								utility.write(
+//									`AI_text_response_${point_id}_${local_order_id}`,
+//									written_output, 
+//								)
+//							}
+//						}else{
+//							//alert(JSON.stringify(response))
+//							loading(false)
+//						}
+//					}
+//				});
 			}
 		}
 	}

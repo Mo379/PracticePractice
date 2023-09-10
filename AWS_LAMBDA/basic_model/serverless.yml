@@ -1,0 +1,31 @@
+service: basic-model
+frameworkVersion: "3"
+
+plugins:
+  - serverless-bundle
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-west-2
+
+functions:
+  streamingChat:
+    handler: index.handler
+    url: true
+    timeout: 10
+    environment:
+      OPEN_AI_API_KEY: ${env:OPEN_AI_API_KEY}
+
+resources:
+  extensions:
+    StreamingChatLambdaFunctionUrl:
+      Properties:
+        InvokeMode: RESPONSE_STREAM
+        Cors:
+          AllowOrigins:
+            - "*"
+          AllowMethods:
+            - "POST"
+          AllowHeaders:
+            - "content-type"
