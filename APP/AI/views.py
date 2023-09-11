@@ -336,7 +336,7 @@ def _ask_from_book(request):
         system_content, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
         system_content = re.sub('<[^<]+?>', '', system_content)
         #
-        function_url = settings.CHATGPT_LAMBDA_URL
+        lambda_url = settings.CHATGPT_LAMBDA_URL
         #
         chat = part['thread'][0:int(local_order_id)*2] if 'thread' in part.keys() else []
         #
@@ -356,23 +356,27 @@ def _ask_from_book(request):
         lesson_part.recording_switch = True
         lesson_part.save()
         #
-        functions = False
-        function_call = False
+        functions = None
+        function_call = None
+        function_app_endpoint = None
         #
         quiz_function = create_quiz_function(5)
         quiz_tag = TagGenerator()
+        #
         functions = [quiz_function[0]]
         function_call = {"name": quiz_function[1]}
+        function_app_endpoint = {}
         #
         response = {
                 'error': 0,
                 'message': message,
                 'functions': functions,
                 'function_call': function_call,
+                'function_app_endpoint': function_app_endpoint,
                 'part_id': lesson_part_id,
                 'point_id': point_id,
                 'user_prompt': user_prompt,
-                'function_url': function_url,
+                'lambda_url': lambda_url,
             }
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})

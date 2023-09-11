@@ -49,7 +49,7 @@ class util{
 		var blinker = '';
 		var image = 'bi bi-send-fill';
 		if (who == 'ai'){
-			blinker = `<span class='blink' style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'></span>`;
+			blinker = `<span class='blink' style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
 			image = 'bi bi-robot';
 		}
 		return `<div class='AI_chat_text AI_text_${who}'>
@@ -173,7 +173,7 @@ class util{
 	    }
 	    if (i < text.length) {
 	      element.innerHTML = text.slice(0, i + charCount) + `
-	      <span class='blink'style='display:inline-block;width: 5px;height:12px;background:var(--text-color-1);'>
+	      <span class='blink'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'>
 	      </span>`;
 	      i += charCount;
 	      MathJax.typeset()
@@ -289,10 +289,17 @@ class controller extends model {
 							<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
 						</div>
 						<div class='AI_text_text' id='ask_content_${point_id}_${local_order_id}'>
+							<select class="custom-select mb-3 bg-transparent" style='width: 20%; margin:auto;display:block;'>
+							  <option selected value="0">Normal Prompt</option>
+							  <option value="1">Multiple choice quiz</option>
+							  <option value="2">Flash Cards</option>
+							  <option value="3">Short Essay</option>
+							</select>
 							<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${local_order_id}'style="color: var(--text-color-1);">Hello, can you assist me today ?</textarea>
 							<p class='d-none' id='display_user_input_${point_id}_${local_order_id}'></p>
 							<div class='AI_window_typing'>
 								<div style='margin:auto;'>
+
 								<button 
 									class='btn btn-success'
 									id='submit_${point_id}_${local_order_id}'
@@ -518,34 +525,53 @@ class controller extends model {
 				var json = JSON.parse(txt);
 				//
 				const request = {
-				  'message': json.message,
+				  'message': json.message.chat,
 				  'functions': json.functions,
 				  'function_call': json.function_call,
+				  'function_app_endpoint': json.function_endpoint,
 				  'part_id': json.part_id,
 				  'point_id': json.point_id,
 				  'global_order_id': global_order_id,
 				  'local_order_id': local_order_id,
-				  'function_url': json.function_url
+				  'lambda_url': json.lambda_url
 				};
-				let chatLogs = [];
-				function setChatLogs(newChatLogs) {
-				  chatLogs = newChatLogs;
-				}
 				const handleSubmit = async () => {
-				  const chatRequest = {
-				    chatLog: request.message.chat,
-				  };
-				  setChatLogs(chatRequest.chatLog);
-				alert(JSON.stringify(chatRequest))
 
-				  const response = await fetch(json.function_url, {
+				  const response = await fetch(json.lambda_url, {
 				    method: "POST",
 				    headers: {
 				      "Content-Type": "application/json",
 				    },
 				    body: JSON.stringify(request),
 				  });
-
+				  const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
+				  const newElement = document.createElement("div");
+				  newElement.innerHTML = `
+				  	<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
+				  		<div class='AI_text_wrap'>
+				  			<div class='AI_text_image'>
+				  				<i class="bi bi-robot"></i>
+				  			</div>
+				  			<div class='AI_text_text'>
+				  				<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
+				  				</div>
+				  				<div class='AI_window_typing'>
+				  					<div style='margin:auto;'>
+				  				<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
+				  						Ask
+				  					</button>
+				  				</div>
+				  			</div>
+				  		</div>
+				  	</div>
+				  `;
+				  var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
+				  var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
+				  elementsToRemove.forEach(function(element) {
+				    element.remove(); // Remove each element
+				  });
+				  element.insertAdjacentElement("afterend", newElement);
+				  //
 				  const streamResponse = response.body;
 				  if (!streamResponse) {
 				    return;
@@ -556,91 +582,41 @@ class controller extends model {
 				  let done = false;
 				  let content = "";
 
-				  let streamingChat = {
-				    chatLog: [...chatRequest.chatLog],
-				  };
-				  while (!done) {
-				    const { value, done: doneReading } = await reader.read();
-				    done = doneReading;
+				  while (true) {
+				    const { value } = await reader.read();
+				    if (!value) {
+				      break;
+				    }
+				    
 				    const chunkValue = decoder.decode(value);
 				    content = content + chunkValue;
-						  alert(chunkValue);
-				    streamingChat = {
-				      chatLog: [
-					...chatRequest.chatLog,
-					{ role: "assistant", content: content },
-				      ],
-				    };
-				    setChatLogs(streamingChat.chatLog);
+				    if (request.function_call){
+					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = 'Wait the test is hidden ;) ...'+ content.replace(/./g, '*') + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
+				    }else{
+					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
+					}
+				    MathJax.typeset()
 				  }
+				  return content
 				};
 				async function run() {
 				  try {
-				    await handleSubmit();
+				    const content = await handleSubmit();
+				    document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
+				    document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
+				    document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
+				    if (request.function_call){
+					const json_response_content = JSON.parse(content)
+				    	const written_output = utility.transform_test_object_to_htmlform(json.function_call.name, json_response_content, point_id, local_order_id, part_id, false)
+					document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = written_output;
+				    }else{
+				    }
 				  } catch (error) {
 				    console.error('An error occurred:', error);
+				    loading(false)
 				  }
 				}
 				run()
-//				lambda.invoke(pullParams, function(err, data) {
-//					if (err) {
-//						loading(false)
-//					} else {
-//						const response = JSON.parse(data.Payload)
-//						if (response.StatusCode == 200){
-//							const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
-//							const newElement = document.createElement("div");
-//							newElement.innerHTML = `
-//								<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
-//									<div class='AI_text_wrap'>
-//										<div class='AI_text_image'>
-//											<i class="bi bi-robot"></i>
-//										</div>
-//										<div class='AI_text_text'>
-//											<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
-//											</div>
-//											<div class='AI_window_typing'>
-//												<div style='margin:auto;'>
-//											<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
-//													Ask
-//												</button>
-//											</div>
-//										</div>
-//									</div>
-//								</div>
-//								`;
-//							var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
-//							var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
-//							elementsToRemove.forEach(function(element) {
-//							  element.remove(); // Remove each element
-//							});
-//							element.insertAdjacentElement("afterend", newElement);
-//							document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
-//							document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
-//							document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
-//							var written_output = response.body
-//							if (response.function_call){
-//								written_output = utility.transform_test_object_to_htmlform(response.function_name, response.function_call, point_id, local_order_id, part_id)
-//								utility.write(
-//									`AI_text_response_${point_id}_${local_order_id}`,
-//									written_output.replace(/\\/g, '\\\\\\'), 
-//									5,
-//									20,
-//									30,
-//									50
-//								)
-//							}else{
-//								utility.write(
-//									`AI_text_response_${point_id}_${local_order_id}`,
-//									written_output, 
-//								)
-//							}
-//						}else{
-//							//alert(JSON.stringify(response))
-//							loading(false)
-//						}
-//					}
-//				});
 			}
 		}
 	}

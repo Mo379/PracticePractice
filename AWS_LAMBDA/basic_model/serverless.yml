@@ -13,7 +13,7 @@ functions:
   streamingChat:
     handler: index.handler
     url: true
-    timeout: 10
+    timeout: 75
     environment:
       OPEN_AI_API_KEY: ${env:OPEN_AI_API_KEY}
 
