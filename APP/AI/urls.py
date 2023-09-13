@@ -23,9 +23,9 @@ urlpatterns = [
         name='_ask_from_book'
     ),
     path(
-        '_catch_chat_completion',
-        views._catch_chat_completion,
-        name='_catch_chat_completion'
+        '_function_app_endpoint',
+        views._function_app_endpoint,
+        name='_function_app_endpoint'
     ),
     path(
         '_mark_quiz_question',

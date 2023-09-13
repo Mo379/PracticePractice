@@ -320,6 +320,7 @@ def _ask_from_book(request):
         global_order_id = request.POST['global_order_id']
         local_order_id = request.POST['local_order_id']
         user_prompt = request.POST['user_prompt']
+        prompt_type_value = request.POST['prompt_type_value']
         #
         lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
         try:
@@ -344,7 +345,7 @@ def _ask_from_book(request):
           "chat": [
             {
               "role": "system",
-              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths and $$ for full line math), the lesson being taught is the following {system_content}.",
+              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths), the lesson being taught is the following {system_content}.",
             },
             *chat,
             {
@@ -353,19 +354,31 @@ def _ask_from_book(request):
             }
           ]
         }
-        lesson_part.recording_switch = True
         lesson_part.save()
         #
-        functions = None
-        function_call = None
-        function_app_endpoint = None
+        function_app_endpoint = {
+                'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                'user_prompt': str(user_prompt),
+            }
         #
-        quiz_function = create_quiz_function(5)
-        quiz_tag = TagGenerator()
-        #
-        functions = [quiz_function[0]]
-        function_call = {"name": quiz_function[1]}
-        function_app_endpoint = {}
+        if int(prompt_type_value) == 1:
+            quiz_function = create_quiz_function(5)
+            functions = [quiz_function[0]]
+            function_call = {"name": quiz_function[1]}
+            function_app_endpoint['prompt_type_value'] = prompt_type_value
+        elif int(prompt_type_value) == 2:
+            functions = None
+            function_call = None
+            function_app_endpoint['prompt_type_value'] = prompt_type_value
+        elif int(prompt_type_value) == 3:
+            functions = None
+            function_call = None
+            function_app_endpoint['prompt_type_value'] = prompt_type_value
+        else:
+            functions = None
+            function_call = None
+            function_app_endpoint['prompt_type_value'] = prompt_type_value
+
         #
         response = {
                 'error': 0,
@@ -373,71 +386,61 @@ def _ask_from_book(request):
                 'functions': functions,
                 'function_call': function_call,
                 'function_app_endpoint': function_app_endpoint,
-                'part_id': lesson_part_id,
-                'point_id': point_id,
-                'user_prompt': user_prompt,
                 'lambda_url': lambda_url,
             }
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
 
-@AISubscriptionRequiredDec
-def _catch_chat_completion(request):
-    if request.method == 'POST':
-        lesson_part_id = request.POST['part_id']
-        point_id = request.POST['point_id']
-        global_order_id = request.POST['global_order_id']
-        local_order_id = request.POST['local_order_id']
-        prompt_tokens = request.POST['prompt_tokens']
-        completion_tokens = request.POST['completion_tokens']
-        total_tokens = request.POST['total_tokens']
-        user_prompt = request.POST['user_prompt']
-        ai_response = request.POST['ai_response']
-        ai_function_name = request.POST['ai_function_name']
-        ai_function_response = request.POST['ai_function_response']
-        #
-        user_part = {"role": 'user', "content": user_prompt}
-        ai_part = {"role": 'assistant', "content": ai_response}
-        ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_function_response}
-        new_stuff = [user_part, ai_part]
-        if ai_function_response != 'null':
-            new_stuff = [user_part, ai_function_part]
-        try:
-            lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
-            if lesson_part.recording_switch == False:
+def _function_app_endpoint(request):
+    if request.method == 'POST' and 'auth_key' in request.POST:
+        if request.POST['auth_key'] == settings.HASHIDS:
+            lesson_part_id = request.POST['part_id']
+            point_id = request.POST['point_id']
+            global_order_id = request.POST['global_order_id']
+            local_order_id = request.POST['local_order_id']
+            user_prompt = request.POST['user_prompt']
+            ai_response = request.POST['ai_response']
+            ai_function_name = request.POST['ai_function_name']
+            #
+            user_part = {"role": 'user', "content": user_prompt}
+            ai_part = {"role": 'assistant', "content": ai_response}
+            ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_response}
+            #
+            new_stuff = [user_part, ai_part]
+            if ai_function_name != 'null':
+                new_stuff = [user_part, ai_function_part]
+            try:
+                lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
+                #
+                part_chat = lesson_part.part_chat[str(int(global_order_id) - 1)]
+                #
+                if 'thread' in part_chat.keys():
+                    part_chat['thread'] = part_chat['thread'][0: int(local_order_id)*2]
+                    part_chat['thread'] += new_stuff
+                else:
+                    part_chat['thread'] = new_stuff
+                lesson_part.part_chat[str(int(global_order_id) - 1)] = part_chat
+                lesson_part.prompt += int(0)
+                lesson_part.completion += int(0)
+                lesson_part.total += int(0)
+                lesson_part.save()
+            except Exception as e:
+                response = {
+                        'status_code': 500,
+                        'message': 'Internal Server Error.'
+                    }
+            else:
                 response = {
                         'status_code': 200,
                         'message': 'Sucess'
                     }
-                return JsonResponse(response)
             #
-            part_chat = lesson_part.part_chat[str(int(global_order_id) - 1)]
-            #
-            if 'thread' in part_chat.keys():
-                part_chat['thread'] = part_chat['thread'][0: int(local_order_id)*2]
-                part_chat['thread'] += new_stuff
-            else:
-                part_chat['thread'] = new_stuff
-            lesson_part.part_chat[str(int(global_order_id) - 1)] = part_chat
-            lesson_part.recording_switch = False
-            lesson_part.prompt += int(prompt_tokens)
-            lesson_part.completion += int(completion_tokens)
-            lesson_part.total += int(total_tokens)
-            lesson_part.save()
-        except Exception as e:
-            response = {
-                    'status_code': 500,
-                    'message': 'Internal Server Error.'
-                }
+            return JsonResponse(response)
         else:
-            response = {
-                    'status_code': 200,
-                    'message': 'Sucess'
-                }
-        #
-        return JsonResponse(response)
-    return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
+            return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
+    else:
+        return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
 
 
 @AISubscriptionRequiredDec
