@@ -21,19 +21,6 @@ Contact
 	{%include 'base/alert.html'%}
 	<form class="px-3 py-3"  action="{%url 'user:_contact_us'%}" method="POST" role="form">
 		{%csrf_token%}
-		<label for="spec_level">About you:</label>
-		<input 
-			type='text' 
-			name='full_name' 
-			class='form-control mb-3'
-			placeholder='Full Name'
-		/>
-		<input 
-			type='text' 
-			name='mail_sender' 
-			class='form-control mb-3'
-			placeholder='Email'
-		/>
 		<label for="spec_board">Message</label>
 		<input 
 			type='text' 

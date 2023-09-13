@@ -15,6 +15,9 @@ from djstripe.models import (
         Subscription,
         Price,
     )
+from braces.views import (
+        LoginRequiredMixin,
+    )
 from PP2.mixin import (
         AnySubscriptionRequiredMixin,
         AnySubscriptionRequiredDec,
@@ -138,7 +141,7 @@ class ReviewView(BaseBreadcrumbMixin ,generic.ListView):
 
 
 
-class ContactView(BaseBreadcrumbMixin, generic.ListView):
+class ContactView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
     template_name = "main/contact.html"
     context_object_name = 'context'
     @cached_property
