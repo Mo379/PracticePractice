@@ -266,8 +266,8 @@ class controller extends model {
 					<select id = 'prompt_type_${point_id}_${local_order_id}' class="custom-select mb-3 bg-transparent" style='width: 30%; margin:auto;display:block; color: var(--text-color-3);'>
 					  <option selected value="0">Normal Prompt</option>
 					  <option value="1">Multiple choice quiz</option>
-					  <option value="2">Flash Cards</option>
-					  <option value="3">Short Essay</option>
+					  <option value="2" disabled>Flash Cards (coming soon)</option>
+					  <option value="3" disabled>Short Essay (coming soon)</option>
 					</select>
 				`
 			}
@@ -335,16 +335,6 @@ class controller extends model {
 			var prompt_options = ''
 			var text_area= ''
 			var prompt_control_buttons = '*Maximum allowed depth reached*'
-			if (local_order_id == 0){
-				prompt_options = `
-					<select id = 'prompt_type_${point_id}_${local_order_id}' class="custom-select mb-3 bg-transparent" style='width: 30%; margin:auto;display:block; color: var(--text-color-3);'>
-					  <option selected value="0">Normal Prompt</option>
-					  <option value="1">Multiple choice quiz</option>
-					  <option value="2">Flash Cards</option>
-					  <option value="3">Short Essay</option>
-					</select>
-				`
-			}
 			if (local_order_id <= 3){
 				text_area= `
 					<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${local_order_id}'style="color: var(--text-color-1);">Hello, can you assist me today ?</textarea>
@@ -382,7 +372,6 @@ class controller extends model {
 							<i class="bi bi-send-fill"style='color: var(--text-color-1);'></i>
 						</div>
 						<div class='AI_text_text' id='ask_content_${point_id}_${local_order_id}'>
-							${prompt_options}
 							${text_area}
 							<p class='d-none' id='display_user_input_${point_id}_${local_order_id}'></p>
 							<div class='AI_window_typing'>
@@ -626,11 +615,11 @@ class controller extends model {
 				    document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
 				    document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
 				    if (request.function_call){
-					const json_response_content = JSON.parse(content)
-					json_response_content = {
-							...json_response_content,
-							'unique_id': json.unique_id,
-					}
+					console.log(JSON.stringify(content))
+					var json_response_content = JSON.parse(content)
+					json_response_content.unique_id = json.function_app_endpoint.unique_id
+					console.log(JSON.stringify(json_response_content))
+					console.log(json.function_app_endpoint.unique_id)
 				    	const written_output = utility.transform_test_object_to_htmlform(json.function_call.name, json_response_content, point_id, local_order_id, part_id, false)
 					document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = written_output;
 				    }else{
