@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name='contentgenerationjob',
-            name='test',
-        ),
-        migrations.RemoveField(
             model_name='lesson_part',
             name='recording_switch',
         ),
