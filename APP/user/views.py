@@ -450,13 +450,13 @@ def _contact_us(request):
         print(captcha_response)
         to_email = 'info@practicepractice.net'
         data = {
-            'secret': '6LezHSIoAAAAAMqd1S5XrTR5CoZ5C4ep6D7vY2Hl',
+            'secret': '',
             'response': captcha_response,
         }
         import requests
         response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
         result = response.json()
-        if result['success']:
+        if result['success'] and request.user.is_authenticated:
             send_mail(
                 message_subject,
                 message,
