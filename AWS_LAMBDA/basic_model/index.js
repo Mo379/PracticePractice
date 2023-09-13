@@ -18,21 +18,24 @@ function return_to_app_endpoint(function_app_endpoint, ai_response, ai_function_
 		postData = {
 			...postData,
 			'function_name': ai_function_name,
+			'auth_key': process.env.OPEN_AI_ORGANISATION,
 		};
 		//
 		var XMLHttpRequest = require('xhr2');
 		const xhttp = new XMLHttpRequest();
 		xhttp.open('POST', returnUrl, true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		xhttp.setRequestHeader("X-CSRFToken", function_app_endpoint.csrf_token);
 		xhttp.send(JSON.stringify(postData));
 		xhttp.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
+				console.log(this.responseText);
 				console.log(this.status);
 			}else{
+				console.log(this.responseText);
 				console.log(this.status);
 			}
 		};
+		console.log(xhttp);
 		console.log(postData);
 	} catch (error){
 		// Handle errors here and potentially send an error response

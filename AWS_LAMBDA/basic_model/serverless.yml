@@ -16,6 +16,7 @@ functions:
     timeout: 120
     environment:
       OPEN_AI_API_KEY: ${env:OPEN_AI_API_KEY}
+      OPEN_AI_ORGANISATION: ${env:OPEN_AI_ORGANISATION}
 
 resources:
   extensions:

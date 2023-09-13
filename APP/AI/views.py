@@ -4,6 +4,7 @@ import collections
 import json
 from cryptography.fernet import Fernet
 from collections import defaultdict
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.conf import settings
@@ -392,11 +393,11 @@ def _ask_from_book(request):
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
 
+@csrf_exempt
 def _function_app_endpoint(request):
-    if request.method == 'POST' and 'auth_key' in request.POST:
-        if request.POST['auth_key'] == settings.HASHIDS:
+    if request.method == 'POST':
+        if request.POST['auth_key'] == settings.OPENAI_ORG:
             lesson_part_id = request.POST['part_id']
-            point_id = request.POST['point_id']
             global_order_id = request.POST['global_order_id']
             local_order_id = request.POST['local_order_id']
             user_prompt = request.POST['user_prompt']
