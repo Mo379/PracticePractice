@@ -7,7 +7,7 @@ A website for delivering A-level content directly to student, with great feature
 - [ ] Everything is super simple ? 
 - [ ] Everything is super super simple ? 
 - [ ] Everything is super super super simple ? 
-- [ ] Infrastructure beast CICD and stuff
+- [x] Infrastructure beast CICD and stuff
 - [ ] A very attractive free package
 - [ ] Bug huntdown
 - [ ] User feedback loop
@@ -15,11 +15,11 @@ A website for delivering A-level content directly to student, with great feature
 
 
 ## Atomic tasks
-- [ ] Stream lining prompts and making it efficent
+- [x] Stream lining prompts and making it efficent
 - [ ] Manual use of gpt-4 for test creation and token efficeny
 - [ ] Create Email templates
 - [ ] Reporting feature for content improvement with punishment to author
-- [ ] Affiliate code functionality
+- [x] Affiliate code functionality
 - [ ] Phone screen CSS margins
 - [ ] Author Recieves payment
 

@@ -446,28 +446,45 @@ def _contact_us(request):
         full_name = request.user.first_name + ' ' + request.user.last_name
         message_subject = request.POST['message_subject']
         message = request.POST['message']
+        captcha_response = request.POST['g-recaptcha-response']
+        print(captcha_response)
         to_email = 'info@practicepractice.net'
-        send_mail(
-            message_subject,
-            message,
-            to_email,
-            [to_email],
-            fail_silently=False,
-        )
-        send_mail(
-            message_subject,
-            message,
-            to_email,
-            [request.user.email],
-            fail_silently=False,
-        )
-        messages.add_message(
-                request,
-                messages.INFO,
-                'Your message has been recieved, \
-                        check your email for the confimration.',
-                extra_tags='alert-success contact_form'
+        data = {
+            'secret': '6LezHSIoAAAAAMqd1S5XrTR5CoZ5C4ep6D7vY2Hl',
+            'response': captcha_response,
+        }
+        import requests
+        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+        result = response.json()
+        if result['success']:
+            send_mail(
+                message_subject,
+                message,
+                to_email,
+                [to_email],
+                fail_silently=False,
             )
+            send_mail(
+                message_subject,
+                message,
+                to_email,
+                [request.user.email],
+                fail_silently=False,
+            )
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Your message has been recieved, \
+                            check your email for the confimration.',
+                    extra_tags='alert-success contact_form'
+                )
+        else:
+            messages.add_message(
+                    request,
+                    messages.INFO,
+                    'Sorry canot verify your identity.',
+                    extra_tags='alert-warning contact_form'
+                )
     return redirect('main:contact')
 
 

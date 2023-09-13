@@ -15,9 +15,7 @@ from djstripe.models import (
         Subscription,
         Price,
     )
-from braces.views import (
-        LoginRequiredMixin,
-    )
+from django.contrib.auth.mixins import LoginRequiredMixin
 from PP2.mixin import (
         AnySubscriptionRequiredMixin,
         AnySubscriptionRequiredDec,
@@ -135,20 +133,19 @@ class ReviewView(BaseBreadcrumbMixin ,generic.ListView):
         return "base_review"
 
 
-
-
-
-
-
-
 class ContactView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
+    login_url = 'user:login'
+    redirect_field_name=None
+
     template_name = "main/contact.html"
     context_object_name = 'context'
+
     @cached_property
     def crumbs(self):
         return [
                 ("contact", reverse("main:contact"))
                 ]
+
     def get_queryset(self):
         return "base_contact"
 

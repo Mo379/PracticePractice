@@ -19,7 +19,13 @@ Contact
 	</div>
 	{%definevar 'contact_form' as alert_loc%}
 	{%include 'base/alert.html'%}
-	<form class="px-3 py-3"  action="{%url 'user:_contact_us'%}" method="POST" role="form">
+ <script src="https://www.google.com/recaptcha/api.js"></script>
+<script>
+   function onSubmit(token) {
+     document.getElementById("contact_form").submit();
+   }
+ </script>
+	<form class="px-3 py-3"  action="{%url 'user:_contact_us'%}" method="POST" role="form" id='contact_form'>
 		{%csrf_token%}
 		<label for="spec_board">Message</label>
 		<input 
@@ -34,7 +40,12 @@ Contact
 			class='form-control mb-3'
 			placeholder='Your message...'
 				></textarea>
-		<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Send </button>
+		<button 
+		type= 'submit' class='btn btn-primary mb-2 g-recaptcha' style='float-right'
+		data-sitekey="6LezHSIoAAAAAPDxsu1OCaBbvHVUDRYLtlrViisw" 
+		data-callback='onSubmit' 
+		data-action='submit'
+		> Send </button>
 	</form>
 	<hr>
 	<div class="text-center">
