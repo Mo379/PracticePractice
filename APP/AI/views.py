@@ -396,20 +396,21 @@ def _ask_from_book(request):
 @csrf_exempt
 def _function_app_endpoint(request):
     if request.method == 'POST':
-        if request.POST['auth_key'] == settings.OPENAI_ORG:
-            lesson_part_id = request.POST['part_id']
-            global_order_id = request.POST['global_order_id']
-            local_order_id = request.POST['local_order_id']
-            user_prompt = request.POST['user_prompt']
-            ai_response = request.POST['ai_response']
-            ai_function_name = request.POST['ai_function_name']
+        json_data = json.loads(request.body)
+        if json_data['auth_key'] == settings.OPENAI_ORG:
+            lesson_part_id = json_data['part_id']
+            global_order_id = json_data['global_order_id']
+            local_order_id = json_data['local_order_id']
+            user_prompt = json_data['user_prompt']
+            ai_response = json_data['ai_response']
+            ai_function_name = json_data['ai_function_name']
             #
             user_part = {"role": 'user', "content": user_prompt}
             ai_part = {"role": 'assistant', "content": ai_response}
             ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_response}
             #
             new_stuff = [user_part, ai_part]
-            if ai_function_name != 'null':
+            if ai_function_name:
                 new_stuff = [user_part, ai_function_part]
             try:
                 lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
