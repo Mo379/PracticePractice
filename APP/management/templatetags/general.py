@@ -192,7 +192,7 @@ def get_percent(denominator, numerator):
 def get_quiz_id(content):
     # setup output
     content = json.loads(content)
-    return content['quiz_id']
+    return content['unique_id']
 @register.filter(name='ToJson')
 def ToJson(content):
     # setup output

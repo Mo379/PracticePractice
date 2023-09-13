@@ -120,7 +120,7 @@ class util{
 		}
 		var my_arguments = function_response_object
 		const q_introduction = my_arguments.quiz_introduction
-		const quiz_id = my_arguments.quiz_id
+		const quiz_id = my_arguments.unique_id
 		const full_quiz = my_arguments.quiz
 		var quiz_html = this.quiz_to_html(full_quiz, quiz_id, part_id, local_order_id)
 		const quiz_html_form = `
@@ -555,7 +555,6 @@ class controller extends model {
 				  },
 				  'lambda_url': json.lambda_url
 				};
-				alert(JSON.stringify(request))
 				const handleSubmit = async () => {
 
 				  const response = await fetch(json.lambda_url, {
@@ -628,6 +627,10 @@ class controller extends model {
 				    document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
 				    if (request.function_call){
 					const json_response_content = JSON.parse(content)
+					json_response_content = {
+							...json_response_content,
+							'unique_id': json.unique_id,
+					}
 				    	const written_output = utility.transform_test_object_to_htmlform(json.function_call.name, json_response_content, point_id, local_order_id, part_id, false)
 					document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = written_output;
 				    }else{

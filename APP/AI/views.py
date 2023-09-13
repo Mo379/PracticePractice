@@ -155,7 +155,7 @@ class AIView(
                                             "is_correct": True if user_answer == solutions[key] else False,
                                             "answer": answers[key],
                                         }
-                                quizzes[content['quiz_id']] = {
+                                quizzes[content['unique_id']] = {
                                         "quiz": questions,
                                         "is_completed": completed,
                                         "percentage_score": percentage_score
@@ -360,6 +360,7 @@ def _ask_from_book(request):
         function_app_endpoint = {
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
                 'user_prompt': str(user_prompt),
+                'unique_id': TagGenerator()
             }
         #
         if int(prompt_type_value) == 1:
@@ -404,13 +405,19 @@ def _function_app_endpoint(request):
             user_prompt = json_data['user_prompt']
             ai_response = json_data['ai_response']
             ai_function_name = json_data['ai_function_name']
+            unique_id = json_data['unique_id']
             #
             user_part = {"role": 'user', "content": user_prompt}
             ai_part = {"role": 'assistant', "content": ai_response}
-            ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_response}
             #
             new_stuff = [user_part, ai_part]
             if ai_function_name:
+                # Your input JSON string
+                ai_response_dict = json.loads(ai_response)
+                ai_response_dict['unique_id'] = unique_id
+                ai_response = json.dumps(ai_response_dict)
+                #
+                ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_response}
                 new_stuff = [user_part, ai_function_part]
             try:
                 lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
@@ -481,7 +488,7 @@ def _mark_quiz_question(request):
                             if item['role'] == 'function':
                                 if item['name'] == 'create_a_quiz':
                                     content = json.loads(item['content'])
-                                    if content['quiz_id'] == quiz_id:
+                                    if content['unique_id'] == quiz_id:
                                         content['user_answers'] = user_answers
                                         chat[part]['thread'][idd]['content'] = json.dumps(content)
                                         return chat
@@ -495,7 +502,7 @@ def _mark_quiz_question(request):
                                 if item['role'] == 'function':
                                     if item['name'] == 'create_a_quiz':
                                         content = json.loads(item['content'])
-                                        if content['quiz_id'] == quiz_id:
+                                        if content['unique_id'] == quiz_id:
                                             return content
                 extracted_quiz = extract_thread_quiz(
                         lesson_part.part_chat,
