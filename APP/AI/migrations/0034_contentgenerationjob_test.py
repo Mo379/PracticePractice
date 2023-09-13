@@ -10,9 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='contentgenerationjob',
-            name='test',
-            field=models.CharField(default='', max_length=255, null=True),
-        ),
     ]
