@@ -137,7 +137,6 @@ class Lesson_part(models.Model):
     prompt = models.IntegerField(default=0, null=True)
     completion = models.IntegerField(default=0, null=True)
     total = models.IntegerField(default=0, null=True)
-    recording_switch = models.BooleanField(default=False, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     terminated_at = models.DateTimeField(null=True, default=None, blank=True)
 

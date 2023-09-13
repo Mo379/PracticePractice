@@ -5,7 +5,7 @@ def create_quiz_function(n_questions):
             'properties':{
                 "question": {
                     "type": "string",
-                    "description": f"Question {id+1} in the multiple choice quiz. (using mathjax $ and $$ for maths)",
+                    "description": f"Question {id+1} in the multiple choice quiz. (using mathjax $ maths)",
                 },
                 "choices": {
                     "type": "object",
@@ -23,7 +23,7 @@ def create_quiz_function(n_questions):
                             'description': 'choice (c) of the quiz'
                         },
                     },
-                    "description": f"A few choices for question {id+1} where only one is correct. (using mathjax $ and $$ for maths notation)",
+                    "description": f"A few choices for question {id+1} where only one is correct. (using mathjax $ maths notation)",
                 },
                 "answer": {
                     "type": "object",
@@ -37,7 +37,7 @@ def create_quiz_function(n_questions):
                             'description': f'A step by step explanation of the answer to question {id}, this explains the steps taken to get the correct choice'
                         },
                     },
-                    "description": f"A detailed step by step answer to the question {id+1} in the multiple choice quiz. (using mathjax $ and $$ for maths)",
+                    "description": f"A detailed step by step answer to the question {id+1} in the multiple choice quiz, this is an explanation of the resoning behind the solution. (using mathjax $ maths)",
                 }
             }
         }
