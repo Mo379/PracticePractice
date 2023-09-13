@@ -17,26 +17,22 @@ function return_to_app_endpoint(function_app_endpoint, ai_response, ai_function_
 		}
 		postData = {
 			...postData,
-			'function_name': ai_function_name,
+			'ai_function_name': ai_function_name,
 			'auth_key': process.env.OPEN_AI_ORGANISATION,
 		};
 		//
 		var XMLHttpRequest = require('xhr2');
 		const xhttp = new XMLHttpRequest();
 		xhttp.open('POST', returnUrl, true);
-		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xhttp.setRequestHeader("Content-type", "application/json");
 		xhttp.send(JSON.stringify(postData));
 		xhttp.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
-				console.log(this.responseText);
 				console.log(this.status);
 			}else{
-				console.log(this.responseText);
 				console.log(this.status);
 			}
 		};
-		console.log(xhttp);
-		console.log(postData);
 	} catch (error){
 		// Handle errors here and potentially send an error response
 		console.error(error);
@@ -56,10 +52,6 @@ export const handler = awslambda.streamifyResponse(
       const functions = JSON.parse(body).functions;
       const function_call = JSON.parse(body).function_call;
       const function_app_endpoint = JSON.parse(body).function_app_endpoint;
-      console.log(messages);
-      console.log(functions);
-      console.log(function_call);
-      console.log(function_app_endpoint);
       const requestOptions = {
         model: "gpt-3.5-turbo-0613",
         temperature: 0.1,
@@ -81,7 +73,6 @@ export const handler = awslambda.streamifyResponse(
 				content += chunk.choices[0].delta.function_call.arguments;
 			}else{
 				responseStream.end();
-				console.log(content);
 				return_to_app_endpoint(function_app_endpoint, content, function_call);
 				return;
 				break;
@@ -92,7 +83,6 @@ export const handler = awslambda.streamifyResponse(
 				content += chunk.choices[0].delta.content;
 			}else{
 				responseStream.end();
-				console.log(content);
 				return_to_app_endpoint(function_app_endpoint, content, function_call);
 				return;
 				break;
