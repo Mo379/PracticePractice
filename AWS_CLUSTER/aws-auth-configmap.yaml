@@ -4,7 +4,7 @@ data:
     - groups:
       - system:bootstrappers
       - system:nodes
-      rolearn: arn:aws:iam::601197766298:role/eksctl-eks-practicepractice-nodeg-NodeInstanceRole-1SDMWDQ3XBYD0
+      rolearn: arn:aws:iam::601197766298:role/eksctl-eks-practicepractice-nodeg-NodeInstanceRole-1G7TMUMMGHR1B
       username: system:node:{{EC2PrivateDNSName}}
   mapUsers: |
     - userarn: arn:aws:iam::601197766298:user/eks-practicepractice
@@ -13,8 +13,8 @@ data:
         - system:masters
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2023-09-07T12:10:58Z"
+  creationTimestamp: "2023-09-14T08:59:47Z"
   name: aws-auth
   namespace: kube-system
-  resourceVersion: "1280"
-  uid: a29e7054-2b79-45c9-8af3-a5d65be2bd85
+  resourceVersion: "1217"
+  uid: afa31717-0aa5-4aeb-b65b-806b6ab7d6f5
