@@ -18,11 +18,18 @@ spec:
   rules:
     - http:
         paths:
-          - path: /*
+          - pathType: Prefix
+            path: /
             backend:
-              serviceName: ssl-redirect
-              servicePort: use-annotation
-          - path: /*
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
+          - pathType: Prefix
+            path: /
             backend:
-              serviceName: metabase
-              servicePort: 443
+              service:
+                name: website
+                port:
+                  number: 443
+
