@@ -162,3 +162,4 @@ jobs:
         export KUBECONFIG=kubeconfig.yaml
         envsubst < ./AWS_CLUSTER/k8s/kustomization.tmpl.yaml > ./AWS_CLUSTER/k8s/kustomization.yaml
         kubectl kustomize ./AWS_CLUSTER/k8s | kubectl apply -f -
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml
