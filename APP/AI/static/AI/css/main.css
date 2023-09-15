@@ -49,6 +49,7 @@ code {
 	grid-template-areas:'chat';
 	max-height: 100vh;
 	min-height: 100vh;
+	font-size: 18px;
 }
 .AI_window_chat{
 	grid-area: chat;

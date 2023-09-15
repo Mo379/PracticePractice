@@ -38,8 +38,8 @@ class controller extends model{
 			var parent_moduel = 'Parent_'
 		}
 		var a = "<div class ='maker_display_option "+class_n+' '+parent_indic+"' id ='disp_"+id+"' data-value='"+value+"'> ";
-		var b = "<p style='display: inline-block;'>"+txt+"</p>";
-		var c = "<a style='display: inline-block;' onclick =controller.C_remove_display_elm('"+id+"')><i class='bi bi-trash' style='color:red;'></i></a>";
+		var b = "<a style='display: inline-block;' onclick =controller.C_remove_display_elm('"+id+"')><i class='bi bi-trash' style='color:red;'></i></a> ";
+		var c = "<p style='display: inline-block;'>"+txt+"</p>";
 		var d = "</div>";
 		return a+b+c+d;
 	}

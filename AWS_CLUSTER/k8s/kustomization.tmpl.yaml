@@ -1,6 +1,7 @@
 resources:
 - deployment.yaml
 - namespace.yaml
+- ingress.yaml
 - service.yaml
 
 images:
