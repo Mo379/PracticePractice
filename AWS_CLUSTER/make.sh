@@ -274,10 +274,11 @@ cluster-configure-ingress() {
     helm repo add eks https://aws.github.io/eks-charts
     helm repo update eks
     helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-	  -n $PROJECT_NAME\
-	  --set clusterName=$PROJECT_NAME\
+	  -n $PROJECT_NAME \
+	  --set clusterName=$PROJECT_NAME \
 	  --set serviceAccount.create=false \
 	  --set serviceAccount.name=aws-load-balancer-controller
+    	  --set region=$AWS_REGION
     kubectl get deployment -n $PROJECT_NAME aws-load-balancer-controller
 }
 
