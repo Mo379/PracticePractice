@@ -34,8 +34,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = decouple_config('django_secret')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple_config('django_debug_state', cast=bool)
-if DEBUG == False:
-    PREPEND_WWW = True
 ALLOWED_HOSTS = decouple_config('django_allowed_hosts', cast=Csv())
 # CND and S3 vars
 CSRF_TRUSTED_ORIGINS = decouple_config('CSRF_TRUSTED_ORIGINS', cast=Csv())
