@@ -6,6 +6,7 @@ AWS_PROFILE=default
 AWS_REGION=eu-west-2
 # project variables
 PROJECT_NAME=eks-practicepractice
+AWS_ACCOUNT_ID=601197766298
 
 # the directory containing the script file
 dir="$(cd "$(dirname "$0")"; pwd)"
@@ -270,6 +271,17 @@ cluster-apply-config() {
 
 # Configure ingress
 cluster-configure-ingress() {
+    curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
+    aws iam create-policy \
+	    --policy-name AWSLoadBalancerControllerIAMPolicy \
+	    --policy-document file://iam_policy.json
+    eksctl create iamserviceaccount \
+	  --cluster=$PROJECT_NAME\
+	  --namespace=$PROJECT_NAME \
+	  --name=aws-load-balancer-controller \
+	  --role-name AmazonEKSLoadBalancerControllerRole \
+	  --attach-policy-arn=arn:aws:iam::$AWS_ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy \
+	  --approve
     kubectl create namespace $PROJECT_NAME
     helm repo add eks https://aws.github.io/eks-charts
     helm repo update eks
