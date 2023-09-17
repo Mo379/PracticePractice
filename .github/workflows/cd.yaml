@@ -8,7 +8,7 @@ on:
 env: 
   AWS_REGION: eu-west-2
   ECR_REPOSITORY: eks-practicepractice
-  SHORT_SHA: $(echo "${{ github.sha }}" | cut -c 1-8)
+  SHORT_SHA: $(echo "${{ github.sha }}" | cut -c 1-12)
 
 
 jobs:
