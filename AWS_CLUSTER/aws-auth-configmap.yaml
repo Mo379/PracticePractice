@@ -4,7 +4,7 @@ data:
     - groups:
       - system:bootstrappers
       - system:nodes
-      rolearn: arn:aws:iam::601197766298:role/eksctl-eks-practicepractice-nodeg-NodeInstanceRole-LMCOK1XBKRWD
+      rolearn: arn:aws:iam::601197766298:role/eksctl-eks-practicepractice-nodeg-NodeInstanceRole-QFTEYDCEMQQT
       username: system:node:{{EC2PrivateDNSName}}
   mapUsers: |
     - userarn: arn:aws:iam::601197766298:user/eks-practicepractice
@@ -13,11 +13,8 @@ data:
         - system:masters
 kind: ConfigMap
 metadata:
-  annotations:
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","data":{"mapRoles":"- groups:\n  - system:bootstrappers\n  - system:nodes\n  rolearn: arn:aws:iam::601197766298:role/eksctl-eks-practicepractice-nodeg-NodeInstanceRole-LMCOK1XBKRWD\n  username: system:node:{{EC2PrivateDNSName}}\n"},"kind":"ConfigMap","metadata":{"annotations":{},"creationTimestamp":"2023-09-17T09:52:18Z","name":"aws-auth","namespace":"kube-system","resourceVersion":"1191","uid":"3c9a8de0-5639-4d3e-b51c-95dd869c9929"}}
-  creationTimestamp: "2023-09-17T09:52:18Z"
+  creationTimestamp: "2023-09-17T10:54:59Z"
   name: aws-auth
   namespace: kube-system
-  resourceVersion: "1989"
-  uid: 3c9a8de0-5639-4d3e-b51c-95dd869c9929
+  resourceVersion: "1183"
+  uid: ee9ed1a3-b05f-482e-ad0c-159150252ec7

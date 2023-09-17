@@ -214,21 +214,6 @@ cluster-create() {
 	--node-volume-size 25
         --profile $AWS_PROFILE
     #
-    eksctl create iamserviceaccount \
-	  --cluster=$PROJECT_NAME \
-	  --namespace=kube-system \
-	  --name=aws-load-balancer-controller \
-	  --role-name AmazonEKSLoadBalancerControllerRole \
-	  --attach-policy-arn=arn:aws:iam::$ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy \
-	  --approve
-    helm repo add eks https://aws.github.io/eks-charts
-    helm repo update eks
-    helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-	  -n kube-system \
-	  --set clusterName=$PROJECT_NAME\
-	  --set serviceAccount.create=false \
-	  --set serviceAccount.name=aws-load-balancer-controller
-    kubectl get deployment -n kube-system aws-load-balancer-controller
 }
 
 # create kubectl EKS configuration
@@ -281,6 +266,19 @@ cluster-apply-config() {
     export AWS_ACCESS_KEY_ID
     export AWS_SECRET_ACCESS_KEY
     kubectl --kubeconfig kubeconfig.yaml get ns
+}
+
+# Configure ingress
+cluster-configure-ingress() {
+    kubectl create namespace $PROJECT_NAME
+    helm repo add eks https://aws.github.io/eks-charts
+    helm repo update eks
+    helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+	  -n $PROJECT_NAME\
+	  --set clusterName=$PROJECT_NAME\
+	  --set serviceAccount.create=false \
+	  --set serviceAccount.name=aws-load-balancer-controller
+    kubectl get deployment -n $PROJECT_NAME aws-load-balancer-controller
 }
 
 # get the cluster ELB URL
