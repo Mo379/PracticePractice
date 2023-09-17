@@ -77,6 +77,13 @@ install-kubectl() {
     else
         log skip kubectl already installed
     fi
+
+    if [[ -z $(which helm) ]]
+    then
+        brew install helm
+    else
+        log skip helm already installed
+    fi
 }
 
 
@@ -206,6 +213,22 @@ cluster-create() {
         --nodes 1 \
 	--node-volume-size 25
         --profile $AWS_PROFILE
+    #
+    eksctl create iamserviceaccount \
+	  --cluster=$PROJECT_NAME \
+	  --namespace=kube-system \
+	  --name=aws-load-balancer-controller \
+	  --role-name AmazonEKSLoadBalancerControllerRole \
+	  --attach-policy-arn=arn:aws:iam::$ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy \
+	  --approve
+    helm repo add eks https://aws.github.io/eks-charts
+    helm repo update eks
+    helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+	  -n kube-system \
+	  --set clusterName=$PROJECT_NAME\
+	  --set serviceAccount.create=false \
+	  --set serviceAccount.name=aws-load-balancer-controller
+    kubectl get deployment -n kube-system aws-load-balancer-controller
 }
 
 # create kubectl EKS configuration
