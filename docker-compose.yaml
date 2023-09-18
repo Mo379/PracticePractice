@@ -12,15 +12,5 @@ services:
       - '5432:5432'
     networks: 
       - PP2_network 
-
-  PP2RDS:
-    image: redis:7.0-alpine
-    ports:
-      - '6379:6379'
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    networks:
-      - PP2_network
-
 networks:
   PP2_network:

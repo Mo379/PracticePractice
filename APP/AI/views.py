@@ -346,7 +346,7 @@ def _ask_from_book(request):
           "chat": [
             {
               "role": "system",
-              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths), the lesson being taught is the following {system_content}.",
+              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths), the lesson being taught is the following {system_content}."
             },
             *chat,
             {
@@ -368,6 +368,8 @@ def _ask_from_book(request):
             functions = [quiz_function[0]]
             function_call = {"name": quiz_function[1]}
             function_app_endpoint['prompt_type_value'] = prompt_type_value
+            message['chat'][0]['content'] = quiz_function[2] + f" {system_content}"
+            print(quiz_function[0])
         elif int(prompt_type_value) == 2:
             functions = None
             function_call = None

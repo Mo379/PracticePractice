@@ -63,7 +63,6 @@ from PP2.mixin import (
 from mdeditor.configs import MDConfig
 from io import BytesIO
 from PP2.utils import h_encode, h_decode
-from AI.tasks import _generate_course_introductions
 from AI.models import (
         ContentPromptQuestion,
         ContentPromptTopic,
@@ -75,7 +74,6 @@ from djstripe.models import (
         Subscription,
         Price,
     )
-from notification.tasks import _send_email
 
 
 MDEDITOR_CONFIGS = MDConfig('default')
@@ -1819,7 +1817,8 @@ def _updatecourseinformation(request):
                     course.course_publication = publication_status
                 course.save()
                 if regenerate_summary:
-                    _generate_course_introductions.delay(request.user.id, course.id)
+                    pass
+                    #_generate_course_introductions.delay(request.user.id, course.id)
             except Exception as e:
                 messages.add_message(
                         request,

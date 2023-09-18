@@ -301,13 +301,6 @@ MDEDITOR_CONFIGS = {
     }
 }
 
-
-
-
-# Celery settings
-CELERY_BROKER_URL = decouple_config('Celery_Broker')
-CELERY_RESULT_BACKEND = decouple_config('Celery_Result')
-
 # Open ai configurations
 OPENAI_ORG = decouple_config('openai_org')
 OPENAI_SECRET = decouple_config('openai_secret')
