@@ -52,8 +52,8 @@ from content.util.GeneralUtil import (
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
-from AI.tasks import _generate_course_content
 from AI.functions import create_quiz_function
+from AI import functions_endpoint
 from management.templatetags.general import ToMarkdownManual
 
 
@@ -401,51 +401,30 @@ def _function_app_endpoint(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
         if json_data['auth_key'] == settings.OPENAI_ORG:
-            lesson_part_id = json_data['part_id']
-            global_order_id = json_data['global_order_id']
-            local_order_id = json_data['local_order_id']
-            user_prompt = json_data['user_prompt']
-            ai_response = json_data['ai_response']
-            ai_function_name = json_data['ai_function_name']
-            unique_id = json_data['unique_id']
-            #
-            user_part = {"role": 'user', "content": user_prompt}
-            ai_part = {"role": 'assistant', "content": ai_response}
-            #
-            new_stuff = [user_part, ai_part]
-            if ai_function_name:
-                # Your input JSON string
-                ai_response_dict = json.loads(ai_response)
-                ai_response_dict['unique_id'] = unique_id
-                ai_response = json.dumps(ai_response_dict)
-                #
-                ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_response}
-                new_stuff = [user_part, ai_function_part]
-            try:
-                lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
-                #
-                part_chat = lesson_part.part_chat[str(int(global_order_id) - 1)]
-                #
-                if 'thread' in part_chat.keys():
-                    part_chat['thread'] = part_chat['thread'][0: int(local_order_id)*2]
-                    part_chat['thread'] += new_stuff
-                else:
-                    part_chat['thread'] = new_stuff
-                lesson_part.part_chat[str(int(global_order_id) - 1)] = part_chat
-                lesson_part.prompt += int(0)
-                lesson_part.completion += int(0)
-                lesson_part.total += int(0)
-                lesson_part.save()
-            except Exception as e:
-                response = {
-                        'status_code': 500,
-                        'message': 'Internal Server Error.'
-                    }
+            if json_data['ai_function_name']:
+                function_name = json_data['ai_function_name']
+                if function_name in ['create_a_quiz', 'create_flashcards', 'create_essay']:
+                    response = functions_endpoint.lesson_prompts(
+                            request,
+                            json_data
+                        )
+                elif function_name == 'create_course_introduction':
+                    response = functions_endpoint.course_introduction_prompts(
+                            request,
+                            json_data
+                        )
+                elif function_name == 'create_course_questions':
+                    pass
+                elif function_name == 'create_course_point':
+                    pass
+                elif function_name == 'send_email':
+                    pass
             else:
-                response = {
-                        'status_code': 200,
-                        'message': 'Sucess'
-                    }
+                response = functions_endpoint.lesson_prompts(
+                        request,
+                        json_data
+                    )
+                
             #
             return JsonResponse(response)
         else:
@@ -639,7 +618,7 @@ def _newgenerationjob(request):
                     moduel=module,
                     chapter=chapter,
                 )
-            _generate_course_content.delay(job.id)
+            #_generate_course_content.delay(job.id)
         except Exception:
             #
             messages.add_message(

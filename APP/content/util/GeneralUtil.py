@@ -530,12 +530,12 @@ def author_user_clicks_data_list(user, month_keys, subscriptions, courses):
 def confirm_question_checks(question):
     message = ''
     status = True
-    if len(str(question.q_content)) < 50:
-        message = f'Failed to pass the minimum question length requirement of at least 50 characters.'
+    if len(str(question.q_content)) < 15:
+        message = f'Failed to pass the minimum question length requirement of at least 15 characters.'
         status = False
         return message, status
-    if len(str(question.q_answer)) < 50:
-        message = f'Failed to pass the minimum question length requirement of at least 50 characters.'
+    if len(str(question.q_answer)) < 15:
+        message = f'Failed to pass the minimum question length requirement of at least 15 characters.'
         status = False
         return message, status
     return message, status 

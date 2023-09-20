@@ -207,7 +207,7 @@ def GetMathString(content):
 @register.filter(name='ProcessToMarkdown')
 def ProcessToMarkdown(content):
     # setup output
-    content_html = markdown.markdown(content, extensions=['tables','admonition', 'fenced_code'])
+    #content_html = markdown.markdown(content, extensions=['tables','admonition', 'fenced_code'])
     return content
 
 
@@ -275,6 +275,7 @@ def ToMarkdown(content, point_id):
 
 
 
+@register.filter(name='ToMarkdownManual')
 def ToMarkdownManual(content, point_id):
     # setup output
     html = ""

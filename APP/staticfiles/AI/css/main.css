@@ -49,6 +49,7 @@ code {
 	grid-template-areas:'chat';
 	max-height: 100vh;
 	min-height: 100vh;
+	font-size: 14px;
 }
 .AI_window_chat{
 	grid-area: chat;
@@ -83,7 +84,7 @@ code {
 	width: 100%;
 	background: var(--second-bg-color);
 	color: var(--text-color-1);
-	padding: 30px;
+	padding: 7px;
 }
 .AI_user_text_area{
 	color: var(--text-color-1);
@@ -106,7 +107,6 @@ code {
 .AI_window_typing{
 }
 .AI_text_wrap{
-	width: 90%;
 	height:auto;
 	margin:auto;
 	display:grid;

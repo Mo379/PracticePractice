@@ -1,3 +1,4 @@
+import json
 import copy
 import datetime
 import pandas as pd
@@ -62,7 +63,7 @@ from PP2.mixin import (
     )
 from mdeditor.configs import MDConfig
 from io import BytesIO
-from PP2.utils import h_encode, h_decode
+from PP2.utils import h_encode, h_decode, fire_and_forget
 from AI.models import (
         ContentPromptQuestion,
         ContentPromptTopic,
@@ -74,6 +75,7 @@ from djstripe.models import (
         Subscription,
         Price,
     )
+from AI.functions import create_course_introduction
 
 
 MDEDITOR_CONFIGS = MDConfig('default')
@@ -1673,7 +1675,6 @@ def _updatecourseinformation(request):
                     course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
                     course.course_summary = '(AI is working...)'
                     course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
-                    course.course_publication = False
                 #
                 # Upload image
                 if course_upload_image:
@@ -1817,8 +1818,40 @@ def _updatecourseinformation(request):
                     course.course_publication = publication_status
                 course.save()
                 if regenerate_summary:
-                    pass
-                    #_generate_course_introductions.delay(request.user.id, course.id)
+                    courseIntro_function = create_course_introduction(request.user, course, 10)
+                    print(courseIntro_function)
+                    message = {
+                      "chat": [
+                        {
+                          "role": "system",
+                          "content": courseIntro_function[2]
+                        },
+                        {
+                          "role": "user",
+                          "content": """With the information provided for this
+                              course, please create a list of skills or objectives
+                              that the studnet can expect to achive, do not use
+                              too many words per skill or learning objective"""
+                        }
+                      ]
+                    }
+                    functions = [courseIntro_function[0]]
+                    function_call = {"name": courseIntro_function[1]}
+                    lambda_url = settings.CHATGPT_LAMBDA_URL
+                    function_app_endpoint = {
+                            'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                            'course_id': course.id,
+                        }
+                    request_body = {
+                            'message': message['chat'],
+                            'functions': functions,
+                            'function_call': function_call,
+                            'function_app_endpoint': function_app_endpoint,
+                        }
+                    headers = {
+                        "Content-Type": "application/json",
+                    }
+                    fire_and_forget(lambda_url, request_body, headers)
             except Exception as e:
                 messages.add_message(
                         request,

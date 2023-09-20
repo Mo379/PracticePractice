@@ -21,22 +21,24 @@
 		<!-- Custom styles for this footer-->
 		<link rel="stylesheet" href="{%static 'AI/css/main.css'%}">
 		<link rel="stylesheet" href="{%static 'AI/css/layout.css'%}">
-		<link rel="stylesheet" href="{%static 'base/css/codehilite.css'%}">
 		{% block pagestatic%}
 		{% endblock %}
 		<title>
 		    {% block title %}
 		    {% endblock %}
 		</title>
+		<!-- and it's easy to individually load additional languages -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/go.min.js"></script>
 		
 		{%if user.theme == 'lig' %}
 		<link rel="stylesheet" href="{%static 'base/css/light_theme.css'%}">
-		{%elif user.theme == 'lib' %}
-		<link rel="stylesheet" href="{%static 'base/css/library_theme.css'%}">
+		{%definevar 'base/css/hljs/github.css' as CODE_THEME_NAME%}
 		{%elif user.theme == 'dar' or user.is_authenticated == False%}
 		<link rel="stylesheet" href="{%static 'base/css/dark_theme.css'%}">
+		{%definevar 'base/css/hljs/github-dark.css' as CODE_THEME_NAME%}
 		{%endif%}
-		<!DOCTYPE html>
+		<link rel="stylesheet" href="{%static CODE_THEME_NAME%}"></link>
 
 
 

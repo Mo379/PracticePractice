@@ -447,10 +447,9 @@ def _contact_us(request):
         message_subject = request.POST['message_subject']
         message = request.POST['message']
         captcha_response = request.POST['g-recaptcha-response']
-        print(captcha_response)
-        to_email = 'info@practicepractice.net'
+        to_email = 'admin@practicepractice.net'
         data = {
-            'secret': '',
+            'secret': '6LezHSIoAAAAAMqd1S5XrTR5CoZ5C4ep6D7vY2Hl',
             'response': captcha_response,
         }
         import requests
@@ -459,16 +458,9 @@ def _contact_us(request):
         if result['success'] and request.user.is_authenticated:
             send_mail(
                 message_subject,
-                message,
+                message + f'\n\n {request.user.email}',
                 to_email,
                 [to_email],
-                fail_silently=False,
-            )
-            send_mail(
-                message_subject,
-                message,
-                to_email,
-                [request.user.email],
                 fail_silently=False,
             )
             messages.add_message(

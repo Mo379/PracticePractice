@@ -1,4 +1,6 @@
 from django.conf import settings
+import requests
+import threading
 
 hashids = settings.HASHIDS
 
@@ -25,3 +27,11 @@ class HashIdConverter:
 
 def get_filename(filename, request):
     return filename.upper()
+
+
+def request_task(url, json, headers):
+    requests.post(url, json=json, headers=headers)
+
+
+def fire_and_forget(url, json, headers):
+    threading.Thread(target=request_task, args=(url, json, headers)).start()

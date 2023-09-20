@@ -249,10 +249,6 @@ class StudentPerformanceView(
                 )
             )
         #
-        lessons = Lesson.objects.filter(user=self.request.user, course=course)
-        lesson_parts = Lesson_part.objects.filter(user=self.request.user, lesson__in=lessons)
-        total_tokens = lesson_parts.aggregate(total_sum=Sum('total'))['total_sum']
-        #
         quizzes = Lesson_quiz.objects.filter(user=self.request.user, course=course)
         completed_quizzes = quizzes.filter(completed=True)
         papers = UserPaper.objects.filter(user=self.request.user, pap_course=course)
@@ -270,7 +266,6 @@ class StudentPerformanceView(
         context['total_n_questions'] = total_n_questions
         context['total_q_tracks'] = total_q_tracks
         context['difficulty_statistics'] = difficulty_statistics
-        context['total_tokens'] = total_tokens if total_tokens else 0
         context['total_tests'] = total_tests
         context['total_completed_tests'] = total_completed_tests
         context['total_average_score'] = round(total_average_score)
@@ -286,9 +281,6 @@ class StudentPerformanceView(
             formatted_month = month.strftime('%b %y')
             labels.append(formatted_month)
         labels.reverse()
-        usage_dataset = user_course_usage_monthly_sum_data_list(
-                [Lesson_part], labels, lessons,'created_at', n_months
-            )
         performance_index_data = performance_index_monthly_sum_data_list(
                 QuestionTrack, labels, self.request.user, course, 'track_creation_time', n_months
             )
@@ -309,7 +301,6 @@ class StudentPerformanceView(
         })
         context['labels'] = labels
         context['datasets'] = datasets
-        context['usage_dataset'] = usage_dataset
         #
         context['q_diff_pie_labels'] = [f"Difficulty {i}" for i in range(1, 6, 1)]
         context['q_diff_polar_labels'] = [f"Difficulty {i}" for i in range(1, 6, 1)]
