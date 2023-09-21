@@ -51,6 +51,7 @@
 			name='Prompt' 
 			placeholder='Prompt...'
 			id='text_t_prompt_{{t_prompt.id}}'
+			rows=10
 		       value=''
 		>{{t_prompt.prompt}}</textarea>
 		<button class="btn btn-primary" type="button" onclick="controller.C_save_prompt_topic('{%url 'AI:_saveprompttopic'%}', '{{csrf_token}}', '{{t_prompt.id}}')">
@@ -117,6 +118,7 @@
 			name='Prompt' 
 			placeholder='Prompt...'
 			id='text_p_prompt_{{p_prompt.id}}'
+			rows=10
 		       value=''
 		>{{p_prompt.prompt}}</textarea>
 		<button class="btn btn-info" type="button" onclick="controller.C_save_prompt_point('{%url 'AI:_savepromptpoint'%}', '{{csrf_token}}', '{{p_prompt.id}}')">

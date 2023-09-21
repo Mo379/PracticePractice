@@ -3,20 +3,46 @@ from content.util.GeneralUtil import (
         order_full_spec_content,
         order_live_spec_content
     )
+from AI.models import ContentPromptTopic
 from content.models import Course, Question, Point
 from user.models import User
 
 
-def create_course_point():
+def create_course_point(request, instructor_context, point_prompt_obj):
+    spec = point_prompt_obj.specification
+    level = spec.spec_level
+    subject = spec.spec_subject
+    module = point_prompt_obj.moduel
+    topic = point_prompt_obj.topic
+    chapter = point_prompt_obj.chapter
+    t_prmpts = ContentPromptTopic.objects.filter(
+            user=request.user,
+            specification=spec,
+            moduel=module,
+            chapter=chapter,
+        )
+    topic_text = t_prmpts.filter(topic=topic)[0].prompt
+    point_text = point_prompt_obj.prompt
+    point = Point.objects.get(p_unique_id=point_prompt_obj.p_unique)
+    point_title = point.p_title
+    def points_prompt(level, subject, module, chapter, point_title, topic_text, point_text, instructor_context):
+        return f"For a course staged in '{level}', the subject is {subject}, \
+            the module for content is {module} and the chapter is {chapter}, \
+            create a short lesson for the lesson point titled '{point_title}', that \
+            teaches this in a way that is easy \
+            to build an understanding, use the following \
+            context to help with the content of the lesson, \
+            ('context_1':'{topic_text}', 'context_2':'{point_text}')."
+    system_message = points_prompt(level, subject, module, chapter, point_title, topic_text, point_text, instructor_context)
     function_description = {
         "name": "create_course_point",
-        "description": "Create a point for the content or topic provided",
+        "description": "Creates a step by step lesson for the content or topic description provided using mathjax and markdown",
         "parameters": {
             "type": "object",
             "properties": {
                 "point": {
                     "type": "string",
-                    "description": "A point teaching the following lesson",
+                    "description": "A a complete step by step lesson teaching the previously mentioned details.",
                 },
             },
             "required": [
@@ -24,7 +50,6 @@ def create_course_point():
             ],
         },
     }
-    system_message = "Youre a helpful tutor creating study content"
     return function_description, 'create_course_point', system_message
 
 

@@ -81,7 +81,7 @@
 			placeholder='Prompt...'
 			id='text_q_prompt_{{q_prompt.id}}'
 		       value=''
-		       rows='15'
+		       rows='10'
 		>{{q_prompt.prompt}}</textarea>
 		<button class="btn btn-info" type="button" onclick="controller.C_save_prompt_question('{%url 'AI:_savepromptquestion'%}', '{{csrf_token}}', '{{q_prompt.id}}')">
 			Generate
