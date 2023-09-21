@@ -1049,7 +1049,6 @@ def _management_options(request):
 @AuthorRequiredDec
 def _author_confirmation_question(request):
     if request.method == 'POST':
-        spec_id = request.POST['spec_id']
         question_id = request.POST['question_id']
         confirmation = True if 'confirmationToggle' in request.POST else False
         #
@@ -1060,53 +1059,14 @@ def _author_confirmation_question(request):
         if confirmation_status:
             question.author_confirmation=confirmation
             question.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Successfully confirmed question content.',
-                    extra_tags='alert-success spectopic'
-                )
-            kwargs = {
-                'level': spec.spec_level,
-                'subject': question.q_subject,
-                'module': question.q_moduel,
-                'chapter': question.q_chapter,
-                'board': spec.spec_board,
-                'name': spec.spec_name
-            }
-            return redirect(
-                    'dashboard:spectopic',
-                    **kwargs
-                )
-        else:
-            question.author_confirmation=False
-            question.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    confirmation_message,
-                    extra_tags='alert-warning editorquestion'
-                )
-            kwargs = {
-                'spec_id': spec.id,
-                'question_id': question.id
-            }
-            return redirect(
-                    'content:editorquestion',
-                    **kwargs
-                )
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+        return JsonResponse({'error': 1, 'message': confirmation_message})
+    return JsonResponse({'error': 1, 'message': 'Error2'})
 
 
 @AuthorRequiredDec
 def _author_confirmation_point(request):
     if request.method == 'POST':
-        spec_id = request.POST['spec_id']
         point_id = request.POST['point_id']
         confirmation = True if 'confirmationToggle' in request.POST else False
         #
@@ -1117,49 +1077,9 @@ def _author_confirmation_point(request):
         if confirmation_status:
             point.author_confirmation=confirmation
             point.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            #
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Successfully confirmed point content.',
-                    extra_tags='alert-success spectopic'
-                )
-            kwargs = {
-                'level': spec.spec_level,
-                'subject': point.p_subject,
-                'module': point.p_moduel,
-                'chapter': point.p_chapter,
-                'board': spec.spec_board,
-                'name': spec.spec_name
-            }
-            return redirect(
-                    'dashboard:spectopic',
-                    **kwargs
-                )
-        else:
-            point.author_confirmation=False
-            point.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            #
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    confirmation_message,
-                    extra_tags='alert-warning editorpoint'
-                )
-            kwargs = {
-                'spec_id': spec.id,
-                'point_id': point.id
-            }
-            return redirect(
-                    'content:editorpoint',
-                    **kwargs
-                )
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+        return JsonResponse({'error': 1, 'message': confirmation_message})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 @AuthorRequiredDec

@@ -67,9 +67,6 @@
 			    {%for B in information|index:A%}
 			    <div class="tab-pane fade" id="ref-{{A}}-{{B}}" 
 				role="tabpanel" aria-labelledby="id-{{A}}-{{B}}">
-					<a style='display:block; margin:auto;width:70px;font-size:16px;'href="{%url 'content:editorquestion' spec.id B.id%}">
-						<i class="bi bi-pencil-square"></i> Edit 
-					</a>
 					<div class="container col-9 text-justify" style='border-left:1px solid black;'>
 						<div class='ml-1' style='border-left: 1px solid grey;'>
 						    <div class='ml-1 mb-3' style='border-left: 2px dashed silver; padding-left:5px;'>
@@ -82,9 +79,11 @@
 						</div>
 						<div style='border-bottom: 1px dashed silver;'></div>
 					</div>
-					<form class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_question'%}">
+					{%concat 'form_' B.id as form_id%}
+					{%concat 'frame_' B.id as frame_id%}
+					{%concat 'saving_indicator_' B.id as indicator_id%}
+					<form id='{{form_id}}' target="{{frame_id}}" class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_question'%}" enctype="multipart/form-data">
 						    {% csrf_token %}
-						    <input type="hidden" name="spec_id" value="{{ spec.id }}">
 						    <input type="hidden" name="question_id" value="{{ B.id }}">
 						    <div class="mb-3">
 							<label>
@@ -95,13 +94,18 @@
 							    >
 							    The content above is correct and has been cleared of any errors.
 							</label>
+							<a style='display:block; margin:auto;width:70px;font-size:16px;'href="{%url 'content:editorquestion' spec.id B.id%}">
+								<i class="bi bi-pencil-square"></i> Edit 
+							</a><br><br>
 						    </div>
 
 						    <!-- Your other form fields can go here -->
 
-						    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button>
-						    <span id="saving_indicator_question_{{B.id}}"> all saved</span>
+						    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button><br><br>
+						    <span id="{{indicator_id}}"> all saved</span>
 					</form>
+					<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+					{%include 'content/items/smart_save.html'%}
 			    </div>
 			    {%endfor%}
 			</div>

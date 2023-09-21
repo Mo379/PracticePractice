@@ -99,7 +99,7 @@ Bin
 					</span>
 					<span class='font-weight-bold ml-2' id='course_outline_span'>
 						<i class="bi bi-arrow-bar-right course_outline_icon"></i> 
-						<a href="{%url 'content:editorpoint' spec.id point|p_unique_to_id%}">Point - {{point|p_unique_to_title|field_name_to_label}}</a>
+						<a href="{%url 'content:noteedit' spec.id context.module context.chapter%}#point_{{point|p_unique_to_id}}">Point - {{point|p_unique_to_title|field_name_to_label}}</a>
 						{%if point in context.author_confirmed_topic_points|index:topic%}
 						<i class="bi bi-x-circle text-warning"></i>
 						{%else%}

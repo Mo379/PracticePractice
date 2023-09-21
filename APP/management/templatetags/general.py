@@ -149,6 +149,11 @@ def definevar(val=None):
     return val
 
 
+@register.simple_tag
+def concat(str1, str2):
+    return str(str1) + str(str2)
+
+
 @register.filter(name='divide')
 def divide(value, arg):
     try:
