@@ -80,11 +80,14 @@ jobs:
         echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> .env
         echo "DB_HOST=${{secrets.DB_HOST}}" >> .env
         echo "DB_PORT=${{secrets.DB_PORT}}" >> .env
+<<<<<<< HEAD
         dont forget to remove celery from live
         echo "Celery_Broker=${{secrets.Celery_Broker}}" >> .env
         echo "Celery_Result=${{secrets.Celery_Result}}" >> .env
         echo "Celery_Broker=${{secrets.Celery_Broker}}" >> .env
         echo "Celery_Result=${{secrets.Celery_Result}}" >> .env
+=======
+>>>>>>> main
         echo "PAYPAL_MODE=${{secrets.PAYPAL_MODE}}" >> .env
         echo "Paypal_live_account=${{secrets.Paypal_live_account}}" >> .env
         echo "Paypal_live_client_id=${{secrets.Paypal_live_client_id}}" >> .env
