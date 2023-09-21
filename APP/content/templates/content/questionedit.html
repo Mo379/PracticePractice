@@ -33,10 +33,11 @@
 
 <section class="py-5 " style='margin-bottom:250px;'>
     <div class="container">
+	<a type="button" style='display:block;margin:auto;max-width: 200px;'class="btn btn-info mb-2" href='{%url 'dashboard:spectopic' spec.spec_level  spec.spec_subject spec.spec_board spec.spec_name sample.q_moduel sample.q_chapter%}'>
+	<i class="bi bi-arrow-bar-left"></i> Go back</a><br>
 	<h1 class="text-center pb-3 mb-4" style='font-size:24px;'>
 	    {{context.sampl_object.q_chapter|field_name_to_label}}
-	    <a href='{%url 'dashboard:spectopic' spec.spec_level  spec.spec_subject spec.spec_board spec.spec_name sample.q_moduel sample.q_chapter%}'><i class="bi bi-plus-square"></i></a>
-	</h1>
+	</h1><br>
 	<p class="text-center pb-3 mb-4" style='font-size:12px;'>
 	{{context.sampl_object.q_level|field_name_to_label}} Chapter questions, on {{context.sampl_object.q_moduel|field_name_to_label}}.
 	</p>
@@ -73,10 +74,38 @@
 						    {{B|ToMarkdownQuestion:B.id|safe}}
 							<br><br>Answer:<br><br>
 						    {{B.q_answer}}
+							<br><br>Marks: {{B.q_marks}}
 						    </div>
 						</div>
 						<div style='border-bottom: 1px dashed silver;'></div>
 					</div>
+					{%concat 'form_' B.id as form_id%}
+					{%concat 'frame_' B.id as frame_id%}
+					{%concat 'saving_indicator_' B.id as indicator_id%}
+					<form id='{{form_id}}' target="{{frame_id}}" class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_question'%}" enctype="multipart/form-data">
+						    {% csrf_token %}
+						    <input type="hidden" name="question_id" value="{{ B.id }}">
+						    <div class="mb-3">
+							<label>
+							    <input type="checkbox" id="confirmationToggle" name="confirmationToggle" class="form-check-input"
+								{%if B.author_confirmation%}
+									checked
+								{%endif%}
+							    >
+							    The content above is correct and has been cleared of any errors.
+							</label>
+							<a style='display:block; margin:auto;width:70px;font-size:16px;'href="{%url 'content:editorquestion' spec.id B.id%}">
+								<i class="bi bi-pencil-square"></i> Edit 
+							</a><br><br>
+						    </div>
+
+						    <!-- Your other form fields can go here -->
+
+						    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button><br><br>
+						    <span id="{{indicator_id}}"> all saved</span>
+					</form>
+					<iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
+					{%include 'content/items/smart_save.html'%}
 			    </div>
 			    {%endfor%}
 			</div>

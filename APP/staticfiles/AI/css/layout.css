@@ -9,6 +9,9 @@
 		grid-template-columns: 1fr;
 		grid-template-areas: "window";
 	}	
+	.AI_text_wrap{
+		width: 100%;
+	}
 	#AI_side_bar{
 		position: absolute !important;
 		top: 0;
@@ -43,6 +46,9 @@
 		grid-template-columns: 1fr;
 		grid-template-areas: "window";
 	}	
+	.AI_text_wrap{
+		width: 100%;
+	}
 	#AI_side_bar{
 		position: absolute !important;
 		top: 0;
@@ -76,6 +82,9 @@
 		grid-template-columns: 1fr;
 		grid-template-areas: "window";
 	}	
+	.AI_text_wrap{
+		width: 70%;
+	}
 	#AI_side_bar{
 		position: absolute !important;
 		top: 0;

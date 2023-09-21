@@ -149,6 +149,11 @@ def definevar(val=None):
     return val
 
 
+@register.simple_tag
+def concat(str1, str2):
+    return str(str1) + str(str2)
+
+
 @register.filter(name='divide')
 def divide(value, arg):
     try:
@@ -207,7 +212,7 @@ def GetMathString(content):
 @register.filter(name='ProcessToMarkdown')
 def ProcessToMarkdown(content):
     # setup output
-    content_html = markdown.markdown(content, extensions=['tables','admonition', 'fenced_code'])
+    #content_html = markdown.markdown(content, extensions=['tables','admonition', 'fenced_code'])
     return content
 
 
@@ -275,6 +280,7 @@ def ToMarkdown(content, point_id):
 
 
 
+@register.filter(name='ToMarkdownManual')
 def ToMarkdownManual(content, point_id):
     # setup output
     html = ""

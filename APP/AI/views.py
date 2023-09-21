@@ -52,8 +52,8 @@ from content.util.GeneralUtil import (
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
-from AI.tasks import _generate_course_content
-from AI.functions import create_quiz_function
+from AI.functions import create_quiz_function, create_course_questions, create_course_point
+from AI import functions_endpoint
 from management.templatetags.general import ToMarkdownManual
 
 
@@ -346,7 +346,7 @@ def _ask_from_book(request):
           "chat": [
             {
               "role": "system",
-              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths), the lesson being taught is the following {system_content}.",
+              "content": f"Youre a helpful tutor for this student. Your responses are formatted in HTML and MATHJAX ($ for inline maths), the lesson being taught is the following {system_content}."
             },
             *chat,
             {
@@ -368,6 +368,7 @@ def _ask_from_book(request):
             functions = [quiz_function[0]]
             function_call = {"name": quiz_function[1]}
             function_app_endpoint['prompt_type_value'] = prompt_type_value
+            message['chat'][0]['content'] = quiz_function[2] + f" {system_content}"
         elif int(prompt_type_value) == 2:
             functions = None
             function_call = None
@@ -399,51 +400,36 @@ def _function_app_endpoint(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
         if json_data['auth_key'] == settings.OPENAI_ORG:
-            lesson_part_id = json_data['part_id']
-            global_order_id = json_data['global_order_id']
-            local_order_id = json_data['local_order_id']
-            user_prompt = json_data['user_prompt']
-            ai_response = json_data['ai_response']
-            ai_function_name = json_data['ai_function_name']
-            unique_id = json_data['unique_id']
-            #
-            user_part = {"role": 'user', "content": user_prompt}
-            ai_part = {"role": 'assistant', "content": ai_response}
-            #
-            new_stuff = [user_part, ai_part]
-            if ai_function_name:
-                # Your input JSON string
-                ai_response_dict = json.loads(ai_response)
-                ai_response_dict['unique_id'] = unique_id
-                ai_response = json.dumps(ai_response_dict)
-                #
-                ai_function_part = {"role": 'function', "name": ai_function_name, "content": ai_response}
-                new_stuff = [user_part, ai_function_part]
-            try:
-                lesson_part = Lesson_part.objects.get(pk=lesson_part_id)
-                #
-                part_chat = lesson_part.part_chat[str(int(global_order_id) - 1)]
-                #
-                if 'thread' in part_chat.keys():
-                    part_chat['thread'] = part_chat['thread'][0: int(local_order_id)*2]
-                    part_chat['thread'] += new_stuff
+            if json_data['ai_function_name']:
+                function_name = json_data['ai_function_name']
+                if function_name in ['create_a_quiz', 'create_flashcards', 'create_essay']:
+                    response = functions_endpoint.lesson_prompts(
+                            request,
+                            json_data
+                        )
+                elif function_name == 'create_course_introduction':
+                    response = functions_endpoint.course_introduction_prompts(
+                            request,
+                            json_data
+                        )
+                elif function_name == 'create_course_questions':
+                    response = functions_endpoint.course_questions_prompts(
+                            request,
+                            json_data
+                        )
+                elif function_name == 'create_course_point':
+                    response = functions_endpoint.course_point_prompts(
+                            request,
+                            json_data
+                        )
                 else:
-                    part_chat['thread'] = new_stuff
-                lesson_part.part_chat[str(int(global_order_id) - 1)] = part_chat
-                lesson_part.prompt += int(0)
-                lesson_part.completion += int(0)
-                lesson_part.total += int(0)
-                lesson_part.save()
-            except Exception as e:
-                response = {
-                        'status_code': 500,
-                        'message': 'Internal Server Error.'
-                    }
+                    response = {'status_code': 500, 'message': 'Internal Server Error.'}
             else:
-                response = {
-                        'status_code': 200,
-                        'message': 'Sucess'
-                    }
+                response = functions_endpoint.lesson_prompts(
+                        request,
+                        json_data
+                    )
+                
             #
             return JsonResponse(response)
         else:
@@ -637,7 +623,7 @@ def _newgenerationjob(request):
                     moduel=module,
                     chapter=chapter,
                 )
-            _generate_course_content.delay(job.id)
+            #_generate_course_content.delay(job.id)
         except Exception:
             #
             messages.add_message(
@@ -672,13 +658,45 @@ def _savepromptquestion(request):
     if request.method == 'POST':
         q_prompt_id = request.POST['q_prompt_id']
         q_prompt = request.POST['q_prompt']
-        activated = True if request.POST['activated'] == 'true' else False
         #
-        prompt = ContentPromptQuestion.objects.get(pk=q_prompt_id)
+        prompt = ContentPromptQuestion.objects.get(user=request.user, pk=q_prompt_id)
         prompt.prompt = q_prompt
-        prompt.activated = activated
         prompt.save()
-        return JsonResponse({'error': 0, 'message': 'Saved'})
+        #
+        lambda_url = settings.CHATGPT_LAMBDA_URL
+        #
+        message = {
+          "chat": [
+            {
+              "role": "system",
+              "content": "Placeholder"
+            },
+            {
+              "role": "user",
+              "content": 'Please generate those questions'
+            }
+          ]
+        }
+        function_app_endpoint = {
+                'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                'q_prompt_id': q_prompt_id
+            }
+        #
+        quiz_function = create_course_questions(q_prompt, prompt, 5)
+        functions = [quiz_function[0]]
+        function_call = {"name": quiz_function[1]}
+        message['chat'][0]['content'] = quiz_function[2]
+
+        #
+        response = {
+                'error': 0,
+                'message': message,
+                'functions': functions,
+                'function_call': function_call,
+                'function_app_endpoint': function_app_endpoint,
+                'lambda_url': lambda_url,
+            }
+        return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 
@@ -700,11 +718,42 @@ def _savepromptpoint(request):
     if request.method == 'POST':
         p_prompt_id = request.POST['p_prompt_id']
         p_prompt = request.POST['p_prompt']
-        activated = True if request.POST['activated'] == 'true' else False
         #
-        prompt = ContentPromptPoint.objects.get(pk=p_prompt_id)
+        prompt = ContentPromptPoint.objects.get(user=request.user, pk=p_prompt_id)
         prompt.prompt = p_prompt
-        prompt.activated = activated
         prompt.save()
-        return JsonResponse({'error': 0, 'message': 'Saved'})
+        #
+        lambda_url = settings.CHATGPT_LAMBDA_URL
+        #
+        message = {
+          "chat": [
+            {
+              "role": "system",
+              "content": "Placeholder"
+            },
+            {
+              "role": "user",
+              "content": 'Please write this lesson.'
+            }
+          ]
+        }
+        function_app_endpoint = {
+                'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                'p_prompt_id': p_prompt_id
+            }
+        #
+        quiz_function = create_course_point(request, p_prompt, prompt)
+        functions = [quiz_function[0]]
+        function_call = {"name": quiz_function[1]}
+        message['chat'][0]['content'] = quiz_function[2]
+        #
+        response = {
+                'error': 0,
+                'message': message,
+                'functions': functions,
+                'function_call': function_call,
+                'function_app_endpoint': function_app_endpoint,
+                'lambda_url': lambda_url,
+            }
+        return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Error'})

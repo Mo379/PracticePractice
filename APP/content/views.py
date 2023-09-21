@@ -1,3 +1,4 @@
+import json
 import copy
 import datetime
 import pandas as pd
@@ -62,8 +63,7 @@ from PP2.mixin import (
     )
 from mdeditor.configs import MDConfig
 from io import BytesIO
-from PP2.utils import h_encode, h_decode
-from AI.tasks import _generate_course_introductions
+from PP2.utils import h_encode, h_decode, fire_and_forget
 from AI.models import (
         ContentPromptQuestion,
         ContentPromptTopic,
@@ -75,7 +75,7 @@ from djstripe.models import (
         Subscription,
         Price,
     )
-from notification.tasks import _send_email
+from AI.functions import create_course_introduction
 
 
 MDEDITOR_CONFIGS = MDConfig('default')
@@ -1049,7 +1049,6 @@ def _management_options(request):
 @AuthorRequiredDec
 def _author_confirmation_question(request):
     if request.method == 'POST':
-        spec_id = request.POST['spec_id']
         question_id = request.POST['question_id']
         confirmation = True if 'confirmationToggle' in request.POST else False
         #
@@ -1060,53 +1059,14 @@ def _author_confirmation_question(request):
         if confirmation_status:
             question.author_confirmation=confirmation
             question.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Successfully confirmed question content.',
-                    extra_tags='alert-success spectopic'
-                )
-            kwargs = {
-                'level': spec.spec_level,
-                'subject': question.q_subject,
-                'module': question.q_moduel,
-                'chapter': question.q_chapter,
-                'board': spec.spec_board,
-                'name': spec.spec_name
-            }
-            return redirect(
-                    'dashboard:spectopic',
-                    **kwargs
-                )
-        else:
-            question.author_confirmation=False
-            question.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    confirmation_message,
-                    extra_tags='alert-warning editorquestion'
-                )
-            kwargs = {
-                'spec_id': spec.id,
-                'question_id': question.id
-            }
-            return redirect(
-                    'content:editorquestion',
-                    **kwargs
-                )
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+        return JsonResponse({'error': 1, 'message': confirmation_message})
+    return JsonResponse({'error': 1, 'message': 'Error2'})
 
 
 @AuthorRequiredDec
 def _author_confirmation_point(request):
     if request.method == 'POST':
-        spec_id = request.POST['spec_id']
         point_id = request.POST['point_id']
         confirmation = True if 'confirmationToggle' in request.POST else False
         #
@@ -1117,49 +1077,9 @@ def _author_confirmation_point(request):
         if confirmation_status:
             point.author_confirmation=confirmation
             point.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            #
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Successfully confirmed point content.',
-                    extra_tags='alert-success spectopic'
-                )
-            kwargs = {
-                'level': spec.spec_level,
-                'subject': point.p_subject,
-                'module': point.p_moduel,
-                'chapter': point.p_chapter,
-                'board': spec.spec_board,
-                'name': spec.spec_name
-            }
-            return redirect(
-                    'dashboard:spectopic',
-                    **kwargs
-                )
-        else:
-            point.author_confirmation=False
-            point.save()
-            spec = Specification.objects.get(
-                    id=spec_id
-                )
-            #
-            messages.add_message(
-                    request,
-                    messages.INFO,
-                    confirmation_message,
-                    extra_tags='alert-warning editorpoint'
-                )
-            kwargs = {
-                'spec_id': spec.id,
-                'point_id': point.id
-            }
-            return redirect(
-                    'content:editorpoint',
-                    **kwargs
-                )
+            return JsonResponse({'error': 0, 'message': 'Saved'})
+        return JsonResponse({'error': 1, 'message': confirmation_message})
+    return JsonResponse({'error': 1, 'message': 'Error'})
 
 
 @AuthorRequiredDec
@@ -1675,7 +1595,6 @@ def _updatecourseinformation(request):
                     course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
                     course.course_summary = '(AI is working...)'
                     course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
-                    course.course_publication = False
                 #
                 # Upload image
                 if course_upload_image:
@@ -1819,7 +1738,40 @@ def _updatecourseinformation(request):
                     course.course_publication = publication_status
                 course.save()
                 if regenerate_summary:
-                    _generate_course_introductions.delay(request.user.id, course.id)
+                    courseIntro_function = create_course_introduction(request.user, course, 10)
+                    print(courseIntro_function)
+                    message = {
+                      "chat": [
+                        {
+                          "role": "system",
+                          "content": courseIntro_function[2]
+                        },
+                        {
+                          "role": "user",
+                          "content": """With the information provided for this
+                              course, please create a list of skills or objectives
+                              that the studnet can expect to achive, do not use
+                              too many words per skill or learning objective"""
+                        }
+                      ]
+                    }
+                    functions = [courseIntro_function[0]]
+                    function_call = {"name": courseIntro_function[1]}
+                    lambda_url = settings.CHATGPT_LAMBDA_URL
+                    function_app_endpoint = {
+                            'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                            'course_id': course.id,
+                        }
+                    request_body = {
+                            'message': message['chat'],
+                            'functions': functions,
+                            'function_call': function_call,
+                            'function_app_endpoint': function_app_endpoint,
+                        }
+                    headers = {
+                        "Content-Type": "application/json",
+                    }
+                    fire_and_forget(lambda_url, request_body, headers)
             except Exception as e:
                 messages.add_message(
                         request,

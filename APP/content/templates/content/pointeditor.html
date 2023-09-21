@@ -33,28 +33,10 @@ var object_type = "Point";
 
 {%include 'content/items/GPT_item.html'%}
 {%include 'content/items/editor_items.html'%}
-<div class="card-body">
-	<div class="card shadow">
-		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-			<h5 class="h4 mb-1 text-primary font-weight-bold">
-				<a href='{%url 'dashboard:spectopic' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name context.point.p_moduel context.point.p_chapter%}'>
-					<i class="bi bi-plus-square"></i>
-				</a>
-				<a href='
-{%if 'contribution' in context.url%}
-{%url 'content:contribution_noteedit' context.task.id %}#point_{{context.point.id}}
-{%else%}
-{%url 'content:noteedit' context.spec.id context.point.p_moduel context.point.p_chapter%}#point_{{context.point.id}}
-{%endif%}
-			'>
-{{context.point.p_topic|field_name_to_label}}: {{context.point.p_title|field_name_to_label}}
-			</a>
-			</h5>
-		</div>
-	</div>
-</div>
 
-
+<a type="button" style='display:block; margin:auto;width:200px;font-size:16px;' class="btn btn-info mb-2" href='{%url 'content:noteedit' context.spec.id context.point.p_moduel context.point.p_chapter%}#point_{{context.point.id}}'>
+<i class="bi bi-arrow-bar-left"></i> Go back
+</a>
 
 {%definevar 'editor_form' as form_id%}
 {%definevar 'editor_frame' as frame_id%}
@@ -73,30 +55,5 @@ var object_type = "Point";
 <iframe style="" name="{{frame_id}}" id="{{frame_id}}" hidden='hidden'></iframe>
 {%include 'content/items/smart_save.html'%}
 {%include 'content/items/auto_save.html'%}
-
-<div style='padding:10px;border:1px dashed grey; margin-top: 50px;'>
-{{context.point.p_content|ToMarkdown:context.point.id|safe}}
-<div class="center-div" style='display:flex;justify-content:center;align-items:center;'>
-	<form class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_point'%}">
-		    {% csrf_token %}
-		    <input type="hidden" name="spec_id" value="{{ context.spec.id }}">
-		    <input type="hidden" name="point_id" value="{{ context.point.id }}">
-		    <div class="mb-3">
-			<label>
-			    <input type="checkbox" id="confirmationToggle" name="confirmationToggle" class="form-check-input"
-				{%if context.point.author_confirmation%}
-					checked
-				{%endif%}
-			    >
-			    The content above is correct and has been cleared of any errors.
-			</label>
-		    </div>
-
-		    <!-- Your other form fields can go here -->
-
-		    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button>
-	</form>
-</div>
-</div>
 
 {%endblock%}

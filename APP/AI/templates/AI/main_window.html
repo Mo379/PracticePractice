@@ -4,7 +4,44 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
-<script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js" integrity="sha512-SYfDUYPg5xspsG6OOpXU366G8SZsdHOhqk/icdrYJ2E/WKZxPxze7d2HD3AyXpT7U22PZ5y74xRpqZ6A2bJ+kQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+
+<script>
+var defaults = {
+    html: true, // Enable HTML tags in source
+    xhtmlOut: false, // Use '/' to close single tags (<br />)
+    breaks: true, // Convert '\n' in paragraphs into <br>
+    langPrefix: 'language-', // CSS language prefix for fenced blocks
+    linkify: true, // autoconvert URL-like texts to links
+    typographer: true, // Enable smartypants and other sweet transforms
+    // options below are for demo only
+    _highlight: true, // <= THIS IS WHAT YOU NEED
+    _strict: false,
+    _view: 'html' // html / src / debug
+};
+
+// and then do this:
+
+defaults.highlight = function (str, lang) {
+    var esc = md_converter.utils.escapeHtml;
+    console.log(str)
+    console.log(lang)
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return '<pre class="hljs"><code>' +
+               hljs.highlight(lang, str, true).value +
+               '</code></pre>';
+      } catch (__) {}
+    }else{
+      return '<pre class="hljs"><code>' + esc(str) + '</code></pre>';
+    }
+
+};
+var md_converter = window.markdownit(defaults);
+</script>
 <script>window.jQuery || document.write('<script src="js/jquery-1.10.1.min.js"><\/script>')</script>
 
 {%include 'AI/scripts/controller.html'%}
@@ -30,9 +67,14 @@
 									<i class="bi bi-book"></i>
 								</div>
 								<div class='AI_text_text'>
-									<div class='mb-3' id='AI_text_introduction'>
+									<div class='mb-3' id='AI_text_introduction_{{random_id}}'>
 										{{point_id|ToMarkdown:point_id|safe}}
 									</div>
+									<script>
+										var tempItem = document.querySelector('#AI_text_introduction_{{random_id}}');
+										var content_show = md_converter.render(tempItem.innerHTML.replace(/[ \t]{2,}/g, ' '));
+										//tempItem.innerHTML = content_show
+									</script>
 									<div class='AI_window_typing'>
 										<div style='margin:auto;'>
 											{%if not part.part_chat|index:chat|index:'thread'%}
@@ -71,7 +113,12 @@
 										</select>
 										{%endif%}
 										<textarea class="form-control bg-transparent mb-3 AI_user_text_area d-none" id='user_input_{{point_id}}_{{forloop.counter0}}'style="color: var(--text-color-1);">{{roleuser_part.content|safe}}</textarea>
-										<p class='' id='display_user_input_{{point_id}}_{{forloop.counter0}}'>{{roleuser_part.content|ProcessToMarkdown|safe}}</p>
+										<p class='' id='display_user_input_{{point_id}}_{{forloop.counter0}}'>{{roleuser_part.content|safe}}</p>
+										<script>
+											var tempItem = document.querySelector('#display_user_input_{{point_id}}_{{forloop.counter0}}');
+											var content_show = md_converter.render(tempItem.innerHTML.replace(/[ \t]{2,}/g, ' '));
+											tempItem.innerHTML = content_show
+										</script>
 										<div class='AI_window_typing'>
 											<div style='margin:auto;'>
 											<button 
@@ -111,11 +158,16 @@
 										<div class='mb-3' id='AI_text_response_{{point_id}}_{{forloop.counter0}}'>
 											{%if roleassistant_part.name == 'create_a_quiz'%}
 											{% definevar roleassistant_part.content|get_quiz_id as quiz_id%}
-											{{context.quizzes|index:quiz_id}}
+											{{context.quizzes|index:quiz_id|safe}}
 											{%else%}
-											{{roleassistant_part.content|ProcessToMarkdown|safe}}
+											{{roleassistant_part.content|safe}}
 											{%endif%}
 										</div>
+										<script>
+											var tempItem = document.querySelector('#AI_text_response_{{point_id}}_{{forloop.counter0}}');
+											var content_show = md_converter.render(tempItem.innerHTML.replace(/[ \t]{2,}/g, ' '));
+											tempItem.innerHTML = content_show
+										</script>
 											{%if roleassistant_part.name == 'create_a_quiz'%}
 											<script>
 												document.getElementById('AI_text_response_{{point_id}}_{{forloop.counter0}}').innerHTML = util.transform_test_object_to_htmlform('create_a_quiz', JSON.parse(`{{roleassistant_part.content|GetMathString|safe}}`.replace(/\\/g, '\\\\')), '{{point_id}}', '{{forloop.counter0}}', '{{part.id}}', streamed=false)

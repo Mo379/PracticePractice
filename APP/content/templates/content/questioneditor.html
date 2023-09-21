@@ -27,24 +27,11 @@ var object_type = "Question";
 {%definevar context.spec as spec%}
 {%definevar context.question as question%}
 
-<div class="card-body">
-	<div class="card shadow">
-		<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-			<h5 class="h4 mb-1 text-primary font-weight-bold">
-				<a href='{%url 'dashboard:spectopic' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name context.question.q_moduel context.question.q_chapter%}'>
-					<i class="bi bi-plus-square"></i>
-				</a>
-				<a href='{%url 'dashboard:spectopic' spec.spec_level spec.spec_subject spec.spec_board spec.spec_name question.q_moduel question.q_chapter%}'>
-					{{context.question.q_chapter|field_name_to_label}}: Difficulty {{question.q_difficulty}}, Number {{question.q_number}}
-				</a>
-			</h5>
-		</div>
-	</div>
-</div>
-
 <nav class="nav nav-pills pricing-tab py-1 justify-content-center" style='margin-bottom:30px;'>
-    <a class="nav-item nav-link" data-toggle="tab" href="" id="show_question">Question</a>
-    <a class="nav-item nav-link" data-toggle="tab" href="" id="show_answer">Answer</a>
+
+<a type="button" style='display:block; margin:auto;width:200px;font-size:16px;' class="btn btn-info mb-2" href='{%url 'content:questionedit' spec.id question.q_moduel question.q_chapter%}'>
+<i class="bi bi-arrow-bar-left"></i> Go back
+</a>
 </nav>
 <div class='spec_organiser_container_notice' id='spec_organiser_container_notice'>
 	Please Use a desktop on chrome to see the editor, or zoom out.
@@ -180,45 +167,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
-<div class='mt-5' style='border:1px solid var(--text-color-1); padding: 10px;margin-top:100px;'>
-Question: <br><br>
-{{context.question.q_content|ToMarkdownQuestion:context.question.id|safe}}
-<br><br>Answer: <br><br>
-{{context.question.q_answer|ToMarkdownAnswer:context.question.id|safe}}
-<div class="center-div" style='display:flex;justify-content:center;align-items:center;'>
-	<form class="p-4 border rounded" method="post" style='text-align:center;' action="{% url 'content:_author_confirmation_question'%}">
-		    {% csrf_token %}
-		    <input type="hidden" name="spec_id" value="{{ context.spec.id }}">
-		    <input type="hidden" name="question_id" value="{{ context.question.id }}">
-		    <div class="mb-3">
-			<label>
-			    <input type="checkbox" id="confirmationToggle" name="confirmationToggle" class="form-check-input"
-				{%if context.question.author_confirmation%}
-					checked
-				{%endif%}
-			    >
-			    The content above is correct and has been cleared of any errors.
-			</label>
-		    </div>
-
-		    <!-- Your other form fields can go here -->
-
-		    <button type="submit" class="btn btn-primary" style='margin:auto;'>Confirm Content</button>
-	</form>
-</div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {%endblock%}

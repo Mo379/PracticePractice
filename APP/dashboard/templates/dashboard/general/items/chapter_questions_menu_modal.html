@@ -28,8 +28,11 @@
 							{%endif%}
 						</span>
 					</button>
-					<button class="btn text-left text-success" type="button" data-toggle="modal" data-target="#PromptQuestionModal_{{level}}">
-						Prompt
+					<a href="{%url 'content:questionedit' spec.id context.module context.chapter%}">
+						View
+					</a>
+					<button class="btn text-left text-info" type="button" data-toggle="modal" data-target="#PromptQuestionModal_{{level}}">
+						Generate
 					</button>
 			    </div>
 
@@ -40,9 +43,7 @@
 						<div class='' style='cursor:pointer;' id='level_question_{{level}}_{{question}}'>
 							<span class='font-weight-bold ml-2' id='course_outline_span'>
 								<i class="bi bi-arrow-bar-right course_outline_icon"></i>
-								<a href="{%url 'content:editorquestion' spec.id question.id%}">
 									Question - {{question.q_number}}
-								</a>
 								{%if question.q_number in context.author_confirmed_chapter_questions|index:level%}
 								<i class="bi bi-x-circle text-warning"></i>
 								{%else%}
@@ -74,23 +75,16 @@
         </button>
       </div>
       <div class="modal-body">
-		<div class="mt-4 custom-control custom-switch">
-			<input name='regenerate_summary' type="checkbox" class="custom-control-input" id="activated_q_prompt_{{q_prompt.id}}" 
-			{%if q_prompt.activated == True%}
-			checked
-			{%endif%}
-		  >
-		  <label class="custom-control-label" for="activated_q_prompt_{{q_prompt.id}}">Toggle to genrate using AI.</label>
-		</div><br> 
 		<textarea
 		       class ='form-control mb-3'
 			name='Prompt' 
 			placeholder='Prompt...'
 			id='text_q_prompt_{{q_prompt.id}}'
 		       value=''
+		       rows='10'
 		>{{q_prompt.prompt}}</textarea>
-		<button class="btn btn-primary" type="button" onclick="controller.C_save_prompt_question('{%url 'AI:_savepromptquestion'%}', '{{csrf_token}}', '{{q_prompt.id}}')">
-			Save Prompt
+		<button class="btn btn-info" type="button" onclick="controller.C_save_prompt_question('{%url 'AI:_savepromptquestion'%}', '{{csrf_token}}', '{{q_prompt.id}}')">
+			Generate
 		</button>
 		<span class='ml-3' id='q_saving_indicator_{{q_prompt.id}}'> all saved</span>
 

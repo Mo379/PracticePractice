@@ -73,7 +73,7 @@ class util{
 				var explanation = quiz[key].answer.answer;
 
 				html += `
-				<div class="question form-check quiz_div p-3 mb-3" style='border-left: 1px dotted var(--text-color-3)'>
+				<div class="question form-check quiz_div p-1 mb-2" style='border-left: 1px dotted var(--text-color-3)'>
        				<h5 class='quiz_question_indicator'>Question ${key} </h5>
 				<p class='quiz_question_paragraph ml-1'>${question}</p>
 				<ul id="quiz_question_choices_${quiz_id}_${key}">`;
@@ -136,7 +136,7 @@ class util{
 				       <i class="bi bi-magic"></i> Show/Hide
 				</button>
        			</div>
-		       <div class='mt-4 p-3 ${hide_questions}' style='border-top: 2px solid var(--text-color-1);' id='quiz_container_${point_id}_${local_order_id}'>
+		       <div class='mt-4 p-1 ${hide_questions}' style='border-top: 2px solid var(--text-color-1);' id='quiz_container_${point_id}_${local_order_id}'>
        				${quiz_html}
        			</div>
 		</div>
@@ -271,7 +271,7 @@ class controller extends model {
 					</select>
 				`
 			}
-			if (local_order_id <= 3){
+			if (local_order_id <= 2){
 				text_area = `
 					<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${local_order_id}'style="color: var(--text-color-1);">Hello, can you assist me today ?</textarea>
 				  `
@@ -335,7 +335,7 @@ class controller extends model {
 			var prompt_options = ''
 			var text_area= ''
 			var prompt_control_buttons = '*Maximum allowed depth reached*'
-			if (local_order_id <= 3){
+			if (local_order_id <= 2){
 				text_area= `
 					<textarea class="form-control bg-transparent mb-3 AI_user_text_area" id='user_input_${point_id}_${local_order_id}'style="color: var(--text-color-1);">Hello, can you assist me today ?</textarea>
 				  `
@@ -599,10 +599,11 @@ class controller extends model {
 				    
 				    const chunkValue = decoder.decode(value);
 				    content = content + chunkValue;
+				    var content_show = md_converter.render(content.replace(/[ \t]{2,}/g, ' '));
 				    if (prompt_type_value == 1 || prompt_type_value == 2){
 					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = 'Please wait...'+ content.replace(/./g, '*') + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
 				    }else{
-					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
+					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content_show + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
 				    }
 				    MathJax.typeset()
 				  }
@@ -615,13 +616,12 @@ class controller extends model {
 				    document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
 				    document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
 				    if (request.function_call){
-					console.log(JSON.stringify(content))
 					var json_response_content = JSON.parse(content)
 					json_response_content.unique_id = json.function_app_endpoint.unique_id
-					console.log(JSON.stringify(json_response_content))
-					console.log(json.function_app_endpoint.unique_id)
 				    	const written_output = utility.transform_test_object_to_htmlform(json.function_call.name, json_response_content, point_id, local_order_id, part_id, false)
-					document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = written_output;
+				        var content_show = md_converter.render(written_output.replace(/[ \t]{2,}/g, ' '));
+					document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content_show;
+					MathJax.typeset()
 				    }else{
 				    }
 				  } catch (error) {
@@ -762,7 +762,8 @@ class controller extends model {
 							<h6 class='quiz_question_indicator'>Solution to Q ${question_number}: </h6>
 							<p class="explanation">${question.answer} <br><br> The correct choice is: ${question.correct_choice}</p>
 						`
-						document.querySelector(`#quiz_solution_${quiz_id}_${question_number}`).innerHTML = solution_html
+				         	var content_show = md_converter.render(solution_html.replace(/[ \t]{2,}/g, ' '));
+						document.querySelector(`#quiz_solution_${quiz_id}_${question_number}`).innerHTML = content_show
 					}
 				}
 			}
@@ -774,7 +775,8 @@ class controller extends model {
 					You have completed this quiz scoring: ${quiz_info.percentage_score}%
 				`
 			score_element.style.color = score_hue
-			document.querySelector(`#final_score_${quiz_id}`).innerHTML = score_html
+			var content_show = md_converter.render(score_html.replace(/[ \t]{2,}/g, ' '));
+			document.querySelector(`#final_score_${quiz_id}`).innerHTML = content_show
 		}
 	}
 }
