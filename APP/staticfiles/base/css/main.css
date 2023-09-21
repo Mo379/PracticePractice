@@ -1,0 +1,444 @@
+.list-group-item{
+	background: var(--main-bg-color);
+}
+
+.card-img-top{
+	aspect-ratio:16/9;
+}
+
+.my_course_card > .card-body{
+    display: flex;
+    flex-direction: column;
+}
+
+.my_course_card > .card-body > * {
+    margin-top: auto;
+}
+
+/* rating item*/
+.rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+}
+
+.rating > input{ display:none;}
+
+.rating > label {
+  position: relative;
+    width: 1em;
+    font-size: 3vw;
+    color: #FFD600;
+    cursor: pointer;
+}
+.rating > label::before{ 
+  content: "\2605";
+  position: absolute;
+  opacity: 0;
+}
+.rating > label:hover:before,
+.rating > label:hover ~ label:before {
+  opacity: 1 !important;
+}
+
+.rating > input:checked ~ label:before{
+  opacity:1;
+}
+.rating:hover > input:checked ~ label:before{ opacity: 0.4; }
+
+/* for the main app index page */
+.landing_wrapper{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-areas: 'left right';
+}
+
+/* Billing page badge styling */
+.badge {
+	margin-left: 5px;
+	font-size: 10px;
+	padding: 4px 4px;
+	border-radius: 50%;
+	background: white;
+	color: black;
+}
+.content_main .container{
+	width: 90%;
+	max-width: 90%;
+	padding: 5px;
+}
+.spec_organiser_container{
+	display: table-row;
+	margin:auto;
+}
+
+/* for the spec outline menu */
+.list{
+	display: table-cell;
+	width: auto;
+	background: #eee;
+	border: 1px solid black;
+	height: 100%;
+	list-style-type: none;
+	background: white;
+}
+.child{
+	background:black;
+	padding:10px;
+	text-align: left;
+	margin:20px;
+	cursor: pointer;
+	width: auto;
+	color:white;
+	border-radius: 15px;
+}
+
+/* styling for courseplace cards and wrapper*/
+.courseplace_wrapper{
+	width:95%;
+	margin:auto;
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-gap: 10px;
+}
+
+/* styling for marketcourse */
+.my_course_card{
+	width: 25em;
+	height: auto;
+	margin: 5px;
+}
+.my_course_card:hover{
+	transition: transform 0.3s ease-in-out;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+	transition: box-shadow 0.3s ease-in-out;
+	border: 1px solid black;
+}
+.marketcourse_middle{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: auto auto;
+	grid-template-areas: 
+	' left right '
+	' bottom bottom ';
+}
+#marketcourse_middle_objectives{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap:10px;
+}
+#marketcourse_coursecard{
+	width: 80%;
+	margin: auto;
+	grid-area: right;
+}
+#marketcourse_learningobjective{
+	grid-area: left;
+	min-width: 90%;
+}
+#marketcourse_courseoutline{
+	grid-area: bottom; 
+	width: 90%;
+}
+
+/* style for the mycourses page*/
+.mycourse_cardbody{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+/* for questionbank page */
+#qbank_container{
+	width: inherit;
+	display:grid;
+	grid-template-columns: 4fr 6fr;
+	grid-template-areas: 'left right';
+}
+#right_container{
+	grid-area: right;
+	max-width: 100%;
+	overflow: scroll;
+}
+#left_container{
+	grid-area: left;
+	max-width: 100%;
+	overflow: scroll;
+}
+#first_row{
+	display:grid;
+	grid-template-columns: 3fr;
+	grid-template-areas: 'right';
+}
+#summarystatistics{
+	max-width: 100%;
+	grid-area: right;
+}
+.collapsing{
+	transition: 0.1s;
+}
+
+/* Custom practice test maker styling */
+#wrapper_testmaker{
+	display:grid;
+	height: 80vh;
+}
+#main_body{
+	display:grid;
+	grid-template-columns: 2fr 7fr;
+	grid-template-areas: 'scroll_window select_window';
+	max-height: 80vh;
+}
+#scroll_window{
+	border-right: 1px solid black;
+}
+#scroll_window ul{
+	list-style-type:none;
+	padding:0px;
+	margin:0px;
+}
+#scroll_window .maker_tabs{
+	padding: 10px;	
+	text-align: center;
+	border: 1px solid var(--main-bg-color);
+}
+#scroll_window .maker_tabs:hover{
+	background: var(--main-bg-color);	
+	color: var(--text-color-1);	
+	cursor: pointer;
+	transition: 0.3s;
+}
+#select_window{
+	display:grid;
+	grid-template-rows: 9fr 3fr;
+	max-height: 80vh;
+	overflow: scroll;
+}
+#select_window #top{
+	padding: 25px;
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr;
+}
+#select_window #bottom{
+	border-top: 1px solid black;
+}
+.loader {
+	margin: auto;
+	float: right;
+	border: 10px solid white;
+	border-radius: 50%;
+	border-top: 10px solid red;
+	width: 20px;
+	height: 20px;
+	-webkit-animation: spin 2s linear infinite; /* Safari */
+	animation: spin 2s linear infinite;
+}
+.maker_catagories li{
+	width:inherit;
+	line-height:50px;
+	text-align: center;
+	margin:auto;
+	border-bottom: 1px solid grey;
+	cursor:pointer;
+	transition: 0.35s;
+}
+.maker_display{
+	grid-area: display;
+	width:inherit;
+	height:100%;
+	display: grid;
+	grid-template-rows: auto auto;
+	margin:auto;
+	border-left: 1px solid grey;
+}
+.maker_display_window{
+	width:100%;
+	max-height: 60vh;
+	display: grid;
+	grid-template-columns:1fr 1fr ;
+	overflow:hidden; 
+	overflow-y:scroll;
+}
+.maker_windw_option{
+	padding: 5px;
+	height: auto;
+}
+.maker_windw_option input{
+	width: 20px;
+	height: 20px;
+	margin:0px;
+}
+.maker_windw_option p{
+	width: 85%;
+	line-height: 25px;
+	margin-left: 10px;
+	text-align: left;
+}
+.maker_display_selections{
+	max-height: 14.5vh;
+	width:100%;
+	padding-top: 10px;
+	border-top: 1px solid grey;
+	overflow:hidden;
+	overflow-y: scroll;
+}
+.maker_display_option{
+	display: inline-block;
+	margin: 5px;
+	padding: 2px;
+	border: 1px solid grey;
+}
+.maker_display_option a{
+	color: red;
+	cursor: pointer;
+	padding: 2px;
+	font-size: 16px;
+}.maker_floor{
+	border-top: 1px solid grey;
+	grid-area: floor;
+	text-align: center;
+}
+
+/* for the notes page */ 
+.prog-nav-item{
+	min-width: 250px;
+	max-width: 250px;
+	text-align: center;
+	display: grid;
+	grid-template-rows: auto 20px;
+}
+
+/* for the note page */
+.point_div h6 {
+	border-left: 2px solid green;
+	border-top: 1px dashed green;
+	padding-left: 3px;
+}
+
+/* for the note editing page */
+.point_div h6 {
+	border-left: 2px solid green;
+	border-top: 1px dashed green;
+	padding-left: 3px;
+}
+.markdown-body table {
+	margin: auto;
+}
+
+/* Whole website: general stylings */
+.PageWallpaper{
+	padding: 0;
+	margin: 0;
+	height: 90px;
+	background-repeat:no-repeat;
+	background-attachment:scroll;
+	background-size: 100%;
+	background-position: center bottom;
+	opacity: 0.9;
+	transition: opacity .25s ease-in-out;
+	width: 100%;
+	margin:auto;
+	margin-top: 0px;
+}
+.PageWallpaper:hover{
+	opacity: 1;
+}
+.subjectmain{/* styling for the pages names within the wallpaper*/
+	font-size:10px;
+	background: white;
+	display: inline-block;
+	margin-top: 20px;
+	margin-left: 20px;
+	padding: 5px;
+	box-shadow: 3px 3px grey;
+	transition: 0.55s;
+}.subjectmain:hover{
+	box-shadow: 3px 3px white;
+	background: black;
+	color: white;
+}
+.MJX-TEX{
+	margin-left:5px;
+	margin-right:5px;
+	padding: 3px;
+}
+.MathJax{
+	overflow-x: scroll;
+	margin-right: 5px;
+}
+.admonition {
+	padding: 15px;
+	margin-bottom: 20px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	text-align: left;
+}
+.admonition.note { /* csslint allow: adjoining-classes */
+	color: #3a87ad;
+	background-color: #d9edf7;
+	border-color: #bce8f1;
+}
+.admonition.warning { /* csslint allow: adjoining-classes */
+	color: #c09853;
+	background-color: #fcf8e3;
+	border-color: #fbeed5;
+}
+.admonition.danger { /* csslint allow: adjoining-classes */
+	color: #b94a48;
+	background-color: #f2dede;
+	border-color: #eed3d7;
+}
+.admonition-title {
+	font-weight: bold;
+	text-align: left;
+}
+.breadcrumb{
+	background:white;
+	margin-bottom:0px;
+}
+.modal.fade .modal-dialog {
+	-webkit-transition: -webkit-transform 0.3s ease-out;
+	-moz-transition: -moz-transform 0.3s ease-out;
+	-o-transition: -o-transform 0.3s ease-out;
+	transition: transform 0.3s ease-out;
+}
+.gu-mirror {
+	position: fixed !important;
+	margin: 0 !important;
+	z-index: 9999 !important;
+	opacity: 0.8;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+	filter: alpha(opacity=80);
+}
+.gu-hide {
+	display: none !important;
+}
+.gu-unselectable {
+	-webkit-user-select: none !important;
+	-moz-user-select: none !important;
+	-ms-user-select: none !important;
+	user-select: none !important;
+}
+.gu-transit {
+	opacity: 0.2;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+	filter: alpha(opacity=20);
+}
+.bd-placeholder-img {
+	font-size: 1.125rem;
+	text-anchor: middle;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+
+/* For the collaborator card */
+.spec_collaboration_span:hover{
+	cursor:pointer;
+}
+
+
+
+.pricing-table{
+	color:var(--text-color-1);
+}

@@ -17,13 +17,6 @@ spec:
         app: website
     spec:
       containers:
-      - name: pp2rds
-        image: redis:7.0-alpine
-        ports:
-        - containerPort: 6379
-        env:
-        - name: ALLOW_EMPTY_PASSWORD
-          value: "yes"
       - name: website
         image: image-eks-practicepractice
         imagePullPolicy: Always
