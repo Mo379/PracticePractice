@@ -1,48 +1,4 @@
 {%load general%}
-<div class="modal fade" id="GenerateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Generate using AI</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	      	<p>
-		Our system will use the course outline information and the ENABLED prompts, to generate
-		questions, answers and notes. Once you click start job, the system will start constructing the content, you 
-		will be able to edit it later on for further correction and will have the ability to regenerate
-		parts of the response.
-		</p>
-		{%if context.last_job%}
-			{%if context.last_job.finished%}
-			<form class="user px-3 py-3"  action="{%url 'AI:_newgenerationjob'%}" method="POST" role="form">
-				{%csrf_token%}
-				<input type='hidden' name='spec_id' value='{{spec.id}}'/>
-				<input type='hidden' name='moduel' value='{{context.module}}'/>
-				<input type='hidden' name='chapter' value='{{context.chapter}}'/>
-				<button type= 'submit' class='btn btn-primary mb-2' style='float-right'>Start Job</button>
-			</form>
-			{%else%}
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'>(Working...)</button>
-			{%endif%}
-		{%else%}
-		<form class="user px-3 py-3"  action="{%url 'AI:_newgenerationjob'%}" method="POST" role="form">
-			{%csrf_token%}
-			<input type='hidden' name='spec_id' value='{{spec.id}}'/>
-			<input type='hidden' name='moduel' value='{{context.module}}'/>
-			<input type='hidden' name='chapter' value='{{context.chapter}}'/>
-			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'>Start Job</button>
-		</form>
-		{%endif%}
-	</form>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 <div class="modal fade" id="CrateTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

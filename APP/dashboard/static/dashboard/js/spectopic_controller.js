@@ -113,7 +113,7 @@ class model extends xhttp {
 		this.open_port(url);
 		this.xhttp.setRequestHeader("X-CSRFToken", csrf_token);    
 		//prepairing query
-		var query = `q_prompt_id=${prompt_id}&q_prompt=${q_prompt}&activated=${activated}`;
+		var query = `q_prompt_id=${prompt_id}&q_prompt=${q_prompt}`;
 		//sending query to model
 		this.xhttp.send(query);
 	}
@@ -504,24 +504,67 @@ class controller extends model {
 		//send command
 		// Get a reference to the modal element
 		const q_prompt = document.getElementById(`text_q_prompt_${prompt_id}`).value;
-		const activated = document.getElementById(`activated_q_prompt_${prompt_id}`).checked;
-		this.M_save_prompt_question(url, csrf_token, prompt_id, q_prompt, activated);
+		this.M_save_prompt_question(url, csrf_token, prompt_id, q_prompt);
 		var s = document.getElementById(`q_saving_indicator_${prompt_id}`);
-		s.innerHTML = 'saving...'
+		s.innerHTML = 'working...'
 		//listen for the repsponse from the server script
 		this.xhttp.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
 				var txt = this.responseText;
 				var json = JSON.parse(txt);
-				setTimeout(function (){
-					var s = document.getElementById(`q_saving_indicator_${prompt_id}`);
-					if (json.error == 0){
-						s.innerHTML = 'all saved'
-					}else{
-						s.innerHTML = 'error :('
-					}
+				var saving_indic = document.getElementById(`q_saving_indicator_${prompt_id}`);
+				saving_indic.innerHTML = 'generating...'
+				//
+				const request = {
+				  'message': json.message.chat,
+				  'functions': json.functions,
+				  'function_call': json.function_call,
+				  'function_app_endpoint': {
+				  	...json.function_app_endpoint,
+				  },
+				  'lambda_url': json.lambda_url
+				};
+				const handleSubmit = async () => {
 
-				}, 1000);
+				  const response = await fetch(json.lambda_url, {
+				    method: "POST",
+				    headers: {
+				      "Content-Type": "application/json",
+				    },
+				    body: JSON.stringify(request),
+				  });
+				  const streamResponse = response.body;
+				  if (!streamResponse) {
+				    return;
+				  }
+
+				  const reader = streamResponse.getReader();
+				  const decoder = new TextDecoder();
+				  let done = false;
+				  let content = "<br><br>";
+
+				  while (true) {
+				    const { value } = await reader.read();
+				    if (!value) {
+				      break;
+				    }
+				    
+				    const chunkValue = decoder.decode(value);
+				    content = content + chunkValue;
+				    saving_indic.innerHTML = content
+				  }
+				  return content
+				};
+				async function run() {
+				  try {
+				    var content = await handleSubmit();
+					
+				  } catch (error) {
+				    console.error('An error occurred:', error);
+				    loading(false)
+				  }
+				}
+				run()
 			}
 		}
 	}

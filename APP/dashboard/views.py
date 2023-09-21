@@ -754,17 +754,6 @@ class SpecTopicHandlerView(
                         p_unique=point['p_unique_id']
                     )
                 point_prompts[topic][point['p_unique_id']] = p_prompt
-        #
-        generation_jobs = ContentGenerationJob.objects.filter(
-                user=self.request.user,
-                specification=spec,
-                moduel=moduel,
-                chapter=chapter,
-            ).order_by('-created_at')
-        if len(generation_jobs) > 0:
-            last_job = generation_jobs[0]
-        else:
-            last_job = False
         # Getting removed items
         context['spec'] = spec
         context['full_ord_spec'] = ordered_spec
@@ -784,7 +773,6 @@ class SpecTopicHandlerView(
         context['deleted_topic_points'] = deleted_topic_points
         context['removed_topic_points'] = removed_topic_points
         #
-        context['last_job'] = last_job
         context['q_prompts'] = question_prompts
         context['t_prompts'] = topic_prompts
         context['p_prompts'] = point_prompts

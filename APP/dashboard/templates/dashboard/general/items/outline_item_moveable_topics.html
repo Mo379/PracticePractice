@@ -1,57 +1,13 @@
 {%load general%}
 
-{%if context.last_job.finished == False%}
-<div class = 'd-flex justify-content-center mb-1'>
-	<i class="fa fa-duotone fa-robot fa-beat" name="GPT" unselectable="on" aria-hidden="true"></i>
-</div>
-<div class = 'd-flex justify-content-center'>
-	working...
-</div>
-{%else%}
-<div class = 'd-flex justify-content-center mb-1'>
-	<i class="fa fa-duotone fa-robot" name="GPT" unselectable="on" aria-hidden="true"></i>
-</div>
-{%endif%}
-
-
-
-
-<div class='d-flex justify-content-center'>
-<a class="mb-2 btn text-left text-primary" href='{%url 'dashboard:specmoduel' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name%}'>
+<a type="button" class="btn btn-info mb-2" href='{%url 'dashboard:specmoduel' context.spec.spec_level context.spec.spec_subject context.spec.spec_board context.spec.spec_name%}'> 
 <i class="bi bi-arrow-bar-left"></i>
-Modules
-</a>
-<a class="mb-2 btn text-left text-primary" href='{%url 'content:noteedit' context.spec.id module chapter%}'>
-<i class="bi bi-book-fill"></i> Notes
-</a>
-<a class="mb-2 btn text-left text-primary" href='{%url 'content:questionedit' context.spec.id module chapter%}'>
-<i class="bi bi-patch-question-fill"></i> Questions
-</a>
-</div>
-<div class='d-flex justify-content-center'>
-<br>
-<button class="mb-2 btn text-left text-success" type="button" data-toggle="modal" data-target="#GenerateModal">
-	Generate
-</button>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
-	New
-</button>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
-	Removed
-</button>
-
-<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteTopicModal">
-Delete
-</button>
-<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
-Bin
-</button>
-</div>
-<br>
+Go back</a><br>
 <div>
 <i class="bi bi-x-circle text-warning"></i> Means either some content is unconfirmed or there is some empty section, none of this is allowed and it should be fixed. <br>
 <i class="bi bi-check-circle text-success"></i> Means that the content is completed and is ready to be published.
 </div>
+<br>
 <br>
 
 <a class="chapter_nav_link" 
@@ -66,7 +22,22 @@ Bin
 	{%endif%}
 </a>
 <br>
+<div class='d-flex justify-content-center'>
 <br>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateTopicModal">
+	New
+</button>
+<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
+	Removed
+</button>
+
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteTopicModal">
+Delete
+</button>
+<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+Bin
+</button>
+</div>
 
 <ol id='topic_list'>
 {%for topic in all_topics%}
@@ -140,8 +111,8 @@ Bin
 						Rename
 					</button>
 
-					<button class="btn text-left text-success" type="button" data-toggle="modal" data-target="#PromptPointModal_{{topic}}_{{point}}">
-						Prompt
+					<button class="btn text-left text-info" type="button" data-toggle="modal" data-target="#PromptPointModal_{{topic}}_{{point}}">
+						Generate
 					</button>
 
 					<button class="btn text-left text-danger" type="button" onclick="controller.C_remove_point('{%url 'content:_removepoint'%}', '{%url 'content:_restorepoint'%}','{%url 'content:noteedit' context.spec.id module chapter%}','{{csrf_token}}', '{{spec.id}}', '{{module}}','{{chapter}}', '{{topic}}', '{{point}}', '{{point|p_unique_to_title}}')">

@@ -1,26 +1,33 @@
 {%load general%}
+<a type="button" class="btn btn-info mb-2" href='{%url 'dashboard:mycourses'%}'> 
+<i class="bi bi-arrow-bar-left"></i>
+Go back</a><br>
 
-<div class='d-flex justify-content-center'>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
-	New
-</button>
-<button class="mb-2 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
-	Removed
-</button>
-
-<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
-Delete
-</button>
-<button class="mb-2 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
-Bin
-</button>
-</div>
-<br>
 <div>
 <i class="bi bi-x-circle text-warning"></i> Means either some content is unconfirmed or there is some empty section, none of this is allowed and it should be fixed. <br>
 <i class="bi bi-check-circle text-success"></i> Means that the content is completed and is ready to be published.
 </div>
 <br>
+<br>
+
+
+
+
+<div class='d-flex justify-content-center'>
+<button class="mb-1 btn text-left text-primary" type="button" data-toggle="modal" data-target="#CrateModuelModal">
+	New
+</button>
+<button class="mb-1 btn text-left text-primary" type="button" data-toggle="modal" data-target="#RemovedModal">
+	Removed
+</button>
+
+<button class="mb-1 btn text-left text-danger" type="button" data-toggle="modal" data-target="#DeleteModuleModal">
+Delete
+</button>
+<button class="mb-1 btn text-left text-danger" type="button" data-toggle="modal" data-target="#BinModal">
+Bin
+</button>
+</div>
 
 
 <ol id='modules_list'>

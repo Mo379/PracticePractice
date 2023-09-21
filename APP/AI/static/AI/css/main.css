@@ -7,6 +7,9 @@ code {
 	inline-size: 150px;
 	overflow-wrap: break-word;
 }
+.hljs{
+	padding: 8px;
+}
 .AI_main_container{
 	border-top: 1px solid var(--second-bg-color);
 	display:grid;

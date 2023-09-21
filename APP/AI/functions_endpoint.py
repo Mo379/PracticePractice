@@ -1,6 +1,6 @@
 import json
-from AI.models import Lesson_part
-from content.models import Course
+from AI.models import Lesson_part, ContentPromptQuestion
+from content.models import Course, Question
 
 
 def lesson_prompts(request, json_data):
@@ -58,7 +58,6 @@ def course_introduction_prompts(request, json_data):
     #
     try:
         ai_response_dict = json.loads(ai_response)
-        print(ai_response_dict)
         course = Course.objects.get(pk=course_id)
         course.course_skills = {idd: ai_response_dict['summary'][val]['skill'] for idd, val in enumerate(ai_response_dict['summary'])}
         course.course_summary = ai_response_dict['course_introduction']
@@ -76,6 +75,72 @@ def course_introduction_prompts(request, json_data):
         course.course_learning_objectives = {idd: '(failed summary generation)' for idd in range(6)}
         course.course_publication = False
         course.save()
+    else:
+        response = {
+                'status_code': 200,
+                'message': 'Sucess'
+            }
+    return response
+
+
+def course_questions_prompts(request, json_data):
+    q_prompt_id = json_data['q_prompt_id']
+    ai_response = json_data['ai_response']
+    #
+    try:
+        ai_response_dict = json.loads(ai_response)
+        prompt_obj = ContentPromptQuestion.objects.get(pk=q_prompt_id)
+        module = prompt_obj.moduel
+        chapter = prompt_obj.chapter
+        level = str(prompt_obj.level)
+        list_questions = prompt_obj.specification.spec_content[module]['content'][chapter]['questions'][level]
+        questions_objs = Question.objects.filter(q_unique_id__in=list_questions).order_by('q_number')
+        for q_object, nth_q in zip(questions_objs, sorted(ai_response_dict['questions'].keys())):
+            q_object.q_content = ai_response_dict['questions'][nth_q]['question']
+            q_object.q_answer = ai_response_dict['questions'][nth_q]['answer']
+            q_object.q_marks = int(ai_response_dict['questions'][nth_q]['marks'])
+            q_object.save()
+        #
+        questions_objs.update(author_confirmation=False)
+    except Exception as e:
+        print(e)
+        response = {
+            'status_code': 500,
+            'message': 'Internal Server Error.'
+        }
+    else:
+        response = {
+                'status_code': 200,
+                'message': 'Sucess'
+            }
+    return response
+
+
+def course_points_prompts(request, json_data):
+    p_prompt_id = json_data['p_prompt_id']
+    ai_response = json_data['ai_response']
+    #
+    try:
+        ai_response_dict = json.loads(ai_response)
+        prompt_obj = ContentPromptQuestion.objects.get(pk=q_prompt_id)
+        module = prompt_obj.moduel
+        chapter = prompt_obj.chapter
+        level = str(prompt_obj.level)
+        list_questions = prompt_obj.specification.spec_content[module]['content'][chapter]['questions'][level]
+        questions_objs = Question.objects.filter(q_unique_id__in=list_questions).order_by('q_number')
+        for q_object, nth_q in zip(questions_objs, sorted(ai_response_dict['questions'].keys())):
+            q_object.q_content = ai_response_dict['questions'][nth_q]['question']
+            q_object.q_answer = ai_response_dict['questions'][nth_q]['answer']
+            q_object.q_marks = int(ai_response_dict['questions'][nth_q]['marks'])
+            q_object.save()
+        #
+        questions_objs.update(author_confirmation=False)
+    except Exception as e:
+        print(e)
+        response = {
+            'status_code': 500,
+            'message': 'Internal Server Error.'
+        }
     else:
         response = {
                 'status_code': 200,

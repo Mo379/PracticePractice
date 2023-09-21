@@ -52,7 +52,7 @@ from content.util.GeneralUtil import (
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
-from AI.functions import create_quiz_function
+from AI.functions import create_quiz_function, create_course_questions
 from AI import functions_endpoint
 from management.templatetags.general import ToMarkdownManual
 
@@ -369,7 +369,6 @@ def _ask_from_book(request):
             function_call = {"name": quiz_function[1]}
             function_app_endpoint['prompt_type_value'] = prompt_type_value
             message['chat'][0]['content'] = quiz_function[2] + f" {system_content}"
-            print(quiz_function[0])
         elif int(prompt_type_value) == 2:
             functions = None
             function_call = None
@@ -414,7 +413,10 @@ def _function_app_endpoint(request):
                             json_data
                         )
                 elif function_name == 'create_course_questions':
-                    pass
+                    response = functions_endpoint.course_questions_prompts(
+                            request,
+                            json_data
+                        )
                 elif function_name == 'create_course_point':
                     pass
                 elif function_name == 'send_email':
@@ -653,13 +655,45 @@ def _savepromptquestion(request):
     if request.method == 'POST':
         q_prompt_id = request.POST['q_prompt_id']
         q_prompt = request.POST['q_prompt']
-        activated = True if request.POST['activated'] == 'true' else False
         #
-        prompt = ContentPromptQuestion.objects.get(pk=q_prompt_id)
+        prompt = ContentPromptQuestion.objects.get(user=request.user, pk=q_prompt_id)
         prompt.prompt = q_prompt
-        prompt.activated = activated
         prompt.save()
-        return JsonResponse({'error': 0, 'message': 'Saved'})
+        #
+        lambda_url = settings.CHATGPT_LAMBDA_URL
+        #
+        message = {
+          "chat": [
+            {
+              "role": "system",
+              "content": "Placeholder"
+            },
+            {
+              "role": "user",
+              "content": 'Please generate those questions'
+            }
+          ]
+        }
+        function_app_endpoint = {
+                'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                'q_prompt_id': q_prompt_id
+            }
+        #
+        quiz_function = create_course_questions(q_prompt, prompt, 5)
+        functions = [quiz_function[0]]
+        function_call = {"name": quiz_function[1]}
+        message['chat'][0]['content'] = quiz_function[2]
+
+        #
+        response = {
+                'error': 0,
+                'message': message,
+                'functions': functions,
+                'function_call': function_call,
+                'function_app_endpoint': function_app_endpoint,
+                'lambda_url': lambda_url,
+            }
+        return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Error'})
 
 

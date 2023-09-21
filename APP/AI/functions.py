@@ -28,7 +28,26 @@ def create_course_point():
     return function_description, 'create_course_point', system_message
 
 
-def create_course_questions(n_questions=5):
+def create_course_questions(instructor_context, question_prompt_obj, n_questions=5):
+    #
+    spec = question_prompt_obj.specification
+    #
+    level = spec.spec_level
+    subject = spec.spec_subject
+    module = question_prompt_obj.moduel
+    chapter = question_prompt_obj.chapter
+    def questions_prompt(level, subject, module, chapter, prompt_level, instructor_context):
+        return f"This is for a course staged in '{level}', where the subject is {subject}, \
+            the module for the questions is {module} and the chapter is {chapter}, \
+            the questions are of increasing difficulty and arranged in such \
+            a way that is easy for a beginner to build their understanding, \
+            overall the difficult of this list of qustions is of level {prompt_level} out of 5 levels\
+            so please estimate and adjust for the difficulty. \
+            The instructor provided the following context to help guide the style and content \
+            of the question, thus the question content should closely follow it with combination \
+            with the previous context. \n\n ('instructor_context':'{instructor_context}')."
+    #
+    system_message = questions_prompt(level, subject, module, chapter, question_prompt_obj.level, instructor_context)
     function_outline = [
         {
             "type": 'object',
@@ -39,7 +58,11 @@ def create_course_questions(n_questions=5):
                 },
                 "answer": {
                     "type": 'string',
-                    "description": f"A detailed step by step answer to question {id+1}, this is an explanation of the resoning behind the solution. (using mathjax $ maths)",
+                    "description": f"A detailed step by step answer to question {id+1}, this is an explanation of the resoning behind the solution. (using mathjax $ maths and showing the number of marks behind each step)",
+                },
+                "marks": {
+                    "type": 'string',
+                    "description": f"An intiger stating the number of marks for question {id+1}.",
                 },
             }
         }
@@ -60,11 +83,10 @@ def create_course_questions(n_questions=5):
     function_description['parameters']['properties']['questions'] = {}
     function_description['parameters']['properties']['questions']['type'] = "object"
     function_description['parameters']['properties']['questions']['properties'] = {}
-    function_description['parameters']['properties']['questions']['description'] = "The questions requested is outlined in this value, it contains the questions and answers"
+    function_description['parameters']['properties']['questions']['description'] = "The questions requested is outlined in this value, it contains the questions, answers and marks."
     for idd, question_dict in enumerate(function_outline):
         idd += 1
-        function_description['parameters']['properties']['quiz']['properties'][idd] = question_dict
-    system_message = "Youre a helpful tutor creating questions and answers for students."
+        function_description['parameters']['properties']['questions']['properties'][idd] = question_dict
     return function_description, 'create_course_questions', system_message
 
 
