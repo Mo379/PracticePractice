@@ -70,7 +70,6 @@ Course Page
 								<button type= 'submit' class='btn btn-info mb-2' > Enroll Now</button>
 							</form>
 							{%else%}
-							<a type= 'button' class='btn btn-success mb-2' href='{%url 'content:coursestudy' course.id%}'>CourseStudy</a>
 							<a type= 'button' class='btn btn-success mb-2' data-toggle="modal" data-target="#GiveReviewModal">Give/Update review</a>
 							{%endif%}
 						</div>
@@ -81,6 +80,7 @@ Course Page
 				<div style='margin:auto; padding:15px;' class='mb-3 mt-5' id='marketcourse_courseoutline'>
 					<h1 class='font-weight-bold' style='margin:auto;' > <i class="bi bi-journal-text"></i> Course Outline </h1>
 					<div class='mt-2' style=''>
+						<a type= 'button' class='btn btn-success mb-2' href='{%url 'content:coursestudy' course.id%}'>Study Now!</a>
 						{%definevar context.ordered_content as content%}
 						{%include 'dashboard/general/items/outline_item.html'%}
 					</div>
