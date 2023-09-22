@@ -24,7 +24,7 @@ from user.util.GeneralUtil import account_activation_token, password_reset_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from django.contrib.auth.mixins import LoginRequiredMixin
+from PP2.mixin import LoginRequiredMixin
 from user.forms import (
         LoginForm,
         ForgotPasswordForm,
@@ -48,7 +48,6 @@ from djstripe.models import (
         Customer,
         PaymentMethod,
         Price,
-        Plan,
         Subscription,
         Charge,
         Session
@@ -91,8 +90,8 @@ class IndexView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         accountdetailsform = AccountDetailsForm(instance=user)
         context['AccountDetailsForm'] = accountdetailsform
         # checking if billing information exists
-        context['user_member_bool'] = Subscription.objects.filter(customer=user.id, status__in=['trialing', 'active']).exists()
-        context['user_billing_bool'] = PaymentMethod.objects.filter(customer=user.id).exists()
+        context['user_member_bool'] = Subscription.objects.filter(customer=user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE).exists()
+        context['user_billing_bool'] = PaymentMethod.objects.filter(customer=user.id, livemode=settings.STRIPE_LIVE_MODE).exists()
         context['profile_picture_url'] = os.path.join(
                 settings.CDN_URL,
                 'users',
@@ -222,15 +221,15 @@ class BillingView(LoginRequiredMixin, BaseBreadcrumbMixin, generic.ListView):
         # think about adding checks for robustness.
         context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
         #
-        customer_object = Customer.objects.get(id=user.id)
+        customer_object = Customer.objects.get(id=user.id, livemode=settings.STRIPE_LIVE_MODE)
         context['customer'] = customer_object
         #
-        context['billing_history'] = Charge.objects.filter(customer=user.id)
+        context['billing_history'] = Charge.objects.filter(customer=user.id, livemode=settings.STRIPE_LIVE_MODE)
         #
-        payment_methods = list(PaymentMethod.objects.filter(customer=user.id))
+        payment_methods = list(PaymentMethod.objects.filter(customer=user.id, livemode=settings.STRIPE_LIVE_MODE))
         context['paymentmethods'] = payment_methods
-        if Subscription.objects.filter(customer=user.id, status__in=['trialing', 'active']).exists():
-            subscription = Subscription.objects.get(customer=user.id, status__in=['trialing', 'active'])
+        if Subscription.objects.filter(customer=user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE).exists():
+            subscription = Subscription.objects.get(customer=user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE)
             context['subscription_status'] = subscription.status
             context['billing_interval'] = subscription.plan.interval
             if subscription.discount is not None:
@@ -861,13 +860,6 @@ def _activate(request, uidb64, token):
             and user.registration==0:
         user.registration = 1
         user.save()
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-        stripe.Customer.create(
-                email=user.email,
-                name=user.first_name+' '+user.last_name,
-                id=user.id,
-                metadata={'username':user.username}
-            )
         messages.add_message(
                 request,
                 messages.INFO,
@@ -1095,7 +1087,7 @@ def _mailchoiceschange(request):
 def _makedefaultpaymentmethod(request):
     if request.method == 'POST':
         request.POST = request.POST.copy()
-        payment_methods = PaymentMethod.objects.filter(customer=str(request.user.id))
+        payment_methods = PaymentMethod.objects.filter(customer=str(request.user.id), livemode=settings.STRIPE_LIVE_MODE)
         payment_methods_ids = {method.id: method for method in payment_methods}
         new_default_method_id = request.POST['method_id']
         if new_default_method_id in payment_methods_ids:
@@ -1106,7 +1098,7 @@ def _makedefaultpaymentmethod(request):
                     invoice_settings={'default_payment_method': str(new_default_method_id)}
               )
             # do local defaulting
-            customer = Customer.objects.get(id=request.user.id)
+            customer = Customer.objects.get(id=request.user.id, livemode=settings.STRIPE_LIVE_MODE)
             customer.default_payment_method=payment_methods_ids[str(new_default_method_id)]
             customer.save()
             messages.add_message(
@@ -1136,19 +1128,19 @@ def _makedefaultpaymentmethod(request):
 def _deletepaymentmethod(request):
     if request.method == 'POST':
         request.POST = request.POST.copy()
-        payment_methods = PaymentMethod.objects.filter(customer=str(request.user.id))
+        payment_methods = PaymentMethod.objects.filter(customer=str(request.user.id), livemode=settings.STRIPE_LIVE_MODE)
         payment_methods_ids = {method.id: method for method in payment_methods}
         deleted_payment_method_id= request.POST['method_id']
         if deleted_payment_method_id in payment_methods_ids:
             method_object = payment_methods_ids[deleted_payment_method_id]
-            customer = Customer.objects.get(id=request.user.id)
+            customer = Customer.objects.get(id=request.user.id, livemode=settings.STRIPE_LIVE_MODE)
             if customer.default_payment_method != method_object or len(payment_methods_ids)==1:
                 # do stripe deleting
                 stripe.api_key = settings.STRIPE_SECRET_KEY
                 stripe.PaymentMethod.detach(
                     deleted_payment_method_id,
                 )
-                PaymentMethod.objects.get(id=deleted_payment_method_id).delete()
+                PaymentMethod.objects.get(id=deleted_payment_method_id, livemode=settings.STRIPE_LIVE_MODE).delete()
                 # do local deleting
                 messages.add_message(
                         request,
@@ -1183,12 +1175,12 @@ def _deletepaymentmethod(request):
 @login_required(login_url='/user/login', redirect_field_name=None)
 def _create_checkout_session(request):
     if request.method == 'POST':
-        customer = Customer.objects.get(id=request.user.id)
+        customer = Customer.objects.get(id=request.user.id, livemode=settings.STRIPE_LIVE_MODE)
         price_id = json.loads(request.body)['price_id']
-        if Price.objects.filter(id=price_id).exists():
+        if Price.objects.filter(id=price_id, livemode=settings.STRIPE_LIVE_MODE).exists():
             # See if subscription exists or not
             if Subscription.objects.filter(
-                        customer=request.user.id, status__in=['trialing', 'active']
+                        customer=request.user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE
                     ).exists() == False:
                 # Set Stripe API key
                 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -1224,7 +1216,7 @@ def _create_customer_portal_session(request):
     if request.method == 'POST':
         user = request.user
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        customer = Customer.objects.get(id=user.id)
+        customer = Customer.objects.get(id=user.id, livemode=settings.STRIPE_LIVE_MODE)
         # Authenticate your user.
         session = stripe.billing_portal.Session.create(
             customer=f'{customer.id}',

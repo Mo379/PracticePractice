@@ -19,11 +19,10 @@ from datetime import datetime, timedelta
 import stripe
 from dateutil.relativedelta import relativedelta
 from braces.views import (
-        LoginRequiredMixin,
-        GroupRequiredMixin,
         SuperuserRequiredMixin,
     )
 from PP2.mixin import (
+        LoginRequiredMixin,
         AnySubscriptionRequiredMixin,
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
@@ -74,13 +73,7 @@ from content.util.GeneralUtil import (
         author_user_clicks_data_list,
     )
 from djstripe.models import (
-        Customer,
-        PaymentMethod,
-        Price,
-        Plan,
         Subscription,
-        Charge,
-        Session
     )
 
 
@@ -311,13 +304,11 @@ class StudentPerformanceView(
 
 class StudentContentManagementView(
             LoginRequiredMixin,
-            GroupRequiredMixin,
             BaseBreadcrumbMixin,
             generic.ListView
         ):
     login_url = 'user:login'
     redirect_field_name = False
-    group_required = u"Student"
     template_name = "dashboard/student/contentmanagement.html"
     context_object_name = 'context'
 
@@ -828,9 +819,10 @@ class EarningStatisticsView(
         all_course_subscriptions = CourseSubscription.objects.filter(course__in=author_courses)
         all_unique_students = all_course_subscriptions.values('user').distinct()
         # Relevant for stripe
-        all_customers = Customer.objects.filter(
-            id__in=list(all_unique_students.values_list('user__id', flat=True))
+        all_customers = Subscription.objects.filter(
+            customer__id__in=list(all_unique_students.values_list('user__id', flat=True)), livemode=settings.STRIPE_LIVE_MODE
         )
+        print(all_customers)
         # Get the current date
         current_date = datetime.now().replace(day=1)
 
