@@ -125,7 +125,7 @@ def course_point_prompts(request, json_data):
         prompt_obj = ContentPromptPoint.objects.get(pk=p_prompt_id)
         point_unique_id = prompt_obj.p_unique
         p_object = Point.objects.get(p_unique_id=point_unique_id)
-        p_object.p_content = ai_response_dict['point']
+        p_object.p_content = ai_response_dict['lesson']
         p_object.author_confirmation = False
         p_object.save()
     except Exception as e:
