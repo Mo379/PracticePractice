@@ -105,7 +105,7 @@ PracticePractice, you personalised study hub.
 				<div class='col-8 mx-auto' style='margin-bottom:30px;'>
 					Unlock a world of learning possibilities with our premium membership: access exclusive self-practice tools, harness AI assistance, and delve into enriching video content. For free users, enjoy limitless reading across all courses. Elevate your study experience today!
 				</div>
-			      <p>A membership gives you access to all of our courses, with or without our Artificial Intelligence features depending on your choice.</p>
+				<p>A membership gives you <strong class='text-success'>access to all of our courses</strong>, with or without our Artificial Intelligence features depending on your choice.</p>
 			      <div class='pt-5 pb-5 mt-3' style='border: 1px solid var(--text-color-3); border-radius:10px; padding: 25px; background:black;box-shadow:0 15px 25px var(--text-color-2);'>
 
 			      <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
@@ -124,6 +124,7 @@ PracticePractice, you personalised study hub.
 		<div class='col-12 mx-auto' style='margin-bottom:30px;'>
 			Unlock a world of learning possibilities with our premium membership: access exclusive self-practice tools, harness AI assistance, and delve into enriching video content. For free users, enjoy limitless reading across all courses. Elevate your study experience today!
 		</div>
+		<p>A membership gives you <strong class='text-success'>access to all of our courses</strong>, with or without our Artificial Intelligence features depending on your choice.</p>
 		<div id='error-message' style='text-align:center; color:red;'></div>
                 <nav class="nav nav-pills pricing-tab py-3 justify-content-center" style='margin-bottom:30px;'>
                     <a class="nav-item nav-link active" data-toggle="tab" href="#monthlypricing" id="monthlypricingtab">1 Month</a>
@@ -141,18 +142,18 @@ PracticePractice, you personalised study hub.
 									<th class="text-center border-0 pb-5">
 										<h6 class="lead font-weight-bold pricing-plan-title">Free</h6>
 										<p class="font-weight-bold pricing-plan-amount"> <span class="h1">-</span></p>
-										<p class="small pricing-plan-allotment"><i class="bi bi-check-circle-fill" style='color:green;'></i></p>
+										<p class="small pricing-plan-allotment">Access basic content</p>
 										<a id='monthly_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
 									</th>
 									<th class="text-center border-0 pb-5">
 										<h6 class="lead font-weight-bold pricing-plan-title">Without AI</h6>
-										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.with_ai_monthly_plan.unit_amount|divide:100}}</span></p>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.without_ai_monthly_plan.unit_amount|divide:100}}</span></p>
 										<p class="small pricing-plan-allotment">Per user, per month</p>
 										<a id='monthly_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
 									</th>
 									<th class="text-center border-0 pb-5">
 										<h6 class="lead font-weight-bold pricing-plan-title">With AI</h6>
-										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.without_ai_monthly_plan.unit_amount|divide:100}}</span></p>
+										<p class="font-weight-bold pricing-plan-amount">£<span class="h1">{{context.with_ai_monthly_plan.unit_amount|divide:100}}</span></p>
 										<p class="small pricing-plan-allotment">Per user, per month</p>
 										<a id='monthly_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
 									</th>
@@ -173,7 +174,7 @@ PracticePractice, you personalised study hub.
 									<th class="text-center border-0 pb-5">
 										<h6 class="lead font-weight-bold pricing-plan-title">Free</h6>
 										<p class="font-weight-bold pricing-plan-amount"> <span class="h1">-</span></p>
-										<p class="small pricing-plan-allotment"><i class="bi bi-check-circle-fill" style='color:green;'></i></p>
+										<p class="small pricing-plan-allotment">Access basic content</p>
 										<a id='3month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
 									</th>
 									<th class="text-center border-0 pb-5">
@@ -205,7 +206,7 @@ PracticePractice, you personalised study hub.
 									<th class="text-center border-0 pb-5">
 										<h6 class="lead font-weight-bold pricing-plan-title">Free</h6>
 										<p class="font-weight-bold pricing-plan-amount"> <span class="h1">-</span></p>
-										<p class="small pricing-plan-allotment"><i class="bi bi-check-circle-fill" style='color:green;'></i></p>
+										<p class="small pricing-plan-allotment">Access basic content</p>
 										<a id='6month_free_plan' href="{%url 'user:register'%}"class="btn btn-block btn-outline-primary btn-rounded">Sign Up</a>
 									</th>
 									<th class="text-center border-0 pb-5">
