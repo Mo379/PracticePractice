@@ -85,7 +85,11 @@ def create_course_questions(instructor_context, question_prompt_obj, n_questions
                     "type": 'string',
                     "description": f"A detailed step by step answer to question {id+1}, this is an explanation of the resoning behind the solution. (using mathjax $ maths and showing the number of marks behind each step)",
                 },
-                "marks": {
+                "marking_criteria": {
+                    "type": 'string',
+                    "description": f"And explanation for where in the method or for what reason each mark should be given for question {id+1}",
+                },
+                "total_marks": {
                     "type": 'string',
                     "description": f"An intiger stating the number of marks for question {id+1}.",
                 },

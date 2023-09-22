@@ -97,8 +97,8 @@ def course_questions_prompts(request, json_data):
         questions_objs = Question.objects.filter(q_unique_id__in=list_questions).order_by('q_number')
         for q_object, nth_q in zip(questions_objs, sorted(ai_response_dict['questions'].keys())):
             q_object.q_content = ai_response_dict['questions'][nth_q]['question']
-            q_object.q_answer = ai_response_dict['questions'][nth_q]['answer']
-            q_object.q_marks = int(ai_response_dict['questions'][nth_q]['marks'])
+            q_object.q_answer = ai_response_dict['questions'][nth_q]['answer'] + '\n\n' + str(ai_response_dict['questions'][nth_q]['marking_criteria'])
+            q_object.q_marks = int(ai_response_dict['questions'][nth_q]['total_marks'])
             q_object.save()
         #
         questions_objs.update(author_confirmation=False)

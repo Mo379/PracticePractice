@@ -883,6 +883,13 @@ class MarketCourseView(
         avg_reviews = list(all_reviews.aggregate(Avg('rating')).values())[0]
         total_reviews = all_reviews.count()
         content = order_live_spec_content(versions[0].version_content)
+        if self.request.user.is_authenticated:
+            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active']).exists():
+                context['is_member'] = True
+            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status__in=['trialing', 'active'])
+            plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
+            if 'with ai' in plan_description.lower():
+                context['is_AI_member'] = True
         context['course'] = course
         context['avg_reviews'] = avg_reviews if avg_reviews else 0.0
         context['total_reviews'] = total_reviews
@@ -1739,7 +1746,6 @@ def _updatecourseinformation(request):
                 course.save()
                 if regenerate_summary:
                     courseIntro_function = create_course_introduction(request.user, course, 10)
-                    print(courseIntro_function)
                     message = {
                       "chat": [
                         {
@@ -2684,7 +2690,6 @@ def _restorechapter(request):
                 new_information[_chapter]['questions'] = save_questions[_chapter]
         # Update the values
         content[module]['content'] = new_information
-        print(content[module]['content'][chapter]['content'], new_information[chapter]['questions'])
         # Check and insert questions
         module_content = ChapterQuestionGenerator(
                 request.user,

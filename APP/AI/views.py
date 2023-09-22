@@ -679,7 +679,8 @@ def _savepromptquestion(request):
         }
         function_app_endpoint = {
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
-                'q_prompt_id': q_prompt_id
+                'q_prompt_id': q_prompt_id,
+                'model_name': 'gpt-4'
             }
         #
         quiz_function = create_course_questions(q_prompt, prompt, 5)
@@ -739,7 +740,8 @@ def _savepromptpoint(request):
         }
         function_app_endpoint = {
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
-                'p_prompt_id': p_prompt_id
+                'p_prompt_id': p_prompt_id,
+                'model_name': 'gpt-4'
             }
         #
         quiz_function = create_course_point(request, p_prompt, prompt)

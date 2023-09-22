@@ -1,4 +1,19 @@
 {%load general%}
+
+
+
+{%if context.is_AI_member is false%}
+{%definevar 'text-primary' as raw_link_highlight%}
+{%definevar 'text-secondary' as lock_text%}
+{%definevar '<i class="bi bi-file-lock2"></i>' as lock_icon%}
+{%else%}
+{%definevar 'text-secondary' as raw_link_highlight%}
+{%definevar '' as lock_text%}
+{%definevar '' as lock_icon%}
+{%endif%}
+
+
+
 {%for module in content%}
 <div class="accordion mb-1" id="Module_{{module}}">
   <div class="card course_outline_card">
@@ -12,8 +27,23 @@
 
     <div id="collapse-{{module}}" class="collapse course_outline_collapse" aria-labelledby="heading-{{module}}" data-parent="#Module_{{module}}">
       <div class="card-body" style='padding:10px;'>
+		<i class="bi bi-file-lock2 mr-1 ml-2 text-secondary"></i> Login or a normal subscription is required to unlock this type of contnet.<br>
+		<i class="bi bi-file-lock2 ml-2 text-secondary"></i><i class="bi bi-file-lock2 mr-1 text-secondary"></i> A subscription (*With AI*) is required to unlock all content <br><br>
 	        {%for chapter in content|index:module|index:'content'%}
-		<span class='font-weight-bold ml-5' id='course_outline_span'><i class="bi bi-arrow-bar-right course_outline_icon"></i> <a type= 'button' class='' href="{%url 'content:notearticle' context.course.id module chapter%}">Chapter {{forloop.counter}} - {{chapter|field_name_to_label}}</a></span><br>
+		      <a class='{{lock_text}}' href='{%url 'AI:index' course.id module chapter%}' style='text-decoration:none;'>
+			      <span class='font-weight-bold'>
+				      <i class="bi bi-book-fill"></i>
+				      AI Tutor| {{chapter|field_name_to_label}} {{lock_icon}}{{lock_icon}}
+				      <a type= 'button' class='{{raw_link_highlight}}' href="{%url 'content:notearticle' course.id module chapter%}">Raw</a>
+								      <a type= 'button' class='text-info' href="{%url 'content:practice' course.id module chapter%}">
+									      <i class="bi bi-patch-question-fill"></i>
+									      Questions 
+									      {%if not user.is_authenticated%}
+									      {{lock_icon}}(login)
+									      {%endif%}
+								      </a><br>
+			      </span>
+		      </a><br>
 		{%endfor%}
       </div>
     </div>

@@ -87,13 +87,22 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
                 context['user_is_subscribed'] = True
         #
         context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
-        context['without_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0s1CUEyV7FMWeH5sz68Hw')
-        context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1Nf0s1CUEyV7FMWe0YJ1jXNX')
-        context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1Nf0s1CUEyV7FMWeqSyB5D8T')
-        #
-        context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
-        context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeKLYogkM2')
-        context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeUr0fHRaW')
+        if settings.STRIPE_LIVE_MODE:
+            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
+            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
+            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
+            #
+            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
+            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
+            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
+        else:
+            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NgOjMCUEyV7FMWesxeNUYXF')
+            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOjhCUEyV7FMWeQHxpUt9b')
+            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
+            #
+            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
+            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOkBCUEyV7FMWezwKtUp2a')
+            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOkOCUEyV7FMWe2k15TK3Z')
         return context
 
 

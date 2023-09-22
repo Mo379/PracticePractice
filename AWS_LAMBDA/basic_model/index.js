@@ -52,8 +52,12 @@ export const handler = awslambda.streamifyResponse(
       const functions = JSON.parse(body).functions;
       const function_call = JSON.parse(body).function_call;
       const function_app_endpoint = JSON.parse(body).function_app_endpoint;
+      var model_name = "gpt-3.5-turbo-0613";
+      if (function_app_endpoint.hasOwnProperty('model_name')){
+	model_name = function_app_endpoint.model_name;
+      }
       const requestOptions = {
-        model: "gpt-3.5-turbo-0613",
+        model: model_name,
         temperature: 0.1,
         messages: messages,
         stream: true,
