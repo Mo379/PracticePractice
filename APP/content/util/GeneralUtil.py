@@ -472,7 +472,7 @@ def author_user_clicks_data_list(user, month_keys, subscriptions, courses):
     # Get all affiliate earnings
     affiliate_promotion_code_id = user.affiliate_promotion_code
     if affiliate_promotion_code_id:
-        affiliate_discounted_subscriptions = Discount.objects.filter(promotion_code=affiliate_promotion_code_id, subscription__status__in=['active'])
+        affiliate_discounted_subscriptions = Discount.objects.filter(promotion_code=affiliate_promotion_code_id, subscription__status__in=['active'], livemode=settings.STRIPE_LIVE_MODE)
         for _discounted_subscription in affiliate_discounted_subscriptions:
             discounted_subscription = _discounted_subscription.subscription
             if 'coupon' in discounted_subscription.discount:
@@ -503,21 +503,23 @@ def author_user_clicks_data_list(user, month_keys, subscriptions, courses):
                 last_month_user_course_clicks = sum(sub.monthly_significant_clicks[month_keys[-1]].values())
                 course_clicks_fraction = last_month_user_course_clicks/total_user_clicks
                 #
-                student_current_subscription = Subscription.objects.get(customer__id=sub.user.id, status__in=['active'])
-                if student_current_subscription.discount is not None:
-                    if 'coupon' in student_current_subscription.discount:
-                        discount_amount = float(student_current_subscription.plan.amount) * float(student_current_subscription.discount['coupon']['percent_off']/100)
+                student_current_subscriptions = Subscription.objects.filter(customer__id=sub.user.id, status__in=['active'], livemode=settings.STRIPE_LIVE_MODE)
+                if len(student_current_subscriptions) > 0:
+                    student_current_subscription = student_current_subscriptions[0]
+                    if student_current_subscription.discount is not None:
+                        if 'coupon' in student_current_subscription.discount:
+                            discount_amount = float(student_current_subscription.plan.amount) * float(student_current_subscription.discount['coupon']['percent_off']/100)
+                        else:
+                            discount_amount = 0
                     else:
                         discount_amount = 0
-                else:
-                    discount_amount = 0
-                #
-                student_plan = student_current_subscription.plan
-                total_amount = round(
-                        (float(student_current_subscription.plan.amount) - discount_amount)/student_plan.interval_count,
-                        2
-                    )
-                total_estimated_earning += (creator_percentage_split*float(total_amount))*course_clicks_fraction
+                    #
+                    student_plan = student_current_subscription.plan
+                    total_amount = round(
+                            (float(student_current_subscription.plan.amount) - discount_amount)/student_plan.interval_count,
+                            2
+                        )
+                    total_estimated_earning += (creator_percentage_split*float(total_amount))*course_clicks_fraction
             # get the total clicks for each course
             by_month_clicks = [sum(list(value.values())) for value in sub.monthly_significant_clicks.values()]
             total_course_clicks += sum(by_month_clicks)

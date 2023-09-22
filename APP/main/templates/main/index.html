@@ -105,17 +105,18 @@ PracticePractice, you personalised study hub.
 				<div class='col-8 mx-auto' style='margin-bottom:30px;'>
 					Unlock a world of learning possibilities with our premium membership: access exclusive self-practice tools, harness AI assistance, and delve into enriching video content. For free users, enjoy limitless reading across all courses. Elevate your study experience today!
 				</div>
-				<p>A membership gives you <strong class='text-success'>access to all of our courses</strong>, with or without our Artificial Intelligence features depending on your choice.</p>
+				<p>A membership gives you <strong class='text-success'>access to all of our courses</strong>, with or without our Artificial Intelligence features depending on your choice. Start a free trial now! (<strong class='text-info'>Requires a valid card</strong>)</p>
 			      <div class='pt-5 pb-5 mt-3' style='border: 1px solid var(--text-color-3); border-radius:10px; padding: 25px; background:black;box-shadow:0 15px 25px var(--text-color-2);'>
 
 			      <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 				<stripe-pricing-table 
-					pricing-table-id="prctbl_1Nf0wJCUEyV7FMWeAvtivll7"
+					    pricing-table-id="{{context.pricing_table}}"
 					publishable-key="{{context.publishable_key}}"
 					client-reference-id="{{user.id}}"
 					customer-session-client-secret="{{context.client_secret}}"
 				>
 				</stripe-pricing-table>
+
 			{%endif%}
 		{%else%}
 		<section class="py-5">

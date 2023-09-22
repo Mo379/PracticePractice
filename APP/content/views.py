@@ -42,12 +42,8 @@ from content.forms import MDEditorAnswerModleForm, MDEditorQuestionModleForm, MD
 from management.templatetags.general import ToMarkdownAnswerManual
 from mdeditor.widgets import MDEditorWidget
 from django.contrib.auth.decorators import login_required
-from braces.views import (
-        LoginRequiredMixin,
-        GroupRequiredMixin,
-        SuperuserRequiredMixin,
-    )
 from PP2.mixin import (
+        LoginRequiredMixin,
         AnySubscriptionRequiredMixin,
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
@@ -71,9 +67,7 @@ from AI.models import (
         Lesson_quiz,
     )
 from djstripe.models import (
-        Customer,
         Subscription,
-        Price,
     )
 from AI.functions import create_course_introduction
 
@@ -104,7 +98,7 @@ class ContentView(
         current_page = self.kwargs['page'] if 'page' in self.kwargs else 1
         course_subscriptions = CourseSubscription.objects.filter(
                 user=self.request.user,
-                visibility=True
+                visibility=True,
             ).order_by('-subscription_created_at') if self.request.user.is_authenticated else False
         #
         courses = [c.course.pk for c in course_subscriptions]
@@ -368,9 +362,9 @@ class CourseStudyView(
                 reverse=True
             )
         if self.request.user.is_authenticated:
-            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active']).exists():
+            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE).exists():
                 context['is_member'] = True
-            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status__in=['trialing', 'active'])
+            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE)
             plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
             if 'with ai' in plan_description.lower():
                 context['is_AI_member'] = True
@@ -513,7 +507,7 @@ class PracticeView(
         #
         difficulties = 1
         if self.request.user.is_authenticated:
-            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active']).exists():
+            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE).exists():
                 difficulties = 5
                 context['is_member'] = True
         #
@@ -884,9 +878,9 @@ class MarketCourseView(
         total_reviews = all_reviews.count()
         content = order_live_spec_content(versions[0].version_content)
         if self.request.user.is_authenticated:
-            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active']).exists():
+            if Subscription.objects.filter(customer__id=self.request.user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE).exists():
                 context['is_member'] = True
-            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status__in=['trialing', 'active'])
+            active_subscriptions = Subscription.objects.filter(customer=self.request.user.id, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE)
             plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
             if 'with ai' in plan_description.lower():
                 context['is_AI_member'] = True

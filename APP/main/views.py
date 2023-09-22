@@ -17,6 +17,7 @@ from djstripe.models import (
     )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from PP2.mixin import (
+        stripe_customer_checks,
         AnySubscriptionRequiredMixin,
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
@@ -28,8 +29,6 @@ from PP2.mixin import (
         TrusteeRequiredMixin,
         TrusteeRequiredDec
     )
-
-
 
 
 # Create your views here.
@@ -54,19 +53,10 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
         context = {}
         user = self.request.user
         if user.is_authenticated:
-            try:
-                Customer.objects.get(id=user.id)
-            except Exception as e:
-                print(str(e))
-                stripe.api_key = settings.STRIPE_SECRET_KEY
-                stripe.Customer.create(
-                        email=user.email,
-                        name=user.first_name+' '+user.last_name,
-                        id=user.id,
-                        metadata={'username':user.username}
-                    )
             #
-            if Subscription.objects.filter(customer=user.id, status__in=['active', 'trialing']).exists() is False:
+            stripe_customer_checks(user)
+            #
+            if Subscription.objects.filter(customer=user.id, status__in=['active', 'trialing'], livemode=settings.STRIPE_LIVE_MODE).exists() is False:
                 auth_key = settings.STRIPE_SECRET_KEY
                 url = "https://api.stripe.com/v1/customer_sessions"
                 data = {
@@ -78,6 +68,7 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
                 }
 
                 response = requests.post(url, data=data, headers=headers)
+                print(response)
                 client_secret = response.json()['client_secret']
 
                 context['client_secret'] = client_secret
@@ -88,21 +79,23 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
         #
         context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
         if settings.STRIPE_LIVE_MODE:
-            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
-            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
-            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
+            context['pricing_table'] = 'prctbl_1Nt3CvCUEyV7FMWeEBVqahY7'
+            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NsvapCUEyV7FMWeyxEjNlp7', livemode=settings.STRIPE_LIVE_MODE)
+            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NsvapCUEyV7FMWesZhlSAqZ', livemode=settings.STRIPE_LIVE_MODE)
+            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NsvaoCUEyV7FMWelNORbffv', livemode=settings.STRIPE_LIVE_MODE)
             #
-            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
-            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
-            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
+            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1NsvawCUEyV7FMWeqrKIR92H', livemode=settings.STRIPE_LIVE_MODE)
+            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1NsvawCUEyV7FMWeak17BZ77', livemode=settings.STRIPE_LIVE_MODE)
+            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1NsvawCUEyV7FMWekIVR7sMp', livemode=settings.STRIPE_LIVE_MODE)
         else:
-            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NgOjMCUEyV7FMWesxeNUYXF')
-            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOjhCUEyV7FMWeQHxpUt9b')
-            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5')
+            context['pricing_table'] = 'prctbl_1Nf0wJCUEyV7FMWeAvtivll7'
+            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NgOjMCUEyV7FMWesxeNUYXF', livemode=settings.STRIPE_LIVE_MODE)
+            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOjhCUEyV7FMWeQHxpUt9b', livemode=settings.STRIPE_LIVE_MODE)
+            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5', livemode=settings.STRIPE_LIVE_MODE)
             #
-            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC')
-            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOkBCUEyV7FMWezwKtUp2a')
-            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOkOCUEyV7FMWe2k15TK3Z')
+            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC', livemode=settings.STRIPE_LIVE_MODE)
+            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOkBCUEyV7FMWezwKtUp2a', livemode=settings.STRIPE_LIVE_MODE)
+            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOkOCUEyV7FMWe2k15TK3Z', livemode=settings.STRIPE_LIVE_MODE)
         return context
 
 
