@@ -22,17 +22,6 @@ urlpatterns = [
     # Author
     path('mycourses', views.MyCoursesView.as_view(), name='mycourses'),
     path('mycourses/<int:page>', views.MyCoursesView.as_view(), name='mycourses'),
-    path(
-        'specmodule/<level>/<subject>/<board>/<name>',
-        views.SpecModuelHandlerView.as_view(),
-        name='specmoduel'
-    ),
-    path(
-        'spectopic/<level>/<subject>/<board>/<name>/<module>/<chapter>',
-        views.SpecTopicHandlerView.as_view(),
-        name='spectopic'
-    ),
-    path('earning-statistics', views.EarningStatisticsView.as_view(), name='earning_statistics'),
     # extra
     path('blank', views.BlankView.as_view(), name='blank'),
     path('404', views.NotFoundView.as_view(), name='404'),

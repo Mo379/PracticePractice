@@ -52,7 +52,7 @@ from content.util.GeneralUtil import (
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
-from AI.functions import create_quiz_function, create_course_questions, create_course_point
+from AI.functions import create_quiz_function, create_course_questions, create_course_lesson
 from AI import functions_endpoint
 from management.templatetags.general import ToMarkdownManual
 
@@ -417,7 +417,7 @@ def _function_app_endpoint(request):
                             request,
                             json_data
                         )
-                elif function_name == 'create_course_point':
+                elif function_name == 'create_course_lesson':
                     response = functions_endpoint.course_point_prompts(
                             request,
                             json_data
@@ -734,7 +734,7 @@ def _savepromptpoint(request):
             },
             {
               "role": "user",
-              "content": 'Please write this lesson.'
+              "content": 'Please create a lesson based on the provided information, please follow the instructions.'
             }
           ]
         }
@@ -744,10 +744,11 @@ def _savepromptpoint(request):
                 'model_name': 'gpt-4'
             }
         #
-        quiz_function = create_course_point(request, p_prompt, prompt)
+        quiz_function = create_course_lesson(request, p_prompt, prompt)
         functions = [quiz_function[0]]
         function_call = {"name": quiz_function[1]}
         message['chat'][0]['content'] = quiz_function[2]
+        print(message)
         #
         response = {
                 'error': 0,

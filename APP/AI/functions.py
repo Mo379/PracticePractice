@@ -1,3 +1,4 @@
+import re
 import collections
 from content.util.GeneralUtil import (
         order_full_spec_content,
@@ -8,7 +9,17 @@ from content.models import Course, Question, Point
 from user.models import User
 
 
-def create_course_point(request, instructor_context, point_prompt_obj):
+personality_prompt = """
+
+"""
+md_mj_formatting_prompt = """
+
+"""
+keyword_formatting_prompt = """
+
+"""
+
+def create_course_lesson(request, instructor_context, point_prompt_obj):
     spec = point_prompt_obj.specification
     level = spec.spec_level
     subject = spec.spec_subject
@@ -26,31 +37,37 @@ def create_course_point(request, instructor_context, point_prompt_obj):
     point = Point.objects.get(p_unique_id=point_prompt_obj.p_unique)
     point_title = point.p_title
     def points_prompt(level, subject, module, chapter, point_title, topic_text, point_text, instructor_context):
-        return f"For a course staged in '{level}', the subject is {subject}, \
+        return re.sub('\s+', ' ', f"You are a very good teacher that understands the importance of \
+                creating good lessons, and are tasked with writing text book course content for a course \
+                The course is staged in '{level}', where the subject is {subject}, \
             the module for content is {module} and the chapter is {chapter}, \
             create a short lesson for the lesson point titled '{point_title}', that \
             teaches this in a way that is easy \
-            to build an understanding, use the following \
+            to build an understanding and gets straight to the point without much of an introduction, use the following \
             context to help with the content of the lesson, \
-            ('context_1':'{topic_text}', 'context_2':'{point_text}')."
+            [ {topic_text} ] [{point_text} ]'). For formatting \
+            you must only use only text and mathjax latex notation ($ for inline maths and $$ for bloack maths), \
+            dont user any character that invalidates reading the json output, \
+            The lesson shold be informative and easy to understand and not too long (make it the right length to get the idea across). \
+            instructor context : {instructor_context}.")
     system_message = points_prompt(level, subject, module, chapter, point_title, topic_text, point_text, instructor_context)
     function_description = {
-        "name": "create_course_point",
-        "description": "Creates a step by step lesson for the content or topic description provided using mathjax and markdown",
+        "name": "create_course_lesson",
+        "description": "Creates a lesson for the content or topic description provided using mathjax and only text",
         "parameters": {
             "type": "object",
             "properties": {
-                "point": {
+                "lesson": {
                     "type": "string",
-                    "description": "A a complete step by step lesson teaching the previously mentioned details.",
+                    "description": "The lesson being taught, this should be a detailed and understandable lesson.",
                 },
             },
             "required": [
-                "point"
+                "lesson"
             ],
         },
     }
-    return function_description, 'create_course_point', system_message
+    return function_description, 'create_course_lesson', system_message
 
 
 def create_course_questions(instructor_context, question_prompt_obj, n_questions=5):

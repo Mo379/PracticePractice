@@ -23,11 +23,13 @@ from djstripe.models import (
 current_month = datetime.now().date()
 n_months = 6
 
+
 def TagGenerator():
     x = ''.join(
             random.choices(string.ascii_letters + string.digits, k=10)
         ).lower()
     return x
+
 
 def ChapterQuestionGenerator(user, subject, module, module_content):
     difficulty_levels = [1, 2, 3, 4, 5]
@@ -55,6 +57,7 @@ def ChapterQuestionGenerator(user, subject, module, module_content):
                 level_qs.append(question.q_unique_id)
     #
     return module_content
+
 
 def filter_drag_drop_selection(global_objects, selected_options, item_name):
     # remove disabled moduels from selection_option
