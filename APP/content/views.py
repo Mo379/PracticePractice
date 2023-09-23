@@ -16,12 +16,8 @@ from django.contrib.postgres.search import (
 from django.db.models import Count, Avg
 from content.util.GeneralUtil import (
         TagGenerator,
-        ChapterQuestionGenerator,
-        insert_new_spec_order,
         order_full_spec_content,
         order_live_spec_content,
-        TranslatePointContent,
-        TranslateQuestionContent,
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
@@ -52,17 +48,14 @@ from PP2.mixin import (
         TrusteeRequiredDec
     )
 from io import BytesIO
-from PP2.utils import h_encode, h_decode, fire_and_forget
+from PP2.utils import h_encode, h_decode
 from AI.models import (
-        ContentPromptQuestion,
-        ContentPromptTopic,
-        ContentPromptPoint,
         Lesson_quiz,
     )
 from djstripe.models import (
         Subscription,
     )
-from AI.functions import create_course_introduction
+from AI import workflows
 
 
 class ContentView(
@@ -133,69 +126,6 @@ class ContentView(
         context['next_page'] = current_page + 1 if current_page < p.num_pages else None
         context['CDN_URL'] = settings.CDN_URL
         return context
-
-
-class NotesView(
-        LoginRequiredMixin,
-        BaseBreadcrumbMixin,
-        generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = 'content/notes.html'
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("content", reverse("content:content")),
-                ("notes", ''),
-                ]
-
-    def get_queryset(self):
-        """Return all of the required hub information"""
-        context = {}
-        course_id = self.kwargs['course_id']
-        Note_objs = []
-        spec_names = {}
-        # optain the subscribed spec or the unviersal spec
-        course = Course.objects.get(
-                    pk=course_id
-                )
-        source_spec = course.specification
-        content = CourseVersion.objects.filter(
-                course=course
-            ).order_by('-version_number')[0].version_content
-        content = order_full_spec_content(content)
-        #
-        for key, value in content.items():
-            if value['active'] == True:
-                for k, v in value['content'].items():
-                    if v['active'] == True:
-                        Note_objs.append({
-                                'p_moduel': key,
-                                'p_chapter': k,
-                            })
-                        spec_names[source_spec.spec_subject] = [source_spec.spec_board,source_spec.spec_name]
-        df = pd.DataFrame(Note_objs)
-        dic = OrderedDict()
-        for m, c in zip(
-                list(df['p_moduel']),
-                list(df['p_chapter']),
-                ):
-            if m not in dic:
-                dic[m] = []
-            dic[m].append(c)
-        course_subscription = CourseSubscription.objects.filter(
-                user=self.request.user,
-                course=course
-                )
-        context['coursesubscription'] = course_subscription if len(course_subscription) else False
-        context['notes'] = dic
-        context['spec_names'] = spec_names
-        context['course'] = course
-        return context
-
 
 
 class NoteArticleView(
@@ -820,13 +750,13 @@ def _createcourse(request):
     if request.method == 'POST':
         course_name = request.POST['course_name']
         course_level = request.POST['course_level']
-        version_name = request.POST['version_name']
-        version_note = request.POST['version_note']
+        version_name = TagGenerator()
+        version_note = 'The course initial version'
         #
         spec_level = request.POST['spec_level']
         spec_subject = request.POST['spec_subject']
         spec_board = 'Universal'
-        spec_name = request.POST['spec_name']
+        spec_name = TagGenerator()
         #
         if len(course_name) < 3 and len(version_name) < 3 and \
             len(spec_level) < 3 and len(spec_subject) < 3 and \
@@ -834,7 +764,7 @@ def _createcourse(request):
             messages.add_message(
                     request,
                     messages.INFO,
-                    'Something went wrong could not create course',
+                    'Something went wrong could not create course, length of input is too short.',
                     extra_tags='alert-warning course'
                 )
             return redirect(
@@ -1003,12 +933,6 @@ def _updatecourseinformation(request):
         course_name = request.POST['new_name']
         course_upload_image = request.FILES.get("course_thmbnail", None)
         course_level = request.POST['course_level']
-        #
-        version_name = request.POST['version_name'] if 'version_name' in request.POST else 'Automatic update'
-        version_note = request.POST['version_note'] if 'version_note' in request.POST else 'Automatic update'
-        #
-        regenerate_summary = True if 'regenerate_summary' in request.POST else None
-        publication_status = True if 'publication_status' in request.POST else None
         # AI created
         courses = Course.objects.filter(
                 user=request.user,
@@ -1021,23 +945,17 @@ def _updatecourseinformation(request):
                 course.course_name = course_name
                 course.course_level = course_level
                 #
-                if regenerate_summary:
-                    course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
-                    course.course_summary = '(AI is working...)'
-                    course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
-                #
-                # Upload image
                 if course_upload_image:
                     file_name_list = course_upload_image.name.split('.')
                     file_extension = file_name_list.pop(-1)
                     full_name = '.'.join(file_name_list) + '.' + file_extension
                     course.course_pic_ext = full_name
                     request.user.save()
-                    if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
+                    if file_extension not in settings.UPLOAD_IMAGE_FORMATS:
                         messages.add_message(
                                 request,
                                 messages.INFO,
-                                'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
+                                'Filetype is not allowed, please user: ' + str(','.join(settings.UPLOAD_IMAGE_FORMATS)),
                                 extra_tags='alert-warning course'
                             )
                     else:
@@ -1063,144 +981,8 @@ def _updatecourseinformation(request):
                                     'Could not store your profile image.',
                                     extra_tags='alert-warning course'
                                 )
-                if publication_status:
-                    # do course item checks
-                    spec_content = course.specification.spec_content
-                    active_points, active_questions = extract_active_spec_content(spec_content)
-                    all_questions = Question.objects.filter(q_unique_id__in=active_questions)
-                    all_points = Point.objects.filter(p_unique_id__in=active_points)
-                    unconfirmed_questions = all_questions.filter(author_confirmation=False)
-                    unconfirmed_points = all_points.filter(author_confirmation=False)
-                    #
-                    empty_content = detect_empty_content(spec_content)
-                    empty_content_str = ''
-                    for module in empty_content.keys():
-                        empty_content_str += f'&ensp; Module: {module} <br>'
-                        if len(empty_content[module])>0:
-                            for chapter in empty_content[module].keys():
-                                empty_content_str += f'&ensp; &ensp;Chapter: {chapter}<br>'
-                                if len(empty_content[module][chapter])>0:
-                                    for topic in empty_content[module][chapter].keys():
-                                        empty_content_str += f"&ensp; &ensp; &ensp; Topic: {topic} <br><br>"
-                    if len(empty_content) > 0:
-                        messages.add_message(
-                                request,
-                                messages.INFO,
-                                f"""
-                                The following content sections are empty, please
-                                add at least a single point:<br>
-                                {empty_content_str}
-                                """,
-                                extra_tags='alert-danger course'
-                            )
-                        return redirect(
-                                'dashboard:mycourses',
-                            )
-                    #
-                    if len(all_questions) < 100 or len(all_points) < 20:
-                        publication_status = False
-                        course.course_publication = publication_status
-                        course.save()
-                        messages.add_message(
-                                request,
-                                messages.INFO,
-                                f"""
-                                To publish your course you need at least 100
-                                questions and 20 points, currently you only have
-                                {len(all_questions)} questions and
-                                {len(all_points)} points, please add more content.
-                                """,
-                                extra_tags='alert-danger course'
-                            )
-                        return redirect(
-                                'dashboard:mycourses',
-                            )
-                    #
-                    if len(unconfirmed_questions) + len(unconfirmed_points) == 0:
-                        publication_status = True
-                        course.course_publication = publication_status
-                        # Create a new course version
-                        if course.course_up_to_date is not True:
-                            versions = CourseVersion.objects.filter(
-                                course=course
-                            ).order_by(
-                                    '-version_number'
-                                )
-                            latest_version = versions[0]
-                            CourseVersion.objects.create(
-                                course=course,
-                                version_number=latest_version.version_number + 1,
-                                version_name=version_name,
-                                version_content=course.specification.spec_content,
-                                version_note=version_note,
-                            )
-                            course.course_up_to_date = True
-                        course.save()
-                    else:
-                        publication_status = False
-                        course.course_publication = publication_status
-                        course.save()
-                        q_link = ""
-                        p_link = ""
-                        for q in unconfirmed_questions[:5]:
-                            kwargs = {"spec_id": course.specification.id, "question_id": q.id}
-                            url = reverse('content:editorquestion', kwargs=kwargs)
-                            q_link += f"<a class='ml-2' href='{url}'>Question: {q}</a><br>"
-                        for p in unconfirmed_points[:5]:
-                            kwargs = {"spec_id": course.specification.id, "point_id": p.id}
-                            url = reverse('content:editorpoint', kwargs=kwargs)
-                            p_link += f"<a class='ml-2' href='{url}'>Point: {p}</a><br>"
-                        messages.add_message(
-                                request,
-                                messages.INFO,
-                                f"""
-                                There is a total of {len(unconfirmed_questions)} and {len(unconfirmed_points)} unconfirmed questions and points,
-                                please go back, check and confirm that the content is correct and free of errors, use those links to make quick confirmations: <br><br>
-                                Questions:<br>{q_link}<br>
-                                Points:<br>{p_link}
-                                """,
-                                extra_tags='alert-danger course'
-                            )
-                        return redirect(
-                                'dashboard:mycourses',
-                            )
-                else:
-                    course.course_publication = publication_status
                 course.save()
-                if regenerate_summary:
-                    courseIntro_function = create_course_introduction(request.user, course, 10)
-                    message = {
-                      "chat": [
-                        {
-                          "role": "system",
-                          "content": courseIntro_function[2]
-                        },
-                        {
-                          "role": "user",
-                          "content": """With the information provided for this
-                              course, please create a list of skills or objectives
-                              that the studnet can expect to achive, do not use
-                              too many words per skill or learning objective"""
-                        }
-                      ]
-                    }
-                    functions = [courseIntro_function[0]]
-                    function_call = {"name": courseIntro_function[1]}
-                    lambda_url = settings.CHATGPT_LAMBDA_URL
-                    function_app_endpoint = {
-                            'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
-                            'course_id': course.id,
-                        }
-                    request_body = {
-                            'message': message['chat'],
-                            'functions': functions,
-                            'function_call': function_call,
-                            'function_app_endpoint': function_app_endpoint,
-                        }
-                    headers = {
-                        "Content-Type": "application/json",
-                    }
-                    fire_and_forget(lambda_url, request_body, headers)
+                workflows.general_course_generation(course)
             except Exception as e:
                 messages.add_message(
                         request,
@@ -1234,7 +1016,7 @@ def _deletecourse(request):
         course_id = request.POST['Course_id']
         courses = Course.objects.filter(
                 user=request.user,
-                pk=course_id
+                pk=h_decode(course_id)
             )
         #
         if len(courses) == 1:

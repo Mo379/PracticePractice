@@ -58,45 +58,8 @@
 			  	Advanced
 			  </option>
 			</select>
-
-			<div class="mt-4 custom-control custom-switch">
-				<input name='regenerate_summary' type="checkbox" class="custom-control-input" id="customSwitch1_{{course.id|hashid}}" 
-			  >
-			  <label class="custom-control-label" for="customSwitch1_{{course.id|hashid}}">Toggle to regenerate course summary using AI.</label>
-			</div>
-
-			<div class="mt-4 custom-control custom-switch">
-				<input name='publication_status' type="checkbox" class="custom-control-input" id="customSwitch2_{{course.id|hashid}}"
-				{%if course.course_publication%}
-				checked
-				{%endif%}
-			  >
-			  <label class="custom-control-label" for="customSwitch2_{{course.id|hashid}}">
-				{%if course.course_publication%}
-				<a class="text-success">Published</a>
-				{%else%}
-				<a class="text-danger">Unpublished</a>
-				{%endif%}
-			  </label>
-			</div>
-			{%if course.course_up_to_date%}
-			<label for="">Latest updates: </label>
-			<a class="text-success">Up to date</a><br>
-			{%else%}
-			<br><label for="">Latest updates: </label>
-			<a class="text-warning">New changes made (course update needed)</a><br>
-			<label for="version_name">Version name (Anything):</label>
-			<input 
-				type='text' 
-				name='version_name' 
-			        class='form-control mb-3'
-			        id='version_name'
-				placeholder='Version Name'
-			        value='New Update'
-			/>
-			<label for="version_note">Give a version Note (Anything):</label>
-	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the new updates.</textarea>
-			{%endif%}
+			<br>
+			<br>
 			<button type= 'submit' class='btn btn-primary mb-2' > Update </button><br><br>
 		</form>
       </div>

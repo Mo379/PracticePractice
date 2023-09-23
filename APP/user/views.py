@@ -921,11 +921,11 @@ def _accountdetails(request):
                 request.user.profile_pic_ext = full_name
                 request.user.profile_pic_status = True
                 request.user.save()
-                if file_extension not in MDEDITOR_CONFIGS['upload_image_formats']:
+                if file_extension not in settings.UPLOAD_IMAGE_FORMATS:
                     messages.add_message(
                             request,
                             messages.INFO,
-                            'Filetype is not allowed, please user: ' + str(','.join(MDEDITOR_CONFIGS['upload_image_formats'])),
+                            'Filetype is not allowed, please user: ' + str(','.join(settings.UPLOAD_IMAGE_FORMATS)),
                             extra_tags='alert-warning user_profile'
                         )
                 else:

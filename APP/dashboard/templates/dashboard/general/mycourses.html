@@ -45,21 +45,17 @@ Courses
 			{%endif%}
 			<div class="card-body">
 				<div class="h6 font-weight-bold" >{{course.course_name}}</div>
+				<div class="" style='font-size: 12px;'><strong>ID:</strong> 
+					<span class="text-info">{{course.id|hashid}}</span>
+				</div>
 				<div class="" style='font-size: 12px;'><strong>Status:</strong> 
 					{%if course.course_publication%}
-					<a class="text-success">Published</a>
+					<span class="text-success">Published</span>
 					{%else%}
-					<a class="text-danger">Unpublished</a>
+					<span class="text-danger">Unpublished</span>
 					{%endif%}
 				</div>
-				<div class="" style='font-size: 12px;'><strong>Latest updates:</strong> 
-					{%if course.course_up_to_date%}
-					<a class="text-success">Up to date</a>
-					{%else%}
-					<a class="text-warning">New changes made (course update needed)</a>
-					{%endif%}
-				</div>
-				<div class="" style='font-size: 12px;'><strong>Specification:</strong> {{course.specification.spec_name}}</div>
+				<div class="" style='font-size: 12px;'><strong>Specification:</strong> {{course.specification.id|hashid}}</div>
 				<div class="" style='font-size: 12px;'><strong>Level:</strong> {{course.course_level}}</div>
 				<div class="" style='font-size: 12px;'><strong>Course Versions (last 3 versions):</strong> 
 					<div>
