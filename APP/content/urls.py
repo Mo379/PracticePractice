@@ -33,26 +33,6 @@ urlpatterns = [
         name='practice'
         ),
     #
-    path(
-        'content/noteedit/<hashid:spec_id>/<module>/<chapter>/',
-        views.NoteEditView.as_view(),
-        name='noteedit'
-    ),
-    path(
-        'content/questionedit/<hashid:spec_id>/<module>/<chapter>/',
-        views.QuestionEditView.as_view(),
-        name='questionedit'
-        ),
-    path(
-        'content/editorpoint/<hashid:spec_id>/<hashid:point_id>',
-        views.EditorPointView.as_view(),
-        name='editorpoint'
-    ),
-    path(
-        'content/editorquestion/<hashid:spec_id>/<hashid:question_id>',
-        views.EditorQuestionView.as_view(),
-        name='editorquestion'
-    ),
     path('marketplace/', views.MarketPlaceView.as_view(), name='marketplace'),
     path('marketplace/<int:page>', views.MarketPlaceView.as_view(), name='marketplace'),
     path('marketcourse/<hashid:course_id>', views.MarketCourseView.as_view(), name='marketcourse'),
@@ -74,39 +54,9 @@ urlpatterns = [
         name='_management_options'
     ),
     path(
-        'content/_author_confirmation_question',
-        views._author_confirmation_question,
-        name='_author_confirmation_question'
-    ),
-    path(
-        'content/_author_confirmation_point',
-        views._author_confirmation_point,
-        name='_author_confirmation_point'
-    ),
-    path(
         'content/_createcourse/',
         views._createcourse,
         name='_createcourse'
-    ),
-    path(
-        'content/_createmoduel/',
-        views._createmoduel,
-        name='_createmoduel'
-    ),
-    path(
-        'content/_createchapter/',
-        views._createchapter,
-        name='_createchapter'
-    ),
-    path(
-        'content/_createtopic/',
-        views._createtopic,
-        name='_createtopic'
-    ),
-    path(
-        'content/_createpoint/',
-        views._createpoint,
-        name='_createpoint'
     ),
     path(
         'content/_createcustomtest/',
@@ -114,204 +64,14 @@ urlpatterns = [
         name='_createcustomtest'
     ),
     path(
-        'content/_renamespec/',
-        views._renamespec,
-        name='_renamespec'
-    ),
-    path(
-        'content/_renamemodule/',
-        views._renamemodule,
-        name='_renamemodule'
-    ),
-    path(
-        'content/_renamechapter/',
-        views._renamechapter,
-        name='_renamechapter'
-    ),
-    path(
-        'content/_renametopic/',
-        views._renametopic,
-        name='_renametopic'
-    ),
-    path(
-        'content/_renamepoint/',
-        views._renamepoint,
-        name='_renamepoint'
-    ),
-    path(
-        'content/_ordermoduels',
-        views._ordermoduels,
-        name='_ordermoduels'
-    ),
-    path(
-        'content/_orderchapters',
-        views._orderchapters,
-        name='_orderchapters'
-    ),
-    path(
-        'content/_ordertopics',
-        views._ordertopics,
-        name='_ordertopics'
-    ),
-    path(
-        'content/_orderpoints',
-        views._orderpoints,
-        name='_orderpoints'
-    ),
-    path(
         'content/_updatecourseinformation/',
         views._updatecourseinformation,
         name='_updatecourseinformation'
     ),
     path(
-        'content/_updatepointvideos/',
-        views._updatepointvideos,
-        name='_updatepointvideos'
-    ),
-    path(
-        'content/_updatequestionvideos/',
-        views._updatequestionvideos,
-        name='_updatequestionvideos'
-    ),
-    path(
-        'content/_updatepointimages/',
-        views._updatepointimages,
-        name='_updatepointimages'
-    ),
-    path(
-        'content/_updatequestionimages/',
-        views._updatequestionimages,
-        name='_updatequestionimages'
-    ),
-    path(
-        'content/_uploadquestionimage/',
-        views._uploadquestionimage,
-        name='_uploadquestionimage'
-    ),
-    path(
-        'content/_uploadpointimage/',
-        views._uploadpointimage,
-        name='_uploadpointimage'
-    ),
-    path(
-        'content/_removemodule',
-        views._removemodule,
-        name='_removemodule'
-    ),
-    path(
-        'content/_removechapter',
-        views._removechapter,
-        name='_removechapter'
-    ),
-    path(
-        'content/_removetopic',
-        views._removetopic,
-        name='_removetopic'
-    ),
-    path(
-        'content/_removepoint',
-        views._removepoint,
-        name='_removepoint'
-    ),
-    path(
-        'content/_restoremodule',
-        views._restoremodule,
-        name='_restoremodule'
-    ),
-    path(
-        'content/_restorechapter',
-        views._restorechapter,
-        name='_restorechapter'
-    ),
-    path(
-        'content/_restoretopic',
-        views._restoretopic,
-        name='_restoretopic'
-    ),
-    path(
-        'content/_restorepoint',
-        views._restorepoint,
-        name='_restorepoint'
-    ),
-    path(
-        'content/_undeletemodule',
-        views._undeletemodule,
-        name='_undeletemodule'
-    ),
-    path(
-        'content/_undeletechapter/',
-        views._undeletechapter,
-        name='_undeletechapter'
-    ),
-    path(
-        'content/_undeletetopic/',
-        views._undeletetopic,
-        name='_undeletetopic'
-    ),
-    path(
-        'content/_undeletepoint/',
-        views._undeletepoint,
-        name='_undeletepoint'
-    ),
-    path(
         'content/_deletecourse/',
         views._deletecourse,
         name='_deletecourse'
-    ),
-    path(
-        'content/_deletemoduel/',
-        views._deletemoduel,
-        name='_deletemoduel'
-    ),
-    path(
-        'content/_deletechpter/',
-        views._deletechapter,
-        name='_deletechapter'
-    ),
-    path(
-        'content/_deletetopic/',
-        views._deletetopic,
-        name='_deletetopic'
-    ),
-    path(
-        'content/_deletepoint/',
-        views._deletepoint,
-        name='_deletepoint'
-    ),
-    path(
-        'content/_erasemodule/',
-        views._erasemodule,
-        name='_erasemodule'
-    ),
-    path(
-        'content/_erasechpter/',
-        views._erasechapter,
-        name='_erasechapter'
-    ),
-    path(
-        'content/_erasetopic/',
-        views._erasetopic,
-        name='_erasetopic'
-    ),
-    path(
-        'content/_erasepoint/',
-        views._erasepoint,
-        name='_erasepoint'
-    ),
-    path(
-        'content/_savepointedit/',
-        views._savepointedit,
-        name='_savepointedit'
-    ),
-    path(
-        'content/_savequestionedit/',
-        views._savequestionedit,
-        name='_savequestionedit'
-    ),
-    path(
-        'content/_saveansweredit/',
-        views._saveansweredit,
-        name='_saveansweredit'
     ),
     path(
         'content/_subjective_mark_question/',

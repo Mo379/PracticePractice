@@ -65,7 +65,6 @@ INSTALLED_APPS = [
     'djstripe',
     'view_breadcrumbs',
     'multiselectfield',
-    'mdeditor',
     'dbbackup',
     # user added
     'main.apps.MainConfig',

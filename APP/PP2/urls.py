@@ -38,7 +38,6 @@ urlpatterns = [
     path('study/', include('content.urls')),
     path('AI/', include('AI.urls')),
     path('user/', include('user.urls')),
-    path('mdeditor/', include('mdeditor.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path("stripe/", include("djstripe.urls", namespace="djstripe")),

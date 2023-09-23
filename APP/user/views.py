@@ -54,10 +54,8 @@ from djstripe.models import (
     )
 import markdown
 from django.db.models import Q
-from mdeditor.configs import MDConfig
 from io import BytesIO
 
-MDEDITOR_CONFIGS = MDConfig('default')
 
 
 

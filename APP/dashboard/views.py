@@ -1,56 +1,30 @@
-import statistics
 import collections
-import pandas as pd
 from django.conf import settings
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views import generic
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 from django.utils.functional import cached_property
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, EmptyPage
 from view_breadcrumbs import BaseBreadcrumbMixin
-from django.db.models import CharField, Count, Avg
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
-from django.db.models.functions import TruncMonth
-from django.db.models import Count, Sum
-from datetime import datetime, timedelta
-import stripe
+from django.db.models import Count, Avg
+from django.contrib.postgres.search import (
+        SearchVector, SearchQuery, SearchRank
+    )
+from django.db.models import Sum
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from braces.views import (
         SuperuserRequiredMixin,
     )
 from PP2.mixin import (
         LoginRequiredMixin,
-        AnySubscriptionRequiredMixin,
-        AnySubscriptionRequiredDec,
-        AISubscriptionRequiredMixin,
-        AISubscriptionRequiredDec,
         CourseSubscriptionRequiredMixin,
-        CourseSubscriptionRequiredDec,
         AuthorRequiredMixin,
-        AuthorRequiredDec,
-        AffiliateRequiredMixin,
-        AffiliateRequiredDec,
-        TrusteeRequiredMixin,
-        TrusteeRequiredDec
     )
 from user.models import User
 from AI.models import (
-        ContentGenerationJob,
-        ContentPromptQuestion,
-        ContentPromptTopic,
-        ContentPromptPoint,
-        Usage,
-        Lesson,
-        Lesson_part,
         Lesson_quiz
     )
 from content.models import (
-        Question,
-        Point,
-        Specification,
         Course,
         CourseVersion,
         CourseSubscription,
@@ -59,21 +33,9 @@ from content.models import (
         UserPaper
     )
 from content.util.GeneralUtil import (
-        filter_drag_drop_selection,
-        order_full_spec_content,
-        order_live_spec_content,
         extract_active_spec_content,
-        ChapterQuestionGenerator,
-        detect_empty_content,
         monthly_sum_data_list,
-        usage_monthly_sum_data_list,
-        user_course_monthly_sum_data_list,
-        user_course_usage_monthly_sum_data_list,
         performance_index_monthly_sum_data_list,
-        author_user_clicks_data_list,
-    )
-from djstripe.models import (
-        Subscription,
     )
 
 
@@ -125,13 +87,6 @@ class SuperuserMonitorView(
         subscription_data = monthly_sum_data_list(
                 CourseSubscription, labels, 'subscription_created_at', n_months
             )
-        usage_dataset = usage_monthly_sum_data_list(
-                [ContentGenerationJob, Usage, Lesson_part], labels, 'created_at', n_months
-            )
-        total_tokens = ContentGenerationJob.objects.aggregate(Sum('total'))['total__sum']
-        total_tokens += Usage.objects.aggregate(Sum('total'))['total__sum']
-        total_tokens += Lesson_part.objects.aggregate(Sum('total'))['total__sum']
-        context['total_tokens'] = total_tokens
 
         #
         datasets.append({
@@ -181,7 +136,6 @@ class SuperuserMonitorView(
         })
         context['labels'] = labels
         context['datasets'] = datasets
-        context['usage_dataset'] = usage_dataset
         return context
 
 
@@ -432,477 +386,6 @@ class MyCoursesView(
 
 
 # Admin views
-class SpecModuelHandlerView(
-            LoginRequiredMixin,
-            AuthorRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/general/specmoduelhandler.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("Home", reverse("main:index")),
-                ("mycourses", reverse("dashboard:mycourses")),
-                ("designer", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'dashboard/specifications'
-        # get kwargs
-        level = self.kwargs['level']
-        subject = self.kwargs['subject']
-        board = self.kwargs['board']
-        name = self.kwargs['name']
-        # get spec from db
-        spec = Specification.objects.get(
-                user=self.request.user,
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name,
-            )
-        content = spec.spec_content.copy()
-        for module in content.keys():
-            module_content = ChapterQuestionGenerator(
-                    self.request.user,
-                    spec.spec_subject,
-                    module,
-                    content[module]['content'].copy()
-                )
-            content[module]['content'] = module_content
-        spec.spec_content = content
-        spec.save()
-        #
-        empty_content = detect_empty_content(spec.spec_content)
-        # get moduels from db
-        author_confirmed_questions = Question.objects.values(
-                    'q_subject',
-                    'q_moduel',
-                    'q_chapter',
-                ).distinct().order_by(
-                    'q_subject',
-                    'q_moduel',
-                    'q_chapter',
-                ).filter(
-                        user=self.request.user,
-                        q_subject=subject,
-                        erased=False,
-                        deleted=False,
-                        author_confirmation=False,
-                )
-        all_chapters = Point.objects.values(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_chapter',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_chapter',
-                ).filter(
-                        user=self.request.user,
-                        p_level=level,
-                        p_subject=subject,
-                        erased=False,
-                )
-        chapters = all_chapters.filter(deleted=False, erased=False)
-        author_confirmed_chapters = all_chapters.filter(deleted=False, erased=False, author_confirmation=False)
-        deleted_chapters = all_chapters.exclude(id__in=chapters.values_list('id'))
-        moduels = chapters.values(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                )        # reformat moduels
-        deleted_modules = deleted_chapters.values(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                )        # reformat moduels
-        # Ordering the modules
-        moduels_objs = [obj['p_moduel'] for obj in moduels]
-        deleted_objs = [obj['p_moduel'] for obj in deleted_modules]
-        ordered_spec = order_live_spec_content(spec.spec_content)
-        keys = list(ordered_spec.keys())
-        left_over = [mod for mod in moduels_objs if mod not in keys]
-        moduels_objs = keys
-        #
-        module_chapters = collections.defaultdict(list)
-        for key in keys:
-            module_chapters[key] = list(ordered_spec[key]['content'].keys())
-        #
-        author_confirmed_module_chapters = collections.defaultdict(list)
-        for confirmed_chapter in author_confirmed_chapters:
-            author_confirmed_module_chapters[confirmed_chapter['p_moduel']].append(confirmed_chapter['p_chapter'])
-        author_confirmed_chapter_questions = collections.defaultdict(list)
-        for confirmed_q_chapters in author_confirmed_questions:
-            author_confirmed_chapter_questions[confirmed_q_chapters['q_moduel']].append(confirmed_q_chapters['q_chapter'])
-        #
-        deleted_module_chapters = collections.defaultdict(list)
-        for d_mod in deleted_chapters:
-            deleted_module_chapters[d_mod['p_moduel']].append(d_mod['p_chapter'])
-        #
-        removed_module_chapters = collections.defaultdict(list)
-        for mod in keys:
-            for chap in chapters.filter(p_moduel=mod):
-                if chap['p_chapter'] not in ordered_spec[mod]['content'].keys():
-                    removed_module_chapters[mod].append(chap['p_chapter'])
-        # Getting removed items
-        context['spec'] = spec
-        context['full_ord_spec'] = ordered_spec
-        #
-        context['modules'] = moduels_objs
-        context['deleted_moduels'] = deleted_objs
-        context['removed_items'] = left_over
-        #
-        context['empty_content'] = empty_content
-        context['module_chapters'] = module_chapters
-        context['author_confirmed_module_chapters'] = author_confirmed_module_chapters
-        context['author_confirmed_chapter_questions'] = author_confirmed_chapter_questions
-        context['deleted_module_chapters'] = deleted_module_chapters
-        context['removed_module_chapters'] = removed_module_chapters
-        return context
-
-
-class SpecTopicHandlerView(
-            LoginRequiredMixin,
-            AuthorRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/general/spectopichandler.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("Home", reverse("main:index")),
-                ("mycourses", reverse("dashboard:mycourses")),
-                ("designer", '')
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'dashboard/specifications'
-        #
-        level = self.kwargs['level']
-        subject = self.kwargs['subject']
-        board = self.kwargs['board']
-        name = self.kwargs['name']
-        moduel = self.kwargs['module']
-        chapter = self.kwargs['chapter']
-
-        spec = Specification.objects.get(
-                user=self.request.user,
-                spec_level=level,
-                spec_subject=subject,
-                spec_board=board,
-                spec_name=name,
-            )
-        empty_content = detect_empty_content(spec.spec_content)
-        # get chapter questions
-        questions = spec.spec_content[moduel]['content'][chapter]['questions']
-        question_prompts = collections.defaultdict(list)
-        for q_level in questions.keys():
-            level_questions = questions[q_level]
-            qs = Question.objects.filter(q_unique_id__in=level_questions).order_by('q_number')
-            questions[q_level] = qs
-            q_prompts, _ = ContentPromptQuestion.objects.get_or_create(
-                    user=self.request.user,
-                    specification=spec,
-                    moduel=moduel,
-                    chapter=chapter,
-                    level=q_level
-                )
-            question_prompts[q_level].append(q_prompts)
-
-        # get moduels from db
-        author_confirmed_questions = Question.objects.values(
-                    'q_subject',
-                    'q_moduel',
-                    'q_chapter',
-                    'q_difficulty',
-                    'q_number',
-                ).distinct().order_by(
-                    'q_subject',
-                    'q_moduel',
-                    'q_chapter',
-                ).filter(
-                        user=self.request.user,
-                        q_subject=subject,
-                        q_moduel=moduel,
-                        erased=False,
-                        deleted=False,
-                        author_confirmation=False,
-                )
-        all_points = Point.objects.values(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_chapter',
-                    'p_topic',
-                    'p_unique_id',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_chapter',
-                    'p_topic',
-                    'p_number',
-                ).filter(
-                        user=self.request.user,
-                        p_level=level,
-                        p_subject=subject,
-                        p_moduel=moduel,
-                        p_chapter=chapter,
-                        erased=False,
-                )
-        points = all_points.filter(deleted=False, erased=False)
-        author_confirmed_points = points.filter(author_confirmation=False)
-        deleted_points = all_points.exclude(id__in=points.values_list('id'))
-        topics = points.values(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_topic',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_topic',
-                )        # reformat moduels
-        deleted_topics = deleted_points.values(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_topic',
-                ).distinct().order_by(
-                    'p_level',
-                    'p_subject',
-                    'p_moduel',
-                    'p_topic',
-                )        # reformat moduels
-        # Ordering the modules
-        topic_objs = [obj['p_topic'] for obj in topics]
-        deleted_objs = [obj['p_topic'] for obj in deleted_topics]
-        ordered_spec = order_live_spec_content(spec.spec_content)[moduel]['content'][chapter]['content']
-        keys = list(ordered_spec.keys())
-        left_over = [topic for topic in topic_objs if topic not in keys]
-        topic_objs = keys
-        #
-        topic_points = collections.defaultdict(list)
-        topic_prompts = collections.defaultdict(list)
-        for key in keys:
-            topic_points[key] = ordered_spec[key]['content'].keys()
-            t_prompt, _ = ContentPromptTopic.objects.get_or_create(
-                    user=self.request.user,
-                    specification=spec,
-                    moduel=moduel,
-                    chapter=chapter,
-                    topic=key
-                )
-            topic_prompts[key].append(t_prompt)
-        #
-        author_confirmed_topic_points = collections.defaultdict(list)
-        for confirmed_points in author_confirmed_points:
-            author_confirmed_topic_points[confirmed_points['p_topic']].append(confirmed_points['p_unique_id'])
-        author_confirmed_chapter_questions = collections.defaultdict(list)
-        for confirmed_q_chapters in author_confirmed_questions:
-            author_confirmed_chapter_questions[str(confirmed_q_chapters['q_difficulty'])].append(confirmed_q_chapters['q_number'])
-        #
-        deleted_topic_points = collections.defaultdict(list)
-        for d_points in deleted_points:
-            deleted_topic_points[d_points['p_topic']].append(d_points['p_unique_id'])
-        #
-        removed_topic_points = collections.defaultdict(list)
-        point_prompts = collections.defaultdict(dict)
-        for topic in keys:
-            for point in points.filter(p_topic=topic):
-                if point['p_unique_id'] not in ordered_spec[topic]['content'].keys():
-                    removed_topic_points[topic].append(point['p_unique_id'])
-                p_prompt, _ = ContentPromptPoint.objects.get_or_create(
-                        user=self.request.user,
-                        specification=spec,
-                        moduel=moduel,
-                        chapter=chapter,
-                        topic=topic,
-                        p_unique=point['p_unique_id']
-                    )
-                point_prompts[topic][point['p_unique_id']] = p_prompt
-        # Getting removed items
-        context['spec'] = spec
-        context['full_ord_spec'] = ordered_spec
-        context['questions'] = questions
-        #
-        context['module'] = moduel
-        context['chapter'] = chapter
-        #
-        context['topics'] = topic_objs
-        context['empty_content'] = empty_content
-        context['deleted_topics'] = deleted_objs
-        context['removed_items'] = left_over
-        #
-        context['topic_points'] = topic_points
-        context['author_confirmed_topic_points'] = author_confirmed_topic_points
-        context['author_confirmed_chapter_questions'] = author_confirmed_chapter_questions if len(author_confirmed_chapter_questions) > 0 else None
-        context['deleted_topic_points'] = deleted_topic_points
-        context['removed_topic_points'] = removed_topic_points
-        #
-        context['q_prompts'] = question_prompts
-        context['t_prompts'] = topic_prompts
-        context['p_prompts'] = point_prompts
-        return context
-
-
-class EarningStatisticsView(
-            LoginRequiredMixin,
-            TrusteeRequiredMixin,
-            BaseBreadcrumbMixin,
-            generic.ListView
-        ):
-    login_url = 'user:login'
-    redirect_field_name = False
-    template_name = "dashboard/earning/statistics.html"
-    context_object_name = 'context'
-
-    @cached_property
-    def crumbs(self):
-        return [
-                ("Home", reverse("main:index")),
-                ("statistics", reverse("dashboard:earning_statistics"))
-                ]
-
-    def get_queryset(self):
-        context = {}
-        context['sidebar_active'] = 'earning/statistics'
-        author_courses = Course.objects.filter(user=self.request.user)
-        #
-        coupon_id = settings.AFFILIATE_COUPON
-        discount_code_id = str(self.request.user.username.lower())+str(20)
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-        if self.request.user.affiliate_permissions:
-            try:
-                promo_code = stripe.PromotionCode.create(
-                  coupon=coupon_id,
-                  code=discount_code_id
-                )
-                promo_code_id = promo_code['id']
-            except Exception:
-                promo_code = stripe.PromotionCode.list(
-                  code=discount_code_id
-                )
-                if len(promo_code['data']) == 1:
-                    promo_code_id = promo_code['data'][0]['id']
-                else:
-                    promo_code_id = ''
-            if promo_code_id:
-                self.request.user.affiliate_promotion_code = promo_code_id
-                self.request.user.save()
-            context['affiliate_code'] = discount_code_id
-        # Relevant locally
-        all_course_subscriptions = CourseSubscription.objects.filter(course__in=author_courses)
-        all_unique_students = all_course_subscriptions.values('user').distinct()
-        # Relevant for stripe
-        all_customers = Subscription.objects.filter(
-            customer__id__in=list(all_unique_students.values_list('user__id', flat=True)), livemode=settings.STRIPE_LIVE_MODE
-        )
-        print(all_customers)
-        # Get the current date
-        current_date = datetime.now().replace(day=1)
-
-        # Initialize a list to store the last 6 months
-        last_six_months = []
-        presentable_last_six_months = []
-        filterable_last_six_months = []
-
-        # Calculate the last 6 months and add them to the list
-        for i in range(6):
-            current_date = current_date.replace(day=1)
-            last_six_months.append(current_date.strftime('%Y%m'))
-            presentable_last_six_months.append(current_date.strftime('%y %b'))
-            filterable_last_six_months.append(current_date.strftime('%Y-%m-%d'))
-            current_date -= timedelta(days=30)  # Approximate 30 days per month
-
-        (
-            aggrigate_monthly_clicks,
-            courge_aggrigate_monthly_clicks,
-            month_active_subscriptions,
-            estimated_earnings,
-            aggrigate_user_monthly_engagement
-        ) = author_user_clicks_data_list(
-                self.request.user,
-                last_six_months[::-1],
-                all_course_subscriptions,
-                author_courses,
-            )
-        datasets = []
-        aggrigate_monthly_clicks_value = list(aggrigate_monthly_clicks.values())
-        datasets.append({
-            "label": "Clicks (N)",
-            "lineTension": 0.2,
-            "backgroundColor": "",
-            "borderColor": "#f6c23e",
-            "pointRadius": 3,
-            "pointBackgroundColor": "#f6c23e",
-            "pointBorderColor": "#f6c23e",
-            "pointHoverRadius": 3,
-            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
-            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
-            "pointHitRadius": 10,
-            "pointBorderWidth": 2,
-            "yAxisID": 'y',
-            "data": aggrigate_monthly_clicks_value
-        })
-        aggrigate_user_monthly_engagement = [
-                aggrigate_user_monthly_engagement[month].values()
-                for month in aggrigate_user_monthly_engagement
-            ]
-        aggrigate_user_monthly_engagement = [100*statistics.mean(array) if len(array) > 0 else 0.0 for array in aggrigate_user_monthly_engagement]
-        datasets.append({
-            "label": "Average User Engagement (%)",
-            "lineTension": 0.2,
-            "backgroundColor": "",
-            "borderColor": "#00ff22",
-            "pointRadius": 3,
-            "pointBackgroundColor": "#00ff22",
-            "pointBorderColor": "#00ff22",
-            "pointHoverRadius": 3,
-            "pointHoverBackgroundColor": "rgba(78, 115, 223, 1)",
-            "pointHoverBorderColor": "rgba(78, 115, 223, 1)",
-            "pointHitRadius": 10,
-            "pointBorderWidth": 2,
-            "yAxisID": 'y1',
-            "data": aggrigate_user_monthly_engagement
-        })
-        #
-        context['labels'] = presentable_last_six_months[::-1]
-        context['clicks_dataset'] = datasets
-        #
-        per_click_rate = 0.001
-        context['per_click_rate'] = per_click_rate
-        context['estimated_earnings'] = round(estimated_earnings, 2)
-        context['total_course_clicks'] = courge_aggrigate_monthly_clicks
-        context['total_month_active_course_subscriptions'] = month_active_subscriptions
-        context['total_course_subscriptions'] = len(all_course_subscriptions)
-        return context
-
-
 class BlankView(BaseBreadcrumbMixin, generic.ListView):
     login_url = 'user:login'
     redirect_field_name = None

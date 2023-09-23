@@ -4,7 +4,6 @@ from django.db import models
 from user.models import User
 
 from django.db import models
-from mdeditor.fields import MDTextField
 
 
 class Image(models.Model):
@@ -42,8 +41,6 @@ class Question(models.Model):
     q_marks = models.IntegerField(default=1)
     q_content = models.JSONField(default=dict, null=True)
     q_answer = models.JSONField(default=dict, null=True)
-    q_MDcontent = MDTextField(default="", null=True)
-    q_MDcontent_ans = MDTextField(default="", null=True)
     q_files_directory = models.CharField(max_length=255, default="", null=True)
     q_videos = models.ManyToManyField(Video)
     q_images = models.ManyToManyField(Image)
@@ -69,7 +66,6 @@ class Point(models.Model):
     p_title = models.CharField(max_length=255, default="", null=True)
     p_number = models.IntegerField(default=-1, null=True)
     p_content = models.JSONField(default=dict, null=True)
-    p_MDcontent = MDTextField(default="", null=True)
     p_files_directory = models.CharField(max_length=255, default="", null=True)
     p_images = models.ManyToManyField(Image)
     p_videos = models.ManyToManyField(Video)
@@ -119,7 +115,6 @@ class Specification(models.Model):
 class ContentTemplate(models.Model):
     name = models.CharField(max_length=50, default="", null=True)
     content = models.JSONField(default=OrderedDict, null=True)
-    MDcontent = MDTextField(default="", null=True)
 
     def __str__(self):
         return self.name

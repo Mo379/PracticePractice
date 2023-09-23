@@ -4,7 +4,6 @@ import collections
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import mdeditor.fields
 
 
 class Migration(migrations.Migration):
@@ -22,7 +21,6 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(default='', max_length=50, null=True)),
                 ('content', models.JSONField(default=collections.OrderedDict, null=True)),
-                ('MDcontent', mdeditor.fields.MDTextField(default='', null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -66,7 +64,6 @@ class Migration(migrations.Migration):
                 ('q_difficulty', models.IntegerField(default=0, null=True)),
                 ('q_total_marks', models.IntegerField(default=0, null=True)),
                 ('q_content', models.JSONField(default=dict, null=True)),
-                ('q_MDcontent', mdeditor.fields.MDTextField(default='', null=True)),
                 ('q_files_directory', models.CharField(default='', max_length=255, null=True)),
                 ('q_unique_id', models.CharField(db_index=True, default='', max_length=11, null=True, unique=True)),
                 ('deleted', models.BooleanField(default=False, null=True)),
@@ -127,7 +124,6 @@ class Migration(migrations.Migration):
                 ('p_topic', models.CharField(default='', max_length=255, null=True)),
                 ('p_number', models.IntegerField(default=-1, null=True)),
                 ('p_content', models.JSONField(default=dict, null=True)),
-                ('p_MDcontent', mdeditor.fields.MDTextField(default='', null=True)),
                 ('p_files_directory', models.CharField(default='', max_length=255, null=True)),
                 ('p_unique_id', models.CharField(db_index=True, default='', max_length=11, null=True, unique=True)),
                 ('deleted', models.BooleanField(default=False, null=True)),

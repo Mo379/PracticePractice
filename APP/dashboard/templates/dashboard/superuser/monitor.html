@@ -67,26 +67,6 @@ Monitor
 				</div>
 			</div>
 		</div>
-		<div class="col-xl-3 col-md-6 mb-4">
-			<div class="card border-left-info shadow h-100 py-2">
-				<div class="card-body">
-					<div class="row no-gutters align-items-center">
-						<div class="col mr-2">
-							<div class="text-xs font-weight-bold text-info text-uppercase mb-1"># Tokens
-							</div>
-							<div class="row no-gutters align-items-center">
-								<div class="col-auto">
-									<div class="h5 mb-0 mr-3 font-weight-bold text-white-800">{{context.total_tokens}}</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-auto">
-							<i class="fa-solid fa-coins fa-2x"></i>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
 	<!-- Content Row -->
 
@@ -106,32 +86,6 @@ Monitor
 						{%definevar 'token_usage_chart' as canvas_id %}
 						{%definevar context.labels as plot_labels %}
 						{%definevar context.datasets as plot_data %}
-						{%include 'dashboard/plots/plot_line.html'%}
-					</div>
-				</div>
-			</div>
-		</div>
-
-	</div>
-
-	<!-- Content Row -->
-
-	<div class="row">
-		<!-- Area Chart -->
-		<div class="col-xl-12">
-			<div class="card shadow mb-4">
-				<!-- Card Header - Dropdown -->
-				<div
-					class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-					<h6 class="m-0 font-weight-bold text-primary">Token usage</h6>
-				</div>
-				<!-- Card Body -->
-				<div class="card-body">
-					<div class="chart-area">
-						<canvas id="token_usage_chart_2"></canvas>
-						{%definevar 'token_usage_chart_2' as canvas_id %}
-						{%definevar context.labels as plot_labels %}
-						{%definevar context.usage_dataset as plot_data %}
 						{%include 'dashboard/plots/plot_line.html'%}
 					</div>
 				</div>
