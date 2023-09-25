@@ -57,8 +57,16 @@
 			  >
 			  	Advanced
 			  </option>
-			</select>
-			<br>
+			</select><br><br>
+
+			<label for="new_name">Give a New Course Description: </label>
+			<textarea
+				type='text' 
+				name='course_description' 
+			        class='form-control'
+				placeholder='Course description'
+				rows=8
+			>{{course.course_description}}</textarea><br>
 			<br>
 			<button type= 'submit' class='btn btn-primary mb-2' > Update </button><br><br>
 		</form>

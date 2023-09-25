@@ -933,6 +933,7 @@ def _updatecourseinformation(request):
         course_name = request.POST['new_name']
         course_upload_image = request.FILES.get("course_thmbnail", None)
         course_level = request.POST['course_level']
+        course_description = request.POST['course_description']
         # AI created
         courses = Course.objects.filter(
                 user=request.user,
@@ -944,6 +945,7 @@ def _updatecourseinformation(request):
                 course = courses[0]
                 course.course_name = course_name
                 course.course_level = course_level
+                course.course_description = course_description
                 #
                 if course_upload_image:
                     file_name_list = course_upload_image.name.split('.')

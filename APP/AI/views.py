@@ -407,6 +407,27 @@ def _function_app_endpoint(request):
                             request,
                             json_data
                         )
+                elif function_name == 'create_course_outline':
+                    if json_data['type'] == 'module':
+                        response = functions_endpoint.course_outline_prompts(
+                                request,
+                                json_data
+                            )
+                    elif json_data['type'] == 'chapter':
+                        response = functions_endpoint.course_outlineChapter_prompts(
+                                request,
+                                json_data
+                            )
+                    elif json_data['type'] == 'topic':
+                        response = functions_endpoint.course_outlineTopic_prompts(
+                                request,
+                                json_data
+                            )
+                    elif json_data['type'] == 'point':
+                        response = functions_endpoint.course_outlinePoint_prompts(
+                                request,
+                                json_data
+                            )
                 elif function_name == 'create_course_introduction':
                     response = functions_endpoint.course_introduction_prompts(
                             request,

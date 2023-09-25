@@ -1,11 +1,91 @@
+import threading
+from django.conf import settings
 from PP2.utils import fire_and_forget
-from AI.functions import create_course_introduction
+from AI.functions import (
+        general_function_call,
+        create_course_introduction,
+        create_course_outline
+    )
+from AI.functions_endpoint import (course_outline_prompts)
 from AI.models import (
         ContentPromptQuestion,
         ContentPromptTopic,
         ContentPromptPoint,
         Lesson_quiz,
     )
+from content.models import Course
+
+
+def general_course_generation(course, nth_reflection=0, previous_output=''):
+    if course.generated_outline is False:
+        courseOutline_function = create_course_outline(course, previous_output)
+        lambda_url = settings.CHATGPT_LAMBDA_URL
+        function_app_endpoint = {
+                'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                'course_id': course.id,
+                'nth_reflection': nth_reflection,
+                'type': 'module',
+                'model_name': 'gpt-3.5-turbo-0613',
+                'model_name': 'gpt-4-0613'
+            }
+        user_prompt = """With the information provided for this
+                  course, please continue or start creating the outline.
+                  if previous ouputs have been presented please attempt to
+                  reorder and improve them.
+                  """
+        request_body, headers = general_function_call(courseOutline_function, function_app_endpoint, user_prompt)
+        if len(course.specification.spec_content) == 0:
+            fire_and_forget(lambda_url, request_body, headers)
+        else:
+            threading.Thread(
+                target=course_outline_prompts,
+                args=(
+                    '', {'course_id': course.id, 'nth_reflection': nth_reflection}
+                )
+            ).start()
+    elif course.generated_content is False:
+        pass
+        courseIntro_function = create_course_introduction(request.user, course, 10)
+        message = {
+          "chat": [
+            {
+              "role": "system",
+              "content": courseIntro_function[2]
+            },
+            {
+              "role": "user",
+              "content": """With the information provided for this
+                  course, please create a list of skills or objectives
+                  that the studnet can expect to achive, do not use
+                  too many words per skill or learning objective"""
+            }
+          ]
+        }
+        functions = [courseIntro_function[0]]
+        function_call = {"name": courseIntro_function[1]}
+        lambda_url = settings.CHATGPT_LAMBDA_URL
+        function_app_endpoint = {
+                'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                'course_id': course.id,
+            }
+        request_body = {
+                'message': message['chat'],
+                'functions': functions,
+                'function_call': function_call,
+                'function_app_endpoint': function_app_endpoint,
+            }
+        headers = {
+            "Content-Type": "application/json",
+        }
+        fire_and_forget(lambda_url, request_body, headers)
+    elif course.generated_questions is False:
+        pass
+    elif course.generated_summary is False:
+        pass
+    else:
+        course.course_publication = True
+        course.save()
+
 
 #if publication_status:
 #    # do course item checks
@@ -111,41 +191,5 @@ from AI.models import (
 #else:
 #    course.course_publication = publication_status
 #course.save()
-#if regenerate_summary:
-#    course.course_skills = {idd: '(AI is working...)' for idd in range(6)}
-#    course.course_summary = '(AI is working...)'
-#    course.course_learning_objectives = {idd: '(AI is working...)' for idd in range(6)}
-#    #
-#    courseIntro_function = create_course_introduction(request.user, course, 10)
-#    message = {
-#      "chat": [
-#        {
-#          "role": "system",
-#          "content": courseIntro_function[2]
-#        },
-#        {
-#          "role": "user",
-#          "content": """With the information provided for this
-#              course, please create a list of skills or objectives
-#              that the studnet can expect to achive, do not use
-#              too many words per skill or learning objective"""
-#        }
-#      ]
-#    }
-#    functions = [courseIntro_function[0]]
-#    function_call = {"name": courseIntro_function[1]}
-#    lambda_url = settings.CHATGPT_LAMBDA_URL
-#    function_app_endpoint = {
-#            'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
-#            'course_id': course.id,
-#        }
-#    request_body = {
-#            'message': message['chat'],
-#            'functions': functions,
-#            'function_call': function_call,
-#            'function_app_endpoint': function_app_endpoint,
-#        }
-#    headers = {
-#        "Content-Type": "application/json",
-#    }
-#    fire_and_forget(lambda_url, request_body, headers)
+
+

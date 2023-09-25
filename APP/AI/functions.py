@@ -1,3 +1,4 @@
+from django.conf import settings
 import re
 import collections
 from content.util.GeneralUtil import (
@@ -16,8 +17,156 @@ md_mj_formatting_prompt = """
 
 """
 keyword_formatting_prompt = """
-
+wrap any keyword used with (<span class='keyword'>)
 """
+
+
+def general_function_call(function_output, function_app_endpoint, user_prompt):
+    message = {
+      "chat": [
+        {
+          "role": "system",
+          "content": function_output[2]
+        },
+        {
+          "role": "user",
+          "content": re.sub('\s+', ' ', user_prompt)
+        }
+      ]
+    }
+    functions = [function_output[0]]
+    function_call = {"name": function_output[1]}
+    request_body = {
+            'message': message['chat'],
+            'functions': functions,
+            'function_call': function_call,
+            'function_app_endpoint': function_app_endpoint,
+        }
+    headers = {
+        "Content-Type": "application/json",
+    }
+    return request_body, headers
+def create_course_outline(
+        course,
+        previous_output='',
+        item_type='module',
+        current_module='',
+        current_chapter='',
+        current_topic=''
+        ):
+    if current_module:
+        current_module = f"The current module is {current_module}"
+    if current_chapter:
+        current_chapter = f", the current chapter is {current_chapter}"
+    if current_topic:
+        current_topic = f", the current topic is {current_topic}"
+    #
+    generated_modules = 'This course is new and no modules have been generated yet'
+    generated_chapters = ''
+    generated_topics = ''
+    generated_modules = ''
+    #
+    if item_type == 'chapter':
+        generated_modules = f"""
+            The following are the presented modules:
+            {course.specification.spec_content.keys()}
+        """
+    if item_type == 'topic':
+        generated_chapters = course.specification.spec_content[current_module]['content'].keys()
+        generated_chapters = f"""
+            The following are the presented chapters:
+            {generated_chapters}
+        """
+    if item_type == 'point':
+        generated_topics = course.specification.spec_content[current_module]['content'][current_chapter]['content'].keys()
+        generated_topics = f"""
+            The following are the presented topics:
+            {generated_topics}
+        """
+    #
+    course_name = course.course_name
+    course_level = course.course_level
+    course_spec_level = course.specification.spec_level
+    course_spec_subject = course.specification.spec_subject
+    course_description = course.course_description
+    def outline_prompt(
+            course_name,
+            course_level,
+            course_spec_level,
+            course_spec_subject,
+            course_description,
+            item_type,
+            current_module=current_module,
+            current_chapter=current_chapter,
+            current_topic=current_topic,
+            #
+            generated_modules=generated_modules,
+            generated_chapters=generated_chapters,
+            generated_topics=generated_topics,
+            ):
+        prompt = f"""
+        You're an expert tutor with good knowledge of many fields.
+        This outline should fully describe a small and easy to consume course.
+        The overall structure follows this schema/scope structure (module:chapter:topic:point),
+        where the module is the higest abstraction of the course outline, followed
+        by the chapter then topic and finally point (a point is like a zettlekasten idea [this is important]).
+        Your job is to create the small and easy to consume outline that gives the student a good
+        amount of knowledge (the essentials), where you're only
+        generating one of the provided four options, in this case, only write ({item_type}s)
+        and closely follow the function and its provided description.
+        You must also pay close attention to the following as it will guide you.
+        Make the outline comprehensive and avoid missing any important/critical items
+        and dont forget to make the course short.
+        try to seperate the content as much as possible so that each {item_type} is completely independent of others.
+
+        The following is the general information for this course:
+        course name: {course_name},
+        course difficulty: {course_level},
+        course target: {course_spec_level},
+        course subject: {course_spec_subject},
+        course description: {course_description},
+        course {item_type} previous outline: {previous_output},
+
+        {generated_modules}
+        {generated_chapters}
+        {generated_topics}
+        {current_module}
+        {current_chapter}
+        {current_topic}
+
+
+        Be sure to strip out things like '{item_type} 1:' from the lists, this is not
+        required, and ensure that the list provided is comma seprable, and remove any
+        repeating or very similar {item_type} from the outline without hesistation.
+        pay close attention to which current module, chapter and topic you're writing for.
+        And rememeber to make the course comprehensive short and welcoming to the specified
+        target and difficulty, so do not include anything that is unnessary.
+        Ensure that the number of {item_type} is not too long, less than 7 items is very highly encouraged
+        unless the course description hints otherwise.
+        This is so that the course is not too long, so ensure that the {item_type} cover only the very very key concepts.
+        Be sure to not repeat anything that is previously present or could be present in the already generated modules chapters or topics.
+        """
+        return re.sub('\s+', ' ', prompt)
+    #
+    system_message = outline_prompt(course_name, course_level, course_spec_level, course_spec_subject, course_description, item_type)
+    function_description = {
+        "name": "create_course_outline",
+        "description": "Create or improve an outline for the course described, the current scope is for {item_type}s so only {item_type}s will be created.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                f"{item_type}s": {
+                    "type": "string",
+                    "description": f"A comma sepearted unordered list of {item_type}s",
+                },
+            },
+            "required": [
+                f"{item_type}s"
+            ],
+        },
+    }
+    return function_description, 'create_course_outline', system_message
+
 
 def create_course_lesson(request, instructor_context, point_prompt_obj):
     spec = point_prompt_obj.specification
