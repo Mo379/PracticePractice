@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 from django.conf import settings
->>>>>>> develop
 import re
 import collections
 from content.util.GeneralUtil import (
@@ -20,7 +17,6 @@ md_mj_formatting_prompt = """
 
 """
 keyword_formatting_prompt = """
-<<<<<<< HEAD
 
 """
 

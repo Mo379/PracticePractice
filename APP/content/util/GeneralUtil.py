@@ -32,12 +32,8 @@ def TagGenerator():
     return x
 
 
-<<<<<<< HEAD
-def ChapterQuestionGenerator(user, subject, module, module_content):
-=======
 def ChapterQuestionGenerator(subject, module, module_content):
     user = User.objects.get(username='Admin')
->>>>>>> develop
     difficulty_levels = [1, 2, 3, 4, 5]
     for chapter in module_content.keys():
         chapter_qs = module_content[chapter]['questions']

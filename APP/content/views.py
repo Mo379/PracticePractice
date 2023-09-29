@@ -18,11 +18,6 @@ from content.util.GeneralUtil import (
         TagGenerator,
         order_full_spec_content,
         order_live_spec_content,
-<<<<<<< HEAD
-        TranslatePointContent,
-        TranslateQuestionContent,
-=======
->>>>>>> develop
     )
 from view_breadcrumbs import BaseBreadcrumbMixin
 from django.forms import model_to_dict
@@ -60,11 +55,7 @@ from AI.models import (
 from djstripe.models import (
         Subscription,
     )
-<<<<<<< HEAD
-from AI.functions import create_course_introduction
-=======
 from AI import workflows
->>>>>>> develop
 
 
 class ContentView(
