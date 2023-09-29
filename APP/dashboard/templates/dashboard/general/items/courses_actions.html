@@ -11,6 +11,21 @@
       <div class="modal-body">
 		<form class="px-3 py-3"  action="{%url 'content:_createcourse'%}" method="POST" role="form">
 			{%csrf_token%}
+			<label for="course_type">Course type:</label>
+			<select name="course_type" id="course_type" class='form-control mb-3'>
+			  <option value="Specialisation"
+			  >
+			  	Specialisation
+			  </option>
+			  <option value="Course"
+			  >
+			  	Course
+			  </option>
+			  <option value="Article"
+			  >
+			  	Article
+			  </option>
+			</select>
 			<label for="course_level">Course difficulty:</label>
 			<select name="course_level" id="course_level" class='form-control mb-3'>
 			  <option value="Beginner"
@@ -59,25 +74,6 @@
 			        id='spec_subject'
 				placeholder='Subject'
 			/>
-			<label for="course_name">Code Name (Anything, H230, A230, P101):</label>
-			<input 
-				type='text' 
-				name='spec_name' 
-			        class='form-control mb-3'
-			        id='spec_name'
-				placeholder='Code Name'
-			/>
-			<label for="version_name">Version name (Anything):</label>
-			<input 
-				type='text' 
-				name='version_name' 
-			        class='form-control mb-3'
-			        id='version_name'
-				placeholder='Version Name'
-			        value='Initial'
-			/>
-			<label for="version_note">Give a version Note (Anything):</label>
-	    		<textarea class="form-control mb-2" id="message-text" name='version_note' rows='10'>A short description of the initial course version.</textarea>
 
 			<br><br>
 			<button type= 'submit' class='btn btn-primary mb-2' style='float-right'> Create </button>
@@ -103,17 +99,15 @@
       <div class="modal-body">
 		<form class="px-3 py-3"  action="{%url 'content:_deletecourse'%}" method="POST" role="form">
 			{%csrf_token%}
-			<label for="Courses">Choose a Course:</label>
+			<label for="Course_id">Course Id</label>
+			<input 
+				type='text' 
+				name='Course_id' 
+			        class='form-control mb-3'
+			        id='Course_id'
+				placeholder='e.g k8u1j24h'
 
-			<select name="Course_id" id="Courses" class='form-control'>
-			  {%for course in context.courses%}
-			{%definevar course.0 as courseversions%}
-			{%definevar course.1 as course%}
-			  <option value="{{course.id}}">
-				{{course.course_name}}
-			  </option>
-			  {%endfor%}
-			</select>
+			/>
 			<br><br>
 			<button type= 'submit' class='btn btn-danger mb-2' style='float-right'> Delete </button>
 		</form>

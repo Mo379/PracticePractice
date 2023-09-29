@@ -52,8 +52,12 @@ from content.util.GeneralUtil import (
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
+<<<<<<< HEAD
 from AI.functions import create_quiz_function, create_course_questions, create_course_lesson
+=======
+>>>>>>> develop
 from AI import functions_endpoint
+from AI.functions import create_quiz_function
 from management.templatetags.general import ToMarkdownManual
 
 
@@ -407,6 +411,27 @@ def _function_app_endpoint(request):
                             request,
                             json_data
                         )
+                elif function_name == 'create_course_outline':
+                    if json_data['type'] == 'module':
+                        response = functions_endpoint.course_outline_prompts(
+                                request,
+                                json_data
+                            )
+                    elif json_data['type'] == 'chapter':
+                        response = functions_endpoint.course_outlineChapter_prompts(
+                                request,
+                                json_data
+                            )
+                    elif json_data['type'] == 'topic':
+                        response = functions_endpoint.course_outlineTopic_prompts(
+                                request,
+                                json_data
+                            )
+                    elif json_data['type'] == 'point':
+                        response = functions_endpoint.course_outlinePoint_prompts(
+                                request,
+                                json_data
+                            )
                 elif function_name == 'create_course_introduction':
                     response = functions_endpoint.course_introduction_prompts(
                             request,
@@ -552,6 +577,7 @@ def _mark_quiz_question(request):
     return JsonResponse({'status_code': 500, 'message': 'Internal Server Error.'})
 
 
+<<<<<<< HEAD
 @AuthorRequiredDec
 def _newgenerationjob(request):
     if request.method == 'POST':
@@ -760,3 +786,5 @@ def _savepromptpoint(request):
             }
         return JsonResponse(response)
     return JsonResponse({'error': 1, 'message': 'Error'})
+=======
+>>>>>>> develop

@@ -123,9 +123,11 @@ class ContentTemplate(models.Model):
 class Course(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, null=True)
     specification = models.ForeignKey(
-        Specification, on_delete=models.CASCADE, db_index=True, default="", null=True
+        Specification, on_delete=models.CASCADE, db_index=True, default="Specialisation", null=True
     )
+    course_type = models.CharField(max_length=150, default="", null=True)
     course_name = models.CharField(max_length=150, default="", null=True)
+    course_description = models.TextField(max_length=5000, default="", null=True)
     course_summary = models.TextField(max_length=1000, default="", null=True)
     course_skills = models.JSONField(default=OrderedDict, null=True)
     course_learning_objectives = models.JSONField(default=OrderedDict, null=True)
@@ -134,6 +136,12 @@ class Course(models.Model):
     course_created_at = models.DateTimeField(auto_now_add=True)
     course_updated_at = models.DateTimeField(auto_now=True)
     course_up_to_date = models.BooleanField(default=False, null=True)
+    # AI workflows
+    generated_outline = models.BooleanField(default=False, null=True)
+    generated_content = models.BooleanField(default=False, null=True)
+    generated_questions = models.BooleanField(default=False, null=True)
+    generated_summary = models.BooleanField(default=False, null=True)
+    #
     course_publication = models.BooleanField(default=False, null=True)
     course_pic_ext = models.CharField(max_length=150, default="", null=True)
     course_pic_status = models.BooleanField(default=False)
