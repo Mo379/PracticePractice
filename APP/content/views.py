@@ -748,6 +748,7 @@ def _management_options(request):
 @AuthorRequiredDec
 def _createcourse(request):
     if request.method == 'POST':
+        course_type = request.POST['course_type']
         course_name = request.POST['course_name']
         course_level = request.POST['course_level']
         version_name = TagGenerator()
@@ -797,6 +798,7 @@ def _createcourse(request):
                 )
             new_course = Course.objects.create(
                         user=request.user,
+                        course_type=course_type,
                         course_name=course_name,
                         course_level=course_level,
                         specification=spec
@@ -984,7 +986,7 @@ def _updatecourseinformation(request):
                                     extra_tags='alert-warning course'
                                 )
                 course.save()
-                workflows.general_course_generation(course)
+                workflows._generate_outline(course)
             except Exception as e:
                 messages.add_message(
                         request,

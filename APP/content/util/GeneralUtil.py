@@ -15,6 +15,7 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 
+from user.models import User
 from content.models import CourseSubscription
 from djstripe.models import (
         Subscription,
@@ -31,7 +32,8 @@ def TagGenerator():
     return x
 
 
-def ChapterQuestionGenerator(user, subject, module, module_content):
+def ChapterQuestionGenerator(subject, module, module_content):
+    user = User.objects.get(username='Admin')
     difficulty_levels = [1, 2, 3, 4, 5]
     for chapter in module_content.keys():
         chapter_qs = module_content[chapter]['questions']

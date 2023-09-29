@@ -54,6 +54,28 @@ def create_course_outline(
         current_chapter='',
         current_topic=''
         ):
+    generated_modules = 'This course is new and no modules have been generated yet'
+    generated_chapters = ''
+    generated_topics = ''
+    generated_modules = ''
+    #
+    if item_type in ['chapter', 'topic', 'point']:
+        generated_modules = f"""
+            The following are the modules already in the course, only use them as guidance:
+            {course.specification.spec_content.keys()}
+        """
+    if item_type in ['topic', 'point']:
+        generated_chapters = course.specification.spec_content[current_module]['content'].keys()
+        generated_chapters = f"""
+            The following are the chapters already in the course, only use them as guidance:
+            {generated_chapters}
+        """
+    if item_type in ['point']:
+        generated_topics = course.specification.spec_content[current_module]['content'][current_chapter]['content'].keys()
+        generated_topics = f"""
+            The following are the topics already in the course, only use them as guidence:
+            {generated_topics}
+        """
     if current_module:
         current_module = f"The current module is {current_module}"
     if current_chapter:
@@ -61,28 +83,6 @@ def create_course_outline(
     if current_topic:
         current_topic = f", the current topic is {current_topic}"
     #
-    generated_modules = 'This course is new and no modules have been generated yet'
-    generated_chapters = ''
-    generated_topics = ''
-    generated_modules = ''
-    #
-    if item_type == 'chapter':
-        generated_modules = f"""
-            The following are the presented modules:
-            {course.specification.spec_content.keys()}
-        """
-    if item_type == 'topic':
-        generated_chapters = course.specification.spec_content[current_module]['content'].keys()
-        generated_chapters = f"""
-            The following are the presented chapters:
-            {generated_chapters}
-        """
-    if item_type == 'point':
-        generated_topics = course.specification.spec_content[current_module]['content'][current_chapter]['content'].keys()
-        generated_topics = f"""
-            The following are the presented topics:
-            {generated_topics}
-        """
     #
     course_name = course.course_name
     course_level = course.course_level
@@ -125,7 +125,6 @@ def create_course_outline(
         course target: {course_spec_level},
         course subject: {course_spec_subject},
         course description: {course_description},
-        course {item_type} previous outline: {previous_output},
 
         {generated_modules}
         {generated_chapters}
@@ -134,15 +133,17 @@ def create_course_outline(
         {current_chapter}
         {current_topic}
 
+        course {item_type} previous outline: {previous_output},
 
         Be sure to strip out things like '{item_type} 1:' from the lists, this is not
         required, and ensure that the list provided is comma seprable, and remove any
         repeating or very similar {item_type} from the outline without hesistation.
+        You're free to remove any item from the previous outline if you think it's not constructive
+        for learning this topic.
         pay close attention to which current module, chapter and topic you're writing for.
         And rememeber to make the course comprehensive short and welcoming to the specified
         target and difficulty, so do not include anything that is unnessary.
-        Ensure that the number of {item_type} is not too long, less than 7 items is very highly encouraged
-        unless the course description hints otherwise.
+        Ensure that the number of {item_type} is not too long as this may discourage the learners/students and we dont want that.
         This is so that the course is not too long, so ensure that the {item_type} cover only the very very key concepts.
         Be sure to not repeat anything that is previously present or could be present in the already generated modules chapters or topics.
         """
@@ -168,66 +169,58 @@ def create_course_outline(
     return function_description, 'create_course_outline', system_message
 
 
-def create_course_lesson(request, instructor_context, point_prompt_obj):
-    spec = point_prompt_obj.specification
+def create_course_lesson(request, course, point):
+    spec = course.specification
     level = spec.spec_level
     subject = spec.spec_subject
-    module = point_prompt_obj.moduel
-    topic = point_prompt_obj.topic
-    chapter = point_prompt_obj.chapter
-    t_prmpts = ContentPromptTopic.objects.filter(
-            user=request.user,
-            specification=spec,
-            moduel=module,
-            chapter=chapter,
-        )
-    topic_text = t_prmpts.filter(topic=topic)[0].prompt
-    point_text = point_prompt_obj.prompt
-    point = Point.objects.get(p_unique_id=point_prompt_obj.p_unique)
+    module = point.p_moduel
+    topic = point.p_topic
+    chapter = point.p_chapter
     point_title = point.p_title
-    def points_prompt(level, subject, module, chapter, point_title, topic_text, point_text, instructor_context):
+    def points_prompt(level, subject, module, chapter, topic, point_title):
         return re.sub('\s+', ' ', f"You are a very good teacher that understands the importance of \
                 creating good lessons, and are tasked with writing text book course content for a course \
                 The course is staged in '{level}', where the subject is {subject}, \
-            the module for content is {module} and the chapter is {chapter}, \
+            the module for content is {module} ,the chapter is {chapter} and the topic is {topic}, \
             create a short lesson for the lesson point titled '{point_title}', that \
             teaches this in a way that is easy \
-            to build an understanding and gets straight to the point without much of an introduction, use the following \
-            context to help with the content of the lesson, \
-            [ {topic_text} ] [{point_text} ]'). For formatting \
+            to build an understanding and gets straight to the point without much of an introduction. For formatting \
             you must only use only text and mathjax latex notation ($ for inline maths and $$ for bloack maths), \
             dont user any character that invalidates reading the json output, \
             The lesson shold be informative and easy to understand and not too long (make it the right length to get the idea across). \
-            instructor context : {instructor_context}.")
-    system_message = points_prompt(level, subject, module, chapter, point_title, topic_text, point_text, instructor_context)
+            Here you are generating something akin to a zettlekasten idea, and making the explanation/examples really easy to understand. \
+            use the lesson prompt as guidance to write the lesson field.")
+    system_message = points_prompt(level, subject, module, chapter, topic, point_title)
     function_description = {
         "name": "create_course_lesson",
         "description": "Creates a lesson for the content or topic description provided using mathjax and only text",
         "parameters": {
             "type": "object",
             "properties": {
+                "Lesson_prompt": {
+                    "type": "string",
+                    "description": "A prompt that tells chatgpt how to design this lesson appropriately and what exactly needs to be added.",
+                },
                 "lesson": {
                     "type": "string",
                     "description": "The lesson being taught, this should be a detailed and understandable lesson.",
                 },
             },
             "required": [
-                "lesson"
+                "Lesson_prompt", "lesson"
             ],
         },
     }
     return function_description, 'create_course_lesson', system_message
 
 
-def create_course_questions(instructor_context, question_prompt_obj, n_questions=5):
+def create_course_questions(course, module, chapter, level, n_questions=5):
     #
-    spec = question_prompt_obj.specification
+    spec = course.specification
     #
     level = spec.spec_level
     subject = spec.spec_subject
-    module = question_prompt_obj.moduel
-    chapter = question_prompt_obj.chapter
-    def questions_prompt(level, subject, module, chapter, prompt_level, instructor_context):
+    def questions_prompt(level, subject, module, chapter, prompt_level):
         return f"This is for a course staged in '{level}', where the subject is {subject}, \
             the module for the questions is {module} and the chapter is {chapter}, \
             the questions are of increasing difficulty and arranged in such \
@@ -236,9 +229,9 @@ def create_course_questions(instructor_context, question_prompt_obj, n_questions
             so please estimate and adjust for the difficulty. \
             The instructor provided the following context to help guide the style and content \
             of the question, thus the question content should closely follow it with combination \
-            with the previous context. \n\n ('instructor_context':'{instructor_context}')."
+            with the previous context."
     #
-    system_message = questions_prompt(level, subject, module, chapter, question_prompt_obj.level, instructor_context)
+    system_message = questions_prompt(level, subject, module, chapter, level)
     function_outline = [
         {
             "type": 'object',
@@ -269,9 +262,13 @@ def create_course_questions(instructor_context, question_prompt_obj, n_questions
         "parameters": {
             "type": "object",
             "properties": {
+                "chatgpt_questions_prompt": {
+                    "type": 'string',
+                    "description": f"A prompt for chat gpt to use to be able to generate better quality questions.",
+                },
             },
             "required": [
-                "questions"
+                "chatgpt_questions_prompt", "questions"
             ],
         },
     }
@@ -285,7 +282,7 @@ def create_course_questions(instructor_context, question_prompt_obj, n_questions
     return function_description, 'create_course_questions', system_message
 
 
-def create_course_introduction(user, course, n_skills=10):
+def create_course_introduction(course, n_skills=10):
     content = course.specification
     content = order_live_spec_content(content.spec_content)
     modules = list(content.keys())

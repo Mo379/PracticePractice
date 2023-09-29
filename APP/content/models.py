@@ -123,8 +123,9 @@ class ContentTemplate(models.Model):
 class Course(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, null=True)
     specification = models.ForeignKey(
-        Specification, on_delete=models.CASCADE, db_index=True, default="", null=True
+        Specification, on_delete=models.CASCADE, db_index=True, default="Specialisation", null=True
     )
+    course_type = models.CharField(max_length=150, default="", null=True)
     course_name = models.CharField(max_length=150, default="", null=True)
     course_description = models.TextField(max_length=5000, default="", null=True)
     course_summary = models.TextField(max_length=1000, default="", null=True)

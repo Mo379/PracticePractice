@@ -1,10 +1,15 @@
+import time
 import threading
 from django.conf import settings
+from content.util.GeneralUtil import ChapterQuestionGenerator
 from PP2.utils import fire_and_forget
+from content.models import Point
 from AI.functions import (
         general_function_call,
         create_course_introduction,
-        create_course_outline
+        create_course_outline,
+        create_course_lesson,
+        create_course_questions
     )
 from AI.functions_endpoint import (course_outline_prompts)
 from AI.models import (
@@ -13,20 +18,20 @@ from AI.models import (
         ContentPromptPoint,
         Lesson_quiz,
     )
-from content.models import Course
+from content.models import Question, Course, CourseVersion
 
 
-def general_course_generation(course, nth_reflection=0, previous_output=''):
+def _generate_outline(course):
     if course.generated_outline is False:
-        courseOutline_function = create_course_outline(course, previous_output)
+        courseOutline_function = create_course_outline(course)
         lambda_url = settings.CHATGPT_LAMBDA_URL
         function_app_endpoint = {
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
                 'course_id': course.id,
-                'nth_reflection': nth_reflection,
+                'nth_reflection': 0,
                 'type': 'module',
                 'model_name': 'gpt-3.5-turbo-0613',
-                'model_name': 'gpt-4-0613'
+                #'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please continue or start creating the outline.
@@ -34,162 +39,171 @@ def general_course_generation(course, nth_reflection=0, previous_output=''):
                   reorder and improve them.
                   """
         request_body, headers = general_function_call(courseOutline_function, function_app_endpoint, user_prompt)
+        if course.course_type == 'Course':
+            if len(course.specification.spec_content) == 0:
+                mini_course = {
+                        course.course_name.replace(' ', '_'): {
+                            'active': True,
+                            'content': {},
+                            'position': 1
+                        }
+                    }
+                course.specification.spec_content = mini_course
+                course.specification.save()
+        elif course.course_type == 'Article':
+            if len(course.specification.spec_content) == 0:
+                mini_course = {
+                        course.course_name.replace(' ', '_'): {
+                            'active': True,
+                            'content': {
+                                    f"module_{course.course_name.replace(' ', '_')}": {
+                                        'active': True,
+                                        'content': {
+                                            },
+                                        'position': 1,
+                                        'questions': {}
+                                    }
+                                },
+                            'position': 1
+                        }
+                    }
+                course.specification.spec_content = mini_course
+                course.specification.save()
         if len(course.specification.spec_content) == 0:
             fire_and_forget(lambda_url, request_body, headers)
         else:
             threading.Thread(
                 target=course_outline_prompts,
                 args=(
-                    '', {'course_id': course.id, 'nth_reflection': nth_reflection}
+                    '', {'course_id': course.id, 'nth_reflection': 0}
                 )
             ).start()
-    elif course.generated_content is False:
-        pass
-        courseIntro_function = create_course_introduction(request.user, course, 10)
-        message = {
-          "chat": [
-            {
-              "role": "system",
-              "content": courseIntro_function[2]
-            },
-            {
-              "role": "user",
-              "content": """With the information provided for this
-                  course, please create a list of skills or objectives
-                  that the studnet can expect to achive, do not use
-                  too many words per skill or learning objective"""
-            }
-          ]
-        }
-        functions = [courseIntro_function[0]]
-        function_call = {"name": courseIntro_function[1]}
+    else:
+        threading.Thread(
+            target=_generated_content,
+            args=(course,)
+        ).start()
+
+
+def _generated_content(course):
+    if course.generated_content is False:
+        content = course.specification.spec_content
+        for module in content.keys():
+            for chapter in content[module]['content'].keys():
+                for topic in content[module]['content'][chapter]['content'].keys():
+                    for point in content[module]['content'][chapter]['content'][topic]['content'].keys():
+                        point_obj = Point.objects.get(p_unique_id=point)
+                        if len(point_obj.p_content) == 0:
+                            courseLesson_function = create_course_lesson('', course, point_obj)
+                            lambda_url = settings.CHATGPT_LAMBDA_URL
+                            function_app_endpoint = {
+                                    'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                                    'course_id': course.id,
+                                    'point_id': point_obj.id,
+                                    'model_name': 'gpt-3.5-turbo-0613',
+                                    #'model_name': 'gpt-4-0613'
+                                }
+                            user_prompt = """With the information provided for this
+                                      course, please write the lesson following the lesson prompt generated in the function.
+                                      """
+                            request_body, headers = general_function_call(courseLesson_function, function_app_endpoint, user_prompt)
+                            print(f'fire for point: {point}')
+                            fire_and_forget(lambda_url, request_body, headers)
+                            #time.sleep(60)
+                        else:
+                            print(f'pass for point: {point}')
+    else:
+        _generated_questions(course)
+
+
+def _generated_questions(course):
+    if course.generated_questions is False:
+        subject = course.specification.spec_subject
+        content = course.specification.spec_content
+        for module in content.keys():
+            module_content = content[module]['content']
+            module_content = ChapterQuestionGenerator(subject, module, module_content)
+            course.specification.spec_content[module]['content'] = module_content
+            course.specification.save()
+        all_generated = True
+        for module in content.keys():
+            for chapter in content[module]['content'].keys():
+                questions = content[module]['content'][chapter]['questions']
+                for level in questions.keys():
+                    courseQuestions_function = create_course_questions(course, module, chapter, level)
+                    lambda_url = settings.CHATGPT_LAMBDA_URL
+                    function_app_endpoint = {
+                            'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
+                            'course_id': course.id,
+                            'module': module,
+                            'chapter': chapter,
+                            'level': level,
+                            'model_name': 'gpt-3.5-turbo-0613',
+                            #'model_name': 'gpt-4-0613'
+                        }
+                    user_prompt = """With the information provided for this
+                              course, please write questions following the specification and details provided.
+                              """
+                    request_body, headers = general_function_call(courseQuestions_function, function_app_endpoint, user_prompt)
+                    level_questions = Question.objects.filter(q_unique_id__in=questions[level])
+                    q_content_fail = False
+                    for question_obj in level_questions:
+                        if len(question_obj.q_content) == 0:
+                            q_content_fail = True
+                        print(question_obj.q_content)
+                    if q_content_fail:
+                        print(f'fire for level: {level}')
+                        fire_and_forget(lambda_url, request_body, headers)
+                        all_generated = False
+                        #time.sleep(60)
+        if all_generated:
+            course.generated_questions = True
+            course.save()
+            _generated_summary(course)
+    else:
+        _generated_summary(course)
+
+
+def _generated_summary(course):
+    if course.generated_summary is False:
+        courseSummary_function = create_course_introduction(course)
         lambda_url = settings.CHATGPT_LAMBDA_URL
         function_app_endpoint = {
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
                 'course_id': course.id,
+                'model_name': 'gpt-3.5-turbo-0613',
+                #'model_name': 'gpt-4-0613'
             }
-        request_body = {
-                'message': message['chat'],
-                'functions': functions,
-                'function_call': function_call,
-                'function_app_endpoint': function_app_endpoint,
-            }
-        headers = {
-            "Content-Type": "application/json",
-        }
-        fire_and_forget(lambda_url, request_body, headers)
-    elif course.generated_questions is False:
-        pass
-    elif course.generated_summary is False:
-        pass
+        user_prompt = """With the information provided for this
+                  course, please write the course introduction summary and etc.
+                  """
+        request_body, headers = general_function_call(courseSummary_function, function_app_endpoint, user_prompt)
+        if len(course.course_learning_objectives) == 0:
+            fire_and_forget(lambda_url, request_body, headers)
+        else:
+            course.generated_summary = True
+            course.course_publication = True
+            course.save()
+            _launch_new_version(course)
     else:
         course.course_publication = True
         course.save()
+        _launch_new_version(course)
 
 
-#if publication_status:
-#    # do course item checks
-#    spec_content = course.specification.spec_content
-#    active_points, active_questions = extract_active_spec_content(spec_content)
-#    all_questions = Question.objects.filter(q_unique_id__in=active_questions)
-#    all_points = Point.objects.filter(p_unique_id__in=active_points)
-#    unconfirmed_questions = all_questions.filter(author_confirmation=False)
-#    unconfirmed_points = all_points.filter(author_confirmation=False)
-#    #
-#    empty_content = detect_empty_content(spec_content)
-#    empty_content_str = ''
-#    for module in empty_content.keys():
-#        empty_content_str += f'&ensp; Module: {module} <br>'
-#        if len(empty_content[module])>0:
-#            for chapter in empty_content[module].keys():
-#                empty_content_str += f'&ensp; &ensp;Chapter: {chapter}<br>'
-#                if len(empty_content[module][chapter])>0:
-#                    for topic in empty_content[module][chapter].keys():
-#                        empty_content_str += f"&ensp; &ensp; &ensp; Topic: {topic} <br><br>"
-#    if len(empty_content) > 0:
-#        messages.add_message(
-#                request,
-#                messages.INFO,
-#                f"""
-#                The following content sections are empty, please
-#                add at least a single point:<br>
-#                {empty_content_str}
-#                """,
-#                extra_tags='alert-danger course'
-#            )
-#        return redirect(
-#                'dashboard:mycourses',
-#            )
-#    #
-#    if len(all_questions) < 100 or len(all_points) < 20:
-#        publication_status = False
-#        course.course_publication = publication_status
-#        course.save()
-#        messages.add_message(
-#                request,
-#                messages.INFO,
-#                f"""
-#                To publish your course you need at least 100
-#                questions and 20 points, currently you only have
-#                {len(all_questions)} questions and
-#                {len(all_points)} points, please add more content.
-#                """,
-#                extra_tags='alert-danger course'
-#            )
-#        return redirect(
-#                'dashboard:mycourses',
-#            )
-#    #
-#    if len(unconfirmed_questions) + len(unconfirmed_points) == 0:
-#        publication_status = True
-#        course.course_publication = publication_status
-#        # Create a new course version
-#        if course.course_up_to_date is not True:
-#            versions = CourseVersion.objects.filter(
-#                course=course
-#            ).order_by(
-#                    '-version_number'
-#                )
-#            latest_version = versions[0]
-#            CourseVersion.objects.create(
-#                course=course,
-#                version_number=latest_version.version_number + 1,
-#                version_name=version_name,
-#                version_content=course.specification.spec_content,
-#                version_note=version_note,
-#            )
-#            course.course_up_to_date = True
-#        course.save()
-#    else:
-#        publication_status = False
-#        course.course_publication = publication_status
-#        course.save()
-#        q_link = ""
-#        p_link = ""
-#        for q in unconfirmed_questions[:5]:
-#            kwargs = {"spec_id": course.specification.id, "question_id": q.id}
-#            url = reverse('content:editorquestion', kwargs=kwargs)
-#            q_link += f"<a class='ml-2' href='{url}'>Question: {q}</a><br>"
-#        for p in unconfirmed_points[:5]:
-#            kwargs = {"spec_id": course.specification.id, "point_id": p.id}
-#            url = reverse('content:editorpoint', kwargs=kwargs)
-#            p_link += f"<a class='ml-2' href='{url}'>Point: {p}</a><br>"
-#        messages.add_message(
-#                request,
-#                messages.INFO,
-#                f"""
-#                There is a total of {len(unconfirmed_questions)} and {len(unconfirmed_points)} unconfirmed questions and points,
-#                please go back, check and confirm that the content is correct and free of errors, use those links to make quick confirmations: <br><br>
-#                Questions:<br>{q_link}<br>
-#                Points:<br>{p_link}
-#                """,
-#                extra_tags='alert-danger course'
-#            )
-#        return redirect(
-#                'dashboard:mycourses',
-#            )
-#else:
-#    course.course_publication = publication_status
-#course.save()
-
-
+def _launch_new_version(course):
+    from content.util.GeneralUtil import TagGenerator
+    versions = CourseVersion.objects.filter(
+        course=course
+    ).order_by(
+            '-version_number'
+        )
+    latest_version = versions[0]
+    random_version_info = TagGenerator()
+    CourseVersion.objects.create(
+        course=course,
+        version_number=latest_version.version_number + 1,
+        version_name=random_version_info,
+        version_content=course.specification.spec_content,
+        version_note=random_version_info,
+    )

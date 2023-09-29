@@ -52,8 +52,8 @@ from content.util.GeneralUtil import (
     )
 from PP2.utils import h_encode, h_decode
 from django.http import JsonResponse
-from AI.functions import create_quiz_function, create_course_questions, create_course_lesson
 from AI import functions_endpoint
+from AI.functions import create_quiz_function
 from management.templatetags.general import ToMarkdownManual
 
 
