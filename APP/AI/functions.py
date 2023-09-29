@@ -69,9 +69,6 @@ def create_course_lesson(request, instructor_context, point_prompt_obj):
         },
     }
     return function_description, 'create_course_lesson', system_message
-=======
-wrap any keyword used with (<span class='keyword'>)
-"""
 
 
 def general_function_call(function_output, function_app_endpoint, user_prompt):
@@ -220,7 +217,6 @@ def create_course_outline(
         },
     }
     return function_description, 'create_course_outline', system_message
->>>>>>> develop
 
 
 def create_course_lesson(request, course, point):
