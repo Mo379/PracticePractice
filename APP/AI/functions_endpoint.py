@@ -36,7 +36,7 @@ def course_outline_prompts(request, json_data):
                 'nth_reflection': nth_reflection,
                 'type': 'module',
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please continue or start creating the outline.
@@ -81,7 +81,7 @@ def course_outline_prompts(request, json_data):
                         'type': 'chapter',
                         'module': module,
                         'model_name': 'gpt-3.5-turbo-0613',
-                        #'model_name': 'gpt-4-0613'
+                        'model_name': 'gpt-4-0613'
                     }
                 user_prompt = """With the information provided for this
                           course, please continue or start creating the outline.
@@ -112,7 +112,7 @@ def course_outline_prompts(request, json_data):
                     'nth_reflection': nth_reflection+1,
                     'type': 'module',
                     'model_name': 'gpt-3.5-turbo-0613',
-                    #'model_name': 'gpt-4-0613'
+                    'model_name': 'gpt-4-0613'
                 }
             user_prompt = """With the information provided for this
                       course, please continue or start creating the outline.
@@ -154,7 +154,7 @@ def course_outlineChapter_prompts(request, json_data):
                 'type': 'chapter',
                 'module': module,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please continue or start creating the outline.
@@ -198,7 +198,7 @@ def course_outlineChapter_prompts(request, json_data):
                         'module': module,
                         'chapter': chapter,
                         'model_name': 'gpt-3.5-turbo-0613',
-                        #'model_name': 'gpt-4-0613'
+                        'model_name': 'gpt-4-0613'
                     }
                 user_prompt = """With the information provided for this
                           course, please continue or start creating the outline.
@@ -236,7 +236,7 @@ def course_outlineChapter_prompts(request, json_data):
                     'type': 'chapter',
                     'module': module,
                     'model_name': 'gpt-3.5-turbo-0613',
-                    #'model_name': 'gpt-4-0613'
+                    'model_name': 'gpt-4-0613'
                 }
             user_prompt = """With the information provided for this
                       course, please continue or start creating the outline.
@@ -277,7 +277,7 @@ def course_outlineTopic_prompts(request, json_data):
                 'module': module,
                 'chapter': chapter,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please continue or start creating the outline.
@@ -327,7 +327,7 @@ def course_outlineTopic_prompts(request, json_data):
                         'chapter': chapter,
                         'topic': topic,
                         'model_name': 'gpt-3.5-turbo-0613',
-                        #'model_name': 'gpt-4-0613'
+                        'model_name': 'gpt-4-0613'
                     }
                 user_prompt = """With the information provided for this
                           course, please continue or start creating the outline.
@@ -367,7 +367,7 @@ def course_outlineTopic_prompts(request, json_data):
                     'module': module,
                     'chapter': chapter,
                     'model_name': 'gpt-3.5-turbo-0613',
-                    #'model_name': 'gpt-4-0613'
+                    'model_name': 'gpt-4-0613'
                 }
             user_prompt = """With the information provided for this
                       course, please continue or start creating the outline.
@@ -416,7 +416,7 @@ def course_outlinePoint_prompts(request, json_data):
                 'chapter': chapter,
                 'topic': topic,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please continue or start creating the outline.
@@ -502,7 +502,7 @@ def course_outlinePoint_prompts(request, json_data):
                     'chapter': chapter,
                     'topic': topic,
                     'model_name': 'gpt-3.5-turbo-0613',
-                    #'model_name': 'gpt-4-0613'
+                    'model_name': 'gpt-4-0613'
                 }
             user_prompt = """With the information provided for this
                       course, please continue or start creating the outline.
@@ -534,8 +534,10 @@ def course_point_prompts(request, json_data):
     p_object = Point.objects.get(pk=point_id)
     #
     try:
-        ai_response_dict = json.loads(ai_response)
+        ai_response_dict = json.loads(ai_response, strict=False)
     except Exception as e:
+        print(ai_response)
+        print(e)
         courseLesson_function = create_course_lesson('', course, p_object)
         lambda_url = settings.CHATGPT_LAMBDA_URL
         function_app_endpoint = {
@@ -543,14 +545,16 @@ def course_point_prompts(request, json_data):
                 'course_id': course.id,
                 'point_id': p_object.id,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please write the lesson following the lesson prompt generated in the function.
+                  please also make sure to escape any special characters, such that my python code can 
+                  interpret the json correctly.
                   """
         request_body, headers = general_function_call(courseLesson_function, function_app_endpoint, user_prompt)
-        time.sleep(60)
-        fire_and_forget(lambda_url, request_body, headers)
+        #time.sleep(60)
+        #fire_and_forget(lambda_url, request_body, headers)
         response = {
             'status_code': 500,
             'message': 'Internal Server Error.'
@@ -588,7 +592,7 @@ def course_questions_prompts(request, json_data):
     #
     course = Course.objects.get(pk=course_id)
     try:
-        ai_response_dict = json.loads(ai_response)
+        ai_response_dict = json.loads(ai_response, strict=False)
     except Exception as e:
         courseQuestions_function = create_course_questions(course, module, chapter, level)
         lambda_url = settings.CHATGPT_LAMBDA_URL
@@ -599,7 +603,7 @@ def course_questions_prompts(request, json_data):
                 'chapter': chapter,
                 'level': level,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please write questions following the specification and details provided.
@@ -654,7 +658,7 @@ def course_introduction_prompts(request, json_data):
     #
     course = Course.objects.get(pk=course_id)
     try:
-        ai_response_dict = json.loads(ai_response)
+        ai_response_dict = json.loads(ai_response, strict=False)
     except Exception as e:
         courseSummary_function = create_course_introduction(course)
         lambda_url = settings.CHATGPT_LAMBDA_URL
@@ -662,7 +666,7 @@ def course_introduction_prompts(request, json_data):
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
                 'course_id': course.id,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please write the course introduction summary and etc.

@@ -31,7 +31,7 @@ def _generate_outline(course):
                 'nth_reflection': 0,
                 'type': 'module',
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please continue or start creating the outline.
@@ -101,15 +101,18 @@ def _generated_content(course):
                                     'course_id': course.id,
                                     'point_id': point_obj.id,
                                     'model_name': 'gpt-3.5-turbo-0613',
-                                    #'model_name': 'gpt-4-0613'
+                                    'model_name': 'gpt-4-0613'
                                 }
                             user_prompt = """With the information provided for this
                                       course, please write the lesson following the lesson prompt generated in the function.
+                                      please also make sure to escape any special characters, such that my python code can 
+                                      interpret the json correctly.
                                       """
                             request_body, headers = general_function_call(courseLesson_function, function_app_endpoint, user_prompt)
+                            print(point_obj.p_content)
                             print(f'fire for point: {point}')
                             fire_and_forget(lambda_url, request_body, headers)
-                            #time.sleep(60)
+                            time.sleep(30)
                         else:
                             print(f'pass for point: {point}')
     else:
@@ -139,7 +142,7 @@ def _generated_questions(course):
                             'chapter': chapter,
                             'level': level,
                             'model_name': 'gpt-3.5-turbo-0613',
-                            #'model_name': 'gpt-4-0613'
+                            'model_name': 'gpt-4-0613'
                         }
                     user_prompt = """With the information provided for this
                               course, please write questions following the specification and details provided.
@@ -172,7 +175,7 @@ def _generated_summary(course):
                 'return_url': f"{settings.SITE_URL}/AI/_function_app_endpoint",
                 'course_id': course.id,
                 'model_name': 'gpt-3.5-turbo-0613',
-                #'model_name': 'gpt-4-0613'
+                'model_name': 'gpt-4-0613'
             }
         user_prompt = """With the information provided for this
                   course, please write the course introduction summary and etc.
