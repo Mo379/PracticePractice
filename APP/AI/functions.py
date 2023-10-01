@@ -20,6 +20,7 @@ keyword_formatting_prompt = """
 
 """
 
+
 def create_course_lesson(request, instructor_context, point_prompt_obj):
     spec = point_prompt_obj.specification
     level = spec.spec_level
@@ -111,19 +112,19 @@ def create_course_outline(
     #
     if item_type in ['chapter', 'topic', 'point']:
         generated_modules = f"""
-            The following are the modules already in the course, only use them as guidance:
+            The following are the modules already in the course, use this as guidance such that the course doesnt contain repeats:
             {course.specification.spec_content.keys()}
         """
     if item_type in ['topic', 'point']:
         generated_chapters = course.specification.spec_content[current_module]['content'].keys()
         generated_chapters = f"""
-            The following are the chapters already in the course, only use them as guidance:
+            The following are the chapters already in the course, use this as guidance such that the course doesnt contain repeats:
             {generated_chapters}
         """
     if item_type in ['point']:
         generated_topics = course.specification.spec_content[current_module]['content'][current_chapter]['content'].keys()
         generated_topics = f"""
-            The following are the topics already in the course, only use them as guidence:
+            The following are the topics already in the course, use this as guidance such that the course doesnt contain repeats:
             {generated_topics}
         """
     if current_module:
@@ -232,7 +233,7 @@ def create_course_lesson(request, course, point):
                 creating good lessons, and are tasked with writing text book course content for a course \
                 The course is staged in '{level}', where the subject is {subject}, \
             the module for content is {module} ,the chapter is {chapter} and the topic is {topic}, \
-            create a short lesson for the lesson point titled '{point_title}', that \
+            create a short zettlekasten lesson for the lesson titled '{point_title}', that \
             teaches this in a way that is easy \
             to build an understanding and gets straight to the point without much of an introduction. For formatting \
             you must only use only text and mathjax latex notation ($ for inline maths and $$ for bloack maths), \
