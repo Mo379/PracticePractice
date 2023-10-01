@@ -111,8 +111,8 @@ def _generated_content(course):
                             request_body, headers = general_function_call(courseLesson_function, function_app_endpoint, user_prompt)
                             print(point_obj.p_content)
                             print(f'fire for point: {point}')
+                            time.sleep(60)
                             fire_and_forget(lambda_url, request_body, headers)
-                            time.sleep(30)
                         else:
                             print(f'pass for point: {point}')
     else:
@@ -158,7 +158,7 @@ def _generated_questions(course):
                         print(f'fire for level: {level}')
                         fire_and_forget(lambda_url, request_body, headers)
                         all_generated = False
-                        #time.sleep(60)
+                        time.sleep(60)
         if all_generated:
             course.generated_questions = True
             course.save()

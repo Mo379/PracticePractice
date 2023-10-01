@@ -165,7 +165,7 @@ def course_outlineChapter_prompts(request, json_data):
         request_body, headers = general_function_call(courseChapterOutline_function, function_app_endpoint, user_prompt)
         print('refire chapter')
         time.sleep(60)
-        fire_and_forget(lambda_url, request_body, headers)
+        (lambda_url, request_body, headers)
         response = {
             'status_code': 500,
             'message': 'Internal Server Error.'
