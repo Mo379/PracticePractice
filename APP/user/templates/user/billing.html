@@ -79,6 +79,20 @@
                 </div>
             </div>
         </div>
+	    {%if user.affiliate_permissions%}
+        <div class="col-lg-4 mb-4">
+            <!-- Billing card 2-->
+            <div class="card h-100 border-start-lg border-start-secondary">
+                <div class="card-body">
+		    <div class="small text-muted">Affiliate Code: {{user.username}}20</div>
+                    <div class="h3">{{user.username}}20</div>
+		    <div class="small">Times used:</div>
+		    <div class="small">Estimated Earnings:</div>
+		    <div class="small">Next Payout (Ensure a valid card is provided):</div>
+                </div>
+            </div>
+        </div>
+	    {%endif%}
     </div>
     <!-- Payment methods card-->
     <div class="card card-header-actions mb-4">
