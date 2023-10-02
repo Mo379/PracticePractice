@@ -21,10 +21,9 @@ from django.conf import settings
 from main.views import NotFoundView, ErrorView, robots_txt
 from main.sitemaps import StaticViewSitemap
 from django.views.generic.base import TemplateView
-from content.sitemaps import NotesSitemap
 from PP2.utils import HashIdConverter
 
-
+register_converter(HashIdConverter, "hashid")
 
 urlpatterns = [
     path('', include('main.urls')),

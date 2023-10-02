@@ -738,7 +738,6 @@ def _createcourse(request):
         )
 
 
-@CourseSubscriptionRequiredDec
 @AnySubscriptionRequiredDec
 def _createcustomtest(request):
     if request.method == 'POST':
@@ -770,7 +769,6 @@ def _createcustomtest(request):
         question_pool = Question.objects.filter(
                     user=creator,
                     q_unique_id__in=question_list,
-                    author_confirmation=True
                 )
         try:
             significant_click_name = 'create_custom_test'

@@ -80,22 +80,14 @@ class IndexView(BaseBreadcrumbMixin, generic.ListView):
         context['publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
         if settings.STRIPE_LIVE_MODE:
             context['pricing_table'] = 'prctbl_1Nt3CvCUEyV7FMWeEBVqahY7'
-            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NsvapCUEyV7FMWeyxEjNlp7', livemode=settings.STRIPE_LIVE_MODE)
-            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NsvapCUEyV7FMWesZhlSAqZ', livemode=settings.STRIPE_LIVE_MODE)
-            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NsvaoCUEyV7FMWelNORbffv', livemode=settings.STRIPE_LIVE_MODE)
+            context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NwqWDCUEyV7FMWegmtPrFiv', livemode=settings.STRIPE_LIVE_MODE)
             #
-            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1NsvawCUEyV7FMWeqrKIR92H', livemode=settings.STRIPE_LIVE_MODE)
-            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1NsvawCUEyV7FMWeak17BZ77', livemode=settings.STRIPE_LIVE_MODE)
-            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1NsvawCUEyV7FMWekIVR7sMp', livemode=settings.STRIPE_LIVE_MODE)
+            context['with_ai_monthly_plan'] = Price.objects.get(id='price_1NwqVYCUEyV7FMWewBHwNao4', livemode=settings.STRIPE_LIVE_MODE)
         else:
             context['pricing_table'] = 'prctbl_1Nf0wJCUEyV7FMWeAvtivll7'
             context['without_ai_monthly_plan'] = Price.objects.get(id='price_1NgOjMCUEyV7FMWesxeNUYXF', livemode=settings.STRIPE_LIVE_MODE)
-            context['without_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOjhCUEyV7FMWeQHxpUt9b', livemode=settings.STRIPE_LIVE_MODE)
-            context['without_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOjsCUEyV7FMWeBDtR0qg5', livemode=settings.STRIPE_LIVE_MODE)
             #
             context['with_ai_monthly_plan'] = Price.objects.get(id='price_1Nf0oUCUEyV7FMWeLnm8V1EC', livemode=settings.STRIPE_LIVE_MODE)
-            context['with_ai_threemonth_plan'] = Price.objects.get(id='price_1NgOkBCUEyV7FMWezwKtUp2a', livemode=settings.STRIPE_LIVE_MODE)
-            context['with_ai_sixmonth_plan'] = Price.objects.get(id='price_1NgOkOCUEyV7FMWe2k15TK3Z', livemode=settings.STRIPE_LIVE_MODE)
         return context
 
 

@@ -530,106 +530,111 @@ class controller extends model {
 			if (this.readyState == 4 && this.status == 200) {
 				var txt = this.responseText;
 				var json = JSON.parse(txt);
-				//
-				const request = {
-				  'message': json.message.chat,
-				  'functions': json.functions,
-				  'function_call': json.function_call,
-				  'function_app_endpoint': {
-				  	...json.function_app_endpoint,
-				 	'part_id': part_id,
-					'point_id': point_id,
-					'global_order_id': global_order_id,
-					'local_order_id': local_order_id,
-				  },
-				  'lambda_url': json.lambda_url
-				};
-				const handleSubmit = async () => {
+				if (json.error > 0){
+						loading(false)
+						document.querySelector(`#user_input_${point_id}_${local_order_id}`).innerHTML = json.message
+				}else{
+					//
+					const request = {
+					  'message': json.message.chat,
+					  'functions': json.functions,
+					  'function_call': json.function_call,
+					  'function_app_endpoint': {
+						...json.function_app_endpoint,
+						'part_id': part_id,
+						'point_id': point_id,
+						'global_order_id': global_order_id,
+						'local_order_id': local_order_id,
+					  },
+					  'lambda_url': json.lambda_url
+					};
+					const handleSubmit = async () => {
 
-				  const response = await fetch(json.lambda_url, {
-				    method: "POST",
-				    headers: {
-				      "Content-Type": "application/json",
-				    },
-				    body: JSON.stringify(request),
-				  });
-				  const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
-				  const newElement = document.createElement("div");
-				  newElement.innerHTML = `
-				  	<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
-				  		<div class='AI_text_wrap'>
-				  			<div class='AI_text_image'>
-				  				<i class="bi bi-robot"></i>
-				  			</div>
-				  			<div class='AI_text_text'>
-				  				<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
-				  				</div>
-				  				<div class='AI_window_typing'>
-				  					<div style='margin:auto;'>
-				  				<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
-				  						Ask
-				  					</button>
-				  				</div>
-				  			</div>
-				  		</div>
-				  	</div>
-				  `;
-				  var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
-				  var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
-				  elementsToRemove.forEach(function(element) {
-				    element.remove(); // Remove each element
-				  });
-				  element.insertAdjacentElement("afterend", newElement);
-				  //
-				  const streamResponse = response.body;
-				  if (!streamResponse) {
-				    return;
-				  }
+					  const response = await fetch(json.lambda_url, {
+					    method: "POST",
+					    headers: {
+					      "Content-Type": "application/json",
+					    },
+					    body: JSON.stringify(request),
+					  });
+					  const element = document.getElementById(`ask_${point_id}_${local_order_id}`);
+					  const newElement = document.createElement("div");
+					  newElement.innerHTML = `
+						<div class='AI_chat_text AI_text_ai chat_thread_${point_id}' id='ai_response_${point_id}_${local_order_id}'>
+							<div class='AI_text_wrap'>
+								<div class='AI_text_image'>
+									<i class="bi bi-robot"></i>
+								</div>
+								<div class='AI_text_text'>
+									<div class='mb-3' id='AI_text_response_${point_id}_${local_order_id}'>
+									</div>
+									<div class='AI_window_typing'>
+										<div style='margin:auto;'>
+									<button class='btn btn-primary' id='ask_button_${point_id}_${local_order_id}' onclick='Controller.C_ask_from_thread("ai_response_${point_id}_${local_order_id}", "${global_order_id}","${Number(local_order_id) + 1}", "${point_id}", "${part_id}")'>
+											Ask
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					  `;
+					  var thread_elements = document.querySelectorAll(`.chat_thread_${point_id}`);
+					  var elementsToRemove = Array.from(thread_elements).slice((Number(local_order_id)+1)*2); // Get elements after the third element
+					  elementsToRemove.forEach(function(element) {
+					    element.remove(); // Remove each element
+					  });
+					  element.insertAdjacentElement("afterend", newElement);
+					  //
+					  const streamResponse = response.body;
+					  if (!streamResponse) {
+					    return;
+					  }
 
-				  const reader = streamResponse.getReader();
-				  const decoder = new TextDecoder();
-				  let done = false;
-				  let content = "";
+					  const reader = streamResponse.getReader();
+					  const decoder = new TextDecoder();
+					  let done = false;
+					  let content = "";
 
-				  while (true) {
-				    const { value } = await reader.read();
-				    if (!value) {
-				      break;
-				    }
-				    
-				    const chunkValue = decoder.decode(value);
-				    content = content + chunkValue;
-				    var content_show = md_converter.render(content.replace(/[ \t]{2,}/g, ' '));
-				    if (prompt_type_value == 1 || prompt_type_value == 2){
-					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = 'Please wait...'+ content.replace(/./g, '*') + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
-				    }else{
-					    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content_show + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
-				    }
-				    MathJax.typeset()
-				  }
-				  return content
-				};
-				async function run() {
-				  try {
-				    var content = await handleSubmit();
-				    document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
-				    document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
-				    document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
-				    if (request.function_call){
-					var json_response_content = JSON.parse(content)
-					json_response_content.unique_id = json.function_app_endpoint.unique_id
-				    	const written_output = utility.transform_test_object_to_htmlform(json.function_call.name, json_response_content, point_id, local_order_id, part_id, false)
-				        var content_show = md_converter.render(written_output.replace(/[ \t]{2,}/g, ' '));
-					document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content_show;
-					MathJax.typeset()
-				    }else{
-				    }
-				  } catch (error) {
-				    console.error('An error occurred:', error);
-				    loading(false)
-				  }
+					  while (true) {
+					    const { value } = await reader.read();
+					    if (!value) {
+					      break;
+					    }
+					    
+					    const chunkValue = decoder.decode(value);
+					    content = content + chunkValue;
+					    var content_show = md_converter.render(content.replace(/[ \t]{2,}/g, ' '));
+					    if (prompt_type_value == 1 || prompt_type_value == 2){
+						    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = 'Please wait...'+ content.replace(/./g, '*') + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
+					    }else{
+						    document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content_show + `<span class='blink ml-1'style='display:inline-block;width: 5px;height:3px;background:var(--text-color-1);'></span>`;
+					    }
+					    MathJax.typeset()
+					  }
+					  return content
+					};
+					async function run() {
+					  try {
+					    var content = await handleSubmit();
+					    document.querySelector(`#submit_${point_id}_${local_order_id}`).classList.add("d-none")
+					    document.querySelector(`#cancel_prompt_${point_id}_${local_order_id}`).classList.add("d-none")
+					    document.querySelector(`#edit_prompt_${point_id}_${local_order_id}`).classList.remove("d-none")
+					    if (request.function_call){
+						var json_response_content = JSON.parse(content)
+						json_response_content.unique_id = json.function_app_endpoint.unique_id
+						const written_output = utility.transform_test_object_to_htmlform(json.function_call.name, json_response_content, point_id, local_order_id, part_id, false)
+						var content_show = md_converter.render(written_output.replace(/[ \t]{2,}/g, ' '));
+						document.querySelector(`#AI_text_response_${point_id}_${local_order_id}`).innerHTML = content_show;
+						MathJax.typeset()
+					    }else{
+					    }
+					  } catch (error) {
+					    console.error('An error occurred:', error);
+					    loading(false)
+					  }
+					}
+					run()
 				}
-				run()
 			}
 		}
 	}

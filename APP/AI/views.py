@@ -15,6 +15,8 @@ from braces.views import (
         SuperuserRequiredMixin,
     )
 from PP2.mixin import (
+        stripe_customer_checks,
+        LoginRequiredMixin,
         AnySubscriptionRequiredMixin,
         AnySubscriptionRequiredDec,
         AISubscriptionRequiredMixin,
@@ -55,11 +57,14 @@ from django.http import JsonResponse
 from AI import functions_endpoint
 from AI.functions import create_quiz_function
 from management.templatetags.general import ToMarkdownManual
+from djstripe.models import (
+        Customer,
+        Subscription,
+    )
 
 
 # Create your views here.
 class AIView(
-        AISubscriptionRequiredMixin,
         CourseSubscriptionRequiredMixin,
         generic.ListView
         ):
@@ -236,7 +241,6 @@ def _load_lesson(request):
 
 
 @CourseSubscriptionRequiredDec
-@AISubscriptionRequiredDec
 def _next_point(request):
     if request.method == 'POST':
         course_version_id = request.POST['course_version_id']
@@ -266,8 +270,10 @@ def _next_point(request):
         #
         next_point = None
         new_topic = None
-        if previous_point_pos >= len(part_content)-1:
+        print(previous_point_pos, len(part_content))
+        if previous_point_pos >= len(part_content):
             next_point = None
+            print(topics.index(lesson_part.topic), len(topics)-1)
             if topics.index(lesson_part.topic) < len(topics)-1:
                 lesson_part = Lesson_part.objects.get(
                         user=request.user,
@@ -275,7 +281,7 @@ def _next_point(request):
                         topic=topics[topics.index(lesson_part.topic)+1]
                         )
                 for point in lesson_part.part_content['content']:
-                    if int(lesson_part.part_content['content'][point]['position']) == 0:
+                    if int(lesson_part.part_content['content'][point]['position']) == 1:
                         next_point = point
                         new_topic = lesson_part.topic
         else:
@@ -293,7 +299,8 @@ def _next_point(request):
                         'system': next_point
                     }
                 lesson_part.save()
-            except Exception:
+            except Exception as e:
+                print(str(e))
                 return JsonResponse({'error': 1, 'message': 'Point does not exits!'})
             else:
                 content_html, video_html, script_html, video_tags = ToMarkdownManual('', point_obj.id)
@@ -313,9 +320,16 @@ def _next_point(request):
     return JsonResponse({'error': 1, 'message': 'Something went wrong, please try again.'})
 
 
-@AISubscriptionRequiredDec
 def _ask_from_book(request):
     if request.method == 'POST':
+        if request.user.is_authenticated:
+            stripe_customer_checks(request.user)
+            admin_customer = Customer.objects.get(id=request.user.id, livemode=settings.STRIPE_LIVE_MODE)
+            active_subscriptions = Subscription.objects.filter(customer=admin_customer, status__in=['trialing', 'active'], livemode=settings.STRIPE_LIVE_MODE)
+            plan_description = str(active_subscriptions[0].plan) if len(active_subscriptions) > 0 else ''
+            if 'with ai' not in plan_description.lower():
+                return JsonResponse({'error': 2, 'message': 'An AI subscription is required to use these features.'})
+        #
         lesson_part_id = request.POST['part_id']
         point_id = request.POST['point_id']
         global_order_id = request.POST['global_order_id']
