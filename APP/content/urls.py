@@ -8,11 +8,6 @@ urlpatterns = [
     path('content/', views.ContentView.as_view(), name='content'),
     path('content/<int:page>', views.ContentView.as_view(), name='content'),
     path(
-        'content/note-article/<hashid:course_id>/<module>/<chapter>/',
-        views.NoteArticleView.as_view(),
-        name='notearticle'
-    ),
-    path(
         'content/coursestudy/<hashid:course_id>/',
         views.CourseStudyView.as_view(),
         name='coursestudy'

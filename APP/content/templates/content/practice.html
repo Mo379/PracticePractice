@@ -273,7 +273,6 @@ Controller = new controller(view);
 					<p class="text-center pb-3 mb-4" style='font-size:12px;'>
 					{{context.sampl_object.q_level|field_name_to_label}} Chapter questions, on {{context.sampl_object.q_moduel|field_name_to_label}}.<br><br>
 						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:coursestudy' context.course.id%}">Go back</a>
-						<a type= 'button' class='btn btn-info mb-2' href="{%url 'content:notearticle' context.course.id context.module context.chapter%}"> Chapter Notes</a>
 						{%if context.is_member is false%}
 						<br><span>
 						    <i class="bi bi-file-lock2 text-secondary"></i> Any subscription is required to unlock all content

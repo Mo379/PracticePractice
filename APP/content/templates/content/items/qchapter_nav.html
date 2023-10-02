@@ -47,11 +47,9 @@
 							{%for chapter in content|index:module|index:'content'%}
 							      <div class="card-body" style='padding:10px;font-size:12px;'>
 								      {%if context.is_AI_member is false%}
-								      {%definevar 'text-primary' as raw_link_highlight%}
 								      {%definevar 'text-secondary' as lock_text%}
 								      {%definevar '<i class="bi bi-file-lock2"></i>' as lock_icon%}
 								      {%else%}
-								      {%definevar 'text-secondary' as raw_link_highlight%}
 								      {%definevar '' as lock_text%}
 								      {%definevar '' as lock_icon%}
 								      {%endif%}
@@ -64,7 +62,6 @@
 											{%endif%}
 										      <i class="bi bi-book-fill"></i>
 										      AI | Chapter {{forloop.counter}} - {{chapter|field_name_to_label}} {{lock_icon}}{{lock_icon}}
-										      <a type= 'button' class='{{raw_link_highlight}}' href="{%url 'content:notearticle' context.course.id module chapter%}">Raw</a>
 									      </span>
 								      </a><br>
 								      <a type= 'button' class='text-info' href="{%url 'content:practice' context.course.id module chapter%}">

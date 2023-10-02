@@ -25,13 +25,6 @@ from content.sitemaps import NotesSitemap
 from PP2.utils import HashIdConverter
 
 
-register_converter(HashIdConverter, "hashid")
-
-sitemaps = {
-    'static': StaticViewSitemap,
-    'notes': NotesSitemap,
-}
-
 
 urlpatterns = [
     path('', include('main.urls')),
@@ -41,7 +34,6 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", robots_txt),
 
 ]

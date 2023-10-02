@@ -44,7 +44,7 @@ def course_outline_prompts(request, json_data):
                   reorder and improve them, please focus on generating correct json syntax.
                   """
         request_body, headers = general_function_call(courseOutline_function, function_app_endpoint, user_prompt)
-        time.sleep(60)
+        time.sleep(30)
         fire_and_forget(lambda_url, request_body, headers)
         # refire lambda if output is invalid
         response = {
@@ -92,7 +92,7 @@ def course_outline_prompts(request, json_data):
                 request_body, headers = general_function_call(courseChapterOutline_function, function_app_endpoint, user_prompt)
                 if len(course.specification.spec_content[module]['content']) == 0:
                     print(f'fire for {module}')
-                    time.sleep(60)
+                    time.sleep(30)
                     fire_and_forget(lambda_url, request_body, headers)
                 else:
                     print(f'pass for {module}')
@@ -121,7 +121,7 @@ def course_outline_prompts(request, json_data):
                       """
             request_body, headers = general_function_call(courseOutline_function, function_app_endpoint, user_prompt)
             print(f'fire for course')
-            time.sleep(60)
+            time.sleep(30)
             fire_and_forget(lambda_url, request_body, headers)
         response = {
                 'status_code': 200,
@@ -164,7 +164,7 @@ def course_outlineChapter_prompts(request, json_data):
                   """
         request_body, headers = general_function_call(courseChapterOutline_function, function_app_endpoint, user_prompt)
         print('refire chapter')
-        time.sleep(60)
+        time.sleep(30)
         (lambda_url, request_body, headers)
         response = {
             'status_code': 500,
@@ -209,7 +209,7 @@ def course_outlineChapter_prompts(request, json_data):
                 request_body, headers = general_function_call(courseTopicOutline_function, function_app_endpoint, user_prompt)
                 if len(course.specification.spec_content[module]['content'][chapter]['content']) == 0:
                     print(f'fire for {module} -> {chapter}')
-                    time.sleep(60)
+                    time.sleep(30)
                     fire_and_forget(lambda_url, request_body, headers)
                 else:
                     print(f'pass for {module} -> {chapter}')
@@ -245,7 +245,7 @@ def course_outlineChapter_prompts(request, json_data):
                       provided module, please give a list of chapters.
                       """
             request_body, headers = general_function_call(courseChapterOutline_function, function_app_endpoint, user_prompt)
-            time.sleep(60)
+            time.sleep(30)
             print(f'fire for {module}')
             fire_and_forget(lambda_url, request_body, headers)
         response = {
@@ -286,7 +286,7 @@ def course_outlineTopic_prompts(request, json_data):
                   provided chapter, please give a list of topics.
                   """
         request_body, headers = general_function_call(courseTopicOutline_function, function_app_endpoint, user_prompt)
-        time.sleep(60)
+        time.sleep(30)
         fire_and_forget(lambda_url, request_body, headers)
         print('refire topic')
         response = {
@@ -338,7 +338,7 @@ def course_outlineTopic_prompts(request, json_data):
                 request_body, headers = general_function_call(coursePointOutline_function, function_app_endpoint, user_prompt)
                 if len(course.specification.spec_content[module]['content'][chapter]['content']) == 0:
                     print(f'fire for {module} -> {chapter} -> {topic}')
-                    time.sleep(60)
+                    time.sleep(30)
                     fire_and_forget(lambda_url, request_body, headers)
                 else:
                     print(f'pass for {module} -> {chapter} -> {topic}')
@@ -376,7 +376,7 @@ def course_outlineTopic_prompts(request, json_data):
                       provided chapter, please give a list of topics.
                       """
             request_body, headers = general_function_call(courseTopicOutline_function, function_app_endpoint, user_prompt)
-            time.sleep(60)
+            time.sleep(30)
             print(f'fire for {module} -> {chapter} last in chain')
             fire_and_forget(lambda_url, request_body, headers)
         response = {
@@ -425,7 +425,7 @@ def course_outlinePoint_prompts(request, json_data):
                   provided topic, please give a list of zettlekasten point titles.
                   """
         request_body, headers = general_function_call(coursePointOutline_function, function_app_endpoint, user_prompt)
-        time.sleep(60)
+        time.sleep(30)
         fire_and_forget(lambda_url, request_body, headers)
         response = {
             'status_code': 500,
@@ -515,7 +515,7 @@ def course_outlinePoint_prompts(request, json_data):
                       this is very important to encode into the points you're about to write.
                       """
             request_body, headers = general_function_call(coursePointOutline_function, function_app_endpoint, user_prompt)
-            time.sleep(60)
+            time.sleep(30)
             print(f'fire for {module} -> {chapter} -> {topic}')
             fire_and_forget(lambda_url, request_body, headers)
         response = {
@@ -553,7 +553,7 @@ def course_point_prompts(request, json_data):
                   interpret the json correctly.
                   """
         request_body, headers = general_function_call(courseLesson_function, function_app_endpoint, user_prompt)
-        #time.sleep(60)
+        #time.sleep(30)
         #fire_and_forget(lambda_url, request_body, headers)
         response = {
             'status_code': 500,
@@ -609,7 +609,7 @@ def course_questions_prompts(request, json_data):
                   course, please write questions following the specification and details provided.
                   """
         request_body, headers = general_function_call(courseQuestions_function, function_app_endpoint, user_prompt)
-        time.sleep(60)
+        time.sleep(30)
         fire_and_forget(lambda_url, request_body, headers)
         response = {
             'status_code': 500,
@@ -672,7 +672,7 @@ def course_introduction_prompts(request, json_data):
                   course, please write the course introduction summary and etc.
                   """
         request_body, headers = general_function_call(courseSummary_function, function_app_endpoint, user_prompt)
-        time.sleep(60)
+        time.sleep(30)
         fire_and_forget(lambda_url, request_body, headers)
         response = {
             'status_code': 500,
