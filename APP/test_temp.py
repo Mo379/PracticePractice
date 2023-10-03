@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+
 import numpy as np
 
 # Initialize the figure and the axis
